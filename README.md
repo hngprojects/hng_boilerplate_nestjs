@@ -188,7 +188,7 @@ npm run build
 Start the development server with the following command. This will also watch for any changes in your code and automatically restart the server.
 
 ```sh
-npm run start:dev
+npm run dev
 ```
 
 ### 6. Run the Production Server
