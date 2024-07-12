@@ -8,7 +8,7 @@
 
 - [Overview](#overview)
 - [ERD](#erd)
-- [SwaggerDocumentation](#swagger documentation)
+- [SwaggerDocumentation](#swaggerdocumentation)
 - [Installation](#installation)
 - [Usage](#usage)
 
@@ -63,7 +63,7 @@ ERD
     User ||--o{  Notifications: "has"
 ```
 
-## Swagger Documentation
+## SwaggerDocumentation
 
 Swagger documentation provides a comprehensive insight to the project's API endpoints, including details about request/response formats, parameters and status codes.
 To access the swagger documentation:
