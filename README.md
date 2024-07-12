@@ -25,42 +25,40 @@ The Entity Relationship Diagram (ERD) represents the data model and relationship
 - `ADMIN`
 - `USER`
 
-```mermaid
+````mermaid
 erDiagram
     User {
-        id string PK
-        firstName string
-        lastName string
-        email  string
-        role   UseRoleEnum
+        string id PK
+        string firstName
+        string lastName
+        string email
+        UserRoleEnum role
     }
-
     Organisation {
-        id string PK
-        name string
-        description string
-        userId  FK
+        string id PK
+        string name
+        string description
+        string userId FK
     }
-
     Notification {
-        id string PK
-        name string
-        userId string
-        isRead boolean
+        string id PK
+        string name
+        string userId FK
+        boolean isRead
     }
-
     Transaction {
-        id string PK
-        orgId FK
-        userId FK
-        paymentChannel string
-        totalBill number
+        string id PK
+        string orgId FK
+        string userId FK
+        string paymentChannel
+        number totalBill
     }
 
-    User ||--o{  Transactions : "has"
-    Organisations ||--o{  Transactions: "has"
-    User ||--o{  Organisations: "has"
-    User ||--o{  Notifications: "has"
+    User ||--o{ Transaction : "has"
+    Organisation ||--o{ Transaction : "has"
+    User ||--o{ Organisation : "has"
+    User ||--o{ Notification : "has"
+
 ```
 
 ## SwaggerDocumentation
@@ -98,3 +96,4 @@ To start the Nest Js server run the following command
 ```
 
 The server starts on `http://localhost:3008` by default.
+````
