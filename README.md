@@ -16,6 +16,8 @@
 
 The Entity Relationship Diagram (ERD) represents the data model and relationships within the project. It provides a visual overview of how the entities (tables) are related to each other. The tables are User, Organisation, Notification and Transaction.
 
+![ERD]("path/to/your/ERD/image.png")
+
 ### Enums
 
 **UserRoleEnum**
@@ -24,7 +26,7 @@ The Entity Relationship Diagram (ERD) represents the data model and relationship
 - `USER`
 
 ```mermaid
-ERD
+erDiagram
     User {
         id string PK
         firstName string
