@@ -39,6 +39,13 @@
 This is the system architecture of the API Design (a detailed and comprehensive API documentation design ).
 - [API DOC DESIGN](https://app.swaggerhub.com/apis-docs/TheCodeGhinux/Team-Abidoshaker/1.0.0#/)
 
+  ### Endpoints
+  - Authentication: /auth/register, /auth/login, /auth/passport/login, /auth/passport/callback, /auth/magic-link/send, /auth/magic-link/verify, /auth/social/login, /auth/social/callback, /auth/password/change
+  - Users: /users, /users/{id}, /users/{userId}/language, /users/{userId}/region,
+  - Settings: /settings
+  - Profile Settings: /profile-settings
+  - Super Admin
+
 ## DATABASE DESIGN
 This is the system architecture dealing with Database schema design.
 - [DATABASE DESIGN](https://dbdiagram.io/d/abidoshaker-66923b569939893daed2fb95)
