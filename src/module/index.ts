@@ -1,9 +1,11 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
-import serverConfig from '../config/server.config';
+import serverConfig from '../../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { APIModule } from 'src/api';
+import { CoreModule } from './core';
 
 @Module({
   providers: [
@@ -41,6 +43,8 @@ import { LoggerModule } from 'nestjs-pino';
       }),
     }),
     LoggerModule.forRoot(),
+    APIModule,
+    CoreModule,
   ],
 })
 export class AppModule {}

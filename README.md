@@ -106,7 +106,3 @@ To start the Nest Js server run the following command
 ```
 
 The server starts on `http://localhost:3008` by default.
-
-```
-
-```
