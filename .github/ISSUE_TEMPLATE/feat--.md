@@ -3,7 +3,6 @@ name: 'feat: '
 about: Template for feature tasks
 title: "[FEAT]"
 labels: feature
-projects: "Boilerplate Issues"
 assignees: ''
 
 ---
@@ -13,11 +12,13 @@ assignees: ''
 
 ## Acceptance Criteria
 
-#### Purpose
 
-#### Requirements	
+### Purpose
 
-#### Expected Outcome
+### Requirem#ents	
+
+
+### Expected Outcome
 
 
 ### 
