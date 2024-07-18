@@ -28,6 +28,6 @@ async function bootstrap() {
   const port = app.get<ConfigService>(ConfigService).get<number>('server.port');
   await app.listen(port);
 
-  logger.log({ message: 'server started 🚀', port, url: `http://localhost:${port}/api` });
+  logger.log({ message: 'server started 🚀', port, url: `http://localhost:${port}/api/v1` });
 }
 bootstrap();
