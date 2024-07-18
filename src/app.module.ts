@@ -4,6 +4,9 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './UserManagement/user.module';
+import databaseConfig from '../config/database/typeorm';
 
 @Module({
   providers: [
@@ -41,6 +44,9 @@ import { LoggerModule } from 'nestjs-pino';
       }),
     }),
     LoggerModule.forRoot(),
+
+    TypeOrmModule.forRoot(databaseConfig()),
+    UserModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
