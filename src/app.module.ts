@@ -4,6 +4,10 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { WaitlistModule } from './modules/waitlist/waitlist.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import config from '../config/db.config';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   providers: [
@@ -34,6 +38,7 @@ import { LoggerModule } from 'nestjs-pino';
       /**
        * See ".env.local" file to list all environment variables needed by the app
        */
+
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PROFILE: Joi.string().valid('local', 'development', 'production', 'ci', 'testing', 'staging').required(),
@@ -41,6 +46,9 @@ import { LoggerModule } from 'nestjs-pino';
       }),
     }),
     LoggerModule.forRoot(),
+    WaitlistModule,
+    DatabaseModule,
+    TypeOrmModule.forRoot(config),
   ],
 })
 export class AppModule {}
