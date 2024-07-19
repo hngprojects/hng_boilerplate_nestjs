@@ -1,23 +1,26 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { config as dotenvConfig } from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import * as dotenv from 'dotenv'
+dotenv.config()
 
-dotenvConfig({ path: '.env' });
-
-const config = {
+const databaseConnectionObject = {
   type: 'postgres',
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: ['src/**/*.entity{.ts,.js}'],
-  migrations: ['src/**/migrations/*{.ts,.js}'],
+  entities: [__dirname + 'src/**/*.entity{.ts,.js}'],
+  migrations: [__dirname + 'src/**/migrations/*{.ts,.js}'],
   synchronize: false,
   retryAttempts: 3,
   retryDelay: 3000,
+}
+
+const config = {
+  ...databaseConnectionObject,
   cli: {
     migrationsDir: 'src/migrations',
   },
@@ -25,19 +28,10 @@ const config = {
 
 export default registerAs(
   'typeorm',
-  (): TypeOrmModuleOptions => ({
-    type: 'postgres',
-    host: process.env.DB_HOST,
-    port: +process.env.DB_PORT,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    entities: ['src/**/*.entity{.ts,.js}'],
-    migrations: ['src/migrations/*{.ts,.js}'],
-    synchronize: false,
-    retryAttempts: 3,
-    retryDelay: 3000,
-    namingStrategy: new SnakeNamingStrategy()
+  () => ({
+    ...databaseConnectionObject,
+    namingStrategy: new SnakeNamingStrategy(),
+
   })
 );
 
