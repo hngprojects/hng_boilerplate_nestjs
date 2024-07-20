@@ -1,4 +1,3 @@
-
 import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
