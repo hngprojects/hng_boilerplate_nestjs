@@ -20,24 +20,13 @@
 ```
 
 ## API DESIGN
-This is the system architecture of the API Design (a detailed and comprehensive API documentation design ).
+This is the system architecture (a detailed and comprehensive API documentation design ).
 - [API DOC DESIGN](https://app.swaggerhub.com/apis-docs/TheCodeGhinux/Team-Abidoshaker/1.0.0#/)
 
 ## DATABASE DESIGN
 This is the system architecture dealing with Database schema design.
 - [DATABASE DESIGN](https://dbdiagram.io/d/abidoshaker-66923b569939893daed2fb95)
   ### Entity-Relationship Design
-  ![DATABASE DESIGN](https://github.com/TheCodeGhinux/team-abidoshaker/blob/b1f047ca500327d2a1e4a59d80a067a2675368f5/abidoshaker.png)
-
-## CONNTRIBUTORS
-- JC CODER  <josephchimezie2003@gmail.com>
-- Kliuvert <kliuvertegbe@gmail.com>
-- Gbenga Black <odedeleg@gmail.com>
-- OriginalTimi <timileyinoyelekan11@gmail.com>
-- CodeGhinux <ilesanmibry@gmail.com>
-
-
-
 
 ## Dependencies (Dev)
 
