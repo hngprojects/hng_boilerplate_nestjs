@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-console.log(isDevelopment);
+
 
 
 export const dataSourceOptions = {

@@ -23,12 +23,13 @@
     "check-format": "prettier --check .",
     "check-lint": "eslint . --ext ts --ext tsx --ext js",
     "typeorm": "npx typeorm -- -d dist/DB/migrate.ts",
-    "migration:create": "npx typeorm migration:create db/migrations/%npm_config_name%",
+    "migration:create": "npx typeorm migration:create db/migrations/migration",
     "premigration:generate": "npm run build",
-    "migration:generate": "npm run build && npx typeorm migration:generate db/migrations/%npm_config_name% -d dist/src/database/data-source",
+    "migration:generate": "npm run build && npx typeorm migration:generate db/migrations/migration -d dist/src/database/data-source",
     "premigration:run": "npm run build",
     "migration:run": "npx typeorm migration:run -d dist/src/database/data-source",
-    "migration:revert": "npx typeorm migration:revert -d dist/src/database/data-source"
+    "migration:revert": "npx typeorm migration:revert -d dist/src/database/data-source",
+    "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",

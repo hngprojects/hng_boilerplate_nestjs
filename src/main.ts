@@ -14,15 +14,19 @@ async function bootstrap() {
 
   const logger = app.get(Logger);
 
-  const dataSource = app.get(DataSource);
+    const dataSource = app.get(DataSource);
 
-try {
-  await dataSource.initialize();
-  logger.log('Database connection initialized successfully');
-} catch (error) {
-  logger.error('Error initializing database connection:', error.stack);
-  process.exit(1);
-}
+  if (!dataSource.isInitialized) {
+    try {
+      await dataSource.initialize();
+      logger.log('Database connection initialized successfully');
+    } catch (error) {
+      logger.error('Error initializing database connection:', error.message);
+      process.exit(1);
+    }
+  } else {
+    logger.log('Database connection is already initialized');
+  }
 
   const seedingService = app.get(SeedingService);
   await seedingService.seedDatabase();
@@ -42,9 +46,9 @@ try {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-    const server = app.getHttpAdapter().getInstance();
-    setupRoutes(server, seedingService);
-    
+  const server = app.getHttpAdapter().getInstance();
+  setupRoutes(server, seedingService);
+
   const port = app.get<ConfigService>(ConfigService).get<number>('server.port');
   await app.listen(port);
 

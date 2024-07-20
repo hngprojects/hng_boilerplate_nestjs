@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from 'src/entities/user.entity';
-import { Profile } from 'src/entities/profile.entity';
-import { Product } from 'src/entities/product.entity';
-import { Organisation } from 'src/entities/organisation.entity';
+import { User } from '../entities/user.entity';
+import { Profile } from '../entities/profile.entity';
+import { Product } from '../entities/product.entity';
+import { Organisation } from '../entities/organisation.entity';
+// import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class SeedingService {
@@ -56,16 +57,16 @@ export class SeedingService {
 
       const p1 = profileRepository.create({
         username: 'johnsmith',
-        bio: "bio data",
+        bio: 'bio data',
         phone: '1234567890',
-        avatar_image: "image.png",
+        avatar_image: 'image.png',
         user: u1,
       });
       const p2 = profileRepository.create({
         username: 'janesmith',
-        bio: "bio data",
+        bio: 'bio data',
         phone: '0987654321',
-        avatar_image: "image.png",
+        avatar_image: 'image.png',
         user: u2,
       });
 
@@ -130,18 +131,24 @@ export class SeedingService {
   }
 
   async getUsers(): Promise<User[]> {
-    return this.dataSource.getRepository(User).find();
+    return this.dataSource.getRepository(User).find({ relations: ['profile', 'products', 'organisations'] });
   }
 
   async getProfiles(): Promise<Profile[]> {
-    return this.dataSource.getRepository(Profile).find();
+    return this.dataSource.getRepository(Profile).find({
+      relations: ['user'],
+    });
   }
 
   async getProducts(): Promise<Product[]> {
-    return this.dataSource.getRepository(Product).find();
+    return this.dataSource.getRepository(Product).find({
+      relations: ['user'],
+    });
   }
 
   async getOrganisations(): Promise<Organisation[]> {
-    return this.dataSource.getRepository(Organisation).find();
+    return this.dataSource.getRepository(Organisation).find({
+      relations: ['users'],
+    });
   }
 }
