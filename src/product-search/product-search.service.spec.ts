@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductSearchService } from './product-search.service';
 import { Repository } from 'typeorm';
-import { Product } from './product.entity';
+import { Product } from '../entities/product.entity';
+import { User } from '../entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('ProductSearchService', () => {
@@ -29,7 +30,10 @@ describe('ProductSearchService', () => {
 
   it('should search products by name', async () => {
     const productName = 'Test Product';
-    const mockProducts = [{ id: 1, name: productName, category: 'Test Category', price: 100 }];
+    const mockProducts = [
+      { id: 'uid', product_name: productName, product_category: 'Test Category', product_price: 100, user: new User() },
+    ];
+
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue(mockProducts),
@@ -43,7 +47,9 @@ describe('ProductSearchService', () => {
 
   it('should search products by category', async () => {
     const productCategory = 'Test Category';
-    const mockProducts = [{ id: 1, name: 'Test name', category: 'Test Category', price: 100 }];
+    const mockProducts = [
+      { id: 'uid', product_name: 'Test name', product_category: productCategory, product_price: 100, user: new User() },
+    ];
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue(mockProducts),
@@ -58,8 +64,8 @@ describe('ProductSearchService', () => {
     const minPrice = 50;
     const maxPrice = 150;
     const mockProducts = [
-      { id: 1, name: 'Product 1', category: 'Category 1', price: 100 },
-      { id: 2, name: 'Product 2', category: 'Category 1', price: 120 },
+      { id: 'uid1', product_name: 'Product 1', product_category: 'Category 1', product_price: 100, user: new User() },
+      { id: 'uid2', product_name: 'Product 2', product_category: 'Category 2', product_price: 120, user: new User() },
     ];
 
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
@@ -76,7 +82,9 @@ describe('ProductSearchService', () => {
   it('should search products by name and category', async () => {
     const productName = 'Test Product';
     const productCategory = 'Test Category';
-    const mockProducts = [{ id: 1, name: productName, category: productCategory, price: 100 }];
+    const mockProducts = [
+      { id: 'uid', product_name: productName, product_category: productCategory, product_price: 100, user: new User() },
+    ];
 
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
@@ -94,7 +102,9 @@ describe('ProductSearchService', () => {
     const productCategory = 'Test Category';
     const minPrice = 50;
     const maxPrice = 150;
-    const mockProducts = [{ id: 1, name: productName, category: productCategory, price: 100 }];
+    const mockProducts = [
+      { id: 'uid', product_name: productName, product_category: productCategory, product_price: 100, user: new User() },
+    ];
 
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),

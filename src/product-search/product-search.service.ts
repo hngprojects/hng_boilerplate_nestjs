@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Product } from './product.entity';
+import { Product } from '../entities/product.entity';
 
 @Injectable()
 export class ProductSearchService {
@@ -14,19 +14,19 @@ export class ProductSearchService {
     const query = this.productRepository.createQueryBuilder('product');
 
     if (name) {
-      query.andWhere('product.name LIKE :name', { name: `%${name}%` });
+      query.andWhere('product.product_name LIKE :name', { name: `%${name}%` });
     }
 
     if (category) {
-      query.andWhere('product.category = :category', { category });
+      query.andWhere('product.product_category = :category', { category });
     }
 
     if (minPrice) {
-      query.andWhere('product.price >= :minPrice', { minPrice });
+      query.andWhere('product.product_price >= :minPrice', { minPrice });
     }
 
     if (maxPrice) {
-      query.andWhere('product.price <= :maxPrice', { maxPrice });
+      query.andWhere('product.product_price <= :maxPrice', { maxPrice });
     }
 
     return await query.getMany();
