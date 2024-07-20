@@ -4,6 +4,9 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { dataSourceOptions } from '../src/database/data-source';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SeedingService } from './database/seeding.service';
 
 @Module({
   providers: [
@@ -19,6 +22,7 @@ import { LoggerModule } from 'nestjs-pino';
           forbidNonWhitelisted: true,
         }),
     },
+    SeedingService
   ],
   imports: [
     ConfigModule.forRoot({
@@ -41,6 +45,7 @@ import { LoggerModule } from 'nestjs-pino';
       }),
     }),
     LoggerModule.forRoot(),
+    TypeOrmModule.forRoot(dataSourceOptions),
   ],
 })
 export class AppModule {}
