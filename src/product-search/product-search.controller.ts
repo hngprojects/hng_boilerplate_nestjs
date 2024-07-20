@@ -1,6 +1,6 @@
 import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
 import { ProductSearchService } from './product-search.service';
-import { Product } from '../dist/product.entity';
+import { Product } from './product.entity';
 @Controller('products')
 export class ProductSearchController {
   constructor(private readonly productService: ProductSearchService) {}

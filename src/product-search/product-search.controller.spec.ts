@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { ProductSearchController } from './product-search.controller';
 import { ProductSearchService } from './product-search.service';
-import { Product } from '../dist/product.entity';
+import { Product } from './product.entity';
 
 describe('ProductSearchController', () => {
   let app: INestApplication;
