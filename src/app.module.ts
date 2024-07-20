@@ -5,9 +5,6 @@ import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
 import HealthController from './health.controller';
-import { dataSourceOptions } from '../src/database/data-source';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { SeedingService } from './database/seeding.service';
 
 @Module({
   providers: [
@@ -23,7 +20,6 @@ import { SeedingService } from './database/seeding.service';
           forbidNonWhitelisted: true,
         }),
     },
-    SeedingService
   ],
   imports: [
     ConfigModule.forRoot({
@@ -46,8 +42,7 @@ import { SeedingService } from './database/seeding.service';
       }),
     }),
     LoggerModule.forRoot(),
-    TypeOrmModule.forRoot(dataSourceOptions),
   ],
   controllers: [HealthController]
 })
-export class AppModule {}
+export class AppModule { }
