@@ -1,48 +1,23 @@
-import { Module, ValidationPipe } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_PIPE } from '@nestjs/core';
-import serverConfig from '../config/server.config';
-import * as Joi from 'joi';
-import { LoggerModule } from 'nestjs-pino';
-import HealthController from './health.controller';
+// src/app.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProductsModule } from './products/products.module';
+import { Product } from './products/entities/product.entity';
+import { createClient } from '@supabase/supabase-js'
 
 @Module({
-  providers: [
-    {
-      provide: 'CONFIG',
-      useClass: ConfigService,
-    },
-    {
-      provide: APP_PIPE,
-      useFactory: () =>
-        new ValidationPipe({
-          whitelist: true,
-          forbidNonWhitelisted: true,
-        }),
-    },
-  ],
   imports: [
-    ConfigModule.forRoot({
-      /**
-       * By default, the package looks for a .env file in the root directory of the application.
-       * We don't use ".env" file because it is prioritize as the same level as real environment variables.
-       * To specify multiple .env files, set the envFilePath property.
-       * If a variable is found in multiple files, the first one takes precedence.
-       */
-      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
-      isGlobal: true,
-      load: [serverConfig],
-      /**
-       * See ".env.local" file to list all environment variables needed by the app
-       */
-      validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
-        PROFILE: Joi.string().valid('local', 'development', 'production', 'ci', 'testing', 'staging').required(),
-        PORT: Joi.number().required(),
-      }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'DB_HOST',
+      port: parseInt('DB_PORT'),
+      username: 'DB_USERNAME',
+      password: 'DB_PASSWORD',
+      database: 'DB_DATABASE',
+      entities: [Product],
+      synchronize: true,
     }),
-    LoggerModule.forRoot(),
+    ProductsModule,
   ],
-  controllers: [HealthController]
 })
-export class AppModule { }
+export class AppModule {}
