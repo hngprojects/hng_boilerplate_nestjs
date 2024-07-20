@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "name": "team-alpha-staging",
+      "script": "npm run dev",
+      "log_file": "~/.pm2/logs/team-alpha-staging-out.log",
+      "combine_logs": true,
+      "log_date_format": "YYYY-MM-DD HH:mm:ss Z"
+    }
+  ]
+}

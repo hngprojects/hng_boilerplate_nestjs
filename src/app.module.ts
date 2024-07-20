@@ -6,6 +6,7 @@ import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import { ProductSearchModule } from './product-search/product-search.module';
+import HealthController from './health.controller';
 
 @Module({
   providers: [
@@ -64,5 +65,6 @@ import { ProductSearchModule } from './product-search/product-search.module';
     LoggerModule.forRoot(),
     ProductSearchModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
