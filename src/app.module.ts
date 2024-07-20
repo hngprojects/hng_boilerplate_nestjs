@@ -4,6 +4,7 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import HealthController from './health.controller';
 
 @Module({
   providers: [
@@ -42,5 +43,6 @@ import { LoggerModule } from 'nestjs-pino';
     }),
     LoggerModule.forRoot(),
   ],
+  controllers: [HealthController]
 })
-export class AppModule {}
+export class AppModule { }
