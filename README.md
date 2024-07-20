@@ -19,22 +19,6 @@
 |--- tsconfig.json
 ```
 
-## COMPONENTS
-1. User Registration and Authentication
-2. Social Authentication
-3. User management
-5. Magic Link Authentication
-6. Super Admin and Authorization
-7. Organisation Management
-8. Profile Settings
-9. Settings
-10. Messaging
-11. Payments
-12. Blog
-13. Notification
-14. Language and Region
-15. Waitlist
-
 ## API DESIGN
 This is the system architecture of the API Design (a detailed and comprehensive API documentation design ).
 - [API DOC DESIGN](https://app.swaggerhub.com/apis-docs/TheCodeGhinux/Team-Abidoshaker/1.0.0#/)
