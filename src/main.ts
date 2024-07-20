@@ -34,6 +34,7 @@ async function bootstrap() {
   app.enable('trust proxy');
   app.useLogger(logger);
   app.enableCors();
+  // app.setGlobalPrefix("api/v1")
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()

@@ -8,7 +8,17 @@ import HealthController from './health.controller';
 import { dataSourceOptions } from '../src/database/data-source';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import UserService from './services/user.service';
+import RegistrationController from './controllers/registration.controller';
+import { appConfig } from 'config/appConfig';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import * as dotenv from 'dotenv';
+import { AuthGuard } from './guards/auth.guard';
 
+dotenv.config();
 @Module({
   providers: [
     {
@@ -22,8 +32,12 @@ import { SeedingService } from './database/seeding.service';
           whitelist: true,
           forbidNonWhitelisted: true,
         }),
+    },{
+      provide: "APP_GUARD",
+      useClass: AuthGuard
     },
-    SeedingService
+    SeedingService, UserService,
+    Repository
   ],
   imports: [
     ConfigModule.forRoot({
@@ -47,7 +61,13 @@ import { SeedingService } from './database/seeding.service';
     }),
     LoggerModule.forRoot(),
     TypeOrmModule.forRoot(dataSourceOptions),
+    TypeOrmModule.forFeature([User]),
+    PassportModule,
+    JwtModule.register({
+      secret: appConfig.jwt.jwtSecret,
+      signOptions: { expiresIn: `${appConfig.jwt.jwtExpiry}s` },
+    }),
   ],
-  controllers: [HealthController]
+  controllers: [HealthController, RegistrationController]
 })
 export class AppModule {}
