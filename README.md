@@ -19,15 +19,6 @@
 |--- tsconfig.json
 ```
 
-## API DESIGN
-This is the system architecture (a detailed and comprehensive API documentation design ).
-- [API DOC DESIGN](https://app.swaggerhub.com/apis-docs/TheCodeGhinux/Team-Abidoshaker/1.0.0#/)
-
-## DATABASE DESIGN
-This is the system architecture dealing with Database schema design.
-- [DATABASE DESIGN](https://dbdiagram.io/d/abidoshaker-66923b569939893daed2fb95)
-  ### Entity-Relationship Design
-
 ## Dependencies (Dev)
 
 - Node.js
