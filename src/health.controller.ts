@@ -4,7 +4,7 @@ import { Controller, Get } from '@nestjs/common';
 export default class HealthController {
     @Get("/")
     public home() {
-        return { status_code: 200, message: "Welcome to our NestJs Backend Endpoint ..." };
+        return { status_code: 200, message: "Welcome to NestJs Backend Endpoint ......" };
     }
     @Get("health")
     public health() {
