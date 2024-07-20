@@ -6,8 +6,6 @@ dotenv.config();
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
-
-
 export const dataSourceOptions = {
   type: process.env.DB_TYPE as 'postgres',
   username: process.env.DB_USERNAME,
