@@ -4,6 +4,9 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import dataSource from './database/data-source';
+import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 
 @Module({
@@ -42,7 +45,14 @@ import HealthController from './health.controller';
       }),
     }),
     LoggerModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => ({
+        ...dataSource.options,
+      }),
+      dataSourceFactory: async () => dataSource,
+    }),
+    SeedingModule,
   ],
-  controllers: [HealthController]
+  controllers: [HealthController],
 })
-export class AppModule { }
+export class AppModule {}
