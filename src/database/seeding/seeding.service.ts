@@ -53,14 +53,14 @@ export class SeedingService {
           username: 'johnsmith',
           bio: 'bio data',
           phone: '1234567890',
-          avatar_image: 'image.png',
+          avatarImage: 'image.png',
           user: savedUsers[0],
         });
         const p2 = profileRepository.create({
           username: 'janesmith',
           bio: 'bio data',
           phone: '0987654321',
-          avatar_image: 'image.png',
+          avatarImage: 'image.png',
           user: savedUsers[1],
         });
 
@@ -71,10 +71,9 @@ export class SeedingService {
           throw new Error('Failed to create all profiles');
         }
 
-        const categroy = this.dataSource
-          .getRepository(ProductCategory)
-          .create({ name: 'category1', description: 'description1', slug: 'slug1' });
-        await categroy.save();
+        const categroyRepository = this.dataSource.getRepository(ProductCategory);
+        const category = categroyRepository.create({ name: 'category1', description: 'description1', slug: 'slug1' });
+        await categroyRepository.save([category]);
 
         const pr1 = productRepository.create({
           name: 'Product 1',
@@ -86,7 +85,7 @@ export class SeedingService {
           user: savedUsers[0],
         });
         const pr2 = productRepository.create({
-          product_name: 'Product 2',
+          name: 'Product 2',
           description: 'Description 2',
           price: 200,
           currentStock: 51,
