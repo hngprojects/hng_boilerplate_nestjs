@@ -34,6 +34,8 @@ export class InvitationsService {
       invitations.push({ email, organization: 'My Organization', expires_at: expiresAt.toISOString() });
 
       // Send email
+      console.log(token);
+
       await this.sendEmail(email, token);
     }
 
@@ -54,13 +56,13 @@ export class InvitationsService {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'osiephriejiro765@gmail.com',
-        pass: 'jayi mhxu gdvb tgeb',
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
     const mailOptions = {
-      from: 'osiephriejiro765@gmail.com',
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Organization Invitation',
       text: `You are invited to join the organization. Click the link to accept the invitation: http://example.com/invite?token=${token}`,

@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Headers, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
-// import { JwtAuthGuard } from '../jwt-auth/jwt-auth.guard';
-// import { RolesGuard } from '../roles/roles.guard';
+import { JwtAuthGuard } from '../jwt-auth/jwt-auth.guard';
+import { RolesGuard } from '../roles/roles.guard';
 import { Roles } from '../roles/roles.decorator';
 
 @Controller('api/v1/organisations')
@@ -9,20 +9,14 @@ export class InvitationsController {
   constructor(private readonly invitationsService: InvitationsService) {}
 
   @Post('send-invite')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('Admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async sendInvite(
     @Body('emails') emails: string[],
     @Body('org_id') orgId: string,
-    @Headers('Authorization') authHeader?: string
+    @Headers('Authorization') authHeader: string
   ) {
-    let adminId: string;
-    if (authHeader) {
-      adminId = this.extractAdminIdFromToken(authHeader);
-    } else {
-      // Set a dummy adminId or handle the case without auth
-      adminId = 'dummy-admin-id'; // Use a fixed adminId for testing purposes
-    }
+    const adminId = this.extractAdminIdFromToken(authHeader);
 
     try {
       const invitations = await this.invitationsService.sendInvitations(emails, orgId, adminId);
@@ -32,7 +26,6 @@ export class InvitationsController {
       };
     } catch (error) {
       console.log(error);
-
       throw new HttpException('Error sending invitations', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

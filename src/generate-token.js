@@ -1,22 +1,18 @@
-// generate-token.js
 const jwt = require('jsonwebtoken');
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config();
 
-// Use the secret key from the environment variable
-const secretKey = 'EJIRO';
+const secretKey = process.env.JWT_SECRET || 'EJIRO';
 
-// Define the payload of the JWT token
 const payload = {
   sub: 'admin',
   role: 'admin',
+  org_id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
 };
 
-// Define options (optional)
 const options = {
-  expiresIn: '7d', // Token expires in 1 hour
+  expiresIn: '7d',
 };
 
-// Sign the token
 const token = jwt.sign(payload, secretKey, options);
 
 console.log('Generated JWT Token:', token);
