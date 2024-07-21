@@ -9,7 +9,7 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
-import { appConfig } from 'config/appConfig';
+import { appConfig } from '../config/appConfig';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as dotenv from 'dotenv';
@@ -68,7 +68,6 @@ dotenv.config();
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
-
     AuthenticationModule,
 
   ],

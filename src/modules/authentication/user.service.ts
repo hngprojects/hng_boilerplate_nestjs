@@ -2,8 +2,8 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import CreateNewUserOptions from 'src/modules/authentication/options/CreateNewUserOptions';
-import UserIdentifierOptions from 'src/modules/authentication/options/UserIdentifierOptions';
+import CreateNewUserOptions from './options/CreateNewUserOptions';
+import UserIdentifierOptions from './options/UserIdentifierOptions';
 
 @Injectable()
 export default class UserService {

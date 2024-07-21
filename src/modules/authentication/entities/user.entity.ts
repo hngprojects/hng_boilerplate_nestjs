@@ -13,9 +13,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Product } from 'src/entities/product.entity';
-import { Organisation } from 'src/entities/organisation.entity';
-import { Profile } from 'src/entities/profile.entity';
+import { Product } from '../../../entities/product.entity';
+import { Organisation } from '../../../entities/organisation.entity';
+import { Profile } from '../../../entities/profile.entity';
 
 @Entity()
 export class User {

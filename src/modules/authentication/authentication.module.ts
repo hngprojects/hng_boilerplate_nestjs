@@ -5,13 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { appConfig } from 'config/appConfig';
+import { appConfig } from '../../../config/appConfig';
 import { Repository } from 'typeorm';
 
 
 @Module({
   controllers: [RegistrationController],
-  providers: [UserService,Repository],
+  providers: [UserService, Repository],
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
@@ -21,6 +21,6 @@ import { Repository } from 'typeorm';
       signOptions: { expiresIn: `${appConfig.jwt.jwtExpiry}s` },
     }),
   ],
-  exports: [UserService]
+  exports: [UserService, User]
 })
-export class AuthenticationModule {}
+export class AuthenticationModule { }

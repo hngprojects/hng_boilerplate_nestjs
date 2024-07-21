@@ -1,9 +1,9 @@
 import { Body, Controller, HttpStatus, Post, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDTO } from 'src/modules/authentication/dto/create-user.dto';
-import { FAILED_TO_CREATE_USER, ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY  } from 'src/helpers/SystemMessages';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { FAILED_TO_CREATE_USER, ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../helpers/SystemMessages';
+import { skipAuth } from '../../helpers/skipAuth';
 import UserService from './user.service';
 
 @Controller('api/v1/auth/register')
@@ -19,7 +19,7 @@ export default class RegistrationController {
     try {
       const registrationPayload = body
       const userExists = await this.userService.getUserRecord({ identifier: registrationPayload.email, identifierType: "email" })
-      
+
       if (userExists) {
         return response.status(HttpStatus.BAD_REQUEST).send({
           status_code: HttpStatus.BAD_REQUEST,
@@ -33,9 +33,9 @@ export default class RegistrationController {
 
       if (!user) {
         return response.status(HttpStatus.CREATED).send({
-            status_code: HttpStatus.BAD_REQUEST,
-            message: FAILED_TO_CREATE_USER,
-          });
+          status_code: HttpStatus.BAD_REQUEST,
+          message: FAILED_TO_CREATE_USER,
+        });
       }
 
       const accessToken = this.jwtService.sign({
