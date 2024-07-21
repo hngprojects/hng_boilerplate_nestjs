@@ -2,6 +2,7 @@ import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 
+
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -16,7 +17,7 @@ export class ProductsController {
       throw new BadRequestException('The query parameter \'q\' is required and must be a non-empty string.');
     }
 
-    const { results, total } = await this.productsService.search(query, page, limit);
+    const { results, total } = await this.productsService.searchProducts(query, page, limit);
 
     return {
       page,
