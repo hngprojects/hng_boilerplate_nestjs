@@ -1,56 +1,37 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddProductTableAndFullTextSearch1627901222340 implements MigrationInterface {
+export class AddFullTextSearchIndexToProduct implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE product (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        category VARCHAR(255),
-        tags TEXT[],
-        fullTextSearch TSVECTOR
+      CREATE OR REPLACE FUNCTION to_tsvector_combined_immutable(
+          name text,
+          description text,
+          category text,
+          tags text[]
+      )
+      RETURNS tsvector AS $$
+      BEGIN
+          RETURN 
+              to_tsvector('english', name) ||
+              to_tsvector('english', description) ||
+              to_tsvector('english', category) ||
+              to_tsvector('english', array_to_string(tags, ' '));
+      END;
+      $$ LANGUAGE plpgsql IMMUTABLE;
+
+      CREATE INDEX idx_products_full_text_search
+      ON products
+      USING gin(
+          to_tsvector_combined_immutable(name, description, category, tags)
       );
-    `);
-
-    await queryRunner.query(`
-      CREATE FUNCTION product_fulltext_trigger() RETURNS trigger AS $$
-      begin
-        new."fullTextSearch" :=
-          setweight(to_tsvector('english', coalesce(new.name, '')), 'A') ||
-          setweight(to_tsvector('english', coalesce(new.description, '')), 'B') ||
-          setweight(to_tsvector('english', coalesce(new.category, '')), 'C') ||
-          setweight(to_tsvector('english', coalesce(array_to_string(new.tags, ' '), '')), 'D');
-        return new;
-      end
-      $$ LANGUAGE plpgsql;
-    `);
-
-    await queryRunner.query(`
-      CREATE TRIGGER product_fulltext_update BEFORE INSERT OR UPDATE
-      ON product FOR EACH ROW EXECUTE FUNCTION product_fulltext_trigger();
-    `);
-
-    await queryRunner.query(`
-      CREATE INDEX idx_products_full_text_search ON product USING gin(fullTextSearch);
-    `);
-
-    // Optionally, initialize existing data
-    await queryRunner.query(`
-      UPDATE product SET "fullTextSearch" =
-        setweight(to_tsvector('english', coalesce(name, '')), 'A') ||
-        setweight(to_tsvector('english', coalesce(description, '')), 'B') ||
-        setweight(to_tsvector('english', coalesce(category, '')), 'C') ||
-        setweight(to_tsvector('english', coalesce(array_to_string(tags, ' '), '')), 'D');
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TRIGGER IF EXISTS product_fulltext_update ON product`);
-    await queryRunner.query(`DROP FUNCTION IF EXISTS product_fulltext_trigger`);
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_products_full_text_search`);
-    await queryRunner.query(`ALTER TABLE product DROP COLUMN fullTextSearch`);
-    await queryRunner.query(`DROP TABLE product`);
+    await queryRunner.query(`
+      DROP INDEX IF EXISTS idx_products_full_text_search;
+      DROP FUNCTION IF EXISTS to_tsvector_combined_immutable(name text, description text, category text, tags text[]);
+    `);
   }
 }
 
