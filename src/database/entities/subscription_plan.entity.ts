@@ -1,4 +1,4 @@
-import { Feature } from 'src/features/entities/feature.entity';
+import { Feature } from 'src/database/entities/feature.entity';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
