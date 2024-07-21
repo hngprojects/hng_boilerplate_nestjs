@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './user.entity';
 
 @Entity()
 export class Product {
@@ -17,8 +16,4 @@ export class Product {
 
   @Column()
   description?: string;
-
-  @ManyToOne(() => User, user => user.products)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 }
