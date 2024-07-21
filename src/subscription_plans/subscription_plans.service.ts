@@ -11,7 +11,7 @@ import { CreateSubscriptionPlanDto } from './dto/create-subscription_plan.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SubscriptionPlan } from '../database/entities/subscription_plan.entity';
 import { Repository } from 'typeorm';
-import { Feature } from 'src/features/entities/feature.entity';
+import { Feature } from 'src/database/entities/feature.entity';
 
 @Injectable()
 export class SubscriptionPlansService {
