@@ -1,4 +1,3 @@
-// about_page_stats.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, UpdateDateColumn } from 'typeorm';
 import { CustomSections } from './custom-sections.entity';
 

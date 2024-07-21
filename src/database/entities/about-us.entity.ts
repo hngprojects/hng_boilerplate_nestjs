@@ -1,4 +1,3 @@
-// about_us.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { CustomSections } from './custom-sections.entity';
 

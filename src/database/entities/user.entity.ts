@@ -20,7 +20,6 @@ import { Roles } from './roles.entity';
 
 @Entity()
 export class User {
-  [x: string]: any;
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
