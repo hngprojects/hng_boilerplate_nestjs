@@ -11,6 +11,5 @@ import { AuthService } from 'src/services/auth.service';
   imports: [JwtModule.register({}), TypeOrmModule.forFeature([User, RefreshToken])],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthController],
 })
 export class AuthModule {}
