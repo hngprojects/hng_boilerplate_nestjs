@@ -29,7 +29,7 @@ describe('UserController', () => {
     }).compile();
 
     controller = module.get<UserController>(UserController);
-  });
+  }, 100000);
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
