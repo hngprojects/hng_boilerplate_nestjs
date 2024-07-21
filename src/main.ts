@@ -15,14 +15,6 @@ async function bootstrap() {
 
   const dataSource = app.get(DataSource);
 
-  // try {
-  //   await dataSource.initialize();
-  //   logger.log('Database connection initialized successfully');
-  // } catch (error) {
-  //   logger.error('Error initializing database connection:', error.stack);
-  //   process.exit(1);
-  // }
-
   try {
     await initializeDataSource();
     console.log('Data Source has been initialized!');

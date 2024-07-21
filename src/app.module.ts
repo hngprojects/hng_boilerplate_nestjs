@@ -4,8 +4,6 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import HealthController from './health.controller';
-// import { SeedingService } from './database/seeding.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
@@ -54,6 +52,6 @@ import { SeedingModule } from './database/seeding/seeding.module';
     }),
     SeedingModule,
   ],
-  controllers: [HealthController],
+  controllers: [],
 })
 export class AppModule {}

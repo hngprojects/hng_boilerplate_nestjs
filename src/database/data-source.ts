@@ -15,7 +15,6 @@ const dataSource = new DataSource({
   entities: [process.env.DB_ENTITIES],
   migrations: [process.env.DB_MIGRATIONS],
   synchronize: isDevelopment,
-  // logging: isDevelopment,
   migrationsTableName: 'migrations',
 });
 
