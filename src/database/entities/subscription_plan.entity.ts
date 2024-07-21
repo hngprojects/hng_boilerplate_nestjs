@@ -19,7 +19,7 @@ export class SubscriptionPlan {
   duration: string;
 
   @OneToMany(() => Feature, feature => feature.plans)
-  feature: Feature[];
+  features: Feature[];
 
   @CreateDateColumn()
   createdAt: Date;
