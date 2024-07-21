@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import dataSource, { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
+import { AuthGuard } from './authGuard/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -30,6 +31,9 @@ async function bootstrap() {
   app.useLogger(logger);
   app.enableCors();
   app.setGlobalPrefix('api/v1');
+
+  // Apply AuthGuard globally
+  app.useGlobalGuards(app.get(AuthGuard));
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()

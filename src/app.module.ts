@@ -7,7 +7,10 @@ import { LoggerModule } from 'nestjs-pino';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
+import { UserModule } from './modules/user/user.module';
 import HealthController from './health.controller';
+import { authGuardProvider } from './authGuard/auth.guard.provider';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   providers: [
@@ -23,6 +26,8 @@ import HealthController from './health.controller';
           forbidNonWhitelisted: true,
         }),
     },
+    authGuardProvider,
+    JwtService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -52,6 +57,7 @@ import HealthController from './health.controller';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    UserModule,
   ],
   controllers: [HealthController],
 })
