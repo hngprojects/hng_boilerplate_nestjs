@@ -1,10 +1,10 @@
 import { Body, Controller, HttpStatus, Post, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import UserService from 'src/services/user.service';
-import { CreateUserDTO } from 'src/interfaces/CreateUserDTO';
+import { CreateUserDTO } from 'src/modules/authentication/dto/create-user.dto';
 import { FAILED_TO_CREATE_USER, ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY  } from 'src/helpers/SystemMessages';
 import { skipAuth } from 'src/helpers/skipAuth';
+import UserService from './user.service';
 
 @Controller('api/v1/auth/register')
 export default class RegistrationController {
@@ -40,6 +40,8 @@ export default class RegistrationController {
 
       const accessToken = this.jwtService.sign({
         email: registrationPayload.email,
+        first_name: registrationPayload.first_name,
+        last_name: registrationPayload,
         sub: user.id
       });
 

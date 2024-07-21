@@ -28,8 +28,8 @@ async function bootstrap() {
     logger.log('Database connection is already initialized');
   }
 
-  const seedingService = app.get(SeedingService);
-  await seedingService.seedDatabase();
+  // const seedingService = app.get(SeedingService);
+  // await seedingService.seedDatabase();
 
   app.enable('trust proxy');
   app.useLogger(logger);
@@ -48,7 +48,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   const server = app.getHttpAdapter().getInstance();
-  setupRoutes(server, seedingService);
+  // setupRoutes(server, seedingService);
 
   const port = app.get<ConfigService>(ConfigService).get<number>('server.port');
   await app.listen(port);

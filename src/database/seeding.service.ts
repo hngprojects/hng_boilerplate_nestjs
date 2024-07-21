@@ -4,6 +4,8 @@ import { User } from '../entities/user.entity';
 import { Profile } from '../entities/profile.entity';
 import { Product } from '../entities/product.entity';
 import { Organisation } from '../entities/organisation.entity';
+
+
 // import { User } from 'src/entities/user.entity';
 
 @Injectable()
@@ -25,7 +27,7 @@ export class SeedingService {
       // await queryRunner.query('DROP TABLE IF EXISTS "user" CASCADE');
 
       // Recreate the tables
-      await this.dataSource.synchronize(true);
+      await this.dataSource.synchronize(false);
 
       // Seed data
       const userRepository = this.dataSource.getRepository(User);
