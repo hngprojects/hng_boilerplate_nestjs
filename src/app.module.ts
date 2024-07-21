@@ -8,17 +8,24 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import { AuthModule } from './modules/auth.module';
+import { UnprocessableEntityException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { ValidationError } from 'class-validator';
 
 @Module({
   providers: [
     {
-      provide: 'CONFIG',
-      useClass: ConfigService,
-    },
-    {
       provide: APP_PIPE,
       useFactory: () =>
         new ValidationPipe({
+          exceptionFactory: (validationErrors: ValidationError[] = []) => {
+            return new UnprocessableEntityException({
+              message: 'Bad Request',
+              error: validationErrors.map(error => Object.values(error.constraints)[0])[0],
+              status_code: HttpStatus.UNPROCESSABLE_ENTITY,
+            });
+          },
           whitelist: true,
           forbidNonWhitelisted: true,
         }),
@@ -52,6 +59,7 @@ import HealthController from './health.controller';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    AuthModule,
   ],
   controllers: [HealthController],
 })
