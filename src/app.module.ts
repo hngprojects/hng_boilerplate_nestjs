@@ -4,6 +4,8 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { InvitationsModule } from './invitations/invitations.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   providers: [
@@ -28,7 +30,7 @@ import { LoggerModule } from 'nestjs-pino';
        * To specify multiple .env files, set the envFilePath property.
        * If a variable is found in multiple files, the first one takes precedence.
        */
-      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`, '.env.local'],
+      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`, '.env'],
       isGlobal: true,
       load: [serverConfig],
       /**
@@ -41,6 +43,8 @@ import { LoggerModule } from 'nestjs-pino';
       }),
     }),
     LoggerModule.forRoot(),
+    InvitationsModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
