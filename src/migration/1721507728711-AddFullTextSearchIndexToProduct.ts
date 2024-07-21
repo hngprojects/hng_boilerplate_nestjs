@@ -1,39 +1,44 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddFullTextSearchIndexToProduct implements MigrationInterface {
-  public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE OR REPLACE FUNCTION to_tsvector_combined_immutable(
-          name text,
-          description text,
-          category text,
-          tags text[]
-      )
-      RETURNS tsvector AS $$
-      BEGIN
-          RETURN 
-              to_tsvector('english', name) ||
-              to_tsvector('english', description) ||
-              to_tsvector('english', category) ||
-              to_tsvector('english', array_to_string(tags, ' '));
-      END;
-      $$ LANGUAGE plpgsql IMMUTABLE;
+export class AddFullTextSearchIndexToProduct1721507728711 implements MigrationInterface {
+    name = 'AddFullTextSearchIndexToProduct1721507728711';
 
-      CREATE INDEX idx_products_full_text_search
-      ON products
-      USING gin(
-          to_tsvector_combined_immutable(name, description, category, tags)
-      );
-    `);
-  }
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            CREATE OR REPLACE FUNCTION to_tsvector_combined_immutable(
+                name text,
+                description text,
+                category text,
+                tags text[]
+            )
+            RETURNS tsvector AS $$
+            BEGIN
+                RETURN 
+                    to_tsvector('english', name) ||
+                    to_tsvector('english', description) ||
+                    to_tsvector('english', category) ||
+                    to_tsvector('english', array_to_string(tags, ' '));
+            END;
+            $$ LANGUAGE plpgsql IMMUTABLE;
+        `);
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      DROP INDEX IF EXISTS idx_products_full_text_search;
-      DROP FUNCTION IF EXISTS to_tsvector_combined_immutable(name text, description text, category text, tags text[]);
-    `);
-  }
+        await queryRunner.query(`
+            CREATE INDEX idx_products_full_text_search
+            ON products
+            USING gin(
+                to_tsvector_combined_immutable(name, description, category, tags)
+            );
+        `);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            DROP INDEX IF EXISTS idx_products_full_text_search;
+            DROP FUNCTION IF EXISTS to_tsvector_combined_immutable(name text, description text, category text, tags text[]);
+        `);
+    }
 }
+
 
 
 
