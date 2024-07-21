@@ -1,18 +1,17 @@
-import HealthController from "./health.controller";
+import HealthController from './health.controller';
 
 describe('Health Check Test', () => {
-    let healthController: HealthController;
+  let healthController: HealthController;
 
-    beforeEach(() => {
-        healthController = new HealthController();
+  beforeEach(() => {
+    healthController = new HealthController();
+  });
+
+  describe('Get Health endpoint', () => {
+    it('should return healthy endpoint', async () => {
+      const result = 'healthy endpoint';
+
+      expect(await healthController.health()).toBe(result);
     });
-
-    describe('Get Health endpoint', () => {
-        it('should return healthy endpoint', async () => {
-            const result = 'healthy endpoint';
-
-            expect(await healthController.health()).toBe(result);
-        });
-    });
-
+  });
 });
