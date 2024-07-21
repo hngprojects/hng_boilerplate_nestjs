@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
+import { Invite } from './invite.entity';
 
 @Entity()
 export class Organisation {
@@ -56,4 +57,7 @@ export class Organisation {
 
   @OneToMany(() => OrganisationPreference, preference => preference.organisation)
   preferences: OrganisationPreference[];
+
+  @OneToMany(() => Invite, invite => invite.organisation)
+  invites: Invite[];
 }
