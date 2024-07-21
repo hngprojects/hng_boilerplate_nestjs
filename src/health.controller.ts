@@ -12,6 +12,6 @@ export default class HealthController {
   @skipAuth()
   @Get('health')
   public health() {
-    return 'healthy endpoint';
+    return 'Server is healthy';
   }
 }

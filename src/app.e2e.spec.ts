@@ -8,8 +8,8 @@ describe('Health Check Test', () => {
   });
 
   describe('Get Health endpoint', () => {
-    it('should return healthy endpoint', async () => {
-      const result = 'healthy endpoint';
+    it('should return Server is healthy', async () => {
+      const result = 'Server is healthy';
 
       expect(await healthController.health()).toBe(result);
     });
