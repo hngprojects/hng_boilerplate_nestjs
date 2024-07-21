@@ -11,6 +11,7 @@ export class ProductsService {
   ) {}
 
   async searchProducts(query: string, page: number = 1, limit: number = 10): Promise<{ total: number; results: Product[] }> {
+    try {
     const skip = (page - 1) * limit;
 
     const [results, total] = await this.productsRepository
@@ -21,5 +22,9 @@ export class ProductsService {
       .getManyAndCount();
 
     return { total, results };
+} catch (error) {
+    console.error(`Error searching products: ${error.message}`);
+    throw new Error('Failed to search products');
+  }
   }
 }
