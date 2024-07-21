@@ -50,7 +50,7 @@ async function bootstrap() {
   const server = app.getHttpAdapter().getInstance();
   setupRoutes(server, seedingService);
 
-  const port = app.get<ConfigService>(ConfigService).get<number>('server.port');
+  const port = app.get<ConfigService>(ConfigService).get<number>('server.port') || 3008;
   await app.listen(port);
 
   logger.log({ message: 'server started 🚀', port, url: `http://localhost:${port}/api` });
