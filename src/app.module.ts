@@ -7,6 +7,8 @@ import { LoggerModule } from 'nestjs-pino';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
+import { OrganisationsController } from './organisations/organisations.controller';
+import { OrganisationsService } from './organisations/organisations.service';
 import HealthController from './health.controller';
 
 @Module({
@@ -23,6 +25,7 @@ import HealthController from './health.controller';
           forbidNonWhitelisted: true,
         }),
     },
+    OrganisationsService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -53,6 +56,6 @@ import HealthController from './health.controller';
     }),
     SeedingModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, OrganisationsController],
 })
 export class AppModule {}
