@@ -8,6 +8,10 @@ import HealthController from './health.controller';
 import { dataSourceOptions } from '../src/database/data-source';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
+import { Auth2FAService } from './auth2fa/auth2fa.service';
+import { Auth2FAController } from './auth2fa/auth2fa.controller';
+import { Auth2FAModule } from './auth2fa/auth2fa.module';
+import { User } from './entities/user.entity';
 
 @Module({
   providers: [
@@ -23,7 +27,8 @@ import { SeedingService } from './database/seeding.service';
           forbidNonWhitelisted: true,
         }),
     },
-    SeedingService
+    SeedingService,
+    Auth2FAService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -47,7 +52,9 @@ import { SeedingService } from './database/seeding.service';
     }),
     LoggerModule.forRoot(),
     TypeOrmModule.forRoot(dataSourceOptions),
+    Auth2FAModule,
+    TypeOrmModule.forFeature([User]),
   ],
-  controllers: [HealthController]
+  controllers: [HealthController, Auth2FAController],
 })
 export class AppModule {}

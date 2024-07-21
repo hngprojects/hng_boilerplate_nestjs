@@ -43,6 +43,12 @@ export class User {
   @Column({ nullable: true })
   time_left: number;
 
+  @Column({ nullable: true })
+  secret?: string;
+
+  @Column({ default: false })
+  is_2fa_enabled: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 
