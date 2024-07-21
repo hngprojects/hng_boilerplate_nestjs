@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
-import dataSource from '../../database/data-source';
+// import dataSource from '../../database/data-source';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -12,12 +12,12 @@ describe('UserController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRootAsync({
-          useFactory: async () => ({
-            ...dataSource.options,
-          }),
-          dataSourceFactory: async () => dataSource,
-        }),
+        // TypeOrmModule.forRootAsync({
+        //   useFactory: async () => ({
+        //     ...dataSource.options,
+        //   }),
+        //   dataSourceFactory: async () => dataSource,
+        // }),
         JwtModule.register({
           secret: process.env.JWT_SECRET, // Use environment variables for security
           signOptions: { expiresIn: '60m' }, // Token expiration time
