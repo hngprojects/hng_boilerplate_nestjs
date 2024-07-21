@@ -14,15 +14,9 @@ const dataSource = new DataSource({
   database: process.env.DB_DATABASE,
   entities: [process.env.DB_ENTITIES],
   migrations: [process.env.DB_MIGRATIONS],
-  synchronize: isDevelopment,
-  migrationsTableName: 'migrations',
-});
+  synchronize: false,
+};
 
-export async function initializeDataSource() {
-  if (!dataSource.isInitialized) {
-    await dataSource.initialize();
-  }
-  return dataSource;
-}
+const dataSource = new DataSource(dataSourceOptions);
 
 export default dataSource;

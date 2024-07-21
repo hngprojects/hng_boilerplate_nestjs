@@ -4,11 +4,25 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import { dataSourceOptions } from '../src/database/data-source';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SeedingService } from './database/seeding.service';
 
+// import UserService from './services/user.service';
+// import RegistrationController from './controllers/registration.controller';
+import { appConfig } from 'config/appConfig';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import * as dotenv from 'dotenv';
+import { AuthGuard } from './guards/auth.guard';
+import { AuthenticationModule } from './modules/authentication/authentication.module';
+
+
+
+dotenv.config();
 @Module({
   providers: [
     {
@@ -22,7 +36,12 @@ import HealthController from './health.controller';
           whitelist: true,
           forbidNonWhitelisted: true,
         }),
+    },{
+      provide: "APP_GUARD",
+      useClass: AuthGuard
     },
+    SeedingService, 
+    
   ],
   imports: [
     ConfigModule.forRoot({
@@ -45,13 +64,10 @@ import HealthController from './health.controller';
       }),
     }),
     LoggerModule.forRoot(),
-    TypeOrmModule.forRootAsync({
-      useFactory: async () => ({
-        ...dataSource.options,
-      }),
-      dataSourceFactory: async () => dataSource,
-    }),
-    SeedingModule,
+    TypeOrmModule.forRoot(dataSourceOptions),
+
+    AuthenticationModule,
+
   ],
   controllers: [HealthController],
 })
