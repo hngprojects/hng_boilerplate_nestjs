@@ -1,13 +1,14 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
-import serverConfig from '../config/server.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import { HelpCenterModule } from './modules/help-center-topic/help-center-topic.module';
 
 @Module({
   providers: [
@@ -52,6 +53,7 @@ import HealthController from './health.controller';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    HelpCenterModule,
   ],
   controllers: [HealthController],
 })

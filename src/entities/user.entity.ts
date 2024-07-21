@@ -1,20 +1,21 @@
-import { IsString } from 'class-validator';
+import * as bcrypt from 'bcrypt';
 import {
   BeforeInsert,
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { Product } from './product.entity';
+import { HelpCenterTopic } from './help-center-topic.entity';
 import { Organisation } from './organisation.entity';
+import { Product } from './product.entity';
 import { Profile } from './profile.entity';
 
 @Entity()
@@ -62,6 +63,9 @@ export class User {
   @OneToOne(() => Profile, profile => profile.user, { cascade: true })
   @JoinColumn({ name: 'profile_id' })
   profile: Profile;
+
+  @ManyToOne(() => HelpCenterTopic, helpCenterTopic => helpCenterTopic.user, { eager: true })
+  helpCenterTopics: HelpCenterTopic[];
 
   @BeforeInsert()
   async hashPassword() {
