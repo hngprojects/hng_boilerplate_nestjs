@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { SeedingService } from './seeding.service';
 import { SeedingController } from './seeding.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
-import { Profile } from 'src/entities/profile.entity';
-import { Product } from 'src/entities/product.entity';
-import { Organisation } from 'src/entities/organisation.entity';
+import { Organisation } from '../entities/org.entity';
+import { Product } from '../entities/products.entity';
+import { Profile } from '../entities/profile.entity';
+import { User } from '../entities/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Profile, Product, Organisation])],

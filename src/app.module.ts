@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   providers: [
@@ -52,6 +53,7 @@ import HealthController from './health.controller';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    DatabaseModule,
   ],
   controllers: [HealthController],
 })
