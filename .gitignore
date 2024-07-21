@@ -391,4 +391,7 @@ dist
 /.env
 /.env.*.local
 *._local.ts
-scripts
+
+
+# Ignore the scripts folder
+/scripts/
