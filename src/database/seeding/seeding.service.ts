@@ -81,7 +81,7 @@ export class SeedingService {
           price: 100,
           currentStock: 50,
           inStock: true,
-          categroy,
+          category,
           user: savedUsers[0],
         });
         const pr2 = productRepository.create({
