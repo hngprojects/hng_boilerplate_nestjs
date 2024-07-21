@@ -21,12 +21,6 @@ describe('UserService', () => {
         },
       ],
       imports: [
-        // TypeOrmModule.forRootAsync({
-        //   useFactory: async () => ({
-        //     ...dataSource.options,
-        //   }),
-        //   dataSourceFactory: async () => dataSource,
-        // }),
         JwtModule.register({
           secret: process.env.JWT_SECRET, // Use environment variables for security
           signOptions: { expiresIn: '60m' }, // Token expiration time
