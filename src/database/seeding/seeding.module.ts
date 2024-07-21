@@ -4,7 +4,7 @@ import { SeedingController } from './seeding.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Profile } from 'src/entities/profile.entity';
-import { Product } from 'src/entities/product.entity';
+import { Product } from 'src/entities/products.entity';
 import { Organisation } from 'src/entities/org.entity';
 
 @Module({
