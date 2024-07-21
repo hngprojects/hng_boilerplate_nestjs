@@ -1,32 +1,22 @@
-import { IsString } from 'class-validator';
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { Product } from './product.entity';
-import { Organisation } from './organisation.entity';
-import { Profile } from './profile.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Testimonial } from './testimonials.entity';
+import { Review } from './reviews.entity';
+import { Sms } from './sms.entity';
+import { JobListing } from './job-listing.entity';
+import { Organisation } from './org.entity';
+import { Invite } from './invite.entity';
 
 @Entity()
 export class User {
+  [x: string]: any;
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: false })
-  first_name: string;
+  @Column({ nullable: false, name: 'first_name' })
+  firstName: string;
 
-  @Column({ nullable: false })
-  last_name: string;
+  @Column({ nullable: false, name: 'last_name' })
+  lastName: string;
 
   @Column({ unique: true, nullable: false })
   email: string;
@@ -34,37 +24,32 @@ export class User {
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: true })
-  is_active: boolean;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @Column({ nullable: true })
-  attempts_left: number;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
-  @Column({ nullable: true })
-  time_left: number;
+  @OneToMany(() => Testimonial, testimonial => testimonial.user)
+  testimonials: Testimonial[];
 
-  @CreateDateColumn()
-  created_at: Date;
+  @OneToMany(() => Review, review => review.user)
+  reviews: Review[];
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @OneToMany(() => Sms, sms => sms.sender)
+  sms: Sms[];
 
-  @OneToMany(() => Product, product => product.user, { cascade: true })
-  products: Product[];
+  @OneToMany(() => JobListing, jobListing => jobListing.user)
+  jobListings: JobListing[];
 
-  @ManyToMany(() => Organisation, organisation => organisation.users, { cascade: true })
-  @JoinTable({
-    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'organisation_org_id', referencedColumnName: 'org_id' },
-  })
-  organisations: Organisation[];
+  @OneToMany(() => Organisation, organisation => organisation.owner)
+  ownedOrganisations: Organisation[];
 
-  @OneToOne(() => Profile, profile => profile.user, { cascade: true })
-  @JoinColumn({ name: 'profile_id' })
-  profile: Profile;
+  @OneToMany(() => Organisation, organisation => organisation.creator)
+  createdOrganisations: Organisation[];
 
-  @BeforeInsert()
-  async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
+  @OneToMany(() => Invite, invite => invite.user)
+  invites: Invite[];
+
+  sessions: any;
 }

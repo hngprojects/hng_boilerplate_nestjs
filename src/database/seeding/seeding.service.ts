@@ -3,7 +3,8 @@ import { DataSource } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { Profile } from 'src/entities/profile.entity';
 import { Product } from 'src/entities/product.entity';
-import { Organisation } from 'src/entities/organisation.entity';
+import { Organisation } from 'src/entities/org.entity';
+import { ProductCategory } from 'src/entities/product-categories.entity';
 
 @Injectable()
 export class SeedingService {
@@ -29,14 +30,14 @@ export class SeedingService {
         const organisationRepository = this.dataSource.getRepository(Organisation);
 
         const u1 = userRepository.create({
-          first_name: 'John',
-          last_name: 'Smith',
+          firstName: 'John',
+          lastName: 'Smith',
           email: 'john.smith@example.com',
           password: 'password',
         });
         const u2 = userRepository.create({
-          first_name: 'Jane',
-          last_name: 'Smith',
+          firstName: 'Jane',
+          lastNname: 'Smith',
           email: 'jane.smith@example.com',
           password: 'password',
         });
@@ -70,16 +71,27 @@ export class SeedingService {
           throw new Error('Failed to create all profiles');
         }
 
+        const categroy = this.dataSource
+          .getRepository(ProductCategory)
+          .create({ name: 'category1', description: 'description1', slug: 'slug1' });
+        await categroy.save();
+
         const pr1 = productRepository.create({
-          product_name: 'Product 1',
+          name: 'Product 1',
           description: 'Description 1',
-          product_price: 100,
+          price: 100,
+          currentStock: 50,
+          inStock: true,
+          categroy,
           user: savedUsers[0],
         });
         const pr2 = productRepository.create({
           product_name: 'Product 2',
           description: 'Description 2',
-          product_price: 200,
+          price: 200,
+          currentStock: 51,
+          inStock: true,
+          categroy,
           user: savedUsers[1],
         });
 
