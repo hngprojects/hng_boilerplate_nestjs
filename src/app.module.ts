@@ -4,13 +4,13 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import HealthController from './health.controller';
-import { dataSourceOptions } from '../src/database/data-source';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SeedingService } from './database/seeding.service';
+import dataSource from './database/data-source';
+import { SeedingModule } from './database/seeding/seeding.module';
+import HealthController from './health.controller';
 import { Auth2FAService } from './auth2fa/auth2fa.service';
-import { Auth2FAController } from './auth2fa/auth2fa.controller';
 import { Auth2FAModule } from './auth2fa/auth2fa.module';
+import { Auth2FAController } from './auth2fa/auth2fa.controller';
 import { User } from './entities/user.entity';
 
 @Module({
@@ -27,7 +27,6 @@ import { User } from './entities/user.entity';
           forbidNonWhitelisted: true,
         }),
     },
-    SeedingService,
     Auth2FAService,
   ],
   imports: [
@@ -51,7 +50,13 @@ import { User } from './entities/user.entity';
       }),
     }),
     LoggerModule.forRoot(),
-    TypeOrmModule.forRoot(dataSourceOptions),
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => ({
+        ...dataSource.options,
+      }),
+      dataSourceFactory: async () => dataSource,
+    }),
+    SeedingModule,
     Auth2FAModule,
     TypeOrmModule.forFeature([User]),
   ],
