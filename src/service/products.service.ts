@@ -17,9 +17,6 @@ export class ProductService {
       throw new NotFoundException(`The product with ID ${id} does not exists.`);
     }
 
-    // if (product.user.id !== user_id) {
-    //     throw new NotFoundException(`You are not authorized to delete this product.`)
-    // }
     await this.productRepository.delete(id);
   }
 }
