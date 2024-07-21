@@ -3,6 +3,7 @@ import { ProductSearchService } from './product-search.service';
 import { Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from '../entities/user.entity';
 
 describe('ProductSearchService', () => {
   let service: ProductSearchService;
@@ -30,7 +31,7 @@ describe('ProductSearchService', () => {
   it('should search products by name', async () => {
     const productName = 'Test Product';
     const mockProducts = [
-      { id: 'uid', product_name: productName, product_category: 'Test Category', product_price: 100 },
+      { id: 'uid', product_name: productName, description: 'Test description', product_price: 100, user: new User() },
     ];
 
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
@@ -44,17 +45,17 @@ describe('ProductSearchService', () => {
     expect(repository.createQueryBuilder).toHaveBeenCalledWith('product');
   });
 
-  it('should search products by category', async () => {
-    const productCategory = 'Test Category';
+  it('should search products by description', async () => {
+    const productdescription = 'Test description';
     const mockProducts = [
-      { id: 'uid', product_name: 'Test name', product_category: productCategory, product_price: 100 },
+      { id: 'uid', product_name: 'Test name', description: productdescription, product_price: 100, user: new User() },
     ];
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue(mockProducts),
     } as any);
 
-    const result = await service.searchProducts(undefined, productCategory);
+    const result = await service.searchProducts(undefined, productdescription);
 
     expect(result).toEqual(mockProducts);
     expect(repository.createQueryBuilder).toHaveBeenCalledWith('product');
@@ -63,8 +64,8 @@ describe('ProductSearchService', () => {
     const minPrice = 50;
     const maxPrice = 150;
     const mockProducts = [
-      { id: 'uid1', product_name: 'Product 1', product_category: 'Category 1', product_price: 100 },
-      { id: 'uid2', product_name: 'Product 2', product_category: 'Category 2', product_price: 120 },
+      { id: 'uid1', product_name: 'Product 1', description: 'description 1', product_price: 100, user: new User() },
+      { id: 'uid2', product_name: 'Product 2', description: 'description 2', product_price: 120, user: new User() },
     ];
 
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
@@ -78,11 +79,11 @@ describe('ProductSearchService', () => {
     expect(repository.createQueryBuilder).toHaveBeenCalledWith('product');
   });
 
-  it('should search products by name and category', async () => {
+  it('should search products by name and description', async () => {
     const productName = 'Test Product';
-    const productCategory = 'Test Category';
+    const productdescription = 'Test description';
     const mockProducts = [
-      { id: 'uid', product_name: productName, product_category: productCategory, product_price: 100 },
+      { id: 'uid', product_name: productName, description: productdescription, product_price: 100, user: new User() },
     ];
 
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
@@ -90,19 +91,19 @@ describe('ProductSearchService', () => {
       getMany: jest.fn().mockResolvedValue(mockProducts),
     } as any);
 
-    const result = await service.searchProducts(productName, productCategory);
+    const result = await service.searchProducts(productName, productdescription);
 
     expect(result).toEqual(mockProducts);
     expect(repository.createQueryBuilder).toHaveBeenCalledWith('product');
   });
 
-  it('should search products by name, category, and price range', async () => {
+  it('should search products by name, description, and price range', async () => {
     const productName = 'Test Product';
-    const productCategory = 'Test Category';
+    const productdescription = 'Test description';
     const minPrice = 50;
     const maxPrice = 150;
     const mockProducts = [
-      { id: 'uid', product_name: productName, product_category: productCategory, product_price: 100 },
+      { id: 'uid', product_name: productName, description: productdescription, product_price: 100, user: new User() },
     ];
 
     jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
@@ -110,7 +111,7 @@ describe('ProductSearchService', () => {
       getMany: jest.fn().mockResolvedValue(mockProducts),
     } as any);
 
-    const result = await service.searchProducts(productName, productCategory, minPrice, maxPrice);
+    const result = await service.searchProducts(productName, productdescription, minPrice, maxPrice);
 
     expect(result).toEqual(mockProducts);
     expect(repository.createQueryBuilder).toHaveBeenCalledWith('product');

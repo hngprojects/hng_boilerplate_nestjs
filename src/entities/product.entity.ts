@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity()
 export class Product {
@@ -9,11 +10,12 @@ export class Product {
   product_name: string;
 
   @Column({ nullable: false })
-  product_category: string;
-
-  @Column({ nullable: false })
   product_price: number;
 
-  @Column()
-  description?: string;
+  @Column({ nullable: false })
+  description: string;
+
+  @ManyToOne(() => User, user => user.products)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

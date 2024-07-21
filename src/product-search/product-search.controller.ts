@@ -8,7 +8,7 @@ export class ProductSearchController {
   @Get('search')
   async searchProducts(
     @Query('name') name?: string,
-    @Query('category') category?: string,
+    @Query('description') description?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string
   ): Promise<{ success: boolean; statusCode?: number; products?: Product[]; error?: string }> {
@@ -30,7 +30,7 @@ export class ProductSearchController {
     }
 
     try {
-      const products = await this.productService.searchProducts(name, category, minPriceNumber, maxPriceNumber);
+      const products = await this.productService.searchProducts(name, description, minPriceNumber, maxPriceNumber);
       if (products.length == 0) {
         return {
           success: true,

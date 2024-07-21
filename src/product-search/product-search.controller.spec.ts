@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { ProductSearchController } from './product-search.controller';
 import { ProductSearchService } from './product-search.service';
 import { Product } from '../entities/product.entity';
+import { User } from '../entities/user.entity';
 
 describe('ProductSearchController', () => {
   let app: INestApplication;
@@ -34,8 +35,8 @@ describe('ProductSearchController', () => {
 
   it('should return products based on search criteria', async () => {
     const products: Product[] = [
-      { id: 'uid1', product_name: 'Product A', product_category: 'Category A', product_price: 100 },
-      { id: 'uid2', product_name: 'Product B', product_category: 'Category B', product_price: 200 },
+      { id: 'uid1', product_name: 'Product A', description: 'Decription A', product_price: 100, user: new User() },
+      { id: 'uid2', product_name: 'Product B', description: 'Decription B', product_price: 200, user: new User() },
     ];
 
     jest.spyOn(productService, 'searchProducts').mockResolvedValue(products);

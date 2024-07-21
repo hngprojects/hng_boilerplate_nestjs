@@ -10,15 +10,15 @@ export class ProductSearchService {
     private readonly productRepository: Repository<Product>
   ) {}
 
-  async searchProducts(name?: string, category?: string, minPrice?: number, maxPrice?: number): Promise<Product[]> {
+  async searchProducts(name?: string, description?: string, minPrice?: number, maxPrice?: number): Promise<Product[]> {
     const query = this.productRepository.createQueryBuilder('product');
 
     if (name) {
       query.andWhere('product.product_name LIKE :name', { name: `%${name}%` });
     }
 
-    if (category) {
-      query.andWhere('product.product_category = :category', { category });
+    if (description) {
+      query.andWhere('product.description LIKE :description', { description: `%${description}%` });
     }
 
     if (minPrice) {

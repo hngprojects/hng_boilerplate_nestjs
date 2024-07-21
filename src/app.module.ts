@@ -3,8 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import dataSource from './database/data-source';
+import { SeedingModule } from './database/seeding/seeding.module';
 import { ProductSearchModule } from './product-search/product-search.module';
 import HealthController from './health.controller';
 
@@ -63,6 +65,14 @@ import HealthController from './health.controller';
       }),
     }),
     LoggerModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => ({
+        ...dataSource.options,
+      }),
+      dataSourceFactory: async () => dataSource,
+    }),
+    SeedingModule,
+    ProductSearchModule,
   ],
   controllers: [HealthController],
 })
