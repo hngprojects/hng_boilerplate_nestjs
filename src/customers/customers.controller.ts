@@ -2,7 +2,7 @@ import { Controller, Delete, Param, UseGuards, Req } from '@nestjs/common';
 import { CustomerService } from './customers.service';
 
 
-@Controller('api/v1/customers')
+@Controller('/customers')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
