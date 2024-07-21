@@ -12,7 +12,7 @@ async function bootstrap() {
     first_name: 'Peterson',
     last_name: 'Doe',
     email: 'peterson.doe@example.com',
-    password: 'password123',
+    password: "password",
     is_active: true,
     attempts_left: 3,
     time_left: 60*60*24*365,

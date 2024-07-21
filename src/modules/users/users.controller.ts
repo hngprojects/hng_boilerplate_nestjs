@@ -1,24 +1,42 @@
-import { Controller, Patch, Body, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Patch, Body, UseGuards, Res, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { GetUser } from '../../decorators/get-user.decorator';
 
-@Controller('users')
+@Controller('api/v1/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Patch('password')
+  @Patch('password-update')
   @UseGuards(JwtAuthGuard)
   async updatePassword(
-    @Req() req: Request,
+    @GetUser() user: any,
     @Body() updatePasswordDto: UpdatePasswordDto,
+    @Res() res: Response
   ): Promise<void> {
-    console.log(req, "gotten here");
-    const userId = req.body.user.id;
-    if (!userId) {
-      throw new UnauthorizedException('User not found');
+    if (!user) {
+      res.status(HttpStatus.UNAUTHORIZED).json({
+        status_code: HttpStatus.UNAUTHORIZED,
+        message: 'Unauthorized',
+        error: 'User not found',
+      });
     }
-    await this.usersService.updatePassword(userId, updatePasswordDto);
+
+    try {
+      await this.usersService.updatePassword(user.id, updatePasswordDto);
+
+      res.status(HttpStatus.OK).json({
+        status_code: HttpStatus.OK,
+        message: 'Password updated successfully',
+      });
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'An error occurred while updating the password',
+        error: error.message,
+      });
+    }
   }
 }

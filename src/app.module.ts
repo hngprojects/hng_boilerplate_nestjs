@@ -9,6 +9,7 @@ import { dataSourceOptions } from '../src/database/data-source';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
 import { UsersModule } from '../src/modules/users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   providers: [
@@ -34,7 +35,7 @@ import { UsersModule } from '../src/modules/users/users.module';
        * To specify multiple .env files, set the envFilePath property.
        * If a variable is found in multiple files, the first one takes precedence.
        */
-      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
+      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`, '.env'],
       isGlobal: true,
       load: [serverConfig],
       /**
@@ -49,6 +50,7 @@ import { UsersModule } from '../src/modules/users/users.module';
     LoggerModule.forRoot(),
     TypeOrmModule.forRoot(dataSourceOptions),
     UsersModule,
+    AuthModule,
   ],
   controllers: [HealthController]
 })

@@ -19,7 +19,7 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found, Reauthenticate');
     }
 
     // Check if old password is correct
@@ -33,17 +33,15 @@ export class UsersService {
 
     // Update the user's password
     user.password = hashedNewPassword;
-    await this.userRepository.save(user); 
+    await this.userRepository.save(user);
   }
 
   async create(user: Partial<User>): Promise<User> {
     const newUser = this.userRepository.create(user);
-    newUser.password = await bcrypt.hash(user.password, 10); // Hash the password before saving
     return this.userRepository.save(newUser);
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    console.log('Finding user by email:', email);
     return await this.userRepository.findOne({ where: { email } });
   }
 }
