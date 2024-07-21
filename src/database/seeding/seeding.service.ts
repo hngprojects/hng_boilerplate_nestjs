@@ -90,7 +90,7 @@ export class SeedingService {
           price: 200,
           currentStock: 51,
           inStock: true,
-          categroy,
+          category: category,
           user: savedUsers[1],
         });
 
@@ -102,14 +102,31 @@ export class SeedingService {
         }
 
         const or1 = organisationRepository.create({
-          org_name: 'Org 1',
+          name: 'Org 1',
           description: 'Description 1',
-          users: savedUsers,
+          email: 'test1@email.com',
+          industry: 'industry1',
+          type: 'type1',
+          country: 'country1',
+          state: 'state1',
+          address: 'address1',
+          owner: savedUsers[0],
+          creator: savedUsers[0],
+          isDeleted: false,
         });
+
         const or2 = organisationRepository.create({
-          org_name: 'Org 2',
+          name: 'Org 2',
           description: 'Description 2',
-          users: [savedUsers[0]],
+          email: 'test2@email.com',
+          industry: 'industry2',
+          type: 'type2',
+          country: 'country2',
+          state: 'state2',
+          address: 'address2',
+          owner: savedUsers[0],
+          creator: savedUsers[0],
+          isDeleted: false,
         });
 
         await organisationRepository.save([or1, or2]);
