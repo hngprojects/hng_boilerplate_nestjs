@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsService } from './products.service';
+import { ProductsService } from '../src/products/products.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Product } from './entities/product.entity';
-
+import { Product } from '../src/products/entities/product.entity';
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
@@ -117,7 +116,16 @@ describe('ProductsService', () => {
   it('should return empty results if no products match', async () => {
     const query = 'nonexistent';
     
-
-});
-
+    jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      } as any);
+  
+      const result = await service.searchProducts(query);
+  
+      expect(result).toEqual({ total: 0, results: [] });
+    });
+  
 });
