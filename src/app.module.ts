@@ -7,6 +7,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import HealthController from './health.controller';
 
 @Module({
@@ -42,9 +43,16 @@ import HealthController from './health.controller';
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PROFILE: Joi.string().valid('local', 'development', 'production', 'ci', 'testing', 'staging').required(),
         PORT: Joi.number().required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().required(),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_DATABASE: Joi.string().required(),
+        DB_TYPE: Joi.string().required(),
       }),
     }),
     LoggerModule.forRoot(),
+    AnalyticsModule,
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,

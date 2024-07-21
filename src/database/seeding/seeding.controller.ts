@@ -30,4 +30,8 @@ export class SeedingController {
   async getOrganisations() {
     return this.seedingService.getOrganisations();
   }
+  @Get('revenues')
+  async getRevenues() {
+    return this.seedingService.getRevenues();
+  }
 }
