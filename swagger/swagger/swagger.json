@@ -1,0 +1,185 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Product API",
+      "version": "1.0.0",
+      "description": "API for creating products"
+    },
+    "paths": {
+      "/api/products": {
+        "post": {
+          "summary": "Create a new product",
+          "description": "Creates a new product in the database",
+          "tags": ["Products"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "New Product"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "A description of the new product."
+                    },
+                    "price": {
+                      "type": "number",
+                      "example": 29.99
+                    },
+                    "category": {
+                      "type": "string",
+                      "example": "Electronics"
+                    }
+                  },
+                  "required": ["name", "price"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Product created successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "success"
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Product created successfully"
+                      },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 123
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "New Product"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "A description of the new product."
+                          },
+                          "price": {
+                            "type": "number",
+                            "example": 29.99
+                          },
+                          "category": {
+                            "type": "string",
+                            "example": "Electronics"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-07-17"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-07-17"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "error"
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Invalid input data"
+                      },
+                      "errors": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Name is required"
+                          },
+                          "price": {
+                            "type": "string",
+                            "example": "Price must be a positive number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized. Please log in.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "unauthorized"
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Unauthorized. Please log in."
+                      },
+                      "status_code": {
+                        "type": "integer",
+                        "example": 401
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error. Please try again later.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "internal_server_error"
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Internal Server Error. Please try again later."
+                      },
+                      "status_code": {
+                        "type": "integer",
+                        "example": 500
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
