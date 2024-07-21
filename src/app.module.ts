@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import { OrganizationModule } from './organization/organization.module';
 
 @Module({
   providers: [
@@ -44,6 +45,7 @@ import HealthController from './health.controller';
         PORT: Joi.number().required(),
       }),
     }),
+    OrganizationModule,
     LoggerModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
