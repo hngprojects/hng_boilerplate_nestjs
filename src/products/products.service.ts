@@ -14,11 +14,11 @@ export class ProductsService {
     const skip = (page - 1) * limit;
 
     const [results, total] = await this.productsRepository
-      .createQueryBuilder('product')
-      .where("product.fullTextSearch @@ to_tsquery('english', :query)", { query })
-      .skip(skip)
-      .take(limit)
-      .getManyAndCount();
+    .createQueryBuilder('product')
+    .where("product.fullTextSearch @@ plainto_tsquery('english', :query)", { query })
+    .skip(skip)
+    .take(limit)
+    .getManyAndCount();
 
     return { total, results };
   }

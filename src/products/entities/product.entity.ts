@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Product {
@@ -8,19 +8,15 @@ export class Product {
   @Column({ length: 255, nullable: false })
   name: string;
 
-  @Column('text', { nullable: true })
+  @Column('text')
   description: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255 })
   category: string;
 
-  @Column('text', { array: true, nullable: true })
+  @Column('text', { array: true })
   tags: string[];
 
-  @Column('tsvector', { select: false, nullable: true })
+  @Column('tsvector', { select: false })
   fullTextSearch: string;
-
-  constructor(partial: Partial<Product>) {
-    Object.assign(this, partial);
-  }
 }
