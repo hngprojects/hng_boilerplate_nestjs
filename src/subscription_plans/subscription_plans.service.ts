@@ -89,39 +89,4 @@ export class SubscriptionPlansService {
       }
     }
   }
-
-  findAll() {
-    return this.subscriptionPlanRepository.find({
-      relations: {
-        feature: true,
-      },
-    });
-  }
-
-  findOne(id: string) {
-    try {
-      const user = this.subscriptionPlanRepository.findOne({
-        where: { id },
-        relations: {
-          feature: true,
-        },
-      });
-
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      return user;
-    } catch (error) {
-      throw new InternalServerErrorException('An error occurred while retrieving the user');
-    }
-  }
-
-  // update(id: number, updateSubscriptionPlanDto: UpdateSubscriptionPlanDto) {
-  //   return `This action updates a #${id} subscriptionPlan`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} subscriptionPlan`;
-  // }
 }
