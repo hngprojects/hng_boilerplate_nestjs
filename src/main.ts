@@ -38,10 +38,10 @@ async function bootstrap() {
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()
-    .setTitle('<project-title-here>')
+    .setTitle('HNG Boilerplate')
     .setDescription('<project-description-here>')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addServer('http://localhost:3008')
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
