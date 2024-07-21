@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ProductCategory } from './product-categories.entity';
 import { Review } from './reviews.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Product {
@@ -35,6 +36,9 @@ export class Product {
 
   @OneToMany(() => Review, review => review.product)
   reviews: Review[];
+
+  @ManyToOne(() => User, user => user.products)
+  user: User;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
