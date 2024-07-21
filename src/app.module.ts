@@ -7,6 +7,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
+import HealthController from './health.controller';
 
 @Module({
   providers: [
@@ -52,6 +53,6 @@ import { SeedingModule } from './database/seeding/seeding.module';
     }),
     SeedingModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
 })
 export class AppModule {}
