@@ -33,10 +33,10 @@ describe('ProductsController (e2e)', () => {
     await app.close();
   });
 
-  describe('/DELETE /products/:id', () => {
+  describe('/DELETE /api/v1/products/:id', () => {
     it('should delete a product successfully', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/products/1')
+        .delete('/api/v1/products/1')
         .set('Authorization', 'Bearer valid-token')
         .expect(200);
 
@@ -45,7 +45,7 @@ describe('ProductsController (e2e)', () => {
 
     it('should return 404 if the product does not exist', async () => {
       const response = await request(app.getHttpServer())
-        .delete('/products/999')
+        .delete('/api/v1/products/999')
         .set('Authorization', 'Bearer valid-token')
         .expect(404);
 
@@ -54,7 +54,7 @@ describe('ProductsController (e2e)', () => {
     });
 
     it('should return 401 if the user is not authenticated', async () => {
-      await request(app.getHttpServer()).delete('/products/1').expect(401);
+      await request(app.getHttpServer()).delete('/api/v1/products/1').expect(401);
     });
   });
 });
