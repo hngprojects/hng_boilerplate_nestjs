@@ -44,6 +44,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "joi": "^17.6.0",
     "nestjs-pino": "^4.1.0",
     "pg": "^8.12.0",
@@ -51,7 +52,9 @@
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
     "typeorm-extension": "^3.5.1",
-    "types-joi": "^2.1.0"
+    "typeorm-test-transactions": "^3.6.1",
+    "types-joi": "^2.1.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",

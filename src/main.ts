@@ -14,7 +14,7 @@ async function bootstrap() {
 
   const logger = app.get(Logger);
 
-    const dataSource = app.get(DataSource);
+  const dataSource = app.get(DataSource);
 
   if (!dataSource.isInitialized) {
     try {
@@ -32,6 +32,7 @@ async function bootstrap() {
   await seedingService.seedDatabase();
 
   app.enable('trust proxy');
+  app.setGlobalPrefix('api/v1');
   app.useLogger(logger);
   app.enableCors();
 

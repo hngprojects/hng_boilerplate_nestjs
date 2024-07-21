@@ -55,6 +55,8 @@ export class SeedingService {
         throw new Error('Failed to create all users');
       }
 
+      console.log(savedUsers);
+
       const p1 = profileRepository.create({
         username: 'johnsmith',
         bio: 'bio data',
