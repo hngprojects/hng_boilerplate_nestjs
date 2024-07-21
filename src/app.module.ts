@@ -6,6 +6,7 @@ import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
 import { InvitationsModule } from './invitations/invitations.module';
 import { AuthModule } from './auth/auth.module';
+import { AppController } from './app.controller';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { AuthModule } from './auth/auth.module';
         }),
     },
   ],
+  controllers: [AppController],
   imports: [
     ConfigModule.forRoot({
       /**

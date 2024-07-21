@@ -5,6 +5,7 @@ import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class InvitationsService {
+  [x: string]: any;
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService

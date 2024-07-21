@@ -15,12 +15,20 @@ export class RolesGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
-      throw new ForbiddenException('No user information found in request');
+      throw new ForbiddenException({
+        status_code: 401,
+        error: 'Unauthorized',
+        message: 'No user information found in request',
+      });
     }
 
     const hasRole = () => roles.includes(user.role);
     if (!hasRole()) {
-      throw new ForbiddenException('You do not have the required role');
+      throw new ForbiddenException({
+        status_code: 403,
+        error: 'Unauthorized',
+        message: 'You do not have admin rights for this organization',
+      });
     }
 
     return true;
