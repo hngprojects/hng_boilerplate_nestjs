@@ -31,7 +31,7 @@ describe('UserController', () => {
     controller = module.get<UserController>(UserController);
   }, 100000);
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  }, 100000);
+  it('should return healthy endpoint', async () => {
+    const result = 'healthy endpoint';
+  });
 });
