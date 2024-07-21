@@ -10,6 +10,7 @@ import {
 import { User } from './user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
 import { Invite } from './invite.entity';
+import { Roles } from './roles.entity';
 
 @Entity()
 export class Organisation {
@@ -60,4 +61,7 @@ export class Organisation {
 
   @OneToMany(() => Invite, invite => invite.organisation)
   invites: Invite[];
+
+  @OneToMany(() => Roles, role => role.organisation)
+  roles: Roles[];
 }
