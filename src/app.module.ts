@@ -8,6 +8,7 @@ import HealthController from './health.controller';
 import { dataSourceOptions } from '../src/database/data-source';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
+import { UsersModule } from '../src/modules/users/users.module';
 
 @Module({
   providers: [
@@ -47,6 +48,7 @@ import { SeedingService } from './database/seeding.service';
     }),
     LoggerModule.forRoot(),
     TypeOrmModule.forRoot(dataSourceOptions),
+    UsersModule,
   ],
   controllers: [HealthController]
 })
