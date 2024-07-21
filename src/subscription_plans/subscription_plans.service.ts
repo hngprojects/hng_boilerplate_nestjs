@@ -46,7 +46,7 @@ export class SubscriptionPlansService {
 
       const newSubscriptionPlan = this.subscriptionPlanRepository.create({
         ...createSubscriptionPlanDto,
-        features: features,
+        feature: features,
       });
 
       await this.subscriptionPlanRepository.save(newSubscriptionPlan);
