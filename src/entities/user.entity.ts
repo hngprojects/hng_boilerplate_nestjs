@@ -63,7 +63,7 @@ export class User {
   invites: Invite[];
 
   @OneToMany(() => Sessions, session => session.user)
-  sessions: any;
+  sessions: Sessions[];
 
   @ManyToOne(() => Roles, roles => roles.users)
   role: Roles;
