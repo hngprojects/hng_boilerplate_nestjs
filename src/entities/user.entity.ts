@@ -1,10 +1,21 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 import { Testimonial } from './testimonials.entity';
 import { Review } from './reviews.entity';
 import { Sms } from './sms.entity';
 import { JobListing } from './job-listing.entity';
 import { Organisation } from './org.entity';
 import { Invite } from './invite.entity';
+import { Session } from '@nestjs/common';
+import { Sessions } from './sessions.entity';
+import { Roles } from './roles.entity';
 
 @Entity()
 export class User {
@@ -51,5 +62,9 @@ export class User {
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
+  @OneToMany(() => Sessions, session => session.user)
   sessions: any;
+
+  @ManyToOne(() => Roles, roles => roles.users)
+  role: Roles;
 }
