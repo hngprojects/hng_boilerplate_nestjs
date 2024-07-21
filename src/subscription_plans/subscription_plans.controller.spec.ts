@@ -21,7 +21,7 @@ describe('SubscriptionPlansController', () => {
               description: 'Test Description',
               price: 10,
               duration: '30 days',
-              features: ['Basic', 'Premium'],
+              feature: ['Basic', 'Premium'],
               createdAt: new Date('2024-07-21T12:00:00Z'),
               updatedAt: new Date('2024-07-21T12:30:00Z'),
             }),
@@ -45,7 +45,7 @@ describe('SubscriptionPlansController', () => {
         description: 'Test Description',
         price: 10,
         duration: '30 days',
-        features: ['Basic', 'Premium'],
+        feature: ['Basic', 'Premium'],
       };
       const result: SubscriptionPlan = {
         id: '1',
@@ -53,7 +53,7 @@ describe('SubscriptionPlansController', () => {
         description: 'Test Description',
         price: 10,
         duration: '30 days',
-        features: ['Basic', 'Premium'],
+        feature: ['Basic', 'Premium'],
         createdAt: new Date('2024-07-21T12:00:00Z'),
         updatedAt: new Date('2024-07-21T12:30:00Z'),
       };
