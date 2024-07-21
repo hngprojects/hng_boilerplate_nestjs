@@ -51,5 +51,73 @@ describe('ProductsService', () => {
     expect(result).toEqual({ total: 1, results: products });
   });
 
-  // Additional tests for pagination, empty results, etc.
+  it('should handle pagination correctly', async () => {
+    const query = 'test';
+    const productsPage1 = [
+      {
+        id: 1,
+        name: 'Test Product 1',
+        description: 'Description for Test Product 1',
+        category: 'Test Category',
+        tags: ['test', 'product'],
+      },
+    ];
+
+    jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([productsPage1, 1]),
+    } as any);
+
+    const result = await service.searchProducts(query, 1, 1);
+
+    expect(result).toEqual({ total: 1, results: productsPage1 });
+  });
+
+  it('should return empty results if no products match', async () => {
+    const query = 'nonexistent';
+    
+    jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+    } as any);
+
+    const result = await service.searchProducts(query);
+
+    expect(result).toEqual({ total: 0, results: [] });
+  });
+
+  it('should handle pagination correctly', async () => {
+    const query = 'test';
+    const productsPage1 = [
+      {
+        id: 1,
+        name: 'Test Product 1',
+        description: 'Description for Test Product 1',
+        category: 'Test Category',
+        tags: ['test', 'product'],
+      },
+    ];
+
+    jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([productsPage1, 1]),
+    } as any);
+
+    const result = await service.searchProducts(query, 1, 1);
+
+    expect(result).toEqual({ total: 1, results: productsPage1 });
+  });
+
+  it('should return empty results if no products match', async () => {
+    const query = 'nonexistent';
+    
+
+});
+
 });
