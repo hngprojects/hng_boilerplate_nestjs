@@ -11,7 +11,7 @@ export class ProductsController {
     @Query('q') query: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ): Promise<{ page: number, limit: number, total: number, results: Product[] }> {
+  ): Promise<{ page: number, limit: number, total: number, results: Product[]; message?:string }> {
     // Validate query parameter
     if (!query || typeof query !== 'string' || query.trim() === '') {
       throw new BadRequestException('The query parameter \'q\' is required and must be a non-empty string.');
@@ -39,7 +39,6 @@ export class ProductsController {
         results,
       };
     } catch (error) {
-      // Handle unexpected server errors
       throw new InternalServerErrorException('An unexpected error occurred. Please try again later.');
     }
   }
