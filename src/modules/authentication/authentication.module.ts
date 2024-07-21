@@ -21,6 +21,6 @@ import { Repository } from 'typeorm';
       signOptions: { expiresIn: `${appConfig.jwt.jwtExpiry}s` },
     }),
   ],
-  exports: [UserService, User]
+  exports: [UserService]
 })
 export class AuthenticationModule { }
