@@ -87,13 +87,16 @@
     "typescript": "^5.1.3"
   },
   "jest": {
+    "setupFiles": [
+      "src/test/setEnvVars.js"
+    ],
     "moduleFileExtensions": [
       "js",
       "json",
       "ts"
     ],
     "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "testRegex": "*[.]spec.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
