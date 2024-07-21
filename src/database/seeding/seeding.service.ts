@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from 'src/entities/user.entity';
-import { Profile } from 'src/entities/profile.entity';
-import { Product } from 'src/entities/product.entity';
-import { Organisation } from 'src/entities/organisation.entity';
+import { User } from 'src/database/entities/user.entity';
+import { Profile } from 'src/database/entities/profile.entity';
+import { Product } from 'src/database/entities/product.entity';
+import { Organisation } from 'src/database/entities/organisation.entity';
 
 @Injectable()
 export class SeedingService {

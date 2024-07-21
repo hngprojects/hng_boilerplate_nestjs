@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from 'src/subscription_plans/entities/subscription_plan.entity';
+import { SubscriptionPlan } from 'src/database/entities/subscription_plan.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
