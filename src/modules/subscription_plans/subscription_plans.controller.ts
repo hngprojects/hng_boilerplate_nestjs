@@ -1,8 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-} from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { SubscriptionPlansService } from './subscription_plans.service';
 import { CreateSubscriptionPlanDto } from './dto/create-subscription_plan.dto';
 
