@@ -8,9 +8,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { OrganisationPreference } from './org-preferences.entity';
-import { Invite } from './invite.entity';
-import { Roles } from './roles.entity';
 
 @Entity()
 export class Organisation {
@@ -55,13 +52,4 @@ export class Organisation {
 
   @Column('boolean', { default: false, nullable: false })
   isDeleted: boolean;
-
-  @OneToMany(() => OrganisationPreference, preference => preference.organisation)
-  preferences: OrganisationPreference[];
-
-  @OneToMany(() => Invite, invite => invite.organisation)
-  invites: Invite[];
-
-  @OneToMany(() => Roles, role => role.organisation)
-  roles: Roles[];
 }

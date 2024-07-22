@@ -8,7 +8,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ProductCategory } from './product-categories.entity';
-import { Review } from './reviews.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -33,9 +32,6 @@ export class Product {
 
   @ManyToOne(() => ProductCategory, category => category.products, { nullable: true, onDelete: 'SET NULL' })
   category: ProductCategory;
-
-  @OneToMany(() => Review, review => review.product)
-  reviews: Review[];
 
   @ManyToOne(() => User, user => user.products)
   user: User;
