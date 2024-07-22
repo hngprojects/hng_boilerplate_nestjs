@@ -11,8 +11,10 @@ export class ProductsService {
 
   async fetchSingleProduct(productId: string) {
     this.logger.log(`Attempting to retrieve product with id: ${productId}`);
+
     try {
       const productExists = await this.repo.findOneBy({ id: productId });
+
       if (!productExists) {
         this.logger.error(`Product with id: ${productId} does not exist`);
         throw new NotFoundException('Product not found');
@@ -26,15 +28,18 @@ export class ProductsService {
           name: productExists.product_name,
           description: productExists.description,
           price: productExists.product_price,
-          //   category: productExists.'',
-          //   available: '',
-          //   created_at: '',
-          //   updated_at: '',
+          //   category: productExists.category,
+          //   available: productExists.available,
+          //   created_at: productExists.created_at,
+          //   updated_at: productExists.updated_at,
         },
       };
     } catch (error) {
-      this.logger.error(`Failed to retrieve product with id : ${productId}`, error.stack);
-      throw new InternalServerErrorException('An unexpected error occurred');
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to retrieve product with id: ${productId}`, error.stack);
+      throw new InternalServerErrorException('Unexpected error occurred while fetching product');
     }
   }
 }

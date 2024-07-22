@@ -14,10 +14,6 @@ describe('ProductsService', () => {
     product_name: 'Test Product',
     description: 'Test Description',
     product_price: 100,
-    category: 'Test Category',
-    available: true,
-    created_at: new Date(),
-    updated_at: new Date(),
   };
 
   const mockRepository = {
@@ -57,10 +53,6 @@ describe('ProductsService', () => {
           name: mockProduct.product_name,
           description: mockProduct.description,
           price: mockProduct.product_price,
-          category: mockProduct.category,
-          available: mockProduct.available,
-          created_at: mockProduct.created_at.toISOString(),
-          updated_at: mockProduct.updated_at.toISOString(),
         },
       });
     });
@@ -68,11 +60,12 @@ describe('ProductsService', () => {
     it('should throw NotFoundException when product does not exist', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.fetchSingleProduct('1')).rejects.toThrow(NotFoundException);
+      await expect(service.fetchSingleProduct('')).rejects.toThrow(NotFoundException);
     });
 
     it('should throw InternalServerErrorException on unexpected errors', async () => {
-      mockRepository.findOneBy.mockRejectedValue(new Error('Unexpected error'));
+      const unexpectedError = new Error('Unexpected error occurred while fetching product');
+      mockRepository.findOneBy.mockRejectedValue(unexpectedError);
 
       await expect(service.fetchSingleProduct('1')).rejects.toThrow(InternalServerErrorException);
     });
