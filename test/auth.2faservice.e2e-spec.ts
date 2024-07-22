@@ -39,9 +39,9 @@ describe('Auth2FAController (e2e)', () => {
     userRepository = moduleFixture.get<Repository<User>>(getRepositoryToken(User));
   });
 
-  it('/api/v1/auth/2fa/enable/:id (POST) - success', async () => {
+  it('/auth/2fa/enable/:id (POST) - success', async () => {
     const response = await request(app.getHttpServer())
-      .post(`/api/v1/auth/2fa/enable/${mockUser.id}`)
+      .post(`/auth/2fa/enable/${mockUser.id}`)
       .send({ password: 'password' });
     expect(response.body).toEqual({
       status_code: 200,

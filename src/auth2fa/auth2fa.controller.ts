@@ -1,7 +1,7 @@
 import { Body, Controller, HttpException, HttpStatus, Param, Post, Request } from '@nestjs/common';
 import { Auth2FAService } from './auth2fa.service';
 
-@Controller('api/v1/auth/2fa')
+@Controller('auth/2fa')
 export class Auth2FAController {
   constructor(private readonly auth2FAService: Auth2FAService) {}
 
