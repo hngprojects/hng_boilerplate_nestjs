@@ -8,8 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
-import { ProductsModule } from './products/products.module';
-import { AuthModule } from './auth/auth.module';
+import { ProductsModule } from './routes/v1/products/products.module';
+import { AuthModule } from './middlewares/auth/auth.module';
 @Module({
   providers: [
     {

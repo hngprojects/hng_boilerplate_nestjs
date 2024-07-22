@@ -1,15 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsService } from './products.service';
+import { ProductsController } from '../../../controllers/v1/products.controller';
+import { ProductsService } from '../../../services/products.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Product } from './entities/product.entity';
+import { Product } from '../../../entities/product.entity';
 import { Repository } from 'typeorm';
 
-describe('ProductsService', () => {
+describe('ProductsController', () => {
+  let controller: ProductsController;
   let service: ProductsService;
-  let repository: Repository<Product>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      controllers: [ProductsController],
       providers: [
         ProductsService,
         {
@@ -19,11 +21,11 @@ describe('ProductsService', () => {
       ],
     }).compile();
 
+    controller = module.get<ProductsController>(ProductsController);
     service = module.get<ProductsService>(ProductsService);
-    repository = module.get<Repository<Product>>(getRepositoryToken(Product));
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });
