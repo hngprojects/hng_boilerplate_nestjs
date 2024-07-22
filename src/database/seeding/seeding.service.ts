@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from 'src/entities/user.entity';
-import { Profile } from 'src/entities/profile.entity';
-import { Product } from 'src/entities/product.entity';
-import { Organisation } from 'src/entities/organisation.entity';
+import { Profile } from '../entities/profile.entity';
+import { Product } from '../entities/products.entity';
+import { Organisation } from '../entities/org.entity';
+import { ProductCategory } from '../entities/product-categories.entity';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class SeedingService {
@@ -27,16 +28,17 @@ export class SeedingService {
         const profileRepository = this.dataSource.getRepository(Profile);
         const productRepository = this.dataSource.getRepository(Product);
         const organisationRepository = this.dataSource.getRepository(Organisation);
+        const categroyRespository = this.dataSource.getRepository(ProductCategory);
 
         const u1 = userRepository.create({
-          first_name: 'John',
-          last_name: 'Smith',
+          firstName: 'John',
+          lastName: 'Smith',
           email: 'john.smith@example.com',
           password: 'password',
         });
         const u2 = userRepository.create({
-          first_name: 'Jane',
-          last_name: 'Smith',
+          firstName: 'Jane',
+          lastName: 'Smith',
           email: 'jane.smith@example.com',
           password: 'password',
         });
@@ -52,14 +54,14 @@ export class SeedingService {
           username: 'johnsmith',
           bio: 'bio data',
           phone: '1234567890',
-          avatar_image: 'image.png',
+          avatarImage: 'image.png',
           user: savedUsers[0],
         });
         const p2 = profileRepository.create({
           username: 'janesmith',
           bio: 'bio data',
           phone: '0987654321',
-          avatar_image: 'image.png',
+          avatarImage: 'image.png',
           user: savedUsers[1],
         });
 
@@ -70,17 +72,27 @@ export class SeedingService {
           throw new Error('Failed to create all profiles');
         }
 
+        const pcr1 = categroyRespository.create({ name: 'category1', description: 'description1', slug: 'slug1' });
+        const pcr2 = categroyRespository.create({ name: 'category2', description: 'description2', slug: 'slug2' });
+
+        await categroyRespository.save([pcr1, pcr2]);
+        const savedCategory = await categroyRespository.find();
+
         const pr1 = productRepository.create({
-          product_name: 'Product 1',
+          name: 'Product 1',
           description: 'Description 1',
-          product_price: 100,
-          user: savedUsers[0],
+          price: 100,
+          currentStock: 50,
+          inStock: true,
+          category: savedCategory[0],
         });
         const pr2 = productRepository.create({
-          product_name: 'Product 2',
+          name: 'Product 2',
           description: 'Description 2',
-          product_price: 200,
-          user: savedUsers[1],
+          price: 200,
+          currentStock: 51,
+          inStock: true,
+          category: savedCategory[1],
         });
 
         await productRepository.save([pr1, pr2]);
@@ -91,14 +103,31 @@ export class SeedingService {
         }
 
         const or1 = organisationRepository.create({
-          org_name: 'Org 1',
+          name: 'Org 1',
           description: 'Description 1',
-          users: savedUsers,
+          email: 'test1@email.com',
+          industry: 'industry1',
+          type: 'type1',
+          country: 'country1',
+          state: 'state1',
+          address: 'address1',
+          owner: savedUsers[0],
+          creator: savedUsers[0],
+          isDeleted: false,
         });
+
         const or2 = organisationRepository.create({
-          org_name: 'Org 2',
+          name: 'Org 2',
           description: 'Description 2',
-          users: [savedUsers[0]],
+          email: 'test2@email.com',
+          industry: 'industry2',
+          type: 'type2',
+          country: 'country2',
+          state: 'state2',
+          address: 'address2',
+          owner: savedUsers[0],
+          creator: savedUsers[0],
+          isDeleted: false,
         });
 
         await organisationRepository.save([or1, or2]);
@@ -122,7 +151,7 @@ export class SeedingService {
 
   async getUsers(): Promise<User[]> {
     try {
-      return this.dataSource.getRepository(User).find({ relations: ['profile', 'products', 'organisations'] });
+      return this.dataSource.getRepository(User).find();
     } catch (error) {
       console.error('Error fetching users:', error.message);
       throw error;
