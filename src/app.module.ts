@@ -9,6 +9,7 @@ import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { DatabaseModule } from './database/database.module';
+import { HelpCenterModule } from './modules/Help-Center-Topic/help-center.module';
 
 @Module({
   providers: [
@@ -54,6 +55,7 @@ import { DatabaseModule } from './database/database.module';
     }),
     SeedingModule,
     DatabaseModule,
+    HelpCenterModule,
   ],
   controllers: [HealthController],
 })
