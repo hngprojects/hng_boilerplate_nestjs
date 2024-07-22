@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
@@ -19,7 +19,7 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
-      throw new NotFoundException('User not found, Reauthenticate');
+      throw new NotFoundException('User not found, reauthenticate');
     }
 
     // Check if old password is correct
@@ -28,12 +28,35 @@ export class UsersService {
       throw new UnauthorizedException('Old password is incorrect');
     }
 
+    // Validate the new password strength
+    this.validatePassword(newPassword);
+
     // Hash the new password
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
     // Update the user's password
     user.password = hashedNewPassword;
     await this.userRepository.save(user);
+  }
+
+  validatePassword(password: string): void {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasDigit = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (
+      password.length < minLength ||
+      !hasUpperCase ||
+      !hasLowerCase ||
+      !hasDigit ||
+      !hasSpecialChar
+    ) {
+      throw new BadRequestException(
+        'Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character',
+      );
+    }
   }
 
   async create(user: Partial<User>): Promise<User> {
