@@ -1,26 +1,24 @@
-import { Injectable } from '@nestjs/common';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { ContactUsResponse, CreateContactDto } from './dto/create-contact.dto';
 
 @Injectable()
 export class ContactService {
-  create(createContactDto: CreateContactDto) {
-    return 'This action adds a new contact';
-  }
+  async contactUs(createContactDto: CreateContactDto) {
+    try {
+      // TODO: Use Email Service to send mail to specified address
 
-  findAll() {
-    return `This action returns all contact`;
-  }
+      // Just a place holder for now
+      return {
+        message: 'Inquiry was successfully sent',
+        status: 200,
+      };
+    } catch (error) {
+      console.log({ error });
 
-  findOne(id: number) {
-    return `This action returns a #${id} contact`;
-  }
-
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} contact`;
+      throw new BadRequestException({
+        message: error?.message || 'A server error occurred',
+        status: error?.status || 500,
+      });
+    }
   }
 }
