@@ -391,4 +391,4 @@ dist
 /.env
 /.env.*.local
 *._local.ts
-/src/auth/constants.ts
+/src/middlewares/auth/constants.ts
