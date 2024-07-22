@@ -21,7 +21,7 @@ export class Auth2FAController {
     } catch (error) {
       throw new HttpException(
         {
-          status_code: 200,
+          status_code: error.status,
           message: error.message,
         },
         error.status
