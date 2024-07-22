@@ -11,18 +11,23 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 
 
-export const dataSourceOptions = {
-  type: process.env.DB_TYPE as "postgres",
-  username: process.env.DB_USERNAME || "postgres",
-  password: process.env.DB_PASSWORD || "postgres",
-  host: process.env.DB_HOST || "localhost",
-  database: process.env.DB_DATABASE || "testDB",
-  entities: [User, Organisation, Profile, Product ],
+const dataSource = new DataSource({
+  type: process.env.DB_TYPE as 'postgres',
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  entities: [process.env.DB_ENTITIES],
   migrations: [process.env.DB_MIGRATIONS],
-  synchronize: true,
-  port: 5432
-};
+  synchronize: isDevelopment,
+  migrationsTableName: 'migrations',
+});
 
-const dataSource = new DataSource(dataSourceOptions);
+export async function initializeDataSource() {
+  if (!dataSource.isInitialized) {
+    await dataSource.initialize();
+  }
+  return dataSource;
+}
 
 export default dataSource;
