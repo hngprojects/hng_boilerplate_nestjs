@@ -7,6 +7,10 @@ import { LoggerModule } from 'nestjs-pino';
 import { InvitationsModule } from './invitations/invitations.module';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import dataSource from './database/data-source';
+import { SeedingModule } from './database/seeding/seeding.module';
+import HealthController from './health.controller';
 
 @Module({
   providers: [
@@ -47,6 +51,14 @@ import { AppController } from './app.controller';
     LoggerModule.forRoot(),
     InvitationsModule,
     AuthModule,
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => ({
+        ...dataSource.options,
+      }),
+      dataSourceFactory: async () => dataSource,
+    }),
+    SeedingModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
