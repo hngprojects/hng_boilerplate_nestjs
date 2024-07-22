@@ -8,9 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
-import { Auth2FAService } from './auth2fa/auth2fa.service';
-import { Auth2FAModule } from './auth2fa/auth2fa.module';
-import { Auth2FAController } from './auth2fa/auth2fa.controller';
+import { Auth2FAService } from './modules/auth2fa/auth2fa.service';
+import { Auth2FAModule } from './modules/auth2fa/auth2fa.module';
+import { Auth2FAController } from './modules/auth2fa/auth2fa.controller';
 import { User } from './entities/user.entity';
 
 @Module({

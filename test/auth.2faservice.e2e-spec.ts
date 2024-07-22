@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
-import { Auth2FAService } from '../src/auth2fa/auth2fa.service';
+import { Auth2FAService } from '../src/modules/auth2fa/auth2fa.service';
 import { User } from '../src/entities/user.entity';
 import { AppModule } from '../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
