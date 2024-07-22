@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
-import { BlogCategory } from 'src/database/entities/blogs-categories.entity';
+import { BlogCategory } from './blogs-categories.entity';
 
 @Entity()
 export class Blog {
