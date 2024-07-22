@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Post, Body, Req, HttpStatus, HttpException, UsePipes, ValidationPipe } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 
@@ -7,6 +7,7 @@ export class BlogsController {
   constructor(private readonly blogsService: BlogsService) {}
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async create(@Body() createBlogDto: CreateBlogDto, @Req() req) {
     try {
       const blog = await this.blogsService.create(createBlogDto);

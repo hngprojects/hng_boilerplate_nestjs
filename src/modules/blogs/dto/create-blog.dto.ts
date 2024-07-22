@@ -19,5 +19,5 @@ export class CreateBlogDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  imageUrls?: string[];
+  image_urls?: string[];
 }
