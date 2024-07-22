@@ -6,9 +6,6 @@ export class AboutPageStats {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => CustomSections, customSection => customSection.aboutPageStats)
-  customSection: CustomSections;
-
   @Column('int')
   yearsInBusiness: number;
 
@@ -20,6 +17,9 @@ export class AboutPageStats {
 
   @Column('int')
   socialFollowers: number;
+
+  @ManyToOne(() => CustomSections, customSection => customSection.aboutPageStats)
+  customSection: CustomSections;
 
   @UpdateDateColumn()
   updatedAt: Date;

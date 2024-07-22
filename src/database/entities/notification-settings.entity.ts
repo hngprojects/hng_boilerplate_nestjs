@@ -1,9 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { User } from './user.entity';
+import { Settings } from './settings.entity';
 
 @Entity()
 export class NotificationSettings {
-  [x: string]: any;
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -18,6 +26,9 @@ export class NotificationSettings {
 
   @Column()
   smsNotifications: boolean;
+
+  @OneToMany(() => Settings, settings => settings.notification)
+  settings: Settings[];
 
   @CreateDateColumn()
   createdAt: Date;
