@@ -4,6 +4,8 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthenticationModule } from './modules/authentication/authentication.module';
 import HealthController from './health.controller';
 
 @Module({
@@ -42,7 +44,18 @@ import HealthController from './health.controller';
       }),
     }),
     LoggerModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: +process.env.DB_PORT,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
+    AuthenticationModule,
   ],
-  controllers: [HealthController]
+  controllers: [HealthController],
 })
-export class AppModule { }
+export class AppModule {}
