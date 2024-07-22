@@ -10,6 +10,7 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import { OrganisationsController } from './organisations/organisations.controller';
 import { OrganisationsService } from './organisations/organisations.service';
 import HealthController from './health.controller';
+import { Organisation } from './entities/organisation.entity';
 
 @Module({
   providers: [
@@ -29,18 +30,9 @@ import HealthController from './health.controller';
   ],
   imports: [
     ConfigModule.forRoot({
-      /**
-       * By default, the package looks for a .env file in the root directory of the application.
-       * We don't use ".env" file because it is prioritize as the same level as real environment variables.
-       * To specify multiple .env files, set the envFilePath property.
-       * If a variable is found in multiple files, the first one takes precedence.
-       */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
       load: [serverConfig],
-      /**
-       * See ".env.local" file to list all environment variables needed by the app
-       */
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PROFILE: Joi.string().valid('local', 'development', 'production', 'ci', 'testing', 'staging').required(),
@@ -51,9 +43,11 @@ import HealthController from './health.controller';
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,
+        entities: [Organisation], // Add the Organisation entity here
       }),
       dataSourceFactory: async () => dataSource,
     }),
+    TypeOrmModule.forFeature([Organisation]), // Register Organisation entity
     SeedingModule,
   ],
   controllers: [HealthController, OrganisationsController],
