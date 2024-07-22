@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsController } from './products.controller';
-import { ProductsService } from './products.service';
+import { ProductsController } from '../src/products/products.controller';
+import { ProductsService } from '../src/products/products.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Product } from '../src/products/entities/product.entity';
+import { Repository } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
+
 
 describe('ProductsController', () => {
   let controller: ProductsController;
@@ -11,11 +15,10 @@ describe('ProductsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProductsController],
       providers: [
+        ProductsService,
         {
-          provide: ProductsService,
-          useValue: {
-            searchProducts: jest.fn(),
-          },
+          provide: getRepositoryToken(Product),
+          useClass: Repository,
         },
       ],
     }).compile();
@@ -37,10 +40,11 @@ describe('ProductsController', () => {
         description: 'Description for Test Product',
         category: 'Test Category',
         tags: ['test', 'product'],
+        fullTextSearch: 'full text search',
       },
     ];
 
-    jest.mock(service, 'searchProducts', () => Promise.resolve({ total: 1, results }));
+    jest.spyOn(service, 'searchProducts').mockResolvedValue({ total: 1, results });
 
     const response = await controller.search(query, 1, 10);
 
@@ -61,10 +65,11 @@ describe('ProductsController', () => {
         description: 'Description for Test Product 1',
         category: 'Test Category',
         tags: ['test', 'product'],
+        fullTextSearch: 'full text search',
       },
     ];
 
-    jest.mock(service, 'searchProducts', () => Promise.resolve({ total: 1, results }));
+    jest.spyOn(service, 'searchProducts').mockResolvedValue({ total: 1, results });
 
     const response = await controller.search(query, 1, 1);
 
@@ -79,7 +84,7 @@ describe('ProductsController', () => {
   it('should return empty results if no products match', async () => {
     const query = 'nonexistent';
 
-    jest.mock(service, 'searchProducts', () => Promise.resolve({ total: 0, results: [] }));
+    jest.spyOn(service, 'searchProducts').mockResolvedValue({ total: 0, results: [] });
 
     const response = await controller.search(query, 1, 10);
 
@@ -92,6 +97,8 @@ describe('ProductsController', () => {
   });
 
   it('should throw BadRequestException for invalid query parameter', async () => {
-    await expect(controller.search('', 1, 10)).rejects.toThrow(BadRequestException);
+    await expect(async () => {
+      await controller.search('', 1, 10);
+    }).rejects.toThrow(BadRequestException);
   });
 });
