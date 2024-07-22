@@ -1,10 +1,10 @@
 import { Body, Controller, HttpStatus, Post, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDTO } from './dto/create-user.dto';
-import { FAILED_TO_CREATE_USER, ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../helpers/SystemMessages';
-import { skipAuth } from '../../helpers/skipAuth';
-import UserService from './user.service';
+import { CreateUserDTO } from '../dto/create-user.dto';
+import { FAILED_TO_CREATE_USER, ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
+import { skipAuth } from '../../../helpers/skipAuth';
+import UserService from '../services/user.service';
 
 @Controller('api/v1/auth/register')
 export default class RegistrationController {

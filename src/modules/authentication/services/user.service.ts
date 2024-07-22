@@ -1,9 +1,10 @@
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User } from '../entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import CreateNewUserOptions from './options/CreateNewUserOptions';
-import UserIdentifierOptions from './options/UserIdentifierOptions';
+import CreateNewUserOptions from '../options/CreateNewUserOptions';
+import UserIdentifierOptions from '../options/UserIdentifierOptions';
+import UserResponseDTO from '../dto/user-resonse.dto';
 
 @Injectable()
 export default class UserService {
@@ -19,11 +20,13 @@ export default class UserService {
   }
 
   private async getUserByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email: email } });
+    const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
+    return user
   }
 
   private async getUserById(identifier: string) {
-    return this.userRepository.findOne({ where: { id: identifier } });
+    const user: UserResponseDTO = await this.userRepository.findOne({ where: { id: identifier } });
+    return user
   }
 
   async getUserRecord(identifierOptions: UserIdentifierOptions) {
