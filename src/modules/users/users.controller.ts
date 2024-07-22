@@ -2,7 +2,7 @@ import { Controller, Patch, Body, UseGuards, Res, HttpStatus } from '@nestjs/com
 import { Response } from 'express';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetUser } from '../../decorators/get-user.decorator';
 
 @Controller('api/v1/users')

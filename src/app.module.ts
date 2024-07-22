@@ -9,7 +9,7 @@ import { dataSourceOptions } from '../src/database/data-source';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
 import { UsersModule } from '../src/modules/users/users.module';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   providers: [
