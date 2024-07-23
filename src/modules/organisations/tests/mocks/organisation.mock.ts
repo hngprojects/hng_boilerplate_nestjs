@@ -1,0 +1,48 @@
+import { Organisation } from '../../entities/organisations.entity';
+
+const orgMock: Organisation = {
+  name: 'John & Co',
+  description: 'An imports organisation',
+  email: 'johnCo@exmaple.com',
+  industry: 'Import',
+  type: 'General',
+  country: 'Nigeria',
+  address: 'Street 101 Building 26',
+  state: 'Lagos',
+  owner: {
+    id: '66b7d75c-4050-4db5-a562-6cacc83846de',
+    created_at: new Date(),
+    updated_at: new Date(),
+    first_name: 'John',
+    last_name: 'Smith',
+    email: 'john.smith@example.com',
+    password: 'pass123',
+    hashPassword: async () => {},
+    is_active: null,
+    attempts_left: null,
+    time_left: null,
+    ownedOrganisations: null,
+    createdOrganisations: null,
+  },
+  creator: {
+    id: '66b7d75c-4050-4db5-a562-6cacc83846de',
+    created_at: new Date(),
+    updated_at: new Date(),
+    first_name: 'John',
+    last_name: 'Smith',
+    email: 'john.smith@example.com',
+    password: 'pass123',
+    hashPassword: async () => {},
+    is_active: null,
+    attempts_left: null,
+    time_left: null,
+    ownedOrganisations: null,
+    createdOrganisations: null,
+  },
+  id: 'd18622dc-94a4-41c3-9fa7-10bf003befc1',
+  created_at: new Date(),
+  updated_at: new Date(),
+  isDeleted: false,
+};
+
+export { orgMock };
