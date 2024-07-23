@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../modules/user/entities/user.entity';
-import { Profile } from '../entities/profile.entity';
-import { Product } from '../entities/product.entity';
-import { Organisation } from '../entities/organisation.entity';
+
 
 
 @Injectable()
@@ -29,9 +27,7 @@ export class SeedingService {
 
       // Seed data
       const userRepository = this.dataSource.getRepository(User);
-      const profileRepository = this.dataSource.getRepository(Profile);
-      const productRepository = this.dataSource.getRepository(Product);
-      const organisationRepository = this.dataSource.getRepository(Organisation);
+
 
       // Create new data
       const u1 = userRepository.create({
@@ -73,50 +69,7 @@ export class SeedingService {
       // await profileRepository.save([p1, p2]);
 
       // Check if profiles are saved
-      const savedProfiles = await profileRepository.find();
-      if (savedProfiles.length !== 2) {
-        throw new Error('Failed to create all profiles');
-      }
 
-      const pr1 = productRepository.create({
-        product_name: 'Product 1',
-        description: 'Description 1',
-        product_price: 100,
-        user: u1,
-      });
-      const pr2 = productRepository.create({
-        product_name: 'Product 2',
-        description: 'Description 2',
-        product_price: 200,
-        user: u2,
-      });
-
-      await productRepository.save([pr1, pr2]);
-
-      // Check if products are saved
-      const savedProducts = await productRepository.find();
-      if (savedProducts.length !== 2) {
-        throw new Error('Failed to create all products');
-      }
-
-      const or1 = organisationRepository.create({
-        org_name: 'Org 1',
-        description: 'Description 1',
-        users: [u1, u2],
-      });
-      const or2 = organisationRepository.create({
-        org_name: 'Org 2',
-        description: 'Description 2',
-        users: [u1],
-      });
-
-      await organisationRepository.save([or1, or2]);
-
-      // Check if organisations are saved
-      const savedOrganisations = await organisationRepository.find();
-      if (savedOrganisations.length !== 2) {
-        throw new Error('Failed to create all organisations');
-      }
 
       // Commit transaction if everything is successful
       await queryRunner.commitTransaction();
@@ -134,21 +87,4 @@ export class SeedingService {
     return this.dataSource.getRepository(User).find({ relations: ['profile', 'products', 'organisations'] });
   }
 
-  async getProfiles(): Promise<Profile[]> {
-    return this.dataSource.getRepository(Profile).find({
-      relations: ['user'],
-    });
-  }
-
-  async getProducts(): Promise<Product[]> {
-    return this.dataSource.getRepository(Product).find({
-      relations: ['user'],
-    });
-  }
-
-  async getOrganisations(): Promise<Organisation[]> {
-    return this.dataSource.getRepository(Organisation).find({
-      relations: ['users'],
-    });
-  }
 }
