@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { User } from '../modules/user/entities/user.entity';
 import { Profile } from '../entities/profile.entity';
 import { Product } from '../entities/product.entity';
 import { Organisation } from '../entities/organisation.entity';
 
 
-// import { User } from 'src/entities/user.entity';
-
 @Injectable()
 export class SeedingService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) { }
 
   async seedDatabase() {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -57,22 +55,22 @@ export class SeedingService {
         throw new Error('Failed to create all users');
       }
 
-      const p1 = profileRepository.create({
-        username: 'johnsmith',
-        bio: 'bio data',
-        phone: '1234567890',
-        avatar_image: 'image.png',
-        user: u1,
-      });
-      const p2 = profileRepository.create({
-        username: 'janesmith',
-        bio: 'bio data',
-        phone: '0987654321',
-        avatar_image: 'image.png',
-        user: u2,
-      });
+      // const p1 = profileRepository.create({
+      //   username: 'johnsmith',
+      //   bio: 'bio data',
+      //   phone: '1234567890',
+      //   avatar_image: 'image.png',
+      //   user: u1,
+      // });
+      // const p2 = profileRepository.create({
+      //   username: 'janesmith',
+      //   bio: 'bio data',
+      //   phone: '0987654321',
+      //   avatar_image: 'image.png',
+      //   user: u2,
+      // });
 
-      await profileRepository.save([p1, p2]);
+      // await profileRepository.save([p1, p2]);
 
       // Check if profiles are saved
       const savedProfiles = await profileRepository.find();

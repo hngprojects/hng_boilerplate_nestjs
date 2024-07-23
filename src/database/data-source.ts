@@ -12,7 +12,7 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
-  entities: [process.env.DB_ENTITIES],
+  entities: ["dist/src/entities/*.entity{.ts,.js}", process.env.DB_ENTITIES],
   migrations: [process.env.DB_MIGRATIONS],
   synchronize: isDevelopment,
   migrationsTableName: 'migrations',
@@ -21,7 +21,9 @@ const dataSource = new DataSource({
 export async function initializeDataSource() {
   if (!dataSource.isInitialized) {
     await dataSource.initialize();
+
   }
+
   return dataSource;
 }
 

@@ -18,6 +18,7 @@ async function bootstrap() {
   try {
     await initializeDataSource();
     console.log('Data Source has been initialized!');
+
   } catch (err) {
     console.error('Error during Data Source initialization', err);
     process.exit(1);

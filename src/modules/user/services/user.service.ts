@@ -4,7 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptions from '../options/UserIdentifierOptions';
-import UserResponseDTO from '../dto/user-resonse.dto';
+import UserResponseDTO from '../dto/user-response.dto';
+
 
 @Injectable()
 export default class UserService {

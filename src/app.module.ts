@@ -9,12 +9,10 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
-import { appConfig } from '../config/appConfig';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
 import * as dotenv from 'dotenv';
 import { AuthGuard } from './guards/auth.guard';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
+import { UserModule } from './modules/user/user.module';
 
 
 
@@ -64,11 +62,13 @@ dotenv.config();
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,
+        autoLoadEntities: true
       }),
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
     AuthenticationModule,
+    UserModule
 
   ],
   controllers: [HealthController],

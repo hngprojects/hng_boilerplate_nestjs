@@ -1,17 +1,18 @@
 import { Module } from '@nestjs/common';
 import RegistrationController from './controllers/registration.controller';
-import UserService from './services/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import { User } from '../user/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { appConfig } from '../../../config/appConfig';
 import { Repository } from 'typeorm';
+import AuthenticationService from './services/authentication.service';
+import UserService from '../user/services/user.service';
 
 
 @Module({
   controllers: [RegistrationController],
-  providers: [UserService, Repository],
+  providers: [AuthenticationService, Repository, UserService],
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
@@ -21,6 +22,5 @@ import { Repository } from 'typeorm';
       signOptions: { expiresIn: `${appConfig.jwt.jwtExpiry}s` },
     }),
   ],
-  exports: [UserService]
 })
 export class AuthenticationModule { }

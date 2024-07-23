@@ -1,47 +1,38 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { JwtService } from "@nestjs/jwt";
-import UserService from "../services/user.service";
-import { AppModule } from "../../../app.module";
-import * as request from 'supertest';
+import UserService from "../../user/services/user.service"
+import { User } from "../../user/entities/user.entity";
+import { getRepositoryToken } from "@nestjs/typeorm";
 import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
-import { INestApplication, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import UserResponseDTO from "../dto/user-resonse.dto";
+import AuthenticationService from "../services/authentication.service";
 
+describe("Authentication Service tests", () => {
 
+    let userService: UserService
+    let authService: AuthenticationService
+    let jwtService: JwtService
 
-describe('RegistrationController (e2e)', () => {
-    let app: INestApplication;
-    let userService: UserService;
-    let jwtService: JwtService;
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [JwtService, AuthenticationService, UserService, {
+                provide: getRepositoryToken(User),
+                useValue: {}
+            }],
+        }).compile()
 
-    beforeAll(async () => {
-        const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [AppModule],
-        })
-            .overrideProvider(UserService)
-            .useValue({
-                getUserRecord: jest.fn(),
-                createUser: jest.fn(),
-            })
-            .overrideProvider(JwtService)
-            .useValue({
-                sign: jest.fn(),
-            })
-            .compile();
+        userService = module.get<UserService>(UserService)
+        authService = module.get<AuthenticationService>(AuthenticationService)
+        jwtService = module.get<JwtService>(JwtService)
+    })
 
-        app = moduleFixture.createNestApplication();
-        await app.init();
+    it("Registration Controller should be defined", () => {
+        expect(authService).toBeDefined()
+    })
 
-        userService = moduleFixture.get<UserService>(UserService);
-        jwtService = moduleFixture.get<JwtService>(JwtService);
-    });
-
-    afterAll(async () => {
-        await app.close();
-    });
-
-    it('should return BAD_REQUEST if user already exists', async () => {
+    it("should return BAD_REQUEST if user already exists", async () => {
         const body: CreateUserDTO = { email: 'test@example.com', first_name: 'John', last_name: 'Doe', password: 'password' };
         const existingRecord: UserResponseDTO = {
             email: 'test@example.com',
@@ -54,18 +45,12 @@ describe('RegistrationController (e2e)', () => {
             updated_at: new Date(),
         }
         jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-
-        const response = await request(app.getHttpServer())
-            .post('/api/v1/auth/register')
-            .send(body)
-            .expect(HttpStatus.BAD_REQUEST);
-
-        expect(response.body).toEqual({
+        const newUserResponse = await authService.createNewUser(body)
+        expect(newUserResponse).toEqual({
             status_code: HttpStatus.BAD_REQUEST,
             message: USER_ACCOUNT_EXIST,
         });
-    });
-
+    })
 
     it('should return CREATED and user data if registration is successful', async () => {
         const body: CreateUserDTO = { email: 'test@example.com', first_name: 'John', last_name: 'Doe', password: 'password' };
@@ -81,18 +66,17 @@ describe('RegistrationController (e2e)', () => {
         };
         const accessToken = 'fake-jwt-token';
 
+
         jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(null);
-        jest.spyOn(userService, 'createUser').mockResolvedValueOnce(null);
         jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(user);
         jest.spyOn(jwtService, 'sign').mockReturnValue(accessToken);
+        jest.spyOn(userService, 'createUser').mockResolvedValueOnce(null);
 
-        const response = await request(app.getHttpServer())
-            .post('/api/v1/auth/register')
-            .send(body)
-            .expect(HttpStatus.CREATED);
-        user.created_at = response.body.data.user.created_at
+        const newUserResponse = await authService.createNewUser(body)
 
-        expect(response.body).toEqual({
+        user.created_at = newUserResponse.data.user.created_at
+
+        expect(newUserResponse).toEqual({
             status_code: HttpStatus.CREATED,
             message: USER_CREATED_SUCCESSFULLY,
             data: {
@@ -105,7 +89,8 @@ describe('RegistrationController (e2e)', () => {
                 },
             },
         });
-    });
+    })
+
 
     it('should return INTERNAL_SERVER_ERROR on exception', async () => {
         const body: CreateUserDTO = { email: 'john@doe.com', first_name: 'John', last_name: 'Doe', password: 'password' };
@@ -114,14 +99,11 @@ describe('RegistrationController (e2e)', () => {
             throw new Error('Test error');
         });
 
-        const response = await request(app.getHttpServer())
-            .post('/api/v1/auth/register')
-            .send(body)
-            .expect(HttpStatus.INTERNAL_SERVER_ERROR);
+        const newUserResponse = await authService.createNewUser(body)
 
-        expect(response.body).toEqual({
+        expect(newUserResponse).toEqual({
             message: ERROR_OCCURED,
             status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         });
     });
-});
+})
