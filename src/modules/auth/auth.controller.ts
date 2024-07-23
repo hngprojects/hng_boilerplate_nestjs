@@ -11,7 +11,7 @@ export default class RegistrationController {
   ) { }
 
   @skipAuth()
-  @Post("register")
+  @Post("/register")
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
     const createUserResponse = await this.authService.createNewUser(body)
     return response.status(createUserResponse.status_code).send(createUserResponse)
