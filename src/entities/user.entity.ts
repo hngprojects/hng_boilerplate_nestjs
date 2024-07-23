@@ -60,7 +60,7 @@ export class User {
   organisations: Organisation[];
 
   @OneToOne(() => Profile, profile => profile.user, { cascade: true })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
   @BeforeInsert()
