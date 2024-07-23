@@ -27,7 +27,7 @@ describe('OrganisationService', () => {
   describe('update', () => {
     it('should update an organisation successfully', async () => {
       const id = '1';
-      const updateOrganisationDto = { org_name: 'New Name', description: 'Updated Description' };
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
       const organisation = new Organisation();
 
       jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(organisation);
@@ -37,18 +37,14 @@ describe('OrganisationService', () => {
       const result = await service.update(id, updateOrganisationDto);
 
       expect(result).toEqual({
-        response: {
-          status: 'successful',
-          message: 'Product successfully updated',
-          status_code: 200,
-          org: { ...organisation, ...updateOrganisationDto },
-        },
+        message: 'Product successfully updated',
+        org: { ...organisation, ...updateOrganisationDto },
       });
     });
 
     it('should throw NotFoundException if organisation not found', async () => {
       const id = '1';
-      const updateOrganisationDto = { org_name: 'New Name', description: 'Updated Description' };
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
 
       jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null);
 
@@ -57,18 +53,19 @@ describe('OrganisationService', () => {
 
     it('should throw BadRequestException if update fails', async () => {
       const id = '1';
-      const updateOrganisationDto = { org_name: 'New Name', description: 'Updated Description' };
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
       const organisation = new Organisation();
 
       jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(organisation);
       jest.spyOn(repository, 'update').mockResolvedValueOnce({ affected: 0 } as any);
+      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null); // Trigger BadRequestException
 
       await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
       const id = '1';
-      const updateOrganisationDto = { org_name: 'New Name', description: 'Updated Description' };
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
 
       jest.spyOn(repository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
 
