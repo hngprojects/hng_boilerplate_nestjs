@@ -19,7 +19,6 @@ export class ResponseInterceptor implements NestInterceptor {
 
     let errorMessage = 'An error occurred';
 
-    // Extract error message from exceptionResponse
     if (typeof exceptionResponse === 'object' && 'message' in exceptionResponse) {
       if (Array.isArray(exceptionResponse.message)) {
         errorMessage = exceptionResponse.message.join(', ');

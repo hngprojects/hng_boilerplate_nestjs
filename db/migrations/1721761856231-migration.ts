@@ -33,6 +33,5 @@ export class Migration1721761856231 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "organisation_preference"`);
     await queryRunner.query(`DROP TABLE "user"`);
     await queryRunner.query(`DROP TYPE "public"."user_user_type_enum"`);
-    await queryRunner.query(`DROP TABLE "abstract_base_entity"`);
   }
 }

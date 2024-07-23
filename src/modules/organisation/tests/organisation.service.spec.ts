@@ -58,7 +58,7 @@ describe('OrganisationService', () => {
 
       jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(organisation);
       jest.spyOn(repository, 'update').mockResolvedValueOnce({ affected: 0 } as any);
-      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null); // Trigger BadRequestException
+      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null);
 
       await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(BadRequestException);
     });
