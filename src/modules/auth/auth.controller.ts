@@ -4,14 +4,14 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
 
-@Controller('auth/register')
+@Controller('auth')
 export default class RegistrationController {
   constructor(
     private authService: AuthenticationService,
   ) { }
 
   @skipAuth()
-  @Post()
+  @Post("register")
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
     const createUserResponse = await this.authService.createNewUser(body)
     return response.status(createUserResponse.status_code).send(createUserResponse)
