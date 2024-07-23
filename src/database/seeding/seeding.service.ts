@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 
-
 @Injectable()
 export class SeedingService {
-  constructor(private readonly dataSource: DataSource) { }
+  constructor(private readonly dataSource: DataSource) {}
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
@@ -13,7 +12,7 @@ export class SeedingService {
     try {
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
-        console.log('Database is already populated. Skipping seeding.');
+        Logger.log('Database is already populated. Skipping seeding.');
         return;
       }
 
@@ -22,8 +21,6 @@ export class SeedingService {
       await queryRunner.startTransaction();
 
       try {
-
-
         const u1 = userRepository.create({
           first_name: 'John',
           last_name: 'Smith',
@@ -64,5 +61,4 @@ export class SeedingService {
       throw error;
     }
   }
-
 }
