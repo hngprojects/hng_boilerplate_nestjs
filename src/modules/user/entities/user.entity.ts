@@ -1,6 +1,7 @@
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 
 @Entity()
 export class User extends AbstractBaseEntity {
@@ -24,6 +25,12 @@ export class User extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   time_left: number;
+
+  @OneToMany(() => Organisation, organisation => organisation.owner)
+  ownedOrganisations: Organisation[];
+
+  @OneToMany(() => Organisation, organisation => organisation.creator)
+  createdOrganisations: Organisation[];
 
   @BeforeInsert()
   async hashPassword() {
