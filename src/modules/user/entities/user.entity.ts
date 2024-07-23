@@ -1,13 +1,24 @@
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { IsString } from 'class-validator';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Parent } from '../../../database/entities/parent.entity';
+
 
 @Entity()
-export class User extends Parent {
-  @Column({ nullable: false, name: 'first_name' })
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ nullable: false })
   first_name: string;
 
-  @Column({ nullable: false, name: 'last_name' })
+  @Column({ nullable: false })
   last_name: string;
 
   @Column({ unique: true, nullable: false })
@@ -16,8 +27,21 @@ export class User extends Parent {
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: true, name: 'is_active' })
+  @Column({ nullable: true })
   is_active: boolean;
+
+  @Column({ nullable: true })
+  attempts_left: number;
+
+  @Column({ nullable: true })
+  time_left: number;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
 
   @BeforeInsert()
   async hashPassword() {
