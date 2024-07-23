@@ -30,6 +30,8 @@ export class AuthService {
 
     const refresh_token = await Utils.assignRefreshJwtToken(user.id, this.jwtService);
 
+    delete user.password;
+
     return { message: 'Login successful', data: user, access_token, refresh_token };
   }
 }
