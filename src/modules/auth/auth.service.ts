@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { CreateUserDTO } from './dto/create-user.dto';
+import * as bcrypt from 'bcryptjs';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
@@ -7,7 +7,11 @@ import {
   USER_CREATED_SUCCESSFULLY,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -65,6 +69,59 @@ export default class AuthenticationService {
       };
     } catch (createNewUserError) {
       Logger.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
+      throw new HttpException(
+        {
+          message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+    try {
+      const { email, password } = loginDto;
+
+      const user = await this.userService.getUserRecord({
+        identifier: email,
+        identifierType: 'email',
+      });
+
+      if (!user)
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch)
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
+
+      const access_token = this.jwtService.sign({
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        sub: user.id,
+      });
+
+      const responsePayload = {
+        access_token,
+        data: {
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          id: user.id,
+        },
+      };
+
+      return { message: 'Login successful', ...responsePayload };
+    } catch (loginError) {
+      Logger.log('AuthenticationServiceError ~ passwordloginError ~', loginError);
       throw new HttpException(
         {
           message: ERROR_OCCURED,
