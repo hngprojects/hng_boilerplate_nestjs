@@ -9,4 +9,4 @@ import { User } from '../../modules/user/entities/user.entity';
   providers: [SeedingService],
   controllers: [SeedingController],
 })
-export class SeedingModule { }
+export class SeedingModule {}
