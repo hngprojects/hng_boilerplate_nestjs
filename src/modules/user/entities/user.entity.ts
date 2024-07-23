@@ -1,15 +1,9 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-} from 'typeorm';
+import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Parent } from '../../../entities/parent.entity';
 
-
 @Entity()
 export class User extends Parent {
-
   @Column({ nullable: false })
   first_name: string;
 
@@ -31,10 +25,8 @@ export class User extends Parent {
   @Column({ nullable: true })
   time_left: number;
 
-
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
 }
-
