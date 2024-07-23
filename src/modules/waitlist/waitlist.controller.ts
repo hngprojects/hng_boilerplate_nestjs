@@ -1,79 +1,36 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
 import { CreateWaitlistUserDto } from './dto/create-waitlist-user.dto';
 import { WaitlistService } from './waitlist.service';
+import { Response } from 'express';
 
-@Controller('api/v1/waitlist')
+@Controller('waitlist')
 export class WaitlistController {
   constructor(private readonly waitlistService: WaitlistService) {}
 
   @Post()
-  create(@Body() createWaitlistUserDto: CreateWaitlistUserDto) {
+  async create(@Body() createWaitlistUserDto: CreateWaitlistUserDto, @Res() res: Response) {
     try {
-      const user = this.waitlistService.create(createWaitlistUserDto);
-      return {
+      const emailExist = await this.waitlistService.emailExist(createWaitlistUserDto.email);
+      if (emailExist) {
+        return res.status(409).json({
+          status: 'duplicate',
+          message: 'Duplicate email!',
+          status_code: 400,
+        });
+      }
+      const user = await this.waitlistService.create(createWaitlistUserDto);
+      return res.status(201).json({
         status: 'success',
-        message: 'User retrieved successfully!',
+        message: 'You are all signed up!',
         user: user,
         status_code: 201,
-      };
+      });
     } catch (error) {
-      return {
+      res.status(500).json({
         status: 'error',
         message: error.message,
         status_code: 500,
-      };
-    }
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    try {
-      const foundUser = await this.waitlistService.findOne(id);
-      if (!foundUser) {
-        return {
-          status: 'Not found',
-          message: 'User not found!',
-          status_code: 404,
-        };
-      }
-      return {
-        status: 'success',
-        message: 'User retrieved successfully!',
-        user: foundUser,
-        status_code: 200,
-      };
-    } catch (error) {
-      return {
-        status: 'error',
-        message: error.message,
-        status_code: 500,
-      };
-    }
-  }
-
-  @Get()
-  async findAll() {
-    try {
-      const waitlist = await this.waitlistService.findAll();
-      if (!waitlist) {
-        return {
-          status: 'Not found',
-          message: 'User not found!',
-          status_code: 404,
-        };
-      }
-      return {
-        status: 'success',
-        message: 'Waitlist retrieved successfully!',
-        waitlist,
-        status_code: 200,
-      };
-    } catch (error) {
-      return {
-        status: 'error',
-        message: error.message,
-        status_code: 500,
-      };
+      });
     }
   }
 }

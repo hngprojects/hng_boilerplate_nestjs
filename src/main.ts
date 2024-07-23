@@ -4,20 +4,32 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
-import { SeedingService } from './database/seeding.service';
+import { DataSource } from 'typeorm';
+import dataSource, { initializeDataSource } from './database/data-source';
+import { SeedingService } from './database/seeding/seeding.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 
   const logger = app.get(Logger);
 
+  const dataSource = app.get(DataSource);
+
+  try {
+    await initializeDataSource();
+    console.log('Data Source has been initialized!');
+  } catch (err) {
+    console.error('Error during Data Source initialization', err);
+    process.exit(1);
+  }
+
+  const seedingService = app.get(SeedingService);
+  await seedingService.seedDatabase();
+
   app.enable('trust proxy');
   app.useLogger(logger);
   app.enableCors();
-
-  const seedingService = app.get(SeedingService);
-  await seedingService.seed();
+  app.setGlobalPrefix('api/v1');
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()

@@ -12,11 +12,9 @@ export class WaitlistService {
     return await this.waitlistRepo.save(waitlistUser);
   }
 
-  async findOne(id: string) {
-    return await this.waitlistRepo.findOne({ where: { id } });
-  }
-
-  async findAll() {
-    return await this.waitlistRepo.find();
+  async emailExist(email: string) {
+    const foundUser = await this.waitlistRepo.findOne({ where: { email } });
+    if (foundUser) return true;
+    else return false;
   }
 }

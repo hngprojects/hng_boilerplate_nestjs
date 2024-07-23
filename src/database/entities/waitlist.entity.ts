@@ -1,13 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
-@Entity('waitlist')
+@Entity()
 export class Waitlist {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ nullable: false })
   email: string;
 
   @Column({ nullable: false })
   fullName: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }

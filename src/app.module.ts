@@ -4,10 +4,11 @@ import { APP_PIPE } from '@nestjs/core';
 import serverConfig from '../config/server.config';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import config from '../config/db.config';
+import dataSource from './database/data-source';
+import { SeedingModule } from './database/seeding/seeding.module';
 import { DatabaseModule } from './database/database.module';
+import { WaitlistModule } from './modules/waitlist/waitlist.module';
 
 @Module({
   providers: [
@@ -38,7 +39,6 @@ import { DatabaseModule } from './database/database.module';
       /**
        * See ".env.local" file to list all environment variables needed by the app
        */
-
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PROFILE: Joi.string().valid('local', 'development', 'production', 'ci', 'testing', 'staging').required(),
@@ -46,9 +46,15 @@ import { DatabaseModule } from './database/database.module';
       }),
     }),
     LoggerModule.forRoot(),
-    WaitlistModule,
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => ({
+        ...dataSource.options,
+      }),
+      dataSourceFactory: async () => dataSource,
+    }),
+    SeedingModule,
     DatabaseModule,
-    TypeOrmModule.forRoot(config),
+    WaitlistModule,
   ],
 })
 export class AppModule {}
