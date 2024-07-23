@@ -7,11 +7,11 @@ import {
   USER_CREATED_SUCCESSFULLY,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 @Injectable()
 export default class AuthenticationService {
