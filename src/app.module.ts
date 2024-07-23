@@ -11,7 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './database/seeding.service';
 import * as dotenv from 'dotenv';
 import { AuthGuard } from './guards/auth.guard';
-import { AuthenticationModule } from './modules/authentication/authentication.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 
 
@@ -67,7 +67,7 @@ dotenv.config();
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
-    AuthenticationModule,
+    AuthModule,
     UserModule
 
   ],
