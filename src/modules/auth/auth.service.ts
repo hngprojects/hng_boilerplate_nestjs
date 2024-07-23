@@ -1,4 +1,5 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CustomHttpException } from 'src/shared/custom-http-filter';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -20,11 +21,19 @@ export class AuthService {
 
     const user = await this.usersRepository.findOneBy({ email });
 
-    if (!user) throw new UnauthorizedException('Invalid email or Password');
+    if (!user)
+      throw new CustomHttpException(
+        { message: 'Invalid password or email', error: 'Bad Request' },
+        HttpStatus.UNAUTHORIZED
+      );
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) throw new UnauthorizedException('Invalid email or Password');
+    if (!isMatch)
+      throw new CustomHttpException(
+        { message: 'Invalid password or email', error: 'Bad Request' },
+        HttpStatus.UNAUTHORIZED
+      );
 
     const access_token = await Utils.assignJwtToken(user.id, this.jwtService);
 
