@@ -8,12 +8,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Parent } from '../../../entities/parent.entity';
 
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class User extends Parent {
 
   @Column({ nullable: false })
   first_name: string;
@@ -35,12 +34,6 @@ export class User {
 
   @Column({ nullable: true })
   time_left: number;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 
 
   @BeforeInsert()
