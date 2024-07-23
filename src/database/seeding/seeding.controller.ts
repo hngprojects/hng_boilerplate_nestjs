@@ -3,7 +3,7 @@ import { SeedingService } from './seeding.service';
 
 @Controller('seed')
 export class SeedingController {
-  constructor(private readonly seedingService: SeedingService) {}
+  constructor(private readonly seedingService: SeedingService) { }
 
   @Post()
   async seedDatabase() {
@@ -16,18 +16,4 @@ export class SeedingController {
     return this.seedingService.getUsers();
   }
 
-  @Get('profiles')
-  async getProfiles() {
-    return this.seedingService.getProfiles();
-  }
-
-  @Get('products')
-  async getProducts() {
-    return this.seedingService.getProducts();
-  }
-
-  @Get('organisations')
-  async getOrganisations() {
-    return this.seedingService.getOrganisations();
-  }
 }

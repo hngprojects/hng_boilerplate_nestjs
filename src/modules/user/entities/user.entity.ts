@@ -1,31 +1,13 @@
-import { IsString } from 'class-validator';
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Product } from '../../../entities/product.entity';
-import { Organisation } from '../../../entities/organisation.entity';
-import { Profile } from '../../../entities/profile.entity';
+import { Parent } from '../../../database/entities/parent.entity';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ nullable: false })
+export class User extends Parent {
+  @Column({ nullable: false, name: 'first_name' })
   first_name: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, name: 'last_name' })
   last_name: string;
 
   @Column({ unique: true, nullable: false })
@@ -34,34 +16,8 @@ export class User {
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, name: 'is_active' })
   is_active: boolean;
-
-  @Column({ nullable: true })
-  attempts_left: number;
-
-  @Column({ nullable: true })
-  time_left: number;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
-
-  @OneToMany(() => Product, product => product.user, { cascade: true })
-  products: Product[];
-
-  @ManyToMany(() => Organisation, organisation => organisation.users, { cascade: true })
-  @JoinTable({
-    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'organisation_org_id', referencedColumnName: 'org_id' },
-  })
-  organisations: Organisation[];
-
-  @OneToOne(() => Profile, profile => profile.user, { cascade: true })
-  @JoinColumn({ name: 'user_id' })
-  profile: Profile;
 
   @BeforeInsert()
   async hashPassword() {
