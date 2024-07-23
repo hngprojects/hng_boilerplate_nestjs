@@ -1,10 +1,10 @@
-type UserIdentifierOptions = {
+type UserIdentifierOptionsType = {
     identifierType: "id",
     identifier: string
-} | 
- {
+} |
+{
     identifierType: "email",
     identifier: string
 }
 
-export default UserIdentifierOptions
+export default UserIdentifierOptionsType

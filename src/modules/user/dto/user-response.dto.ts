@@ -1,4 +1,4 @@
 import UserInterface from "../interfaces/UserInterface";
 
-type UserResponseDTO = Pick<UserInterface, "email" | "first_name" | "last_name" | "id" | "is_active" | "attempts_left" | "created_at" | "updated_at">
+type UserResponseDTO = Partial<UserInterface>
 export default UserResponseDTO
