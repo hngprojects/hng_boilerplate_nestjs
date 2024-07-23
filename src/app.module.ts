@@ -7,9 +7,10 @@ import { LoggerModule } from 'nestjs-pino';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
 import HealthController from './health.controller';
+import { AuthModule } from './modules/auth/auth.module';
+import authConfig from 'config/auth.config';
+import { UserModule } from './modules/user/users.module';
 
 @Module({
   providers: [
@@ -36,7 +37,7 @@ import HealthController from './health.controller';
        */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
-      load: [serverConfig],
+      load: [serverConfig, authConfig],
       /**
        * See ".env.local" file to list all environment variables needed by the app
        */
@@ -55,7 +56,7 @@ import HealthController from './health.controller';
     }),
     SeedingModule,
     AuthModule,
-    UsersModule,
+    UserModule,
   ],
   controllers: [HealthController],
 })
