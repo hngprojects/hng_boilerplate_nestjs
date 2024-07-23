@@ -8,7 +8,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
-  login(@Body() loginDto: LoginDto): Promise<{ token: string }> {
+  login(@Body() loginDto: LoginDto): Promise<{}> {
     return this.authService.login(loginDto);
   }
 }

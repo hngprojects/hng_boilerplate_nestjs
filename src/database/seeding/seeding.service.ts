@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../../entities/user.entity';
+import { User } from '../../modules/users/user.entity';
 
 @Injectable()
 export class SeedingService {
@@ -22,14 +22,14 @@ export class SeedingService {
 
       try {
         const u1 = userRepository.create({
-          firstName: 'John',
-          lastName: 'Smith',
+          first_name: 'John',
+          last_name: 'Smith',
           email: 'john.smith@example.com',
           password: 'password',
         });
         const u2 = userRepository.create({
-          firstName: 'Jane',
-          lastName: 'Smith',
+          first_name: 'Jane',
+          last_name: 'Smith',
           email: 'jane.smith@example.com',
           password: 'password',
         });

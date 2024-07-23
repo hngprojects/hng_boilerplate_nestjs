@@ -1,14 +1,14 @@
 import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Parent } from './parent.entity';
+import { Parent } from '../../entities/parent.entity';
 
 @Entity()
 export class User extends Parent {
-  @Column({ nullable: false })
-  firstName: string;
+  @Column({ nullable: false, name: 'first_name' })
+  first_name: string;
 
-  @Column({ nullable: false })
-  lastName: string;
+  @Column({ nullable: false, name: 'last_name' })
+  last_name: string;
 
   @Column({ unique: true, nullable: false })
   email: string;
@@ -16,8 +16,8 @@ export class User extends Parent {
   @Column({ nullable: false })
   password: string;
 
-  @Column({ nullable: true })
-  isActive: boolean;
+  @Column({ nullable: true, name: 'is_active' })
+  is_active: boolean;
 
   @BeforeInsert()
   async hashPassword() {

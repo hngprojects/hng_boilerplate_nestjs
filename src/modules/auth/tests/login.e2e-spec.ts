@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../../src/entities/user.entity';
+import { User } from '../../users/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { AppModule } from '../../src/app.module';
+import { AppModule } from '../../../app.module';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -54,7 +54,9 @@ describe('AuthController (e2e)', () => {
       .send({ email: 'test@example.com', password: 'password' })
       .expect(200);
 
-    expect(response.body).toEqual({ token: 'fake-jwt-token' });
+    expect(response.body.access_token).toEqual('fake-jwt-token');
+    expect(response.body.refresh_token).toEqual('fake-jwt-token');
+    expect(response.body.data).toBeDefined();
   });
 
   it('/api/v1/auth/login (POST) - invalid email/password', async () => {

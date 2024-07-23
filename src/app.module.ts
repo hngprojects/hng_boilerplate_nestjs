@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import HealthController from './health.controller';
 
 @Module({
@@ -54,6 +55,7 @@ import HealthController from './health.controller';
     }),
     SeedingModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [HealthController],
 })
