@@ -10,6 +10,8 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { ProductsModule } from './modules/products/products.module';
+import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import authConfig from 'config/auth.config';
 
 @Module({
@@ -57,6 +59,8 @@ import authConfig from 'config/auth.config';
     SeedingModule,
     AuthModule,
     UserModule,
+    ProductsModule,
+    ProductCategoryModule,
   ],
   controllers: [HealthController],
 })
