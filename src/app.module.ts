@@ -56,8 +56,8 @@ import authConfig from 'config/auth.config';
     }),
     SeedingModule,
     AuthModule,
-    UserModule
+    UserModule,
   ],
   controllers: [HealthController],
 })
-export class AppModule { }
+export class AppModule {}

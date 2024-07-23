@@ -6,8 +6,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import UserResponseDTO from '../dto/user-resonse.dto';
 import AuthenticationService from '../auth.service';
+import UserResponseDTO from 'src/modules/user/dto/user-response.dto';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
