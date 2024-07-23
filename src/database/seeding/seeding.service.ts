@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
+import { Organisation } from '../../modules/organisation/entities/organisation.entity';
 
 @Injectable()
 export class SeedingService {
@@ -8,6 +9,7 @@ export class SeedingService {
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
+    const organisationRepository = this.dataSource.getRepository(Organisation);
 
     try {
       const existingUsers = await userRepository.count();
@@ -41,6 +43,40 @@ export class SeedingService {
           throw new Error('Failed to create all users');
         }
 
+        const or1 = organisationRepository.create({
+          name: 'Org 1',
+          description: 'Description 1',
+          email: 'test1@email.com',
+          industry: 'industry1',
+          type: 'type1',
+          country: 'country1',
+          state: 'state1',
+          address: 'address1',
+          owner: savedUsers[0],
+          creator: savedUsers[0],
+          isDeleted: false,
+        });
+
+        const or2 = organisationRepository.create({
+          name: 'Org 2',
+          description: 'Description 2',
+          email: 'test2@email.com',
+          industry: 'industry2',
+          type: 'type2',
+          country: 'country2',
+          state: 'state2',
+          address: 'address2',
+          owner: savedUsers[0],
+          creator: savedUsers[0],
+          isDeleted: false,
+        });
+
+        await organisationRepository.save([or1, or2]);
+        const savedOrganisations = await organisationRepository.find();
+        if (savedOrganisations.length !== 2) {
+          throw new Error('Failed to create all organisations');
+        }
+
         await queryRunner.commitTransaction();
       } catch (error) {
         await queryRunner.rollbackTransaction();
@@ -55,7 +91,7 @@ export class SeedingService {
 
   async getUsers(): Promise<User[]> {
     try {
-      return this.dataSource.getRepository(User).find({ relations: ['profile', 'products', 'organisations'] });
+      return this.dataSource.getRepository(User).find({ relations: ['organisations'] });
     } catch (error) {
       console.error('Error fetching users:', error.message);
       throw error;

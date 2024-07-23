@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import dataSource, { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
+import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -29,7 +30,8 @@ async function bootstrap() {
   app.enable('trust proxy');
   app.useLogger(logger);
   app.enableCors();
-  app.setGlobalPrefix('api/v1', { exclude: ["/", "health"] });
+  app.setGlobalPrefix('api/v1', { exclude: ['/', 'health'] });
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()
