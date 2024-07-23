@@ -3,22 +3,30 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../../src/entities/user.entity';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
 import { AppModule } from '../../src/app.module';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
+  let mockUserRepository;
+  let mockJwtService;
 
-  const mockUserRepository = {
-    findOneBy: jest.fn(),
-  };
-
-  const mockJwtService = {
-    sign: jest.fn().mockReturnValue('fake-jwt-token'),
+  const mockUser = {
+    id: '1',
+    email: 'test@example.com',
+    password: 'hashedPassword',
   };
 
   beforeAll(async () => {
+    mockUserRepository = {
+      findOneBy: jest.fn(),
+    };
+
+    mockJwtService = {
+      sign: jest.fn().mockReturnValue('fake-jwt-token'),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
@@ -29,6 +37,7 @@ describe('AuthController (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
   });
 
@@ -37,36 +46,34 @@ describe('AuthController (e2e)', () => {
   });
 
   it('/api/v1/auth/login (POST) - success', async () => {
-    const user = { id: '1', email: 'test@example.com', password: 'hashedPassword' } as User;
-    mockUserRepository.findOneBy.mockResolvedValue(user);
-    jest.spyOn(bcrypt, 'compare').mockImplementation(() => true);
+    mockUserRepository.findOneBy.mockResolvedValue(mockUser);
+    jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
 
     const response = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'test@example.com', password: 'password' })
       .expect(200);
 
     expect(response.body).toEqual({ token: 'fake-jwt-token' });
   });
 
-  it('api/v1/auth/login (POST) - invalid email/password', async () => {
+  it('/api/v1/auth/login (POST) - invalid email/password', async () => {
     mockUserRepository.findOneBy.mockResolvedValue(null);
 
     const response = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'invalid@example.com', password: 'password' })
       .expect(401);
 
     expect(response.body.message).toBe('Invalid email or Password');
   });
 
-  it('/auth/login (POST) - invalid password', async () => {
-    const user = { id: '1', email: 'test@example.com', password: 'hashedPassword' } as User;
-    mockUserRepository.findOneBy.mockResolvedValue(user);
-    jest.spyOn(bcrypt, 'compare').mockImplementation(() => false);
+  it('/api/v1/auth/login (POST) - invalid password', async () => {
+    mockUserRepository.findOneBy.mockResolvedValue(mockUser);
+    jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
 
     const response = await request(app.getHttpServer())
-      .post('auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: 'test@example.com', password: 'wrongpassword' })
       .expect(401);
 
