@@ -1,9 +1,9 @@
 import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Parent } from '../../../entities/parent.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 
 @Entity()
-export class User extends Parent {
+export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
   first_name: string;
 
