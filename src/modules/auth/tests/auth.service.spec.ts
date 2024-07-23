@@ -5,7 +5,7 @@ import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
-import { HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import UserResponseDTO from '../dto/user-resonse.dto';
 import AuthenticationService from '../auth.service';
 
@@ -107,15 +107,14 @@ describe('Authentication Service tests', () => {
   it('should return INTERNAL_SERVER_ERROR on exception', async () => {
     const body: CreateUserDTO = { email: 'john@doe.com', first_name: 'John', last_name: 'Doe', password: 'password' };
 
-    jest.spyOn(userService, 'getUserRecord').mockImplementationOnce(() => {
-      throw new Error('Test error');
-    });
-
-    const newUserResponse = await authService.createNewUser(body);
-
-    expect(newUserResponse).toEqual({
-      message: ERROR_OCCURED,
-      status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-    });
+    await expect(authService.createNewUser(body)).rejects.toEqual(
+      new HttpException(
+        {
+          message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    );
   });
 });

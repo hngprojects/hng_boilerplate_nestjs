@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
 import {
   ERROR_OCCURED,
@@ -64,11 +64,14 @@ export default class AuthenticationService {
         data: responsePayload,
       };
     } catch (createNewUserError) {
-      console.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
-      return {
-        message: ERROR_OCCURED,
-        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
+      Logger.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
+      throw new HttpException(
+        {
+          message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }
