@@ -80,55 +80,44 @@ export default class AuthenticationService {
   }
 
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-    try {
-      const { email, password } = loginDto;
+    const { email, password } = loginDto;
 
-      const user = await this.userService.getUserRecord({
-        identifier: email,
-        identifierType: 'email',
-      });
+    const user = await this.userService.getUserRecord({
+      identifier: email,
+      identifierType: 'email',
+    });
 
-      if (!user)
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+    if (!user)
+      throw new CustomHttpException(
+        { message: 'Invalid password or email', error: 'Bad Request' },
+        HttpStatus.UNAUTHORIZED
+      );
 
-      const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
-      if (!isMatch)
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+    if (!isMatch)
+      throw new CustomHttpException(
+        { message: 'Invalid password or email', error: 'Bad Request' },
+        HttpStatus.UNAUTHORIZED
+      );
 
-      const access_token = this.jwtService.sign({
-        email: user.email,
+    const access_token = this.jwtService.sign({
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      sub: user.id,
+    });
+
+    const responsePayload = {
+      access_token,
+      data: {
         first_name: user.first_name,
         last_name: user.last_name,
-        sub: user.id,
-      });
+        email: user.email,
+        id: user.id,
+      },
+    };
 
-      const responsePayload = {
-        access_token,
-        data: {
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          id: user.id,
-        },
-      };
-
-      return { message: 'Login successful', ...responsePayload };
-    } catch (loginError) {
-      Logger.log('AuthenticationServiceError ~ passwordloginError ~', loginError);
-      throw new HttpException(
-        {
-          message: ERROR_OCCURED,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+    return { message: 'Login successful', ...responsePayload };
   }
 }
