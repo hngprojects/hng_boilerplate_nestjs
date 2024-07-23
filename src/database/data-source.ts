@@ -1,7 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as dotenv from 'dotenv';
-import { User } from '../entities/user.entity';
 
 dotenv.config();
 
@@ -13,7 +12,7 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
-  entities: [User],
+  entities: [process.env.DB_ENTITIES],
   migrations: [process.env.DB_MIGRATIONS],
   synchronize: isDevelopment,
   migrationsTableName: 'migrations',
@@ -23,7 +22,6 @@ export async function initializeDataSource() {
   if (!dataSource.isInitialized) {
     await dataSource.initialize();
   }
-  console.log('initialized');
   return dataSource;
 }
 
