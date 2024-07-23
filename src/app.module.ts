@@ -10,7 +10,8 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import authConfig from 'config/auth.config';
+import authConfig from '../config/auth.config';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
 
 @Module({
   providers: [
@@ -57,6 +58,7 @@ import authConfig from 'config/auth.config';
     SeedingModule,
     AuthModule,
     UserModule,
+    OrganisationsModule,
   ],
   controllers: [HealthController],
 })
