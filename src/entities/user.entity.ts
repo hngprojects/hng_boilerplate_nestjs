@@ -1,6 +1,6 @@
 import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Parent } from '../../../database/entities/parent.entity';
+import { Parent } from './parent.entity';
 
 @Entity()
 export class User extends Parent {
