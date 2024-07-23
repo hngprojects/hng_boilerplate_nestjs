@@ -9,8 +9,6 @@ import { Repository } from 'typeorm';
 import AuthenticationService from './auth.service';
 import UserService from '../user/user.service';
 
-
-
 @Module({
   controllers: [RegistrationController],
   providers: [AuthenticationService, Repository, UserService],
@@ -19,8 +17,8 @@ import UserService from '../user/user.service';
     PassportModule,
     JwtModule.register({
       global: true,
-      secret: (appConfig()).jwtSecret,
-      signOptions: { expiresIn: `${(appConfig()).jwtExpiry}s` },
+      secret: appConfig().jwtSecret,
+      signOptions: { expiresIn: `${appConfig().jwtExpiry}s` },
     }),
   ],
 })
