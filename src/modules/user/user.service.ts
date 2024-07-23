@@ -3,7 +3,7 @@ import { User } from './entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
-import UserIdentifierOptions from './options/UserIdentifierOptions';
+import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
 
 
@@ -30,7 +30,7 @@ export default class UserService {
     return user
   }
 
-  async getUserRecord(identifierOptions: UserIdentifierOptions) {
+  async getUserRecord(identifierOptions: UserIdentifierOptionsType) {
     const { identifier, identifierType } = identifierOptions
 
     const GetRecord = {
