@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import Utils from '../../shared/utils';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async login(loginDto: LoginDto): Promise<{}> {
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
 
     const user = await this.usersRepository.findOneBy({ email });

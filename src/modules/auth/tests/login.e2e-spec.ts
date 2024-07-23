@@ -45,7 +45,7 @@ describe('AuthController (e2e)', () => {
     await app.close();
   });
 
-  it('/api/v1/auth/login (POST) - success', async () => {
+  it('should login user and return appropriate response if correct credentials', async () => {
     mockUserRepository.findOneBy.mockResolvedValue(mockUser);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
 
@@ -59,7 +59,7 @@ describe('AuthController (e2e)', () => {
     expect(response.body.data).toBeDefined();
   });
 
-  it('/api/v1/auth/login (POST) - invalid email/password', async () => {
+  it('should return an error if invalid email', async () => {
     mockUserRepository.findOneBy.mockResolvedValue(null);
 
     const response = await request(app.getHttpServer())
@@ -70,7 +70,7 @@ describe('AuthController (e2e)', () => {
     expect(response.body.message).toBe('Invalid email or Password');
   });
 
-  it('/api/v1/auth/login (POST) - invalid password', async () => {
+  it('should return an error if invalid password', async () => {
     mockUserRepository.findOneBy.mockResolvedValue(mockUser);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
 
