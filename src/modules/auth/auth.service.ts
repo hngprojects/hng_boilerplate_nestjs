@@ -1,12 +1,12 @@
 import { ConflictException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
-import { CustomHttpException } from 'src/shared/custom-http-filter';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
-import Utils from '../../shared/utils';
+import Utils from '../../helpers/utils';
 import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
