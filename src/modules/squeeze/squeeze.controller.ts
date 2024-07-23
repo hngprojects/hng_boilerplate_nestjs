@@ -4,7 +4,7 @@ import { CreateSqueezeDto } from './dto/create-squeeze.dto';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 
-@Controller('squeezes')
+@Controller('squeeze')
 export class SqueezeController {
   constructor(private readonly squeezeService: SqueezeService) {}
 

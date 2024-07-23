@@ -5,6 +5,9 @@ export class Squeeze {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ unique: true, nullable: false })
+  email: string;
+
   @Column({ nullable: false })
   first_name: string;
 
@@ -23,7 +26,7 @@ export class Squeeze {
   @Column({ nullable: false })
   company: string;
 
-  @Column({ nullable: false })
+  @Column('simple-array')
   interest: string[];
 
   @Column({ nullable: false })

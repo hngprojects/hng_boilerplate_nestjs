@@ -66,7 +66,7 @@ describe('SqueezeController', () => {
       mockSqueezeRepository.create.mockReturnValue(squeeze);
       mockSqueezeRepository.save.mockResolvedValue(squeeze);
 
-      const response = await request(app.getHttpServer()).post('/squeezes').send(createSqueezeDto).expect(201);
+      const response = await request(app.getHttpServer()).post('/squeeze').send(createSqueezeDto).expect(201);
 
       expect(response.body.message).toContain('Your request has been received. You will get a template shortly.');
       expect(mockSqueezeRepository.create).toHaveBeenCalledWith(createSqueezeDto);
@@ -85,7 +85,7 @@ describe('SqueezeController', () => {
         interests: [],
       };
 
-      const response = await request(app.getHttpServer()).post('/squeezes').send(createSqueezeDto).expect(400);
+      const response = await request(app.getHttpServer()).post('/squeeze').send(createSqueezeDto).expect(400);
 
       expect(response.body.message).toContain('Failed to submit your request');
     });
