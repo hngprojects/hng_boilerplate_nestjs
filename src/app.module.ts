@@ -8,6 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import authConfig from 'config/auth.config';
 
 @Module({
   providers: [
@@ -34,7 +37,7 @@ import HealthController from './health.controller';
        */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
-      load: [serverConfig],
+      load: [serverConfig, authConfig],
       /**
        * See ".env.local" file to list all environment variables needed by the app
        */
@@ -52,6 +55,8 @@ import HealthController from './health.controller';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [HealthController],
 })
