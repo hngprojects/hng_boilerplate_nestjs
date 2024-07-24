@@ -1,6 +1,9 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as dotenv from 'dotenv';
+import { ProductCategory } from '../modules/product-category/entities/product-category.entity';
+import { User } from '../modules/user/entities/user.entity';
+import { Product } from '../modules/products/entities/product.entity';
 
 dotenv.config();
 
@@ -12,7 +15,7 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
-  entities: [process.env.DB_ENTITIES],
+  entities: [Product, User, ProductCategory],
   migrations: [process.env.DB_MIGRATIONS],
   synchronize: isDevelopment,
   migrationsTableName: 'migrations',

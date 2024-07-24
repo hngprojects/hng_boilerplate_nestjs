@@ -1,7 +1,7 @@
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Product } from 'src/modules/products/entities/product.entity';
+import { Product } from '../../products/entities/product.entity';
 
 @Entity()
 export class User extends AbstractBaseEntity {

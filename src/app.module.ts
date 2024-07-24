@@ -12,7 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
-import authConfig from 'config/auth.config';
+import authConfig from '../config/auth.config';
 
 @Module({
   providers: [
