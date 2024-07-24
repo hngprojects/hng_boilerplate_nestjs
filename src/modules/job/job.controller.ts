@@ -11,7 +11,7 @@ export class JobController {
 
   @ApiOperation({ summary: 'Create Job Listing' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Job created successfully',
     type: CreateJobDTO,
   })
