@@ -1,4 +1,3 @@
-// src/timezones/dto/create-timezone.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTimezoneDto {
