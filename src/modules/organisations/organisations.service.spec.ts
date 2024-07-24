@@ -56,7 +56,7 @@ describe('OrganisationsService', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('creation of an organisation', async () => {
+    it('should create an organisation', async () => {
       jest.spyOn(organisationRepository, 'findBy').mockResolvedValue(null);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue({
         ...orgMock.owner,
