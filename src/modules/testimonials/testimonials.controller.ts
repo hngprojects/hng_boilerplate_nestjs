@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
+import { Body, Controller, Delete, HttpStatus, Param, ParseUUIDPipe, Post, Req, UseFilters } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { CustomExceptionFilter } from 'src/helpers/custom-exception.filter';
@@ -30,6 +30,17 @@ export class TestimonialsController {
       status: 'success',
       message: 'Testimonial created successfully',
       data,
+    };
+  }
+
+  @Delete(':id')
+  async deleteTestimonial(@Param('id', ParseUUIDPipe) id: string) {
+    await this.testimonialsService.deleteTestimonial(id);
+
+    return {
+      success: true,
+      message: 'Testimonial deleted successfully',
+      status_code: HttpStatus.OK,
     };
   }
 }

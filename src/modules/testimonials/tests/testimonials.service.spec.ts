@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -88,6 +88,38 @@ describe('TestimonialsService', () => {
       jest.spyOn(testimonialRepository, 'save').mockRejectedValue(error);
 
       await expect(service.create(createTestimonialDto, userId)).rejects.toThrow(error);
+    });
+  });
+
+  describe('Delete testimonial', () => {
+    beforeEach(() => {
+      jest.spyOn(testimonialRepository, 'findOneBy').mockImplementationOnce(async ({ id }: { id: string }) => {
+        if (id === 'correct-id') {
+          return { id } as Testimonial;
+        } else {
+          return null;
+        }
+      });
+      jest.spyOn(testimonialRepository, 'delete').mockResolvedValueOnce({ affected: 1, raw: '' });
+    });
+
+    it('Should throw error, Testimonial not found', async () => {
+      try {
+        await service.deleteTestimonial('wrong-id');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect((error as NotFoundException).getResponse()).toEqual({
+          success: false,
+          message: 'Testimonial not found',
+          status_code: HttpStatus.NOT_FOUND,
+        });
+        expect(jest.spyOn(testimonialRepository, 'delete')).not.toHaveBeenCalled();
+      }
+    });
+
+    it('should delete testimonial', async () => {
+      await service.deleteTestimonial('correct-id');
+      expect(jest.spyOn(testimonialRepository, 'delete')).toHaveBeenCalled();
     });
   });
 });

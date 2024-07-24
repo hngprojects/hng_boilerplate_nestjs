@@ -39,4 +39,16 @@ export class TestimonialsService {
       created_at: new Date(),
     };
   }
+
+  async deleteTestimonial(id: string) {
+    const testimonial = await this.testimonialRepository.findOneBy({ id });
+
+    if (!testimonial)
+      throw new NotFoundException({
+        success: false,
+        message: 'Testimonial not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    await this.testimonialRepository.delete({ id });
+  }
 }
