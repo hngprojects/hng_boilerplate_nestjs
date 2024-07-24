@@ -1,6 +1,7 @@
-import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Testimonial } from '../../testimonials/entities/testimonials.entity';
 
 @Entity()
 export class User extends AbstractBaseEntity {
@@ -29,4 +30,7 @@ export class User extends AbstractBaseEntity {
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
+
+  @OneToMany(() => Testimonial, testimonial => testimonial.user)
+  testimonials: Testimonial[];
 }
