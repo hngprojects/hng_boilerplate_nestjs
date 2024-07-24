@@ -72,6 +72,8 @@ export class OrganisationsService {
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
+
+  //// Get Organisation by ID started here
   async getOrganisationById(id: string, userId: string): Promise<Organisation> {
     try {
       const organisation = await this.organisationRepository.findOne({
