@@ -16,17 +16,19 @@ export default class RegistrationController {
   }
 
   @Post('token/refresh')
-  public async refreshToken(@Body('refreshToken') refreshToken: string, @Res() response: Response): Promise<any> {
-    if (!refreshToken) {
-      return response.status(HttpStatus.BAD_REQUEST).send({ message: 'Refresh token is required' });
+  public async refreshToken(@Body('refresh_token') refresh_token: string, @Res() response: Response): Promise<any> {
+    if (!refresh_token) {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .send({ status_code: HttpStatus.BAD_REQUEST, message: 'Refresh token is required' });
     }
 
-    const tokenResponse = await this.authService.refreshAccessToken(refreshToken);
+    const tokenResponse = await this.authService.refreshAccessToken(refresh_token);
 
     if (tokenResponse.status_code === HttpStatus.UNAUTHORIZED) {
-      return response.status(HttpStatus.UNAUTHORIZED).send({ message: tokenResponse.message });
+      return response.status(HttpStatus.UNAUTHORIZED).send(tokenResponse);
     }
 
-    return response.status(HttpStatus.OK).send({ accessToken: tokenResponse.accessToken });
+    return response.status(tokenResponse.status_code).send(tokenResponse);
   }
 }

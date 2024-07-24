@@ -49,11 +49,11 @@ export default class AuthenticationService {
         last_name: user.last_name,
         sub: user.id,
       });
-      const refreshToken = this.generateRefreshToken(user);
+      const refreshToken = await this.generateRefreshToken(user);
 
       const responsePayload = {
         accessToken: accessToken,
-        refreshToken: refreshToken,
+        refresh_token: refreshToken,
         user: {
           first_name: user.first_name,
           last_name: user.last_name,
@@ -115,8 +115,8 @@ export default class AuthenticationService {
     }
   }
 
-  async refreshAccessToken(refreshToken: string) {
-    const user = await this.validateRefreshToken(refreshToken);
+  async refreshAccessToken(refresh_token: string) {
+    const user = await this.validateRefreshToken(refresh_token);
     if (!user) {
       return {
         status_code: HttpStatus.UNAUTHORIZED,
@@ -125,7 +125,11 @@ export default class AuthenticationService {
     }
     const accessToken = await this.generateAccessToken(user);
     return {
-      accessToken,
+      status_code: HttpStatus.OK,
+      message: 'Access Token refreshed successfully',
+      data: {
+        access_token: accessToken,
+      },
     };
   }
 }

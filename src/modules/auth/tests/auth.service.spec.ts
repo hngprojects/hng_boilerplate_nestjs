@@ -84,6 +84,7 @@ describe('Authentication Service tests', () => {
       updated_at: new Date(),
     };
     const accessToken = 'fake-jwt-token';
+    const refresh_token = 'fake-jwt-token';
 
     jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(null);
     jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(user);
@@ -98,7 +99,8 @@ describe('Authentication Service tests', () => {
       status_code: HttpStatus.CREATED,
       message: USER_CREATED_SUCCESSFULLY,
       data: {
-        token: accessToken,
+        accessToken: accessToken,
+        refresh_token: refresh_token,
         user: {
           first_name: user.first_name,
           last_name: user.last_name,
@@ -154,7 +156,13 @@ describe('Authentication Service tests', () => {
 
       const response = await authService.refreshAccessToken(validToken);
 
-      expect(response).toEqual({ accessToken: newAccessToken });
+      expect(response).toEqual({
+        data: {
+          access_token: newAccessToken,
+        },
+        message: 'Access Token refreshed successfully',
+        status_code: HttpStatus.OK,
+      });
     });
   });
 });
