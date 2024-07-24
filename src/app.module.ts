@@ -7,6 +7,9 @@ import { LoggerModule } from 'nestjs-pino';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
+// import { ProductModule } from './product/product.module';
+// import { BlogModule } from './blog/blog.module';
+import { BlogModule } from './modules/blog/blog.module';
 import HealthController from './health.controller';
 
 @Module({
@@ -52,6 +55,7 @@ import HealthController from './health.controller';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    BlogModule,
   ],
   controllers: [HealthController],
 })

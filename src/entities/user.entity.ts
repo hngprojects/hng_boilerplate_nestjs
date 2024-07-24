@@ -12,7 +12,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Product } from './product.entity';
 import { Organisation } from './organisation.entity';
 import { Profile } from './profile.entity';
