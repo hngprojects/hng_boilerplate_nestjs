@@ -19,7 +19,7 @@ export const createMockOrganisation = (): Organisation => {
     owned_organisations: [],
     created_organisations: [],
     user_type: UserType.ADMIN,
-    products: [] as Product[], // Add the products property
+    products: [] as Product[],
   };
 
   return {

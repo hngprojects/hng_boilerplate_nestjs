@@ -2,7 +2,6 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { ProductCategory } from '../../product-category/entities/product-category.entity';
 import { ApiProperty } from '@nestjs/swagger';
-
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()

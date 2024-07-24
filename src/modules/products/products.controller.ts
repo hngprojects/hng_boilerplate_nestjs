@@ -1,10 +1,7 @@
-import { Controller, Post, Body, Delete, Param, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Param, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { ApiTags, ApiBody, ApiParam, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthGuard } from '../../guards/auth.guard';
+import { ApiTags, ApiParam, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
-@UseGuards(AuthGuard)
 @ApiBearerAuth()
 @ApiTags('Products')
 @Controller('products')
