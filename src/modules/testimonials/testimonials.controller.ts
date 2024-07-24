@@ -1,11 +1,12 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import UserService from '../user/user.service';
 import { CreateTestimonialResponseDto } from './dto/create-testimonial-response.dto';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
 
+@ApiBearerAuth()
 @ApiTags('Testimonials')
 @Controller('testimonials')
 export class TestimonialsController {
