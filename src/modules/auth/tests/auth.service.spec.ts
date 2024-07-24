@@ -15,6 +15,10 @@ import {
 } from '../../../helpers/SystemMessages';
 import { User, UserType } from '../../user/entities/user.entity';
 import { Otp } from '../../otp/entities/otp.entity';
+import UserResponseDTO from '../../user/dto/user-response.dto';
+import { LoginDto } from '../dto/login.dto';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import * as bcrypt from 'bcrypt';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -137,6 +141,90 @@ describe('AuthenticationService', () => {
       userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
 
       await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
+    });
+  });
+
+  describe('loginUser', () => {
+    it('should return login response if credentials are valid', async () => {
+      const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
+      const user: UserResponseDTO = {
+        id: '1',
+        email: loginDto.email,
+        first_name: 'Test',
+        last_name: 'User',
+        password: await bcrypt.hash('password123', 10),
+        is_active: true,
+        attempts_left: 2,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      jwtServiceMock.sign.mockReturnValue('jwt_token');
+
+      const result = await service.loginUser(loginDto);
+
+      expect(result).toEqual({
+        message: 'Login successful',
+        access_token: 'jwt_token',
+        data: {
+          user: {
+            first_name: 'Test',
+            last_name: 'User',
+            email: 'test@example.com',
+            id: '1',
+          },
+        },
+      });
+    });
+
+    it('should throw an unauthorized error for invalid email', async () => {
+      const loginDto: LoginDto = { email: 'invalid@example.com', password: 'password123' };
+
+      userServiceMock.getUserRecord.mockResolvedValue(null);
+
+      await expect(service.loginUser(loginDto)).rejects.toThrow(
+        new CustomHttpException({ message: 'Invalid password or email', error: 'Bad Request' }, HttpStatus.UNAUTHORIZED)
+      );
+    });
+
+    it('should throw an unauthorized error for invalid password', async () => {
+      const loginDto: LoginDto = { email: 'test@example.com', password: 'wrongpassword' };
+      const user: UserResponseDTO = {
+        id: '1',
+        email: loginDto.email,
+        first_name: 'Test',
+        last_name: 'User',
+        password: await bcrypt.hash('password123', 10),
+        is_active: true,
+        attempts_left: 2,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      userServiceMock.getUserRecord.mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
+
+      await expect(service.loginUser(loginDto)).rejects.toThrow(
+        new CustomHttpException({ message: 'Invalid password or email', error: 'Bad Request' }, HttpStatus.UNAUTHORIZED)
+      );
+    });
+
+    it('should handle unexpected errors gracefully', async () => {
+      const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
+
+      userServiceMock.getUserRecord.mockRejectedValue(new Error('Unexpected error'));
+
+      await expect(service.loginUser(loginDto)).rejects.toThrow(
+        new HttpException(
+          {
+            message: 'An error occurred during login',
+            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR
+        )
+      );
     });
   });
 
