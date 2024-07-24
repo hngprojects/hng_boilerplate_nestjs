@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpException, HttpStatus, Get, Query } from '@nestjs/common';
 import { BlogService } from '../services/blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { Blog } from '../entities/blog.entity';
@@ -31,5 +31,9 @@ export class BlogController {
     }
   }
 
+  @Get('search')
+  async search(@Query('query') query: string) {
+    return this.blogService.searchBlogs(query);
+  }
   //Other blog method endpoint here
 }

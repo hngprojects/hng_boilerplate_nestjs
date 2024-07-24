@@ -3,7 +3,9 @@ import { BlogController } from '../controllers/blog.controller';
 import { BlogService } from '../services/blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { Blog } from '../entities/blog.entity';
-import { HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('BlogController', () => {
   let controller: BlogController;
@@ -73,6 +75,66 @@ describe('BlogController', () => {
           status_code: HttpStatus.BAD_REQUEST,
         });
       }
+    });
+  });
+
+  describe('Blog search', () => {
+    let blogController: BlogController;
+    let blogService: BlogService;
+    let blogRepository: Repository<Blog>;
+
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        controllers: [BlogController],
+        providers: [
+          {
+            provide: BlogService,
+            useValue: {
+              searchBlogs: jest.fn(),
+            },
+          },
+        ],
+      }).compile();
+
+      blogController = module.get<BlogController>(BlogController);
+      blogService = module.get<BlogService>(BlogService);
+      blogRepository = module.get<Repository<Blog>>(getRepositoryToken(Blog));
+    });
+
+    it('should return bad request if no query parameter is provided', async () => {
+      await expect(blogController.search('')).rejects.toThrow(BadRequestException);
+    });
+
+    it('should return an empty array if no blogs are found', async () => {
+      jest.spyOn(blogService, 'searchBlogs').mockResolvedValue([]);
+
+      const result = await blogController.search('nestjs');
+      expect(result).toEqual([]);
+    });
+
+    it('should return an array of blogs if blogs are found', async () => {
+      const mockBlogs = [
+        {
+          id: 1,
+          title: 'Backend with NestJs',
+          content: 'NestJs is a wrapper around Express but with better implementation',
+          isPublished: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          author: {},
+          comments: [],
+          category: { id: 1, name: 'Programming' },
+          topic: { id: 1, name: 'Backend' },
+        },
+      ];
+
+      jest.spyOn(blogRepository, 'createQueryBuilder').mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(mockBlogs),
+      } as any);
+
+      const result = await blogService.searchBlogs('nestjs');
+      expect(result).toEqual(mockBlogs);
     });
   });
 

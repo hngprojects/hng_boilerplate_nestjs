@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Blog } from '../entities/blog.entity';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { User } from '../../user/entities/user.entity';
@@ -34,5 +34,27 @@ export class BlogService {
     return await this.blogRepository.save(blog);
   }
 
+  async searchBlogs(query: string) {
+    if (!query)
+      return {
+        status_code: HttpStatus.BAD_REQUEST,
+        message: 'Query parameter is required!',
+      };
+    const blogs = await this.blogRepository.find({
+      where: [{ title: ILike(`%${query}%`) }, { content: ILike(`%${query}%`) }],
+      relations: ['author', 'comments', 'category', 'topic'],
+    });
+
+    if (blogs.length < 1)
+      return {
+        status_code: HttpStatus.OK,
+        message: `No blogs found for ${query}`,
+      };
+    return {
+      status_code: HttpStatus.OK,
+      message: 'success',
+      data: blogs,
+    };
+  }
   //Other blog service here
 }

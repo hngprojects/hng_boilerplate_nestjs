@@ -97,3 +97,58 @@ describe('BlogService', () => {
     });
   });
 });
+
+describe('Blog search', () => {
+  let blogService: BlogService;
+  let blogRepository: Repository<Blog>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        BlogService,
+        {
+          provide: getRepositoryToken(Blog),
+          useClass: Repository,
+        },
+      ],
+    }).compile();
+
+    blogService = module.get<BlogService>(BlogService);
+    blogRepository = module.get<Repository<Blog>>(getRepositoryToken(Blog));
+  });
+
+  it('should return an empty array if no blogs are found', async () => {
+    jest.spyOn(blogRepository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
+    } as any);
+
+    const result = await blogService.searchBlogs('nestjs');
+    expect(result).toEqual([]);
+  });
+
+  it('should return an array of blogs if blogs are found', async () => {
+    const mockBlogs = [
+      {
+        id: 1,
+        title: 'Backend with NestJs',
+        content: 'NestJs is a wrapper around Express but with better implementation',
+        isPublished: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        author: {},
+        comments: [],
+        category: { id: 1, name: 'Programming' },
+        topic: { id: 1, name: 'Backend' },
+      },
+    ];
+
+    jest.spyOn(blogRepository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue(mockBlogs),
+    } as any);
+
+    const result = await blogService.searchBlogs('nestjs');
+    expect(result).toEqual(mockBlogs);
+  });
+});
