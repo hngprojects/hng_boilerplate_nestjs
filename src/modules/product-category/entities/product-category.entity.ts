@@ -16,5 +16,5 @@ export class ProductCategory extends AbstractBaseEntity {
   description: string;
 
   @ManyToOne(() => Product, products => products.category)
-  product: Product;
+  product: Product[];
 }

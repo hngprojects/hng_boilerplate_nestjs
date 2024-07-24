@@ -10,6 +10,7 @@ export enum UserType {
   ADMIN = 'admin',
   USER = 'vendor',
 }
+import { Product } from 'src/modules/products/entities/product.entity';
 
 @Entity({ name: 'users' })
 export class User extends AbstractBaseEntity {
@@ -52,6 +53,8 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
+  @OneToMany(() => Product, product => product.user, { cascade: true })
+  products: Product[];
 
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];

@@ -27,5 +27,5 @@ export class Product extends AbstractBaseEntity {
   user: User;
 
   @OneToMany(() => ProductCategory, category => category.product)
-  category: ProductCategory[];
+  category: ProductCategory;
 }

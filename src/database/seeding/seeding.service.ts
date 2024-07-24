@@ -3,6 +3,8 @@ import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
+import { Product } from 'src/modules/products/entities/product.entity';
+import { ProductCategory } from 'src/modules/product-category/entities/product-category.entity';
 
 @Injectable()
 export class SeedingService {
@@ -12,6 +14,8 @@ export class SeedingService {
     const userRepository = this.dataSource.getRepository(User);
     const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
+    const productRepository = this.dataSource.getRepository(Product);
+    const categoryRepository = this.dataSource.getRepository(ProductCategory);
 
     try {
       const existingUsers = await userRepository.count();
@@ -75,8 +79,54 @@ export class SeedingService {
 
         await organisationRepository.save([or1, or2]);
         const savedOrganisations = await organisationRepository.find();
+
         if (savedOrganisations.length !== 2) {
           throw new Error('Failed to create all organisations');
+        }
+        
+        const c1 = categoryRepository.create({
+          name: 'Category 1',
+          description: 'Description for Category 1',
+        });
+        const c2 = categoryRepository.create({
+          name: 'Category 2',
+          description: 'Description for Category 2',
+        });
+        const c3 = categoryRepository.create({
+          name: 'Category 3',
+          description: 'Description for Category 3',
+        });
+
+        await categoryRepository.save([c1, c2, c3]);
+
+        const p1 = productRepository.create({
+          product_name: 'Product 1',
+          description: 'Description for Product 1',
+          quantity: 10,
+          price: 100,
+          user: u1,
+          category: c1, 
+        });
+        const p2 = productRepository.create({
+          product_name: 'Product 2',
+          description: 'Description for Product 2',
+          quantity: 20,
+          price: 200,
+          user: u2,
+          category: c3, // Attach category c3 to p2
+        });
+
+        await productRepository.save([p1, p2]);
+
+        // Update categories with the associated products
+        c1.product = [p1];
+        c2.product = [p1];
+        c3.product = [p2];
+        await categoryRepository.save([c1, c2, c3]);
+
+        const savedProducts = await productRepository.find();
+        if (savedProducts.length !== 2) {
+          throw new Error('Failed to create all products');
         }
 
         const inv1 = inviteRepository.create({
