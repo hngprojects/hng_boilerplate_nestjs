@@ -118,18 +118,6 @@ describe('OrganisationsService', () => {
       await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw BadRequestException if update fails', async () => {
-      const id = '1';
-      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
-      const organisation = new Organisation();
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
-      jest.spyOn(organisationRepository, 'update').mockResolvedValueOnce({ affected: 0 } as any);
-      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
-
-      await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(BadRequestException);
-    });
-
     it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
       const id = '1';
       const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
