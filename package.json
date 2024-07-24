@@ -47,7 +47,6 @@
     "class-validator": "^0.14.1",
     "joi": "^17.6.0",
     "nestjs-pino": "^4.1.0",
-    "nodemailer": "^6.9.14",
     "passport": "^0.7.0",
     "nodemailer": "^6.9.14",
     "passport-jwt": "^4.0.1",
