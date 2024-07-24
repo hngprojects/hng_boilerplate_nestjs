@@ -4,15 +4,22 @@ import { Repository } from 'typeorm';
 import { Job } from '../entities/job.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import CreateNewJobOption from '../options/CreateNewJobOption';
+import { Organisation } from '../../organisations/entities/organisations.entity';
+import { OrganisationsService } from '../../organisations/organisations.service';
 
-// Mock repository
+// Mock repositories
 const mockJobRepository = {
   save: jest.fn(),
 };
 
+const mockOrganisationService = {
+  findById: jest.fn(),
+};
+
 describe('JobService', () => {
   let service: JobService;
-  let repository: Repository<Job>;
+  let jobRepository: Repository<Job>;
+  let organisationService: OrganisationsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,11 +29,16 @@ describe('JobService', () => {
           provide: getRepositoryToken(Job),
           useValue: mockJobRepository,
         },
+        {
+          provide: OrganisationsService,
+          useValue: mockOrganisationService,
+        },
       ],
     }).compile();
 
     service = module.get<JobService>(JobService);
-    repository = module.get<Repository<Job>>(getRepositoryToken(Job));
+    jobRepository = module.get<Repository<Job>>(getRepositoryToken(Job));
+    organisationService = module.get<OrganisationsService>(OrganisationsService);
   });
 
   it('should be defined', () => {
@@ -47,12 +59,20 @@ describe('JobService', () => {
       const jobEntity = new Job();
       Object.assign(jobEntity, jobData);
 
-      mockJobRepository.save.mockResolvedValue(jobEntity);
+      const organisation = new Organisation();
+      organisation.id = 'Tech Company';
+      mockOrganisationService.findById.mockResolvedValue(organisation);
+
+      // Adjust the expected job entity
+      const expectedJobEntity = { ...jobEntity, organisation };
+
+      mockJobRepository.save.mockResolvedValue(expectedJobEntity);
 
       const result = await service.createJob(jobData);
 
-      expect(repository.save).toHaveBeenCalledWith(jobEntity);
-      expect(result).toEqual(jobEntity);
+      expect(organisationService.findById).toHaveBeenCalledWith(jobData.organisation);
+      expect(jobRepository.save).toHaveBeenCalledWith(expectedJobEntity);
+      expect(result).toEqual(expectedJobEntity);
     });
   });
 });

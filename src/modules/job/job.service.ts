@@ -11,8 +11,7 @@ export class JobService {
   constructor(
     @InjectRepository(Job)
     private jobRepository: Repository<Job>,
-    @InjectRepository(Organisation)
-    private organisationService: OrganisationsService
+    private organisationService: OrganisationsService // Inject OrganisationsService directly
   ) {}
 
   async createJob(job: CreateNewJobOption) {

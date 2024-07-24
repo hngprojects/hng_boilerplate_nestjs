@@ -53,9 +53,8 @@ describe('JobController', () => {
 
       expect(service.createJob).toHaveBeenCalledWith(createJobDto);
       expect(result).toEqual({
-        status_code: HttpStatus.CREATED,
-        message: 'Job listing created successfully',
-        data: job,
+        message: 'Job Listing Created successfully',
+        job,
       });
     });
   });
