@@ -17,8 +17,7 @@ import UserService from '../user/user.service';
 import * as speakeasy from 'speakeasy';
 import { Verify2FADto } from './dto/verify-2fa.dto';
 import { LoginDto } from './dto/login.dto';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
-import { error } from 'console';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export default class AuthenticationService {
