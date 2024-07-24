@@ -27,6 +27,6 @@ export class Squeeze extends AbstractBaseEntity {
   @Column('simple-array')
   interests: string[];
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   referral_source: string;
 }
