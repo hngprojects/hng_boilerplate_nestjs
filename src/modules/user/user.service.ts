@@ -23,7 +23,7 @@ export default class UserService {
     await this.userRepository.save(newUser);
   }
 
-  private async getUserByEmail(email: string) {
+  async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
     return user;
   }
