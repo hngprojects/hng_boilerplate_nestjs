@@ -6,6 +6,7 @@ import { User } from '../entities/user.entity';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserResponseDTO from '../dto/user-response.dto';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
+import { HttpException } from '@nestjs/common';
 
 describe('UserService', () => {
   let service: UserService;
@@ -94,6 +95,26 @@ describe('UserService', () => {
       });
 
       await expect(service.getUserRecord(identifierOptions)).rejects.toThrow('Test error');
+    });
+  });
+
+  describe('saveUser', () => {
+    it('should save a user successfully', async () => {
+      const user = {
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        password: 'password',
+      };
+      const userResponseDto: UserResponseDTO = {
+        id: 'some-uuid-here',
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+      mockUserRepository.save.mockResolvedValue(userResponseDto);
+      const result = await service.saveUser(user);
+      expect(result).toEqual(undefined);
     });
   });
 });

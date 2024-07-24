@@ -2,7 +2,6 @@ import { BeforeInsert, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 
-@Entity()
 export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
   first_name: string;
@@ -18,6 +17,15 @@ export class User extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   is_active: boolean;
+
+  @Column({ nullable: true })
+  two_factor_secret?: string;
+
+  @Column({ default: false })
+  is_two_factor_enabled: boolean;
+
+  @Column('simple-array', { nullable: true })
+  backup_codes: string[];
 
   @Column({ nullable: true })
   attempts_left: number;

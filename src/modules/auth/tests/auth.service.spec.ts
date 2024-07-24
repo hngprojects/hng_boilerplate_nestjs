@@ -3,11 +3,21 @@ import { JwtService } from '@nestjs/jwt';
 import UserService from '../../user/user.service';
 import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
+import {
+  ERROR_OCCURED,
+  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+  USER_ACCOUNT_EXIST,
+  USER_CREATED_SUCCESSFULLY,
+} from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import AuthenticationService from '../auth.service';
-import UserResponseDTO from '../../user/dto/user-response.dto';
+import UserResponseDTO from '../../../modules/user/dto/user-response.dto';
+import * as speakeasy from 'speakeasy';
+import UserInterface from '../../../modules/user/interfaces/UserInterface';
+import { Verify2FADto } from '../dto/verify-2fa.dto';
+
+jest.mock('speakeasy');
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
@@ -116,5 +126,66 @@ describe('Authentication Service tests', () => {
         HttpStatus.INTERNAL_SERVER_ERROR
       )
     );
+  });
+
+  describe('verify2fa', () => {
+    it('should throw error if totp code is incorrect', () => {
+      const verify2faDto: Verify2FADto = { totp_code: '12345' };
+      const userId = 'some-uuid-here';
+
+      const user: UserResponseDTO = {
+        id: userId,
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        attempts_left: 2,
+        is_active: true,
+        two_factor_secret: 'some-2fa-secret',
+        is_two_factor_enabled: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(user);
+      (speakeasy.totp.verify as jest.Mock).mockReturnValue(false);
+
+      expect(authService.verify2fa(verify2faDto, userId)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should enable 2fa if successful', async () => {
+      const verify2faDto: Verify2FADto = { totp_code: '12345' };
+      const userId = 'some-uuid-here';
+
+      const user: UserResponseDTO = {
+        id: userId,
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        attempts_left: 2,
+        is_active: true,
+        two_factor_secret: 'some-2fa-secret',
+        is_two_factor_enabled: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      const codes: string[] = ['98765432', '87654321', '76543210', '65432109', '54321098'];
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(user);
+      jest.spyOn(userService, 'saveUser').mockResolvedValueOnce(undefined);
+      jest.spyOn(authService, 'generateBackupCodes').mockReturnValue(codes);
+      (speakeasy.totp.verify as jest.Mock).mockReturnValue(true);
+
+      const result = await authService.verify2fa(verify2faDto, userId);
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+        data: { backup_codes: codes },
+      });
+    });
+  });
+
+  describe('generateBackupCodes', () => {
+    it('should generate random backup codes when called', () => {
+      const codes = authService.generateBackupCodes();
+      expect(codes).toBeInstanceOf(Array);
+    });
   });
 });
