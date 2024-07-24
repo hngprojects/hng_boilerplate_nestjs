@@ -35,7 +35,7 @@ describe('EmailService', () => {
     const token = 'mike';
     const link = `${url}?token=${token}`;
 
-    await service.sendUserConfirmation(email, url, token);
+    await service.sendUserConfirmationMail(email, url, token);
 
     expect(mailerService.sendMail).toHaveBeenCalledWith({
       to: email,
@@ -54,7 +54,7 @@ describe('EmailService', () => {
     const token = 'mike';
     const link = `${url}?token=${token}`;
 
-    await service.sendForgotPassword(email, url, token);
+    await service.sendForgotPasswordMail(email, url, token);
 
     expect(mailerService.sendMail).toHaveBeenCalledWith({
       to: email,
