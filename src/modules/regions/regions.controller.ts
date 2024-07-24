@@ -1,6 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { RegionsService } from './regions.service';
-import { Region } from './entities/region.entity';
+import { Regions } from './entities/region.entity';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('regions')

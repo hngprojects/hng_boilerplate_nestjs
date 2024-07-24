@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
-import { Region } from '../../modules/regions/entities/region.entity';
+import { Regions } from '../../modules/regions/entities/region.entity';
 
 @Injectable()
 export class SeedingService {
