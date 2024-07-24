@@ -12,6 +12,8 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { SessionService } from '../session/session.service';
+import { CreateSessionDto } from '../session/dto/create-session.dto';
 import * as useragent from 'useragent';
 import { Request } from 'express';
 
@@ -19,7 +21,8 @@ import { Request } from 'express';
 export default class AuthenticationService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private sessionService: SessionService
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -110,6 +113,14 @@ export default class AuthenticationService {
 
       const access_token = this.jwtService.sign({ id: user.id });
 
+      const createSessionDto: CreateSessionDto = {
+        user_id: user.id,
+        ...deviceInfo,
+        expires_at: new Date(Date.now() + 3600 * 1000),
+      };
+
+      const session = await this.sessionService.createSession(createSessionDto);
+
       const responsePayload = {
         access_token,
         data: {
@@ -118,7 +129,9 @@ export default class AuthenticationService {
             last_name: user.last_name,
             email: user.email,
             id: user.id,
+            last_login_device: deviceInfo,
           },
+          session_id: session.id,
         },
       };
 

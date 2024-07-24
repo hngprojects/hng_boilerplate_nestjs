@@ -23,7 +23,7 @@ export class CreateSessionDto {
   device_brand: string;
 
   @IsString()
-  device_mode: string;
+  device_model: string;
 
   @IsNotEmpty()
   expires_at: Date;
