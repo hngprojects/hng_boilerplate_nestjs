@@ -8,10 +8,11 @@ import appConfig from '../../../config/auth.config';
 import { Repository } from 'typeorm';
 import AuthenticationService from './auth.service';
 import UserService from '../user/user.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   controllers: [RegistrationController],
-  providers: [AuthenticationService, Repository, UserService],
+  providers: [AuthenticationService, Repository, UserService, JwtStrategy],
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
@@ -22,4 +23,4 @@ import UserService from '../user/user.service';
     }),
   ],
 })
-export class AuthModule { }
+export class AuthModule {}

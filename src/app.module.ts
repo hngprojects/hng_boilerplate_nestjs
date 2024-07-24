@@ -11,6 +11,7 @@ import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import authConfig from 'config/auth.config';
+import { NotificationSettingsModule } from './settings/notification-settings/notification-settings.module';
 
 @Module({
   providers: [
@@ -57,6 +58,7 @@ import authConfig from 'config/auth.config';
     SeedingModule,
     AuthModule,
     UserModule,
+    NotificationSettingsModule,
   ],
   controllers: [HealthController],
 })
