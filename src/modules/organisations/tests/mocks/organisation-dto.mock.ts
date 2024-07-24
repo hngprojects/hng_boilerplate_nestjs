@@ -1,14 +1,20 @@
 import { OrganisationRequestDto } from '../../dto/organisation.dto';
 
-const OrgRequestMockdto: OrganisationRequestDto = {
-  name: 'John & Co',
-  description: 'An imports organisation',
-  email: 'johnCo@exmaple.com',
-  industry: 'Import',
-  type: 'General',
-  country: 'Nigeria',
-  address: 'Street 101 Building 26',
-  state: 'Lagos',
+export const createMockOrganisationRequestDto = (
+  overrides?: Partial<OrganisationRequestDto>
+): OrganisationRequestDto => {
+  const defaultMock: OrganisationRequestDto = {
+    name: 'John & Co',
+    description: 'An imports organisation',
+    email: 'johnCo@example.com',
+    industry: 'Import',
+    type: 'General',
+    country: 'Nigeria',
+    address: 'Street 101 Building 26',
+    state: 'Lagos',
+  };
+
+  return { ...defaultMock, ...overrides };
 };
 
-export { OrgRequestMockdto };
+export const OrgRequestMockDto = createMockOrganisationRequestDto();
