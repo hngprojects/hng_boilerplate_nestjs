@@ -1,13 +1,15 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
 import UserService from './user.service';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Patch(':userId')
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async updateUser(
     @Param('userId') userId: string,
