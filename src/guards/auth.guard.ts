@@ -1,8 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, HttpStatus } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import appConfig from '../../config/auth.config';
+import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../helpers/skipAuth';
 import { UNAUTHENTICATED_MESSAGE } from '../helpers/SystemMessages';
 
@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
     const isPublicRoute = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -44,16 +44,15 @@ export class AuthGuard implements CanActivate {
           status_code: HttpStatus.UNAUTHORIZED,
         });
       }
-
       request['user'] = payload;
       request['token'] = token;
-      return true;
-    } catch (e) {
+    } catch {
       throw new UnauthorizedException({
         message: UNAUTHENTICATED_MESSAGE,
         status_code: HttpStatus.UNAUTHORIZED,
       });
     }
+    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
@@ -61,8 +60,11 @@ export class AuthGuard implements CanActivate {
     return type === 'Bearer' ? token : undefined;
   }
 
-  private isExpiredToken(token: any): boolean {
+  private isExpiredToken(token: any) {
     const currentTime = Math.floor(Date.now() / 1000);
-    return token.exp < currentTime;
+    if (token.exp < currentTime) {
+      return true;
+    }
+    return false;
   }
 }
