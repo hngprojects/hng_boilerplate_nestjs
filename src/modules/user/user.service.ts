@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
+import UserInterface from './interfaces/UserInterface';
 
 @Injectable()
 export default class UserService {
@@ -17,6 +18,10 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, user);
     await this.userRepository.save(newUser);
+  }
+
+  async createUserSecret(user: UserResponseDTO) {
+    await this.userRepository.save(user);
   }
 
   private async getUserByEmail(email: string) {

@@ -11,6 +11,7 @@ import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import authConfig from 'config/auth.config';
+import { AuthGuard } from './guards/auth.guards';
 
 @Module({
   providers: [
@@ -25,6 +26,10 @@ import authConfig from 'config/auth.config';
           whitelist: true,
           forbidNonWhitelisted: true,
         }),
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: AuthGuard,
     },
   ],
   imports: [
@@ -61,3 +66,5 @@ import authConfig from 'config/auth.config';
   controllers: [HealthController],
 })
 export class AppModule {}
+{
+}

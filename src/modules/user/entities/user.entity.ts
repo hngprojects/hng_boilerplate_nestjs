@@ -25,6 +25,12 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true })
   time_left: number;
 
+  @Column({ nullable: true })
+  secret: string;
+
+  @Column({ default: false })
+  is_2fa_enabled: boolean;
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
