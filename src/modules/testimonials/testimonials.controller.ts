@@ -17,13 +17,12 @@ export class TestimonialsController {
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  // @AuthGuard()
   async create(
     @Body() createTestimonialDto: CreateTestimonialDto,
     @Req() req: Request
   ): Promise<CreateTestimonialResponseDto> {
-    // const { sub: userId } = req?.user as { sub: string };
-
-    const userId = 'a9fb405b-cd70-4314-8177-25b056a0cb53';
+    const { sub: userId } = req?.user as { sub: string };
 
     const data = await this.testimonialsService.create(createTestimonialDto, userId);
 
