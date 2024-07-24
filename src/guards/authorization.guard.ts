@@ -20,7 +20,6 @@ export class OwnershipGuard implements CanActivate {
     if (user.user_type === UserType.SUPER_ADMIN) {
       return true;
     }
-
     const organisation = await this.organisationRepository.findOne({
       where: { id: organisationId },
       relations: ['owner', 'creator'],
@@ -28,7 +27,7 @@ export class OwnershipGuard implements CanActivate {
     if (!organisation) {
       throw new NotFoundException('Organisation not found');
     }
-    if (organisation.owner.id === user.id || organisation.creator.id === user.id) {
+    if (organisation.owner.id === user.sub || organisation.creator.id === user.sub) {
       return true;
     }
     throw new ForbiddenException('You do not have permission to update this organisation');
