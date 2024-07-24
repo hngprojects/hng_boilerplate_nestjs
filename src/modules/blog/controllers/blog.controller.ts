@@ -10,13 +10,13 @@ export class BlogController {
   @Post()
   async create(
     @Body() createBlogDto: CreateBlogDto
-  ): Promise<{ status: string; message: string; statusCode: number; data?: Blog }> {
+  ): Promise<{ status: string; message: string; status_code: number; data?: Blog }> {
     try {
       const blog = await this.blogService.create(createBlogDto);
       return {
         status: 'success',
         message: 'Blog created successfully',
-        statusCode: HttpStatus.CREATED,
+        status_code: HttpStatus.CREATED,
         data: blog,
       };
     } catch (error) {
@@ -24,7 +24,7 @@ export class BlogController {
         {
           status: 'error',
           message: error.message || 'Error creating blog',
-          statusCode: HttpStatus.BAD_REQUEST,
+          status_code: HttpStatus.BAD_REQUEST,
         },
         HttpStatus.BAD_REQUEST
       );

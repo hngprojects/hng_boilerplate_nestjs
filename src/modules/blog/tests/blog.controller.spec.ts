@@ -47,7 +47,7 @@ describe('BlogController', () => {
       expect(await controller.create(createBlogDto)).toEqual({
         status: 'success',
         message: 'Blog created successfully',
-        statusCode: HttpStatus.CREATED,
+        status_code: HttpStatus.CREATED,
         data: blog,
       });
     });
@@ -70,7 +70,7 @@ describe('BlogController', () => {
         expect(error.response).toEqual({
           status: 'error',
           message: 'Error creating blog',
-          statusCode: HttpStatus.BAD_REQUEST,
+          status_code: HttpStatus.BAD_REQUEST,
         });
       }
     });
