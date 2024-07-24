@@ -8,7 +8,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Patch(':userId')
-  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async updateUser(
     @Request() req: { user: UserPayload },
     @Param('userId') userId: string,
