@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
-import ApiController from './api.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { EmailModule } from './modules/email/email.module';
@@ -94,6 +93,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     }),
     OrganisationsModule,
   ],
-  controllers: [HealthController, ApiController],
+  controllers: [HealthController],
 })
 export class AppModule {}
