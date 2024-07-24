@@ -24,7 +24,7 @@ export class SqueezeController {
     status: 422,
     description: 'Squeeze record for the provided email address already exists',
   })
-  async create(@Body() createSqueezeDto: CreateSqueezeDto) {
-    return await this.squeezeService.create(createSqueezeDto);
+  async createSqueeze(@Body() createSqueezeDto: CreateSqueezeDto) {
+    return await this.squeezeService.createSqueeze(createSqueezeDto);
   }
 }

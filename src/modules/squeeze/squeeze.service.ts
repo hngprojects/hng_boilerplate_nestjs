@@ -11,7 +11,7 @@ export class SqueezeService {
     private squeezeRepository: Repository<Squeeze>
   ) {}
 
-  async create(createSqueezeDto: CreateSqueezeDto) {
+  async createSqueeze(createSqueezeDto: CreateSqueezeDto) {
     const exists = await this.emailExists(createSqueezeDto.email);
     if (exists) {
       throw new UnprocessableEntityException({

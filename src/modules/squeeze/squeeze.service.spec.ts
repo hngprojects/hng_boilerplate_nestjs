@@ -54,7 +54,7 @@ describe('SqueezeService', () => {
       expect(mockSqueezeRepository.create).not.toHaveBeenCalled();
       expect(mockSqueezeRepository.save).not.toHaveBeenCalled();
 
-      const result = await service.create(createSqueezeDto);
+      const result = await service.createSqueeze(createSqueezeDto);
 
       expect(mockSqueezeRepository.create).toHaveBeenCalledWith(createSqueezeDto);
       expect(mockSqueezeRepository.save).toHaveBeenCalledWith(squeeze);
