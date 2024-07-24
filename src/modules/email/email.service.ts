@@ -1,7 +1,7 @@
 // src/email/email.service.ts
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Article } from './article.interface';
+import { ArticleInterface } from './article.interface';
 
 @Injectable()
 export class EmailService {
@@ -45,7 +45,7 @@ export class EmailService {
     });
   }
 
-  async sendNewsLetterMail(email: string, articles: Article[]) {
+  async sendNewsLetterMail(email: string, articles: ArticleInterface[]) {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Monthly Newsletter',
