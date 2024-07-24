@@ -7,10 +7,9 @@ import { AuthGuard } from '@nestjs/passport';
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Request() req) {
-    const userId = req.user.userId;
-    return this.organisationsService.create(createOrganisationDto, userId);
+    const user = req['user'];
+    return this.organisationsService.create(createOrganisationDto, user.sub);
   }
 }
