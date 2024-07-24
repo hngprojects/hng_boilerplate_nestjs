@@ -1,26 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ProductCategory } from './entities/product-category.entity';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
 
 @Injectable()
 export class ProductCategoryService {
-  create(createProductCategoryDto: CreateProductCategoryDto) {
-    return 'This action adds a new productCategory';
+  constructor(
+    @InjectRepository(ProductCategory)
+    private categoryRepository: Repository<ProductCategory>
+  ) {}
+
+  async findAll(): Promise<ProductCategory[]> {
+    return this.categoryRepository.find();
   }
 
-  findAll() {
-    return `This action returns all productCategory`;
+  async findOne(id: string): Promise<ProductCategory> {
+    const category = await this.categoryRepository.findOneBy({ id });
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+    return category;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} productCategory`;
+  async create(createCategoryDto: CreateProductCategoryDto): Promise<ProductCategory> {
+    const category = this.categoryRepository.create(createCategoryDto);
+    return await this.categoryRepository.save(category);
   }
 
-  update(id: number, updateProductCategoryDto: UpdateProductCategoryDto) {
-    return `This action updates a #${id} productCategory`;
+  async update(id: string, updateCategoryDto: UpdateProductCategoryDto): Promise<ProductCategory> {
+    const category = await this.findOne(id);
+    Object.assign(category, updateCategoryDto);
+    return await this.categoryRepository.save(category);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productCategory`;
+  async remove(id: string): Promise<void> {
+    const category = await this.findOne(id);
+    await this.categoryRepository.remove(category);
   }
 }

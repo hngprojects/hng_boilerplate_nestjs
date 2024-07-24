@@ -3,7 +3,7 @@ import { User } from '../../user/entities/user.entity';
 import { ProductCategory } from '../../product-category/entities/product-category.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Product extends AbstractBaseEntity {
@@ -26,6 +26,6 @@ export class Product extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.products)
   user: User;
 
-  @OneToMany(() => ProductCategory, category => category.product)
-  category: ProductCategory[];
+  @ManyToOne(() => ProductCategory, category => category.products)
+  category: ProductCategory;
 }

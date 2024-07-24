@@ -1,20 +1,31 @@
-import { Product } from '../../products/entities/product.entity';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Entity, PrimaryGeneratedColumn, Column, Index, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { ManyToOne } from 'typeorm';
-
-import { Column, Entity } from 'typeorm';
-
-@Entity()
+import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Product } from '../../products/entities/product.entity';
+@Entity('categories')
 export class ProductCategory extends AbstractBaseEntity {
   @ApiProperty()
-  @Column({ type: 'text', unique: true })
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ApiProperty()
+  @Column({ length: 500 })
+  @Index()
   name: string;
 
   @ApiProperty()
-  @Column({ type: 'text', nullable: true })
+  @Column('text')
+  @Index()
   description: string;
 
-  @ManyToOne(() => Product, products => products.category)
-  product: Product;
+  @ApiProperty()
+  @Column('text')
+  slug: string;
+
+  @ApiProperty()
+  @Column({ type: 'uuid', nullable: true })
+  parent_id: string;
+
+  @OneToMany(() => Product, product => product.category)
+  products: Product[];
 }
