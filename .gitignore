@@ -391,4 +391,3 @@ dist
 /.env
 /.env.*.local
 *._local.ts
-.env.local
