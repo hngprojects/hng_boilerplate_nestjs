@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
@@ -111,10 +111,12 @@ export default class AuthenticationService {
     const responsePayload = {
       access_token,
       data: {
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        id: user.id,
+        user: {
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          id: user.id,
+        },
       },
     };
 
