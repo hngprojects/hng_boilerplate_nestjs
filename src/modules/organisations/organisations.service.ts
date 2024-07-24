@@ -57,18 +57,11 @@ export class OrganisationsService {
   ): Promise<{ message: string; org: Organisation }> {
     try {
       const org = await this.organisationRepository.findOneBy({ id });
-
       if (!org) {
         throw new NotFoundException('Organization not found');
       }
-
       await this.organisationRepository.update(id, updateOrganisationDto);
-
       const updatedOrg = await this.organisationRepository.findOneBy({ id });
-
-      if (!updatedOrg) {
-        throw new BadRequestException('Error updating organization');
-      }
 
       return { message: 'Organisation successfully updated', org: updatedOrg };
     } catch (error) {
