@@ -37,10 +37,8 @@ Before you begin, ensure you have the following installed on your machine:
 - [Git](https://git-scm.com/)
 
 ## Setup Guide
-
-#### Detailed guide on setting and starting the Application
-
-- [Setup Guide](setup-guide.md)
+  #### Detailed guide on setting and starting the Application
+  - [Setup Guide](setup-guide.md)
 
 ## Contribution Guide
 
