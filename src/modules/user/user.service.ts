@@ -1,12 +1,13 @@
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { User, UserType } from './entities/user.entity';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
+import { UserPayload } from './interfaces/user-payload.interface';
 
 @Injectable()
 export default class UserService {
@@ -43,7 +44,11 @@ export default class UserService {
     return await GetRecord[identifierType]();
   }
 
-  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<UpdateUserResponseDTO> {
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+    currentUser: UserPayload
+  ): Promise<UpdateUserResponseDTO> {
     if (!userId) {
       throw new BadRequestException('UserId is required');
     }
@@ -55,6 +60,11 @@ export default class UserService {
     const user = await this.getUserRecord(identifierOptions);
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    // Check if the current user is a super admin or the user being updated
+    if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
+      throw new ForbiddenException('You are not authorized to update this user');
     }
 
     try {
