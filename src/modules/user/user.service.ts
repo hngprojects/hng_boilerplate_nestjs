@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
@@ -12,6 +12,24 @@ export default class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
+
+  async findOne(user_id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: user_id } });
+    if (!user) {
+      throw new NotFoundException(`User with id ${user_id} not found`);
+    }
+    return user;
+  }
+
+  async softDelete(user_id: string): Promise<User> {
+    const user = await this.findOne(user_id);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    user.is_active = false;
+    await this.userRepository.save(user);
+    return user;
+  }
 
   async createUser(user: CreateNewUserOptions) {
     const newUser = new User();
