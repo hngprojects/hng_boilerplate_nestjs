@@ -67,15 +67,17 @@ describe('ProductsService', () => {
       });
     });
 
-    it('should throw NotFoundException when product does not exist', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should throw NotFoundException if product does not exist', async () => {
+      const productId = '2';
+      mockRepository.findOne.mockResolvedValue(undefined);
 
-      const result = await service.fetchSingleProduct('2');
-
-      expect(result).toEqual({
-        error: 'Product not found',
-        status_code: HttpStatus.NOT_FOUND,
-      });
+      await expect(service.fetchSingleProduct(productId)).rejects.toThrowError(NotFoundException);
+      await expect(service.fetchSingleProduct(productId)).rejects.toThrowError(
+        new NotFoundException({
+          error: 'Product not found',
+          status_code: 404,
+        })
+      );
     });
 
     it('should throw InternalServerErrorException on unexpected errors', async () => {

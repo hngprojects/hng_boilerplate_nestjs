@@ -20,10 +20,10 @@ export class ProductsService {
     });
     if (!productExists) {
       this.logger.log(`Product with id: ${productId} does not exist`);
-      return {
+      throw new NotFoundException({
         error: 'Product not found',
         status_code: HttpStatus.NOT_FOUND,
-      };
+      });
     }
     return {
       status_code: HttpStatus.OK,
