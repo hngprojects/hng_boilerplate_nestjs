@@ -17,7 +17,7 @@ export class OrganisationsService {
   ) {}
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
-    const emailFound = await this.emailExsits(createOrganisationDto.email);
+    const emailFound = await this.emailExists(createOrganisationDto.email);
     if (emailFound)
       throw new UnprocessableEntityException({
         status: 'Unprocessable entity exception',
@@ -39,7 +39,7 @@ export class OrganisationsService {
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }
 
-  async emailExsits(email: string): Promise<boolean> {
+  async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
     return emailFound?.length ? true : false;
   }
