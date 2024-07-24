@@ -74,6 +74,7 @@ export class OrganisationsService {
   }
   
   async removeUser(orgId: string, userId: string, currentUserId: string) {
+    try{
     const org = await this.organisationRepository.findOne({
       where: {
         id: orgId,
@@ -121,4 +122,11 @@ export class OrganisationsService {
       message: 'User removed successfully',
       status_code: 200,
     };
-}
+    }catch(err){
+      console.error(err);
+      if (err instanceof NotFoundException || error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+}}
