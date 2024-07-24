@@ -8,6 +8,13 @@ export enum UserType {
   ADMIN = 'admin',
   USER = 'vendor',
 }
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+
+export enum UserType {
+  SUPER_ADMIN = 'super_admin',
+  ADMIN = 'admin',
+  USER = 'vendor',
+}
 
 @Entity()
 export class User extends AbstractBaseEntity {
