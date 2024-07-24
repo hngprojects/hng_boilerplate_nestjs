@@ -105,7 +105,7 @@ describe('ProductsController', () => {
 
     it('should return a message when no products are available', async () => {
       const result = {
-        message: 'No Product available',
+        message: 'Product does not exist',
       };
       const paginationQuery: PaginationQueryDto = { limit: 10, page: 1 };
 

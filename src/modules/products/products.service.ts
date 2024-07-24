@@ -5,6 +5,7 @@ import { Product } from './entities/product.entity';
 import { ProductCategory } from '../product-category/entities/product-category.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { PaginationQueryDto } from './dto/ PaginationQueryDto';
+import { error } from 'console';
 
 @Injectable()
 export class ProductsService {
@@ -16,24 +17,6 @@ export class ProductsService {
     @InjectRepository(ProductCategory)
     private categoryRepository: Repository<ProductCategory>
   ) {}
-
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    // Fetch the category by ID
-    const category = await this.categoryRepository.findOneBy({ id: createProductDto.categoryId });
-
-    if (!category) {
-      throw new NotFoundException(`Category with ID ${createProductDto.categoryId} not found`);
-    }
-
-    // Create and save the product
-    const product = this.productRepository.create({
-      ...createProductDto,
-      category, // Set the category as a single object
-    });
-
-    return await this.productRepository.save(product);
-  }
-
   async findAll(paginationQuery: PaginationQueryDto){
     const { limit, page } = paginationQuery;
     const offset = limit * (page - 1); // Calculate offset
@@ -43,9 +26,7 @@ export class ProductsService {
     });
       const totalPage = products.length / limit
     if(products.length === 0 ){
-      return ({
-        message: 'No Product available',
-      })
+      throw new NotFoundException({message: 'Product does not exist', status_code:400})
     }
     return ({
       
