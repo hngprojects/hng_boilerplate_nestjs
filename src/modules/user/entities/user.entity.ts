@@ -36,6 +36,7 @@ export class User extends AbstractBaseEntity {
   created_organisations: Organisation[];
   @OneToMany(() => Product, product => product.user, { cascade: true })
   products: Product[];
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
