@@ -9,6 +9,12 @@ import { orgMock } from '../tests/mocks/organisation.mock';
 import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
 import { UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -26,6 +32,8 @@ describe('OrganisationsService', () => {
             findOne: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
           },
         },
         UserService,
@@ -39,6 +47,7 @@ describe('OrganisationsService', () => {
         },
       ],
     }).compile();
+
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
@@ -49,6 +58,7 @@ describe('OrganisationsService', () => {
   });
 
   describe('it should create an organisation', () => {
+  describe('create organisation', () => {
     beforeEach(async () => {
       const errors = await validate(createMockOrganisationRequestDto());
       expect(errors).toHaveLength(0);
@@ -85,6 +95,45 @@ describe('OrganisationsService', () => {
           status_code: 422,
         })
       );
+    });
+  });
+
+  describe('update organisation', () => {
+    it('should update an organisation successfully', async () => {
+      const id = '1';
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
+      const organisation = new Organisation();
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
+      jest.spyOn(organisationRepository, 'update').mockResolvedValueOnce({ affected: 1 } as any);
+      jest
+        .spyOn(organisationRepository, 'findOneBy')
+        .mockResolvedValueOnce({ ...organisation, ...updateOrganisationDto });
+
+      const result = await service.updateOrganisation(id, updateOrganisationDto);
+
+      expect(result).toEqual({
+        message: 'Organisation successfully updated',
+        org: { ...organisation, ...updateOrganisationDto },
+      });
+    });
+
+    it('should throw NotFoundException if organisation not found', async () => {
+      const id = '1';
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
+
+      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
+      const id = '1';
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
+
+      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

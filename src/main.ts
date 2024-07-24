@@ -5,7 +5,7 @@ import { Logger } from 'nestjs-pino';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
-import dataSource, { initializeDataSource } from './database/data-source';
+import { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
 
 async function bootstrap() {
@@ -30,6 +30,7 @@ async function bootstrap() {
   app.useLogger(logger);
   app.enableCors();
   app.setGlobalPrefix('api/v1', { exclude: ["/", "health"] });
+  app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs'] });
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()
@@ -40,11 +41,14 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
   const port = app.get<ConfigService>(ConfigService).get<number>('server.port');
   await app.listen(port);
 
-  logger.log({ message: 'server started 🚀', port, url: `http://localhost:${port}/api` });
+  logger.log({ message: 'server started 🚀', port, url: `http://localhost:${port}/api/v1` });
 }
-bootstrap();
+bootstrap().catch(err => {
+  console.error('Error during bootstrap', err);
+  process.exit(1);
+});
