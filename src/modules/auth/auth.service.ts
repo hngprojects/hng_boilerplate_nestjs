@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { CreateUserDTO } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
+import * as speakeasy from 'speakeasy';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
@@ -11,9 +12,11 @@ import {
   USER_NOT_FOUND,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
-import * as bcrypt from 'bcrypt';
-import * as speakeasy from 'speakeasy';
+import { LoginDto } from './dto/login.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export default class AuthenticationService {
@@ -74,6 +77,61 @@ export default class AuthenticationService {
       throw new HttpException(
         {
           message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
+    try {
+      const { email, password } = loginDto;
+
+      const user = await this.userService.getUserRecord({
+        identifier: email,
+        identifierType: 'email',
+      });
+
+      if (!user) {
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+
+      const access_token = this.jwtService.sign({ id: user.id });
+
+      const responsePayload = {
+        access_token,
+        data: {
+          user: {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            id: user.id,
+          },
+        },
+      };
+
+      return { message: 'Login successful', ...responsePayload };
+    } catch (error) {
+      if (error instanceof CustomHttpException) {
+        throw error;
+      }
+      Logger.log('AuthenticationServiceError ~ loginError ~', error);
+      throw new HttpException(
+        {
+          message: 'An error occurred during login',
           status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         },
         HttpStatus.INTERNAL_SERVER_ERROR
