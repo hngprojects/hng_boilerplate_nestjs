@@ -4,26 +4,26 @@ import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Session extends AbstractBaseEntity {
-  @Column({ type: 'varchar', nullable: true })
-  device_browser?: string;
+  @Column({ type: 'varchar' })
+  device_browser: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  device_browser_version?: string;
+  @Column({ type: 'varchar' })
+  device_browser_version: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  device_os?: string;
+  @Column({ type: 'varchar' })
+  device_os: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  device_os_version?: string;
+  @Column({ type: 'varchar' })
+  device_os_version: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  device_type?: string;
+  @Column({ type: 'varchar' })
+  device_type: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  device_brand?: string;
+  @Column({ type: 'varchar' })
+  device_brand: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  device_model?: string;
+  @Column({ type: 'varchar' })
+  device_model: string;
 
   @Column({ type: 'timestamp' })
   expires_at: Date;
