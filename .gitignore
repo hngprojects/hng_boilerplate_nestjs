@@ -391,3 +391,11 @@ dist
 /.env
 /.env.*.local
 *._local.ts
+
+# Ignore specific files
+/src/database/seeding/seeding.service.ts
+/src/database/data-source.ts
+
+# Package files
+/package-lock.json
+/package.json
