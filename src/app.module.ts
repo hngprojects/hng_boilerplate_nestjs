@@ -10,6 +10,7 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import authConfig from '../config/auth.config';
 import { AuthGuard } from './guards/auth.guard';
 
@@ -62,6 +63,7 @@ import { AuthGuard } from './guards/auth.guard';
     SeedingModule,
     AuthModule,
     UserModule,
+    TestimonialsModule,
   ],
   controllers: [HealthController],
 })

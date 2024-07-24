@@ -1,11 +1,11 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { Logger } from 'nestjs-pino';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 import { DataSource } from 'typeorm';
-import dataSource, { initializeDataSource } from './database/data-source';
+import { AppModule } from './app.module';
+import { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
 
 async function bootstrap() {
@@ -29,7 +29,7 @@ async function bootstrap() {
   app.enable('trust proxy');
   app.useLogger(logger);
   app.enableCors();
-  app.setGlobalPrefix('api/v1', { exclude: ["/", "health"] });
+  app.setGlobalPrefix('api/v1', { exclude: ['/', 'health'] });
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()
