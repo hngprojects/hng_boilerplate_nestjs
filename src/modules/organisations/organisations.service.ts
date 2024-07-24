@@ -72,61 +72,62 @@ export class OrganisationsService {
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
-  
+
   async removeUser(orgId: string, userId: string, currentUserId: string) {
-    try{
-    const org = await this.organisationRepository.findOne({
-      where: {
-        id: orgId,
-      },
-      relations: {
-        owner: true,
-        members: true,
-      },
-    });
-
-    if (!org) {
-      throw new NotFoundException({
-        status: 'error',
-        message: 'Organisation not found',
-        status_code: 404,
+    try {
+      const org = await this.organisationRepository.findOne({
+        where: {
+          id: orgId,
+        },
+        relations: {
+          owner: true,
+          members: true,
+        },
       });
-    }
 
-    const isOwner = org.owner.id == currentUserId;
+      if (!org) {
+        throw new NotFoundException({
+          status: 'error',
+          message: 'Organisation not found',
+          status_code: 404,
+        });
+      }
 
-    if (!isOwner) {
-      throw new UnauthorizedException({
-        status: 'Forbidden',
-        message: 'Only admin can remove users',
-        status_code: 403,
-      });
-    }
+      const isOwner = org.owner.id == currentUserId;
 
-    const findUser = org.members.filter(member => member.id == userId);
+      if (!isOwner) {
+        throw new UnauthorizedException({
+          status: 'Forbidden',
+          message: 'Only admin can remove users',
+          status_code: 403,
+        });
+      }
 
-    if (findUser.length <= 0) {
-      throw new NotFoundException({
-        status: 'error',
-        message: 'User not found',
-        status_code: 404,
-      });
-    }
+      const findUser = org.members.filter(member => member.id == userId);
 
-    org.members = org.members.filter(member => member.id != userId);
+      if (findUser.length <= 0) {
+        throw new NotFoundException({
+          status: 'error',
+          message: 'User not found',
+          status_code: 404,
+        });
+      }
 
-    await this.organisationRepository.save(org);
+      org.members = org.members.filter(member => member.id != userId);
 
-    return {
-      status: 'Success',
-      message: 'User removed successfully',
-      status_code: 200,
-    };
-    }catch(err){
+      await this.organisationRepository.save(org);
+
+      return {
+        status: 'Success',
+        message: 'User removed successfully',
+        status_code: 200,
+      };
+    } catch (err) {
       console.error(err);
-      if (err instanceof NotFoundException || error instanceof UnauthorizedException) {
-        throw error;
+      if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
+        throw err;
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
-}}
+  }
+}
