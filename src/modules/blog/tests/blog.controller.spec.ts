@@ -2,8 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BlogController } from '../controllers/blog.controller';
 import { BlogService } from '../services/blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
+import { EditBlogDto } from '../dto/edit-blog.dto';
 import { Blog } from '../entities/blog.entity';
 import { HttpStatus } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 describe('BlogController', () => {
   let controller: BlogController;
@@ -77,4 +79,40 @@ describe('BlogController', () => {
   });
 
   //Other Endpoint Tests Here
+  describe('editBlog', () => {
+    it('should update a blog post successfully', async () => {
+      const id = 1;
+      const updateData: EditBlogDto = {
+        title: 'Updated Title',
+        content: 'Updated Content',
+      };
+
+      const updatedBlog = new Blog();
+      updatedBlog.id = id;
+      updatedBlog.title = updateData.title;
+      updatedBlog.content = updateData.content;
+
+      jest.spyOn(service, 'editBlog').mockResolvedValue(updatedBlog);
+
+      const response = await controller.editBlog(id, updateData);
+      expect(response).toEqual(updatedBlog);
+    });
+
+    it('should throw a NotFoundException if blog post is not found', async () => {
+      const id = 1;
+      const updateData: EditBlogDto = { title: 'Updated Title' };
+
+      jest.spyOn(service, 'editBlog').mockRejectedValue(new NotFoundException('Blog post not found'));
+
+      try {
+        await controller.editBlog(id, updateData);
+        fail('Expected NotFoundException');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error.message).toBe('Blog post not found');
+      }
+    });
+  });
+
+  // Add more test cases for different scenarios (e.g., validation errors, other exceptions)
 });

@@ -2,6 +2,8 @@ import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/commo
 import { BlogService } from '../services/blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { Blog } from '../entities/blog.entity';
+import { EditBlogDto } from '../dto/edit-blog.dto';
+import { Put, Param } from '@nestjs/common';
 
 @Controller('api/v1/blogs')
 export class BlogController {
@@ -32,4 +34,10 @@ export class BlogController {
   }
 
   //Other blog method endpoint here
+  //edit blog endpoint
+
+  @Put('edit/:id')
+  async editBlog(@Param('id') id: string, @Body() editBlogDto: EditBlogDto): Promise<void> {
+    await this.blogService.editBlog(id, editBlogDto);
+  }
 }

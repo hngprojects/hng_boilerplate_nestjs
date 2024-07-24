@@ -6,6 +6,7 @@ import { BlogCategory } from '../entities/blog-category.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { EditBlogDto } from '../dto/edit-blog.dto';
 
 describe('BlogService', () => {
   let service: BlogService;
@@ -16,6 +17,7 @@ describe('BlogService', () => {
   beforeEach(async () => {
     blogRepository = {
       create: jest.fn(),
+      findOne: jest.fn(),
       save: jest.fn(),
     };
     userRepository = {
@@ -94,6 +96,32 @@ describe('BlogService', () => {
         category: { id: 'categoryuid' },
       });
       expect(blogRepository.save).toHaveBeenCalledWith(blogData);
+    });
+  });
+
+  describe('editBlog', () => {
+    it('should throw NotFoundException if blog post is not found', async () => {
+      const id = 1;
+      const updateData: EditBlogDto = { title: 'Updated Title' };
+
+      blogRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.editBlog(id, updateData)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should update and save the blog post', async () => {
+      const id = 1;
+      const updateData: EditBlogDto = { title: 'Updated Title', content: 'Updated Content' };
+
+      const existingBlog = { id: '1', title: 'Old Title' } as Blog;
+
+      blogRepository.findOne.mockResolvedValue(existingBlog);
+      blogRepository.save.mockResolvedValue({ ...existingBlog, ...updateData });
+
+      const updatedBlog = await service.editBlog(id, updateData);
+
+      expect(updatedBlog).toEqual({ ...existingBlog, ...updateData });
+      expect(blogRepository.save).toHaveBeenCalledWith({ ...existingBlog, ...updateData });
     });
   });
 });

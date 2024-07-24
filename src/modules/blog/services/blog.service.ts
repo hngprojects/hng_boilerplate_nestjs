@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from '../entities/blog.entity';
 import { CreateBlogDto } from '../dto/create-blog.dto';
+import { EditBlogDto } from '../dto/edit-blog.dto';
 import { User } from '../../user/entities/user.entity';
 import { BlogCategory } from '../entities/blog-category.entity';
 
@@ -35,4 +36,30 @@ export class BlogService {
   }
 
   //Other blog service here
+  // Edit method here
+  async editBlog(id: number, editBlogDto: EditBlogDto): Promise<Blog> {
+    const blog = await this.blogRepository.findOne({ where: { id }, relations: ['author', 'category'] });
+    if (!blog) {
+      throw new NotFoundException('Blog not found');
+    }
+
+    if (editBlogDto.categoryId) {
+      const category = await this.categoryRepository.findOne({ where: { id: editBlogDto.categoryId } });
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+      blog.category = category;
+    }
+
+    if (editBlogDto.title) {
+      blog.title = editBlogDto.title;
+    }
+
+    if (editBlogDto.content) {
+      blog.content = editBlogDto.content;
+    }
+
+    return await this.blogRepository.save(blog);
+    // Other blog service methods here
+  }
 }
