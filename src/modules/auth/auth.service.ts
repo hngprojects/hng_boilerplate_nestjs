@@ -13,6 +13,7 @@ import UserService from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as useragent from 'useragent';
+import { Request } from 'express';
 
 @Injectable()
 export default class AuthenticationService {
@@ -80,9 +81,11 @@ export default class AuthenticationService {
     }
   }
 
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
+  async loginUser(loginDto: LoginDto, request: Request): Promise<LoginResponseDto> {
     try {
       const { email, password } = loginDto;
+      const userAgentString = request.headers['user-agent'] || '';
+      const deviceInfo = this.parseUserAgent(userAgentString);
 
       const user = await this.userService.getUserRecord({
         identifier: email,
