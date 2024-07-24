@@ -11,6 +11,7 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import { AuthGuard } from './guards/auth.guard';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -63,6 +64,7 @@ import { UserModule } from './modules/user/user.module';
     SeedingModule,
     AuthModule,
     UserModule,
+    OrganisationsModule,
     TestimonialsModule,
   ],
   controllers: [HealthController],
