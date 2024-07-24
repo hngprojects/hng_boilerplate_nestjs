@@ -69,7 +69,7 @@ export class OrganisationsService {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
 
@@ -127,7 +127,7 @@ export class OrganisationsService {
       if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
         throw err;
       }
-      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+      throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
     }
   }
 }
