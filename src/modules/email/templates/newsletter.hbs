@@ -1,0 +1,43 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Newsletter</title>
+    <style>
+      body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; } .container { width:
+      100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow:
+      0 0 10px rgba(0, 0, 0, 0.1); } .header { text-align: center; padding-bottom: 20px; } .header img { width: 120px;
+      /* Adjust based on your logo */ } .content { padding: 20px; } .content h1 { color: #333; /* Dark gray for
+      readability */ font-size: 24px; margin-bottom: 15px; } .content p { color: #666; /* Light gray for softer text */
+      font-size: 16px; line-height: 1.5; margin-bottom: 20px; } .content .article { margin-bottom: 20px; } .content
+      .article h2 { font-size: 20px; color: #007bff; /* Primary brand color for headers */ margin-bottom: 10px; }
+      .content .article p { font-size: 14px; color: #666; } .content .article a { color: #007bff; /* Match header color
+      */ text-decoration: none; } .footer { text-align: center; padding-top: 20px; font-size: 12px; color: #888888; }
+      .footer a { color: #007bff; /* Match brand color */ text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <img
+          src='https://www.shutterstock.com/image-vector/circle-line-simple-design-logo-600nw-2174926871.jpg'
+          alt='Company Logo'
+        />
+      </div>
+      <div class='content'>
+        <h1>Monthly Newsletter</h1>
+        <p>Hello {{email}},</p>
+        {{#each articles}}
+          <div class='article'>
+            <h2>{{this.title}}</h2>
+            <p>{{this.description}} <a href='{{this.link}}'>Read more</a></p>
+          </div>
+        {{/each}}
+      </div>
+      <div class='footer'>
+        <p>&copy; 2024 Company Name. All rights reserved.</p>
+        <p><a href='https://example.com/unsubscribe'>Unsubscribe</a></p>
+      </div>
+    </div>
+  </body>
+</html>
