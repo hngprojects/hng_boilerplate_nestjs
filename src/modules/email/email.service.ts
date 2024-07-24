@@ -7,7 +7,7 @@ import { ArticleInterface } from './article.interface';
 export class EmailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  async sendUserConfirmation(email: string, url: string, token: string) {
+  async sendUserConfirmationMail(email: string, url: string, token: string) {
     const link = `${url}?token=${token}`;
     await this.mailerService.sendMail({
       to: email,
@@ -20,7 +20,7 @@ export class EmailService {
     });
   }
 
-  async sendForgotPassword(email: string, url: string, token: string) {
+  async sendForgotPasswordMail(email: string, url: string, token: string) {
     const link = `${url}?token=${token}`;
     await this.mailerService.sendMail({
       to: email,
