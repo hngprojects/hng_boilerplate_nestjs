@@ -101,7 +101,7 @@ describe('OrganisationsService', () => {
         .spyOn(organisationRepository, 'findOneBy')
         .mockResolvedValueOnce({ ...organisation, ...updateOrganisationDto });
 
-      const result = await service.update(id, updateOrganisationDto);
+      const result = await service.updateOrganisation(id, updateOrganisationDto);
 
       expect(result).toEqual({
         message: 'Organisation successfully updated',
@@ -115,7 +115,7 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
 
-      await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
@@ -124,7 +124,7 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
 
-      await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });
