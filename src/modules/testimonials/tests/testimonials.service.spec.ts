@@ -1,93 +1,96 @@
-import { NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
+import UserService from '../../user/user.service';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { Testimonial } from '../entities/testimonials.entity';
 import { TestimonialsService } from '../testimonials.service';
 
 describe('TestimonialsService', () => {
   let service: TestimonialsService;
-  let userRepository: Repository<User>;
+  let userService: UserService;
   let testimonialRepository: Repository<Testimonial>;
+  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TestimonialsService,
+        UserService,
         {
-          provide: getRepositoryToken(User),
+          provide: getRepositoryToken(Testimonial),
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(Testimonial),
+          provide: getRepositoryToken(User),
           useClass: Repository,
         },
       ],
     }).compile();
 
     service = module.get<TestimonialsService>(TestimonialsService);
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    userService = module.get<UserService>(UserService);
     testimonialRepository = module.get<Repository<Testimonial>>(getRepositoryToken(Testimonial));
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('create', () => {
-    it('should create a testimonial successfully', async () => {
-      const userId = 'test-user-id';
+  describe('createTestimonial', () => {
+    it('should successfully create a testimonial', async () => {
       const createTestimonialDto: CreateTestimonialDto = {
         name: 'John Doe',
-        content: 'I am very happy with the service provided by the company',
+        content: 'Great service!',
       };
-      const user = { id: userId } as User;
+      const user = { id: 'user-id' } as User;
 
-      jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(user);
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
       jest.spyOn(testimonialRepository, 'save').mockResolvedValue(undefined);
 
-      const result = await service.create(createTestimonialDto, userId);
+      const result = await service.createTestimonial(createTestimonialDto, user);
 
       expect(result).toEqual({
-        user_id: userId,
+        user_id: 'user-id',
         ...createTestimonialDto,
         created_at: expect.any(Date),
       });
     });
 
     it('should throw a NotFoundException if user is not found', async () => {
-      const userId = 'test-user-id';
       const createTestimonialDto: CreateTestimonialDto = {
         name: 'John Doe',
-        content: 'I am very happy with the service provided by the company',
+        content: 'Great service!',
       };
 
-      jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(null);
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(null);
 
-      await expect(service.create(createTestimonialDto, userId)).rejects.toThrow(
+      await expect(service.createTestimonial(createTestimonialDto, null)).rejects.toThrow(
         new NotFoundException({
-          status: 'Not Found',
-          message: 'User not found',
-          status_code: 404,
+          error: 'Not Found',
         })
       );
     });
 
-    it('should throw an error if testimonialRepository.save throws an error', async () => {
-      const userId = 'test-user-id';
+    it('should handle other errors with InternalServerErrorException', async () => {
       const createTestimonialDto: CreateTestimonialDto = {
         name: 'John Doe',
-        content: 'I am very happy with the service provided by the company',
+        content: 'Great service!',
       };
-      const user = { id: userId } as User;
-      const error = new Error('Test error');
+      const user = { id: 'user-id' } as User;
+      const error = new Error('Database error');
 
-      jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(user);
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
       jest.spyOn(testimonialRepository, 'save').mockRejectedValue(error);
 
-      await expect(service.create(createTestimonialDto, userId)).rejects.toThrow(error);
+      await expect(service.createTestimonial(createTestimonialDto, user)).rejects.toThrow(
+        new InternalServerErrorException({
+          error: `An internal server error occurred: ${error.message}`,
+        })
+      );
     });
   });
 });

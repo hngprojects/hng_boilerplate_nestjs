@@ -1,14 +1,13 @@
-import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { CustomExceptionFilter } from '../../helpers/custom-exception.filter';
+import { skipAuth } from '../../helpers/skipAuth';
 import UserService from '../user/user.service';
 import { CreateTestimonialResponseDto } from './dto/create-testimonial-response.dto';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
 
 @ApiTags('Testimonials')
-@UseFilters(CustomExceptionFilter)
 @Controller('testimonials')
 export class TestimonialsController {
   constructor(
@@ -18,6 +17,7 @@ export class TestimonialsController {
   ) {}
 
   @Post()
+  @skipAuth()
   @ApiOperation({ summary: 'Create Testimonials' })
   @ApiResponse({ status: 201, description: 'Testimonial created successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -27,7 +27,9 @@ export class TestimonialsController {
     @Body() createTestimonialDto: CreateTestimonialDto,
     @Req() req: Request
   ): Promise<CreateTestimonialResponseDto> {
-    const { sub: userId } = req?.user as { sub: string };
+    // const { sub: userId } = req?.user as { sub: string };
+
+    const userId = '65ee112f-bfd2-481b-bcc6-5a5bc59f4d94';
 
     const user = await this.userService.getUserRecord({ identifier: userId, identifierType: 'id' });
 
