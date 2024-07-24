@@ -2,7 +2,6 @@ import { SqueezeRequestDto } from '../dto/squeeze.dto';
 import { Squeeze } from '../entities/squeeze.entity';
 
 export class CreateSqueezeMapper {
-  // Maps SqueezeRequestDto to Squeeze entity
   static mapToEntity(dto: SqueezeRequestDto): Squeeze {
     if (!dto) {
       throw new Error('SqueezeRequestDto is required');
