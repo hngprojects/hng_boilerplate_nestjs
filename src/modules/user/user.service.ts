@@ -52,7 +52,6 @@ export default class UserService {
     };
 
     const user = await this.getUserRecord(identifierOptions);
-    console.log(user);
     if (!user) {
       throw new HttpException({ status_code: 404, error: 'User not found' }, HttpStatus.NOT_FOUND);
     }
