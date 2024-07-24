@@ -1,5 +1,6 @@
 import { Organisation } from '../../entities/organisations.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Job } from '../../../job/entities/job.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -25,6 +26,8 @@ export const createMockOrganisation = (): Organisation => {
     user_type: UserType.ADMIN,
   };
 
+  const jobs: Job[] = []; // Add an empty array or some mock jobs if needed
+
   return {
     id: uuidv4(),
     name: 'John & Co',
@@ -41,6 +44,7 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
+    jobs, // Add the jobs property
   };
 };
 

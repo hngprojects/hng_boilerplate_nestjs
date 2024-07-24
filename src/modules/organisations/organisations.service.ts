@@ -71,4 +71,8 @@ export class OrganisationsService {
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
+
+  async findById(id: string): Promise<Organisation> {
+    return this.organisationRepository.findOneBy({ id });
+  }
 }

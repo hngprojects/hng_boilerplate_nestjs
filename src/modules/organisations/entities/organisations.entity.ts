@@ -10,7 +10,7 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-
+import { Job } from '../../job/entities/job.entity';
 @Entity()
 export class Organisation extends AbstractBaseEntity {
   @Column({ nullable: false })
@@ -48,4 +48,7 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationPreference, preference => preference.organisation)
   preferences: OrganisationPreference[];
+
+  @OneToMany(() => Job, job => job.organisation)
+  jobs: Job[];
 }

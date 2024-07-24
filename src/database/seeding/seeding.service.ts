@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
+import { Job } from '../../modules/job/entities/job.entity';
 
 @Injectable()
 export class SeedingService {
@@ -10,6 +11,7 @@ export class SeedingService {
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
     const organisationRepository = this.dataSource.getRepository(Organisation);
+    const jobRepository = this.dataSource.getRepository(Job);
 
     try {
       const existingUsers = await userRepository.count();
@@ -55,6 +57,7 @@ export class SeedingService {
           owner: savedUsers[0],
           creator: savedUsers[0],
           isDeleted: false,
+          jobs: [],
         });
 
         const or2 = organisationRepository.create({
@@ -69,12 +72,37 @@ export class SeedingService {
           owner: savedUsers[0],
           creator: savedUsers[0],
           isDeleted: false,
+          jobs: [],
         });
 
         await organisationRepository.save([or1, or2]);
         const savedOrganisations = await organisationRepository.find();
         if (savedOrganisations.length !== 2) {
           throw new Error('Failed to create all organisations');
+        }
+
+        const job1 = jobRepository.create({
+          title: 'Job 1',
+          description: 'Job 1 description',
+          location: 'Location 1',
+          salary: '1000',
+          job_type: 'Full-time',
+          organisation: savedOrganisations[0],
+        });
+
+        const job2 = jobRepository.create({
+          title: 'Job 2',
+          description: 'Job 2 description',
+          location: 'Location 2',
+          salary: '2000',
+          job_type: 'Part-time',
+          organisation: savedOrganisations[1],
+        });
+
+        await jobRepository.save([job1, job2]);
+        const savedJobs = await jobRepository.find();
+        if (savedJobs.length !== 2) {
+          throw new Error('Failed to create all jobs');
         }
 
         await queryRunner.commitTransaction();
