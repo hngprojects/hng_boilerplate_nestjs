@@ -8,10 +8,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
-import authConfig from 'config/auth.config';
-import { User } from './modules/user/entities/user.entity';
-import { ExportController } from './modules/export/export.controller';
-import { ExportService } from './modules/export/export.service';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import authConfig from '../config/auth.config';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
+import { AuthGuard } from './guards/auth.guard';
 
 @Module({
   providers: [
@@ -27,7 +28,10 @@ import { ExportService } from './modules/export/export.service';
           forbidNonWhitelisted: true,
         }),
     },
-    ExportService,
+    {
+      provide: 'APP_GUARD',
+      useClass: AuthGuard,
+    },
   ],
   imports: [
     ConfigModule.forRoot({
@@ -53,12 +57,14 @@ import { ExportService } from './modules/export/export.service';
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,
-        entities: [User], //Profile, Product, Organisation],
       }),
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    AuthModule,
+    UserModule,
+    OrganisationsModule,
   ],
-  controllers: [HealthController, ExportController],
+  //controllers: [HealthController, ExportController],
 })
 export class AppModule {}
