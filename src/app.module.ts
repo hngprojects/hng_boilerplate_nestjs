@@ -11,6 +11,7 @@ import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import authConfig from '../config/auth.config';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 
 @Module({
@@ -62,6 +63,7 @@ import { AuthGuard } from './guards/auth.guard';
     SeedingModule,
     AuthModule,
     UserModule,
+    OrganisationsModule,
   ],
   controllers: [HealthController],
 })
