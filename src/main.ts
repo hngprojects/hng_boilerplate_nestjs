@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import dataSource, { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
+import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
 
 async function bootstrap() {
   try {

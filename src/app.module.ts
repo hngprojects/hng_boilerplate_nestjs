@@ -11,9 +11,12 @@ import HealthController from './health.controller';
 import ApiController from './api.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { EmailModule } from './modules/email/email.module';
 import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   providers: [
@@ -64,6 +67,31 @@ import { AuthGuard } from './guards/auth.guard';
     SeedingModule,
     AuthModule,
     UserModule,
+    EmailModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('SMTP_HOST'),
+          port: configService.get<number>('SMTP_PORT'),
+          auth: {
+            user: configService.get<string>('SMTP_USER'),
+            pass: configService.get<string>('SMTP_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"Team Remote Bingo" <${configService.get<string>('SMTP_USER')}>`,
+        },
+        template: {
+          dir: process.cwd() + '/src/modules/email/templates',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
     OrganisationsModule,
   ],
   controllers: [HealthController, ApiController],
