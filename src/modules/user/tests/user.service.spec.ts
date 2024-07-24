@@ -6,8 +6,7 @@ import { User, UserType } from '../entities/user.entity';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserResponseDTO from '../dto/user-response.dto';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
-import { HttpException } from '@nestjs/common';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException, HttpException } from '@nestjs/common';
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 
@@ -120,6 +119,7 @@ describe('UserService', () => {
       expect(result).toEqual(undefined);
     });
   });
+
   describe('updateUser', () => {
     const userId = 'valid-id';
     const updateOptions: UpdateUserDto = {
