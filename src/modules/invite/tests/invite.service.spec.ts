@@ -79,7 +79,7 @@ describe('InviteService', () => {
         status: 'approved',
         created_at: new Date(),
         updated_at: new Date(),
-        organisation: mockOrg, // Provide a mock Organisation object if needed
+        organisation: mockOrg,
         user: mockUser,
       },
     ];
