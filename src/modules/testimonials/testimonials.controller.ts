@@ -1,10 +1,12 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { CustomExceptionFilter } from 'src/helpers/custom-exception.filter';
 import { CreateTestimonialDto, CreateTestimonialResponseDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
 
 @ApiTags('Testimonials')
+@UseFilters(CustomExceptionFilter)
 @Controller('testimonials')
 export class TestimonialsController {
   constructor(private readonly testimonialsService: TestimonialsService) {}
@@ -19,7 +21,9 @@ export class TestimonialsController {
     @Body() createTestimonialDto: CreateTestimonialDto,
     @Req() req: Request
   ): Promise<CreateTestimonialResponseDto> {
-    const { sub: userId } = req?.user as { sub: string };
+    // const { sub: userId } = req?.user as { sub: string };
+
+    const userId = 'a9fb405b-cd70-4314-8177-25b056a0cb53';
 
     const data = await this.testimonialsService.create(createTestimonialDto, userId);
 
