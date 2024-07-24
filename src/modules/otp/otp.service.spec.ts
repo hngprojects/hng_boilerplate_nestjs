@@ -5,7 +5,6 @@ import { OtpService } from './otp.service';
 import { Otp } from './entities/otp.entity';
 import { User } from '../user/entities/user.entity';
 
-// Mock the generateSixDigitToken function
 jest.mock('../../utils/generate-token', () => ({
   generateSixDigitToken: jest.fn().mockReturnValue('123456'),
 }));
