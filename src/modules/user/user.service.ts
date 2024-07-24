@@ -21,8 +21,11 @@ export default class UserService {
     await this.userRepository.save(newUser);
   }
 
-  async createUserSecret(user: UserResponseDTO) {
-    await this.userRepository.save(user);
+  async updateUserSecret(user: UserResponseDTO) {
+    await this.userRepository.update(user.id, {
+      secret: user.secret,
+      is_2fa_enabled: user.is_2fa_enabled,
+    });
   }
 
   private async getUserByEmail(email: string) {

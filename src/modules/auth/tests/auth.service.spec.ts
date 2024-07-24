@@ -156,11 +156,15 @@ describe('Enabling two factor authentication', () => {
 
     const existingRecord = null;
     jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-    const user = await authService.enable2FA(user_id, password);
-    expect(user).toEqual({
-      status_code: HttpStatus.NOT_FOUND,
-      message: USER_NOT_FOUND,
-    });
+    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
+      new HttpException(
+        {
+          message: USER_NOT_FOUND,
+          status_code: HttpStatus.NOT_FOUND,
+        },
+        HttpStatus.NOT_FOUND
+      )
+    );
   });
 
   it('should return INVALID PASSWORD if user enters a wrong password', async () => {
@@ -175,11 +179,16 @@ describe('Enabling two factor authentication', () => {
       id: 'some-uuid-value-here',
     };
     jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-    const res = await authService.enable2FA(user_id, password);
-    expect(res).toEqual({
-      status_code: HttpStatus.BAD_REQUEST,
-      message: INVALID_PASSWORD,
-    });
+
+    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
+      new HttpException(
+        {
+          message: INVALID_PASSWORD,
+          status_code: HttpStatus.BAD_REQUEST,
+        },
+        HttpStatus.BAD_REQUEST
+      )
+    );
   });
 
   it('should return 2FA ALREADY ENABLED if user tries to enable 2fa when enabled', async () => {
@@ -196,11 +205,16 @@ describe('Enabling two factor authentication', () => {
       id: 'some-uuid-value-here',
     };
     jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-    const res = await authService.enable2FA(user_id, password);
-    expect(res).toEqual({
-      status_code: HttpStatus.BAD_REQUEST,
-      message: TWO_FA_ENABLED,
-    });
+
+    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
+      new HttpException(
+        {
+          message: TWO_FA_ENABLED,
+          status_code: HttpStatus.BAD_REQUEST,
+        },
+        HttpStatus.BAD_REQUEST
+      )
+    );
   });
 
   it('should enable 2FA and return secret and QR code URL for a valid user', async () => {
@@ -219,7 +233,7 @@ describe('Enabling two factor authentication', () => {
 
     const secret = speakeasy.generateSecret({ length: 32 });
     jest.spyOn(speakeasy, 'generateSecret').mockReturnValue(secret);
-    jest.spyOn(userService, 'createUserSecret').mockResolvedValueOnce(undefined);
+    jest.spyOn(userService, 'updateUserSecret').mockResolvedValueOnce(undefined);
 
     const expectedResponse = {
       status_code: HttpStatus.OK,

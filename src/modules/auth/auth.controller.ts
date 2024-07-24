@@ -6,7 +6,6 @@ import AuthenticationService from './auth.service';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { BAD_REQUEST, TWO_FA_INITIATED } from 'src/helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
-import { CustomRequest } from '../user/interfaces/custom-request.interface';
 
 @Controller('auth')
 export default class RegistrationController {
@@ -26,14 +25,9 @@ export default class RegistrationController {
   })
   @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
   @ApiResponse({ status: 400, description: BAD_REQUEST })
-  public async enable2FA(
-    @Body() body: Enable2FADto,
-    @Req() request: CustomRequest,
-    @Res() response: Response
-  ): Promise<any> {
+  public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
     const { password } = body;
-    const { sub: user_id } = request.user;
-    const res = await this.authService.enable2FA(user_id, password);
-    return response.status(res.status_code).send(res);
+    const { sub: user_id } = request['user'];
+    return this.authService.enable2FA(user_id, password);
   }
 }
