@@ -49,9 +49,11 @@ export default class AuthenticationService {
         last_name: user.last_name,
         sub: user.id,
       });
+      const refreshToken = this.generateRefreshToken(user);
 
       const responsePayload = {
-        token: accessToken,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
         user: {
           first_name: user.first_name,
           last_name: user.last_name,
@@ -72,6 +74,21 @@ export default class AuthenticationService {
         message: ERROR_OCCURED,
       };
     }
+  }
+
+  async generateRefreshToken(user: any) {
+    return this.jwtService.sign(
+      {
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        sub: user.id,
+      },
+      {
+        secret: appConfig().jwtSecret,
+        expiresIn: appConfig().jwtRefreshExpiry,
+      }
+    );
   }
 
   async generateAccessToken(user: any) {
