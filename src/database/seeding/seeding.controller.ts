@@ -15,19 +15,4 @@ export class SeedingController {
   async getUsers() {
     return this.seedingService.getUsers();
   }
-
-  @Get('profiles')
-  async getProfiles() {
-    return this.seedingService.getProfiles();
-  }
-
-  @Get('products')
-  async getProducts() {
-    return this.seedingService.getProducts();
-  }
-
-  @Get('organisations')
-  async getOrganisations() {
-    return this.seedingService.getOrganisations();
-  }
 }

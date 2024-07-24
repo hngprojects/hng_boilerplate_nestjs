@@ -8,13 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
-import { User } from './entities/user.entity';
-import { Profile } from './entities/profile.entity';
-import { Product } from './entities/product.entity';
-import { Organisation } from './entities/organisation.entity';
-import { ExportModule } from './export/export.module';
-import { ExportController } from './export/export.controller';
-import { ExportService } from './export/export.service';
 
 @Module({
   providers: [
@@ -30,7 +23,6 @@ import { ExportService } from './export/export.service';
           forbidNonWhitelisted: true,
         }),
     },
-    ExportService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -42,7 +34,7 @@ import { ExportService } from './export/export.service';
        */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
-      load: [serverConfig],
+      load: [serverConfig, authConfig],
       /**
        * See ".env.local" file to list all environment variables needed by the app
        */
@@ -61,7 +53,6 @@ import { ExportService } from './export/export.service';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
-    ExportModule,
   ],
   controllers: [HealthController, ExportController],
 })
