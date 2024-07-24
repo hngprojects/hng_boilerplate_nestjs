@@ -8,7 +8,12 @@ import { validate } from 'class-validator';
 import { orgMock } from '../tests/mocks/organisation.mock';
 import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
-import { UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -85,6 +90,75 @@ describe('OrganisationsService', () => {
           status_code: 422,
         })
       );
+    });
+  });
+});
+
+describe('OrganisationService', () => {
+  let service: OrganisationsService;
+  let repository: Repository<Organisation>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        OrganisationsService,
+        {
+          provide: getRepositoryToken(Organisation),
+          useClass: Repository,
+        },
+      ],
+    }).compile();
+
+    service = module.get<OrganisationsService>(OrganisationsService);
+    repository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
+  });
+
+  describe('update', () => {
+    it('should update an organisation successfully', async () => {
+      const id = '1';
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
+      const organisation = new Organisation();
+
+      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(organisation);
+      jest.spyOn(repository, 'update').mockResolvedValueOnce({ affected: 1 } as any);
+      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce({ ...organisation, ...updateOrganisationDto });
+
+      const result = await service.update(id, updateOrganisationDto);
+
+      expect(result).toEqual({
+        message: 'Product successfully updated',
+        org: { ...organisation, ...updateOrganisationDto },
+      });
+    });
+
+    it('should throw NotFoundException if organisation not found', async () => {
+      const id = '1';
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
+
+      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null);
+
+      await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException if update fails', async () => {
+      const id = '1';
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
+      const organisation = new Organisation();
+
+      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(organisation);
+      jest.spyOn(repository, 'update').mockResolvedValueOnce({ affected: 0 } as any);
+      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null);
+
+      await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
+      const id = '1';
+      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
+
+      jest.spyOn(repository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
+
+      await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

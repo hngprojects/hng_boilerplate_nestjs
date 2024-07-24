@@ -1,9 +1,8 @@
-import { CreateOrganisationDto } from './create-organisation.dto';
 import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 import { User } from '../../user/entities/user.entity';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-export class UpdateOrganisationDto extends PartialType(CreateOrganisationDto) {
+export class UpdateOrganisationDto {
   @ApiProperty({
     example: "CodeGhinux's Organisation",
     description: 'Name of organisation',
