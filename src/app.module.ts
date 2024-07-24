@@ -8,6 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import authConfig from 'config/auth.config';
+import { User } from './modules/user/entities/user.entity';
+import { ExportController } from './modules/export/export.controller';
 
 @Module({
   providers: [
@@ -48,7 +51,7 @@ import HealthController from './health.controller';
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,
-        entities: [User, Profile, Product, Organisation],
+        entities: [User], //Profile, Product, Organisation],
       }),
       dataSourceFactory: async () => dataSource,
     }),
