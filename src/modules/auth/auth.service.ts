@@ -119,6 +119,7 @@ export default class AuthenticationService {
         message: 'Refresh token is required',
       };
     }
+
     const user = await this.validateRefreshToken(refresh_token);
     if (!user) {
       return {

@@ -18,6 +18,7 @@ export default class RegistrationController {
   @Post('token/refresh')
   public async refreshToken(@Body('refresh_token') refresh_token: string, @Res() response: Response): Promise<any> {
     const tokenResponse = await this.authService.refreshAccessToken(refresh_token);
+
     return response.status(tokenResponse.status_code).send(tokenResponse);
   }
 }
