@@ -41,7 +41,7 @@ describe('JobService', () => {
         location: 'Remote',
         salary: '100000',
         job_type: 'Full-time',
-        company_name: 'Tech Company',
+        organisation: 'Tech Company',
       };
 
       const jobEntity = new Job();
