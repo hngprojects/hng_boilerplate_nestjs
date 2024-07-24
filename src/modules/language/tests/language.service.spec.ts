@@ -68,7 +68,7 @@ describe('LanguageService', () => {
     const result = await service.createLanguage(language as any);
 
     expect(result).toEqual({
-      status_code: HttpStatus.BAD_REQUEST,
+      status_code: HttpStatus.CONFLICT,
       message: LANGUAGE_ALREADY_EXISTS,
     });
     expect(repository.findOne).toHaveBeenCalledWith({ where: { code: language.code } });
