@@ -48,12 +48,6 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
 
-  @OneToMany(() => Blog, blog => blog.author, { nullable: true })
-  blogs?: Blog[];
-
-  @OneToMany(() => BlogComment, comment => comment.author, { nullable: true })
-  comments?: BlogComment[];
-
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
