@@ -1,36 +1,29 @@
-import { IsNotEmpty, IsString, IsUUID, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreateSessionDto {
   @IsUUID()
   user_id: string;
 
-  @IsOptional()
   @IsString()
-  device_browser?: string;
+  device_browser: string;
 
-  @IsOptional()
   @IsString()
-  device_browser_version?: string;
+  device_browser_version: string;
 
-  @IsOptional()
   @IsString()
-  device_os?: string;
+  device_os: string;
 
-  @IsOptional()
   @IsString()
-  device_os_version?: string;
+  device_os_version: string;
 
-  @IsOptional()
   @IsString()
-  device_type?: string;
+  device_type: string;
 
-  @IsOptional()
   @IsString()
-  device_brand?: string;
+  device_brand: string;
 
-  @IsOptional()
   @IsString()
-  device_model?: string;
+  device_mode: string;
 
   @IsNotEmpty()
   expires_at: Date;
