@@ -8,6 +8,7 @@ import appConfig from '../../../config/auth.config';
 import { Repository } from 'typeorm';
 import AuthenticationService from './auth.service';
 import UserService from '../user/user.service';
+import { SessionModule } from '../session/session.module';
 
 @Module({
   controllers: [RegistrationController],
@@ -20,6 +21,7 @@ import UserService from '../user/user.service';
       secret: appConfig().jwtSecret,
       signOptions: { expiresIn: `${appConfig().jwtExpiry}s` },
     }),
+    SessionModule,
   ],
 })
-export class AuthModule { }
+export class AuthModule {}
