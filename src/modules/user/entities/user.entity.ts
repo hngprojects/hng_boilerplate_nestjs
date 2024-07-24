@@ -37,6 +37,7 @@ export class User extends AbstractBaseEntity {
 
   @Column({ default: false })
   is_2fa_enabled: boolean;
+
   @Column({
     type: 'enum',
     enum: UserType,

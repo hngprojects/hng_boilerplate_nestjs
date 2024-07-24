@@ -233,7 +233,7 @@ describe('Enabling two factor authentication', () => {
 
     const secret = speakeasy.generateSecret({ length: 32 });
     jest.spyOn(speakeasy, 'generateSecret').mockReturnValue(secret);
-    jest.spyOn(userService, 'updateUserSecret').mockResolvedValueOnce(undefined);
+    jest.spyOn(userService, 'updateUserRecord').mockResolvedValueOnce(undefined);
 
     const expectedResponse = {
       status_code: HttpStatus.OK,

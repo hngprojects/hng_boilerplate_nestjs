@@ -138,10 +138,18 @@ export default class AuthenticationService {
     }
 
     const secret = speakeasy.generateSecret({ length: 32 });
-    user.secret = secret.base32;
-    user.is_2fa_enabled = true;
+    const payload = {
+      secret: secret.base32,
+      is_2fa_enabled: true,
+    };
 
-    await this.userService.updateUserSecret(user);
+    await this.userService.updateUserRecord({
+      updatePayload: payload,
+      identifierOptions: {
+        identifierType: 'id',
+        identifier: user.id,
+      },
+    });
 
     const qrCodeUrl = speakeasy.otpauthURL({
       secret: secret.ascii,

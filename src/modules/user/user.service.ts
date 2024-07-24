@@ -6,6 +6,7 @@ import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
 import UserInterface from './interfaces/UserInterface';
+import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 
 @Injectable()
 export default class UserService {
@@ -21,11 +22,11 @@ export default class UserService {
     await this.userRepository.save(newUser);
   }
 
-  async updateUserSecret(user: UserResponseDTO) {
-    await this.userRepository.update(user.id, {
-      secret: user.secret,
-      is_2fa_enabled: user.is_2fa_enabled,
-    });
+  async updateUserRecord(userUpdateOptions: UpdateUserRecordOption) {
+    const { updatePayload, identifierOptions } = userUpdateOptions;
+    const user = await this.getUserRecord(identifierOptions);
+    Object.assign(user, updatePayload);
+    await this.userRepository.save(user);
   }
 
   private async getUserByEmail(email: string) {
