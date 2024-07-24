@@ -1,17 +1,18 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
-import serverConfig from '../config/server.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import authConfig from '../config/auth.config';
+import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
+import { AuthGuard } from './guards/auth.guard';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
-import authConfig from 'config/auth.config';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   providers: [
@@ -26,6 +27,10 @@ import authConfig from 'config/auth.config';
           whitelist: true,
           forbidNonWhitelisted: true,
         }),
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: AuthGuard,
     },
   ],
   imports: [
