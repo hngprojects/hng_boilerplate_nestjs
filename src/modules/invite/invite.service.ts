@@ -13,7 +13,7 @@ export class InviteService {
     return 'This action adds a new invite';
   }
 
-  async findAllInvites() {
+  async findAllInvitations() {
     try {
       const allInvites = await this.inviteRepository.find();
 

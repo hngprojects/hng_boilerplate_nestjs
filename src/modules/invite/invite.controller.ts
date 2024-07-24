@@ -22,8 +22,8 @@ export class InviteController {
     description: 'The found record',
   })
   @Get()
-  async findAllInvites() {
-    const allInvites = await this.inviteService.findAllInvites();
+  async findAllInvitations() {
+    const allInvites = await this.inviteService.findAllInvitations();
     return allInvites;
   }
 

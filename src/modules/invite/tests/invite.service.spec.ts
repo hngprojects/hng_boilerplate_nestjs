@@ -86,7 +86,7 @@ describe('InviteService', () => {
 
     jest.spyOn(repository, 'find').mockResolvedValue(mockInvites);
 
-    const result = await service.findAllInvites();
+    const result = await service.findAllInvitations();
 
     expect(result).toEqual({
       status_code: 200,
@@ -102,6 +102,6 @@ describe('InviteService', () => {
   it('should throw an internal server error if an exception occurs', async () => {
     jest.spyOn(repository, 'find').mockRejectedValue(new Error('Test error'));
 
-    await expect(service.findAllInvites()).rejects.toThrow(InternalServerErrorException);
+    await expect(service.findAllInvitations()).rejects.toThrow(InternalServerErrorException);
   });
 });
