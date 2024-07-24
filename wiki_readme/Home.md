@@ -4,6 +4,7 @@ Welcome to the comprehensive documentation for our NestJS boilerplate project. T
 
 **Table of Contents**
 
+- [NestJS Boilerplate Project Documentation](#nestjs-boilerplate-project-documentation)
 - [Introduction](#introduction)
 - [CI/CD Setup](#cicd-setup)
   - [Choosing CI/CD Tool](#choosing-cicd-tool)
@@ -17,8 +18,13 @@ Welcome to the comprehensive documentation for our NestJS boilerplate project. T
 - [Deployment](#deployment)
   - [Server Setup](#server-setup)
   - [Deployment Process](#deployment-process)
+    - [Steps for Deployment](#steps-for-deployment)
   - [Domain Name Configuration](#domain-name-configuration)
 - [Documentation](#documentation)
+  - [CI/CD Pipelines](#cicd-pipelines)
+  - [Messaging Queue Integration](#messaging-queue-integration-1)
+  - [NGINX Configuration](#nginx-configuration)
+  - [Database Setup](#database-setup-1)
 - [Getting Started](#getting-started)
 
 ## Introduction
@@ -145,7 +151,7 @@ Automated processes for build, test, and deployment are detailed, including YAML
 
 Documentation covers the installation, configuration, and integration of RabbitMQ into the NestJS project.
 
-### [NGINX Configuration ](nginx-configuration)
+### [NGINX Configuration](nginx-configuration)
 
 This outlines the NGINX configuration used for routing traffic to our NestJS applications deployed on different ports and subdomains.
 

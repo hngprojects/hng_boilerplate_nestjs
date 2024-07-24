@@ -13,10 +13,10 @@ export default class UserService {
     private userRepository: Repository<User>
   ) {}
 
-  async createUser(user: CreateNewUserOptions) {
+  async createUser(user: CreateNewUserOptions): Promise<any> {
     const newUser = new User();
     Object.assign(newUser, user);
-    await this.userRepository.save(newUser);
+    return await this.userRepository.save(newUser);
   }
 
   private async getUserByEmail(email: string) {

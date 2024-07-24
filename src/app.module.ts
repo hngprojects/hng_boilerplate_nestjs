@@ -10,7 +10,11 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import authConfig from 'config/auth.config';
+import { OtpService } from './modules/otp/otp.service';
+import { EmailService } from './modules/email/email.service';
+import { EmailModule } from './modules/email/email.module';
+import authConfig from '../config/auth.config';
+import { OtpModule } from './modules/otp/otp.module';
 
 @Module({
   providers: [
@@ -26,6 +30,8 @@ import authConfig from 'config/auth.config';
           forbidNonWhitelisted: true,
         }),
     },
+    OtpService,
+    EmailService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -57,6 +63,8 @@ import authConfig from 'config/auth.config';
     SeedingModule,
     AuthModule,
     UserModule,
+    OtpModule,
+    EmailModule,
   ],
   controllers: [HealthController],
 })

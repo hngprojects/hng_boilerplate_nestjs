@@ -3,17 +3,27 @@ import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export default class RegistrationController {
-  constructor(
-    private authService: AuthenticationService,
-  ) { }
+  constructor(private authService: AuthenticationService) {}
 
   @skipAuth()
-  @Post("register")
+  @Post('register')
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
-    const createUserResponse = await this.authService.createNewUser(body)
-    return response.status(createUserResponse.status_code).send(createUserResponse)
+    const createUserResponse = await this.authService.createNewUser(body);
+    return response.status(createUserResponse.status_code).send(createUserResponse);
+  }
+
+  @skipAuth()
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Res() response: Response): Promise<any> {
+    const { email } = forgotPasswordDto;
+    await this.authService.forgotPassword(email);
+
+    return response.status(HttpStatus.OK).send({
+      message: 'Email sent successfully',
+    });
   }
 }

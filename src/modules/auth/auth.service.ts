@@ -8,12 +8,16 @@ import {
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import UserService from '../user/user.service';
+import { OtpService } from '../otp/otp.service';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export default class AuthenticationService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private otpService: OtpService,
+    private emailService: EmailService
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -65,6 +69,31 @@ export default class AuthenticationService {
       };
     } catch (createNewUserError) {
       Logger.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
+      throw new HttpException(
+        {
+          message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async forgotPassword(email: string): Promise<any> {
+    try {
+      const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
+      if (!user) {
+        return {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: FAILED_TO_CREATE_USER,
+        };
+      }
+
+      const token = (await this.otpService.createOtp(user.id)).token;
+      const html = `<p>Your OTP code is: <strong>${token}</strong></p>`;
+      await this.emailService.sendMail(email, 'Password Reset Request', `Your OTP code is: ${token}`, html);
+    } catch (forgotPasswordError) {
+      Logger.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
       throw new HttpException(
         {
           message: ERROR_OCCURED,

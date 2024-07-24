@@ -1,120 +1,189 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
-import UserService from '../../user/user.service';
-import { User } from '../../user/entities/user.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
-import { CreateUserDTO } from '../dto/create-user.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
-import UserResponseDTO from 'src/modules/user/dto/user-response.dto';
+import UserService from '../../user/user.service';
+import { OtpService } from '../../otp/otp.service';
+import { EmailService } from '../../email/email.service';
+import { CreateUserDTO } from '../dto/create-user.dto';
+import {
+  ERROR_OCCURED,
+  FAILED_TO_CREATE_USER,
+  USER_ACCOUNT_EXIST,
+  USER_CREATED_SUCCESSFULLY,
+} from '../../../helpers/SystemMessages';
 
-describe('Authentication Service tests', () => {
-  let userService: UserService;
-  let authService: AuthenticationService;
-  let jwtService: JwtService;
+describe('AuthenticationService', () => {
+  let service: AuthenticationService;
+  let userServiceMock: jest.Mocked<UserService>;
+  let jwtServiceMock: jest.Mocked<JwtService>;
+  let otpServiceMock: jest.Mocked<OtpService>;
+  let emailServiceMock: jest.Mocked<EmailService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        JwtService,
         AuthenticationService,
-        UserService,
         {
-          provide: getRepositoryToken(User),
-          useValue: {},
+          provide: UserService,
+          useValue: {
+            getUserRecord: jest.fn(),
+            createUser: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
+        },
+        {
+          provide: OtpService,
+          useValue: {
+            createOtp: jest.fn(),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendMail: jest.fn(),
+          },
         },
       ],
     }).compile();
 
-    userService = module.get<UserService>(UserService);
-    authService = module.get<AuthenticationService>(AuthenticationService);
-    jwtService = module.get<JwtService>(JwtService);
+    service = module.get<AuthenticationService>(AuthenticationService);
+    userServiceMock = module.get(UserService) as jest.Mocked<UserService>;
+    jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;
+    otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
+    emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
   });
 
-  it('Registration Controller should be defined', () => {
-    expect(authService).toBeDefined();
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
-  it('should return BAD_REQUEST if user already exists', async () => {
-    const body: CreateUserDTO = {
+  describe('createNewUser', () => {
+    const createUserDto: CreateUserDTO = {
       email: 'test@example.com',
+      password: 'password123',
       first_name: 'John',
       last_name: 'Doe',
-      password: 'password',
     };
-    const existingRecord: UserResponseDTO = {
-      email: 'test@example.com',
-      first_name: 'John',
-      last_name: 'Doe',
-      is_active: true,
-      id: 'some-uuid-value-here',
-      attempts_left: 2,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-    const newUserResponse = await authService.createNewUser(body);
-    expect(newUserResponse).toEqual({
-      status_code: HttpStatus.BAD_REQUEST,
-      message: USER_ACCOUNT_EXIST,
+
+    it('should create a new user successfully', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+      userServiceMock.createUser.mockResolvedValueOnce(undefined);
+      userServiceMock.getUserRecord.mockResolvedValueOnce({
+        id: '1',
+        email: createUserDto.email,
+        first_name: createUserDto.first_name,
+        last_name: createUserDto.last_name,
+        created_at: new Date(),
+      });
+      jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
+
+      const result = await service.createNewUser(createUserDto);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.CREATED,
+        message: USER_CREATED_SUCCESSFULLY,
+        data: {
+          token: 'mocked_token',
+          user: {
+            first_name: createUserDto.first_name,
+            last_name: createUserDto.last_name,
+            email: createUserDto.email,
+            created_at: expect.any(Date),
+          },
+        },
+      });
+    });
+
+    it('should return error if user already exists', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce({ id: '1' });
+
+      const result = await service.createNewUser(createUserDto);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: USER_ACCOUNT_EXIST,
+      });
+    });
+
+    it('should return error if user creation fails', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+      userServiceMock.createUser.mockResolvedValueOnce(undefined);
+      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+
+      const result = await service.createNewUser(createUserDto);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: FAILED_TO_CREATE_USER,
+      });
+    });
+
+    it('should throw HttpException on unexpected error', async () => {
+      userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
+
+      await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
     });
   });
 
-  it('should return CREATED and user data if registration is successful', async () => {
-    const body: CreateUserDTO = {
-      email: 'test@example.com',
-      first_name: 'John',
-      last_name: 'Doe',
-      password: 'password',
-    };
-    const user: UserResponseDTO = {
-      id: '1',
-      email: body.email,
-      first_name: body.first_name,
-      last_name: body.last_name,
-      attempts_left: 2,
-      is_active: true,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    const accessToken = 'fake-jwt-token';
+  describe('forgotPassword', () => {
+    const email = 'test@example.com';
 
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(null);
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(user);
-    jest.spyOn(jwtService, 'sign').mockReturnValue(accessToken);
-    jest.spyOn(userService, 'createUser').mockResolvedValueOnce(null);
-
-    const newUserResponse = await authService.createNewUser(body);
-
-    user.created_at = newUserResponse.data.user.created_at;
-
-    expect(newUserResponse).toEqual({
-      status_code: HttpStatus.CREATED,
-      message: USER_CREATED_SUCCESSFULLY,
-      data: {
-        token: accessToken,
+    it('should send reset password email successfully', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce({ id: '1' });
+      otpServiceMock.createOtp.mockResolvedValueOnce({
+        token: '123456',
+        expiry: new Date(),
+        user_id: '1',
+        id: '1',
         user: {
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          created_at: user.created_at,
+          id: '1',
+          email,
+          first_name: 'John',
+          last_name: 'Doe',
+          hashPassword: jest.fn(),
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+          password: 'password',
+          attempts_left: 0,
+          time_left: 0,
         },
-      },
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+      emailServiceMock.sendMail.mockResolvedValueOnce(undefined);
+
+      await service.forgotPassword(email);
+
+      expect(emailServiceMock.sendMail).toHaveBeenCalledWith(
+        email,
+        'Password Reset Request',
+        'Your OTP code is: 123456',
+        '<p>Your OTP code is: <strong>123456</strong></p>'
+      );
     });
-  });
 
-  it('should return INTERNAL_SERVER_ERROR on exception', async () => {
-    const body: CreateUserDTO = { email: 'john@doe.com', first_name: 'John', last_name: 'Doe', password: 'password' };
+    it('should return error if user not found', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
 
-    await expect(authService.createNewUser(body)).rejects.toEqual(
-      new HttpException(
-        {
-          message: ERROR_OCCURED,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      )
-    );
+      const result = await service.forgotPassword(email);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: FAILED_TO_CREATE_USER,
+      });
+    });
+
+    it('should throw HttpException on unexpected error', async () => {
+      userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
+
+      await expect(service.forgotPassword(email)).rejects.toThrow(HttpException);
+    });
   });
 });
