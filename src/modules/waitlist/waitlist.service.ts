@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Waitlist } from './waitlist.entity';
 import { Repository } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { EMAIL_EXISTS, WAITLIST_USER_CREATED_SUCCESSFULLY } from 'src/helpers/SystemMessages';
+import { EMAIL_EXISTS, WAITLIST_USER_CREATED_SUCCESSFULLY } from '../../helpers/SystemMessages';
 import { EmailService } from '../email/email.service';
 dotenv.config();
 
