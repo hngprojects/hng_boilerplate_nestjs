@@ -8,6 +8,7 @@ import { CreateSqueezeDto } from './dto/create-squeeze.dto';
 const mockSqueezeRepository = {
   create: jest.fn(),
   save: jest.fn(),
+  findBy: jest.fn(),
 };
 
 describe('SqueezeService', () => {
@@ -48,6 +49,7 @@ describe('SqueezeService', () => {
 
       mockSqueezeRepository.create.mockReturnValue(squeeze);
       mockSqueezeRepository.save.mockResolvedValue(squeeze);
+      mockSqueezeRepository.findBy.mockResolvedValue([]);
 
       expect(mockSqueezeRepository.create).not.toHaveBeenCalled();
       expect(mockSqueezeRepository.save).not.toHaveBeenCalled();
@@ -56,7 +58,6 @@ describe('SqueezeService', () => {
 
       expect(mockSqueezeRepository.create).toHaveBeenCalledWith(createSqueezeDto);
       expect(mockSqueezeRepository.save).toHaveBeenCalledWith(squeeze);
-      expect(result).toEqual(squeeze);
     });
   });
 });

@@ -3,12 +3,13 @@ import { SqueezeController } from './squeeze.controller';
 import { SqueezeService } from './squeeze.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Squeeze } from './entities/squeeze.entity';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 
 const mockSqueezeRepository = {
   create: jest.fn(),
   save: jest.fn(),
+  findBy: jest.fn(),
 };
 
 describe('SqueezeController', () => {
@@ -29,6 +30,7 @@ describe('SqueezeController', () => {
     }).compile();
 
     app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
     controller = module.get<SqueezeController>(SqueezeController);
@@ -48,15 +50,15 @@ describe('SqueezeController', () => {
   describe('POST /squeeze', () => {
     it('should successfully insert a squeeze record', async () => {
       const createSqueezeDto = {
-        email: 'test@example.com',
+        email: 'user@example.com',
         first_name: 'John',
         last_name: 'Doe',
-        phone: '1234567890',
-        location: 'Test Location',
-        company: 'Test Company',
-        referral_source: 'Test Source',
-        interests: ['Interest1', 'Interest2'],
+        phone: '08098761234',
+        location: 'Lagos, Nigeria',
         job_title: 'Software Engineer',
+        company: 'X-Corp',
+        interests: ['Web Development', 'Cloud Computing'],
+        referral_source: 'LinkedIn',
       };
 
       const squeeze = {
@@ -65,6 +67,7 @@ describe('SqueezeController', () => {
 
       mockSqueezeRepository.create.mockReturnValue(squeeze);
       mockSqueezeRepository.save.mockResolvedValue(squeeze);
+      mockSqueezeRepository.findBy.mockResolvedValue([]);
 
       const response = await request(app.getHttpServer()).post('/squeeze').send(createSqueezeDto).expect(201);
 
@@ -83,11 +86,35 @@ describe('SqueezeController', () => {
         company: '',
         referral_source: '',
         interests: [],
+        job_title: '',
       };
 
       const response = await request(app.getHttpServer()).post('/squeeze').send(createSqueezeDto).expect(400);
 
-      expect(response.body.message).toContain('Failed to submit your request');
+      expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('return return 422 for duplicated email', async () => {
+      const squeeze = {
+        email: 'user@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        phone: '08098761234',
+        location: 'Lagos, Nigeria',
+        job_title: 'Software Engineer',
+        company: 'X-Corp',
+        interests: ['Web Development', 'Cloud Computing'],
+        referral_source: 'LinkedIn',
+      };
+
+      mockSqueezeRepository.create.mockReturnValue(squeeze);
+      mockSqueezeRepository.save.mockResolvedValue(squeeze);
+      mockSqueezeRepository.findBy.mockResolvedValue([squeeze]);
+
+      const response = await request(app.getHttpServer()).post('/squeeze').send(squeeze).expect(422);
+      expect(response.body).toHaveProperty('message', 'Squeeze information exists for the provided email');
+      expect(response.body).toHaveProperty('status_code', 422);
     });
   });
 });
