@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId, Repository } from 'typeorm';
 import { Otp } from './entities/otp.entity';
@@ -19,7 +19,7 @@ export class OtpService {
       const user = await this.userRepository.findOne({ where: { id: userId } });
 
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundException('User not found');
       }
 
       const token = generateSixDigitToken();
@@ -30,7 +30,7 @@ export class OtpService {
 
       return otp;
     } catch (error) {
-      console.error('Error creating OTP:', error);
+      Logger.error('OtpServiceError ~ createOtpError ~', error);
       return null;
     }
   }
@@ -40,16 +40,16 @@ export class OtpService {
       const otp = await this.otpRepository.findOne({ where: { token, user_id: userId } });
 
       if (!otp) {
-        throw new Error('Invalid OTP');
+        throw new NotFoundException('Invalid OTP');
       }
 
       if (otp.expiry < new Date()) {
-        throw new Error('OTP expired');
+        throw new NotAcceptableException('OTP expired');
       }
 
       return true;
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      Logger.error('OtpServiceError ~ verifyOtpError ~', error);
       return false;
     }
   }
