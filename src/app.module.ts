@@ -10,6 +10,7 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { ProductsModule } from './modules/products/products.module';
 import { EmailModule } from './modules/email/email.module';
 import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
@@ -66,6 +67,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     SeedingModule,
     AuthModule,
     UserModule,
+    ProductsModule,
     EmailModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],

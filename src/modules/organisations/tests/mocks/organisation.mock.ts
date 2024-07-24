@@ -1,11 +1,7 @@
 import { Organisation } from '../../entities/organisations.entity';
 import { v4 as uuidv4 } from 'uuid';
-
-export enum UserType {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  USER = 'vendor',
-}
+import { Product } from '../../../products/entities/product.entity';
+import { UserType } from '../../../user/entities/user.entity';
 
 export const createMockOrganisation = (): Organisation => {
   const ownerAndCreator = {
@@ -23,6 +19,7 @@ export const createMockOrganisation = (): Organisation => {
     owned_organisations: [],
     created_organisations: [],
     user_type: UserType.ADMIN,
+    products: [] as Product[], // Add the products property
   };
 
   return {

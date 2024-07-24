@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Delete, Param, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Param, HttpStatus, HttpException, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ApiTags, ApiBody, ApiParam, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AuthGuard } from '../../guards/auth.guard';
 
-@ApiTags('products')
+@UseGuards(AuthGuard)
+@ApiTags('Products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -14,13 +16,13 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  /*
-  @Get()
-  @ApiBody({ type: CreateProductDto })
-  findAll() {
-    return this.productsService.findAll();
-  }
+  // @Get()
+  // @ApiBody({ type: CreateProductDto })
+  // findAll() {
+  //   return this.productsService.findAll();
+  // }
 
+  /*
   @Get(':id')
   @ApiBody({ type: CreateProductDto })
   findOne(@Param('id') id: string) {
