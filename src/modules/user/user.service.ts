@@ -1,10 +1,11 @@
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
+import { UpdateUserDto } from './dto/update-user-dto';
 
 @Injectable()
 export default class UserService {
@@ -39,5 +40,36 @@ export default class UserService {
     };
 
     return await GetRecord[identifierType]();
+  }
+
+  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<UserResponseDTO> {
+    if (!userId) {
+      throw new BadRequestException('UserId is required');
+    }
+
+    const identifierOptions: UserIdentifierOptionsType = {
+      identifierType: 'id',
+      identifier: userId,
+    };
+    const user = await this.getUserRecord(identifierOptions);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    try {
+      Object.assign(user, updateUserDto);
+      await this.userRepository.save(user);
+    } catch (error) {
+      throw new BadRequestException('Failed to update user');
+    }
+
+    const updatedUser: UserResponseDTO = {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      phone_number: user.phone_number,
+    };
+
+    return updatedUser;
   }
 }
