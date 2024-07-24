@@ -44,8 +44,8 @@ export class RegionsController {
       throw new HttpException(
         {
           status: 'error',
-          message: 'You are not authorised for this action',
-          statusCode: HttpStatus.UNAUTHORIZED,
+          message: 'You are not authorized for this action',
+          status_code: HttpStatus.UNAUTHORIZED,
         },
         HttpStatus.UNAUTHORIZED
       );
