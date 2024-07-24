@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
@@ -11,18 +11,25 @@ export class TestimonialsService {
     private readonly testimonialRepository: Repository<Testimonial>
   ) {}
   async createTestimonial(createTestimonialDto: CreateTestimonialDto, user) {
-    const { content, name } = createTestimonialDto;
+    try {
+      const { content, name } = createTestimonialDto;
 
-    await this.testimonialRepository.save({
-      user,
-      name,
-      content,
-    });
+      await this.testimonialRepository.save({
+        user,
+        name,
+        content,
+      });
 
-    return {
-      user_id: user.id,
-      ...createTestimonialDto,
-      created_at: new Date(),
-    };
+      return {
+        user_id: user.id,
+        ...createTestimonialDto,
+        created_at: new Date(),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
   }
 }
