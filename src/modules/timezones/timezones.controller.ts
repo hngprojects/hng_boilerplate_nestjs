@@ -24,20 +24,3 @@ export class TimezonesController {
     };
   }
 }
-
-// With authentication
-//   @Get()
-//   @UseGuards(AuthGuard)
-//   @ApiOperation({ summary: 'Get supported timezones with authentication' })
-//   @ApiResponse({ status: 200, description: 'Successfully fetched timezones.' })
-//   @ApiResponse({ status: 401, description: 'You are not authorised for this action' })
-//   async getTimezonesWithAuth(): Promise<{ status: string; data: { timezones: CreateTimezoneDto[] } }> {
-//     const timezones = await this.timezonesService.getSupportedTimezones();
-//     return {
-//       status: 'success',
-//       data: {
-//         timezones,
-//       },
-//     };
-//   }
-// }
