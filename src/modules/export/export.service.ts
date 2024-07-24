@@ -1,19 +1,19 @@
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ExportService {
-  constructor(private readonly dataSource: DataSource) {
-    this.userRepository = this.dataSource.getRepository(User);
-  }
-
-  private userRepository;
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>
+  ) {}
 
   async getUserData(user_id: string): Promise<User> {
     return this.userRepository.findOne({
       where: { id: user_id },
-      //relations: ['profile', 'products', 'organisations'],
+      relations: ['owned_organisations', 'created_organisations'],
     });
   }
 

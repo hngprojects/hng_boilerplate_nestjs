@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
+import { ExportModule } from './modules/export/export.module';
 import { AuthGuard } from './guards/auth.guard';
 
 @Module({
@@ -64,7 +65,8 @@ import { AuthGuard } from './guards/auth.guard';
     AuthModule,
     UserModule,
     OrganisationsModule,
+    ExportModule,
   ],
-  //controllers: [HealthController, ExportController],
+  controllers: [HealthController],
 })
 export class AppModule {}

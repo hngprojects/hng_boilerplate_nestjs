@@ -3,16 +3,23 @@ import { Response, Request } from 'express';
 import { ExportService } from './export.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { User } from '../user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('export')
 @Controller('export')
 @UseGuards(AuthGuard)
 export class ExportController {
   constructor(private readonly exportService: ExportService) {}
 
   @Get('user')
+  @ApiOperation({ summary: 'Export user data' })
+  @ApiQuery({ name: 'userId', required: true, type: String, description: 'User ID to export' })
+  @ApiResponse({ status: 200, description: 'User data exported successfully', type: User })
+  @ApiResponse({ status: 400, description: 'User ID is required' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async exportUserData(@Req() req: Request, @Res() res: Response) {
     const userId = req.query.userId as string;
-    console.log(userId);
     if (!userId) {
       return res.status(400).json({
         statusCode: 400,
