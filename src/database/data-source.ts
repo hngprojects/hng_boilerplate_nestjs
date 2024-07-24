@@ -14,7 +14,7 @@ const dataSource = new DataSource({
   database: process.env.DB_DATABASE,
   entities: [process.env.DB_ENTITIES],
   migrations: [process.env.DB_MIGRATIONS],
-  synchronize: isDevelopment,
+  synchronize: false,
   migrationsTableName: 'migrations',
   ssl: process.env.DB_SSL === 'true',
 });
