@@ -7,7 +7,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { validate } from 'class-validator';
 import { orgMock } from '../tests/mocks/organisation.mock';
 import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
-import UserService from '../../user/user.service'
+import UserService from '../../user/user.service';
 import { newUser } from './mocks/new-user.mock';
 import {
   BadRequestException,
@@ -129,7 +129,7 @@ describe('OrganisationsService', () => {
       await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
     });
   });
-  
+
   describe('it should validate before removing a user', () => {
     it("should throw error if organisation doesn't exist", async () => {
       await jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
@@ -175,7 +175,6 @@ describe('OrganisationsService', () => {
       expect(result.status).toEqual('Success');
       expect(result.message).toEqual('User removed successfully');
       expect(result.status_code).toEqual(200);
-      
-   )};
- )};
+    });
+  });
 });
