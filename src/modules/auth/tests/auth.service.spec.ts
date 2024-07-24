@@ -7,7 +7,7 @@ import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '..
 import { CreateUserDTO } from '../dto/create-user.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import AuthenticationService from '../auth.service';
-import UserResponseDTO from 'src/modules/user/dto/user-response.dto';
+import UserResponseDTO from '../../user/dto/user-response.dto';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
