@@ -104,12 +104,7 @@ export default class AuthenticationService {
         );
       }
 
-      const access_token = this.jwtService.sign({
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        sub: user.id,
-      });
+      const access_token = this.jwtService.sign({ id: user.id });
 
       const responsePayload = {
         access_token,
