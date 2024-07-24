@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
@@ -48,4 +50,8 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationPreference, preference => preference.organisation)
   preferences: OrganisationPreference[];
+
+  @ManyToMany(() => User, user => user.member_organisations)
+  @JoinTable()
+  members: User[];
 }
