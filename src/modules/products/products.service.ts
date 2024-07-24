@@ -12,29 +12,34 @@ export class ProductsService {
   async fetchSingleProduct(productId: string) {
     this.logger.log(`Attempting to retrieve product with id: ${productId}`);
 
-    try {
-      const productExists = await this.productRepository.findOneBy({ id: productId });
-      if (!productExists) {
-        this.logger.log(`Product with id: ${productId} does not exist`);
-        return {
-          error: 'Product not found',
-          status_code: HttpStatus.NOT_FOUND,
-        };
-      }
+    const productExists = await this.productRepository.findOne({
+      where: {
+        id: productId,
+      },
+      relations: ['category'],
+    });
+    if (!productExists) {
+      this.logger.log(`Product with id: ${productId} does not exist`);
       return {
-        status_code: HttpStatus.OK,
-        message: 'Product fetched successfully',
-        data: productExists,
+        error: 'Product not found',
+        status_code: HttpStatus.NOT_FOUND,
       };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        return {
-          error: 'Product not found',
-          status_code: HttpStatus.NOT_FOUND,
-        };
-      }
-      this.logger.error(`Failed to retrieve product with id: ${productId}`, error.stack);
-      throw new InternalServerErrorException('Unexpected error occurred while fetching product');
     }
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Product fetched successfully',
+      data: {
+        products: {
+          id: productExists.id,
+          product_name: productExists.product_name,
+          description: productExists.description,
+          quantity: productExists.quantity,
+          price: productExists.price,
+          category: productExists.category.id,
+          created_at: productExists.created_at,
+          updated_at: productExists.updated_at,
+        },
+      },
+    };
   }
 }

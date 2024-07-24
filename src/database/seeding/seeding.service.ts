@@ -83,7 +83,7 @@ export class SeedingService {
         if (savedOrganisations.length !== 2) {
           throw new Error('Failed to create all organisations');
         }
-        
+
         const c1 = categoryRepository.create({
           name: 'Category 1',
           description: 'Description for Category 1',
@@ -97,15 +97,17 @@ export class SeedingService {
           description: 'Description for Category 3',
         });
 
+        // Save categories
         await categoryRepository.save([c1, c2, c3]);
 
+        // Create products with associated categories
         const p1 = productRepository.create({
           product_name: 'Product 1',
           description: 'Description for Product 1',
           quantity: 10,
           price: 100,
           user: u1,
-          category: c1, 
+          category: c1,
         });
         const p2 = productRepository.create({
           product_name: 'Product 2',
@@ -118,13 +120,7 @@ export class SeedingService {
 
         await productRepository.save([p1, p2]);
 
-        // Update categories with the associated products
-        c1.product = [p1];
-        c2.product = [p1];
-        c3.product = [p2];
-        await categoryRepository.save([c1, c2, c3]);
-
-        const savedProducts = await productRepository.find();
+        const savedProducts = await productRepository.find({ relations: ['category'] });
         if (savedProducts.length !== 2) {
           throw new Error('Failed to create all products');
         }
@@ -147,6 +143,10 @@ export class SeedingService {
         const savedInvite = await inviteRepository.find();
         if (savedInvite.length !== 2) {
           throw new Error('Failed to create all organisations');
+        }
+        const savedCategories = await categoryRepository.find({ relations: ['products'] });
+        if (savedCategories.length !== 3) {
+          throw new Error('Failed to create all categories');
         }
 
         await queryRunner.commitTransaction();

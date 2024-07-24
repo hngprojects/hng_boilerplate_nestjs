@@ -10,21 +10,18 @@ describe('ProductsService', () => {
   let repository: Repository<Product>;
 
   const mockProduct = {
-    status_code: 201,
-    message: 'Product fetched successfully',
-    data: {
-      id: '6',
-      created_at: new Date('2024-07-24T14:22:35.443Z'),
-      updated_at: new Date('2024-07-24T14:22:35.443Z'),
-      product_name: 'Product 2',
-      description: 'Description for Product 2',
-      quantity: 20,
-      price: 200,
-    },
+    id: '6',
+    created_at: new Date('2024-07-24T14:22:35.443Z'),
+    updated_at: new Date('2024-07-24T14:22:35.443Z'),
+    product_name: 'Product 2',
+    description: 'Description for Product 2',
+    quantity: 20,
+    price: 200,
+    category: { id: '9' },
   };
 
   const mockRepository = {
-    findOneBy: jest.fn(),
+    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -48,19 +45,30 @@ describe('ProductsService', () => {
 
   describe('fetchSingleProduct', () => {
     it('should return a product if it exists', async () => {
-      mockRepository.findOneBy.mockResolvedValue(mockProduct);
+      mockRepository.findOne.mockResolvedValue(mockProduct);
 
       const result = await service.fetchSingleProduct('6');
 
       expect(result).toEqual({
         status_code: HttpStatus.OK,
         message: 'Product fetched successfully',
-        data: mockProduct,
+        data: {
+          products: {
+            id: mockProduct.id,
+            product_name: mockProduct.product_name,
+            description: mockProduct.description,
+            quantity: mockProduct.quantity,
+            price: mockProduct.price,
+            category: mockProduct.category.id,
+            created_at: mockProduct.created_at,
+            updated_at: mockProduct.updated_at,
+          },
+        },
       });
     });
 
     it('should throw NotFoundException when product does not exist', async () => {
-      mockRepository.findOneBy.mockResolvedValue(null);
+      mockRepository.findOne.mockResolvedValue(null);
 
       const result = await service.fetchSingleProduct('2');
 
@@ -71,8 +79,8 @@ describe('ProductsService', () => {
     });
 
     it('should throw InternalServerErrorException on unexpected errors', async () => {
-      const unexpectedError = new Error('Unexpected error occurred while fetching product');
-      mockRepository.findOneBy.mockRejectedValue(unexpectedError);
+      const unexpectedError = new InternalServerErrorException();
+      mockRepository.findOne.mockRejectedValue(unexpectedError);
 
       await expect(service.fetchSingleProduct('1')).rejects.toThrow(InternalServerErrorException);
     });
