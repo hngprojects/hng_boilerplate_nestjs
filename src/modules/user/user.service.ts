@@ -17,7 +17,7 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, user);
     newUser.is_active = true;
-    return await this.userRepository.save(newUser);
+    return this.userRepository.save(newUser);
   }
 
   private async getUserByEmail(email: string) {
