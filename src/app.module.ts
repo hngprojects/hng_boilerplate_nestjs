@@ -17,6 +17,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Regions } from './modules/regions/entities/region.entity';
+import { RegionsModule } from './modules/regions/regions.module';
 
 @Module({
   providers: [
@@ -94,6 +95,7 @@ import { Regions } from './modules/regions/entities/region.entity';
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    RegionsModule,
   ],
   controllers: [HealthController],
 })
