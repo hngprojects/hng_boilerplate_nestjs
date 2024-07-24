@@ -24,20 +24,6 @@ export class WaitlistService {
       };
     }
     const waitlistUser = await this.waitlistRepo.create(createWaitlistUserDto);
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.MAILER_PASSWORD,
-      },
-    });
-    const mailOptions = {
-      from: process.env.FROM_EMAIL,
-      to: waitlistUser.email,
-      subject: 'Waitlist Confirmation',
-      text: 'You are all signed up!',
-    };
-    await transporter.sendMail(mailOptions);
     await this.emailService.sendWaitListMail(waitlistUser.email, process.env.CLIENT_URL);
     const user = await this.waitlistRepo.save(waitlistUser);
     return {
