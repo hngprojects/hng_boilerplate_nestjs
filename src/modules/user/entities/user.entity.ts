@@ -24,6 +24,7 @@ export class User extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   time_left: number;
+    products: any;
 
   @BeforeInsert()
   async hashPassword() {

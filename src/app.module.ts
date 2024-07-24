@@ -1,3 +1,4 @@
+import authConfig from '../config/auth.config';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -10,7 +11,10 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import authConfig from 'config/auth.config';
+import { ProductsModule } from './modules/products/products.module';
+import { ProductCategoryModule } from './modules/product-category/product-category.module';
+// import authConfig from 'config/auth.config';
+
 
 @Module({
   providers: [
@@ -57,6 +61,8 @@ import authConfig from 'config/auth.config';
     SeedingModule,
     AuthModule,
     UserModule,
+    ProductsModule,
+    ProductCategoryModule,
   ],
   controllers: [HealthController],
 })
