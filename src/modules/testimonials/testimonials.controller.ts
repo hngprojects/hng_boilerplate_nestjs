@@ -1,7 +1,8 @@
-import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseFilters, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { CustomExceptionFilter } from 'src/helpers/custom-exception.filter';
+import { AuthGuard } from '../../guards/auth.guard';
+import { CustomExceptionFilter } from '../../helpers/custom-exception.filter';
 import { CreateTestimonialDto, CreateTestimonialResponseDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
 
@@ -17,7 +18,7 @@ export class TestimonialsController {
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  // @AuthGuard()
+  @UseGuards(AuthGuard)
   async create(
     @Body() createTestimonialDto: CreateTestimonialDto,
     @Req() req: Request
