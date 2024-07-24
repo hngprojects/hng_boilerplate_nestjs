@@ -13,6 +13,7 @@ import { UserModule } from './modules/user/user.module';
 import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
+import { RegionsModule } from './modules/regions/regions.module';
 
 @Module({
   providers: [
@@ -64,6 +65,7 @@ import { AuthGuard } from './guards/auth.guard';
     AuthModule,
     UserModule,
     OrganisationsModule,
+    RegionsModule,
   ],
   controllers: [HealthController],
 })

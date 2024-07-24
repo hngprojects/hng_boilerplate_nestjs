@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
+import { Region } from '../../modules/regions/entities/region.entity';
 
 @Injectable()
 export class SeedingService {
@@ -8,45 +9,115 @@ export class SeedingService {
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
+    const regionsRepository = this.dataSource.getRepository(Region);
 
     try {
+      // Seed Users
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
-        Logger.log('Database is already populated. Skipping seeding.');
-        return;
+        Logger.log('Database is already populated. Skipping user seeding.');
+      } else {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+          const u1 = userRepository.create({
+            first_name: 'John',
+            last_name: 'Smith',
+            email: 'john.smith@example.com',
+            password: 'password',
+          });
+          const u2 = userRepository.create({
+            first_name: 'Jane',
+            last_name: 'Smith',
+            email: 'jane.smith@example.com',
+            password: 'password',
+          });
+
+          await userRepository.save([u1, u2]);
+
+          const savedUsers = await userRepository.find();
+          if (savedUsers.length !== 2) {
+            throw new Error('Failed to create all users');
+          }
+
+          await queryRunner.commitTransaction();
+        } catch (error) {
+          await queryRunner.rollbackTransaction();
+          console.error('User seeding failed:', error.message);
+        } finally {
+          await queryRunner.release();
+        }
       }
 
-      const queryRunner = this.dataSource.createQueryRunner();
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
+      // Seed Regions
+      const existingRegions = await regionsRepository.count();
+      if (existingRegions === 0) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-      try {
-        const u1 = userRepository.create({
-          first_name: 'John',
-          last_name: 'Smith',
-          email: 'john.smith@example.com',
-          password: 'password',
-        });
-        const u2 = userRepository.create({
-          first_name: 'Jane',
-          last_name: 'Smith',
-          email: 'jane.smith@example.com',
-          password: 'password',
-        });
+        try {
+          const regions = [
+            {
+              regionCode: 'NA',
+              regionName: 'North America',
+              countryCode: 'US',
+              status: 1,
+              createdOn: new Date(),
+              createdBy: 'admin',
+              modifiedOn: new Date(),
+              modifiedBy: 'admin',
+            },
+            {
+              regionCode: 'EU',
+              regionName: 'Europe',
+              countryCode: 'EU',
+              status: 1,
+              createdOn: new Date(),
+              createdBy: 'admin',
+              modifiedOn: new Date(),
+              modifiedBy: 'admin',
+            },
+            {
+              regionCode: 'AS',
+              regionName: 'Asia',
+              countryCode: 'AS',
+              status: 1,
+              createdOn: new Date(),
+              createdBy: 'admin',
+              modifiedOn: new Date(),
+              modifiedBy: 'admin',
+            },
+            {
+              regionCode: 'AF',
+              regionName: 'Africa',
+              countryCode: 'AF',
+              status: 1,
+              createdOn: new Date(),
+              createdBy: 'admin',
+              modifiedOn: new Date(),
+              modifiedBy: 'admin',
+            },
+          ];
 
-        await userRepository.save([u1, u2]);
+          await regionsRepository.save(regions);
 
-        const savedUsers = await userRepository.find();
-        if (savedUsers.length !== 2) {
-          throw new Error('Failed to create all users');
+          const savedRegions = await regionsRepository.find();
+          if (savedRegions.length !== regions.length) {
+            throw new Error('Failed to create all regions');
+          }
+
+          await queryRunner.commitTransaction();
+        } catch (error) {
+          await queryRunner.rollbackTransaction();
+          console.error('Region seeding failed:', error.message);
+        } finally {
+          await queryRunner.release();
         }
-
-        await queryRunner.commitTransaction();
-      } catch (error) {
-        await queryRunner.rollbackTransaction();
-        console.error('Seeding failed:', error.message);
-      } finally {
-        await queryRunner.release();
+      } else {
+        Logger.log('Regions are already seeded.');
       }
     } catch (error) {
       console.error('Error while checking for existing data:', error.message);
