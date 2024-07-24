@@ -12,24 +12,25 @@ export class WaitlistController {
     try {
       const emailExist = await this.waitlistService.emailExist(createWaitlistUserDto.email);
       if (emailExist) {
-        return res.status(409).json({
+        return res.status(HttpStatus.CONFLICT).json({
           status: 'duplicate',
           message: 'Duplicate email!',
-          status_code: 400,
+          status_code: HttpStatus.CONFLICT,
         });
       }
       const user = await this.waitlistService.create(createWaitlistUserDto);
-      return res.status(201).json({
+      await this.waitlistService.sendMail(createWaitlistUserDto.email)
+      return res.status(HttpStatus.CREATED).json({
         status: 'success',
         message: 'You are all signed up!',
         user: user,
-        status_code: 201,
+        status_code: HttpStatus.CREATED,
       });
     } catch (error) {
-      res.status(500).json({
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         status: 'error',
         message: error.message,
-        status_code: 500,
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
   }

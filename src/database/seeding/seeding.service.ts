@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
-import { CreateWaitlistUserDto } from 'src/modules/waitlist/dto/create-waitlist-user.dto';
-import { Waitlist } from 'src/modules/waitlist/waitlist.entity';
+import { Waitlist } from '../../modules/waitlist/waitlist.entity';
 
 @Injectable()
 export class SeedingService {
