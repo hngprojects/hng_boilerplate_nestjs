@@ -66,5 +66,3 @@ import { AuthGuard } from './guards/auth.guard';
   controllers: [HealthController],
 })
 export class AppModule {}
-{
-}
