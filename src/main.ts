@@ -30,7 +30,7 @@ async function bootstrap() {
     app.enable('trust proxy');
     app.useLogger(logger);
     app.enableCors();
-    app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1'] });
+    app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs'] });
 
     // TODO: set options for swagger docs
     const options = new DocumentBuilder()
