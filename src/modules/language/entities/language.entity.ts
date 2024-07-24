@@ -1,7 +1,8 @@
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
-export class Language {
+export class Language extends AbstractBaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

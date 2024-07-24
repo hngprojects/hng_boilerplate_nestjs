@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LanguageService } from '../language.service';
-import dataSource from '../../../database/data-source';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Language } from '../entities/language.entity';
 import { mockLanguageRepository } from './language.repository.mock';
@@ -25,15 +24,6 @@ describe('LanguageService', () => {
           provide: getRepositoryToken(Language),
           useValue: repository,
         },
-      ],
-      imports: [
-        TypeOrmModule.forFeature([Language]),
-        TypeOrmModule.forRootAsync({
-          useFactory: async () => ({
-            ...dataSource.options,
-          }),
-          dataSourceFactory: async () => dataSource,
-        }),
       ],
     }).compile();
 

@@ -15,7 +15,7 @@ import {
 export class LanguageService {
   constructor(
     @InjectRepository(Language)
-    private languageRepository: Repository<Language>
+    private readonly languageRepository: Repository<Language>
   ) {}
 
   async createLanguage(createLanguageDto: CreateLanguageDto): Promise<any> {
