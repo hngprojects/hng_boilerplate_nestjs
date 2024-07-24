@@ -11,10 +11,7 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import { ProductsModule } from './modules/products/products.module';
-import { ProductCategoryModule } from './modules/product-category/product-category.module';
-// import authConfig from 'config/auth.config';
-
+import authConfig from 'config/auth.config';
 
 @Module({
   providers: [
@@ -29,6 +26,10 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
           whitelist: true,
           forbidNonWhitelisted: true,
         }),
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: AuthGuard,
     },
   ],
   imports: [
@@ -61,8 +62,6 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
     SeedingModule,
     AuthModule,
     UserModule,
-    ProductsModule,
-    ProductCategoryModule,
   ],
   controllers: [HealthController],
 })
