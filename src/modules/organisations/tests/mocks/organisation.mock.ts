@@ -22,6 +22,25 @@ export const createMockOrganisation = (): Organisation => {
     time_left: 3600,
     owned_organisations: [],
     created_organisations: [],
+    member_organisations: [],
+    user_type: UserType.ADMIN,
+  };
+
+  const member = {
+    id: uuidv4(),
+    created_at: new Date(),
+    updated_at: new Date(),
+    first_name: 'Marie',
+    last_name: 'James',
+    email: 'marie.james@example.com',
+    password: 'pass123',
+    hashPassword: async () => {},
+    is_active: true,
+    attempts_left: 3,
+    time_left: 3600,
+    owned_organisations: [],
+    created_organisations: [],
+    member_organisations: [],
     user_type: UserType.ADMIN,
   };
 
@@ -41,6 +60,7 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
+    members: [member],
   };
 };
 
