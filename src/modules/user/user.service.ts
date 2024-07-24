@@ -16,6 +16,7 @@ export default class UserService {
   async createUser(user: CreateNewUserOptions) {
     const newUser = new User();
     Object.assign(newUser, user);
+    newUser.is_active = true;
     await this.userRepository.save(newUser);
   }
 
