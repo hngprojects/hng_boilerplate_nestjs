@@ -3,7 +3,9 @@ import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
 import { ApiTags, ApiBody, ApiParam } from '@nestjs/swagger';
+import { skipAuth } from '../../helpers/skipAuth';
 
+@skipAuth()
 @ApiTags('product-categories')
 @Controller('product-categories')
 export class ProductCategoryController {

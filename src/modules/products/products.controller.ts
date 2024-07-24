@@ -3,11 +3,13 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '../../guards/auth.guard';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('products')
 export class ProductController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @skipAuth()
   @UseGuards(AuthGuard)
   @ApiTags('Products')
   @ApiBody({ type: CreateProductDto })
