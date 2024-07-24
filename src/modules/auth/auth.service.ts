@@ -85,7 +85,7 @@ export default class AuthenticationService {
         sub: user.id,
       },
       {
-        secret: appConfig().jwtSecret,
+        secret: appConfig().jwtRefreshSecret,
         expiresIn: appConfig().jwtRefreshExpiry,
       }
     );
@@ -108,7 +108,7 @@ export default class AuthenticationService {
 
   async validateRefreshToken(token: string) {
     try {
-      const payload = this.jwtService.verify(token, { secret: appConfig().jwtSecret });
+      const payload = this.jwtService.verify(token, { secret: appConfig().jwtRefreshSecret });
       return payload;
     } catch (e) {
       return null;
@@ -116,6 +116,12 @@ export default class AuthenticationService {
   }
 
   async refreshAccessToken(refresh_token: string) {
+    if (!refresh_token) {
+      return {
+        status_code: HttpStatus.BAD_REQUEST,
+        message: 'Refresh token is required',
+      };
+    }
     const user = await this.validateRefreshToken(refresh_token);
     if (!user) {
       return {
