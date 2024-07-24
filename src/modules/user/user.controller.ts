@@ -23,7 +23,7 @@ export class UserController {
 
     try {
       const decodedToken = this.jwtService.verify(token);
-      const userId = 'ceed29eb-d9ba-4d81-82b2-223f2bfbece3';
+      const userId = decodedToken.sub;
 
       const result = await this.userService.deactivateUser(userId, deactivateAccountDto);
 
