@@ -1,6 +1,7 @@
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Product } from '../../products/entities/product.entity';
 
 @Entity()
 export class User extends AbstractBaseEntity {
@@ -24,6 +25,9 @@ export class User extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   time_left: number;
+
+  @OneToMany(() => Product, product => product.user)
+  products: Product[];
 
   @BeforeInsert()
   async hashPassword() {
