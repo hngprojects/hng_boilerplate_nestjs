@@ -1,5 +1,5 @@
-import { Body, Controller, Param, Patch, Post, Request } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, Request } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { SqueezeService } from './squeeze.service';
 import { SqueezeRequestDto } from './dto/squeeze.dto';
 
