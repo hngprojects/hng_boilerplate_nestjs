@@ -20,16 +20,3 @@ export class CreateTestimonialDto {
   })
   content: string;
 }
-
-export class CreateTestimonialResponseDto {
-  'status': string;
-  'message': string;
-  'data': TestimonialData;
-}
-
-interface TestimonialData {
-  user_id: string;
-  name: string;
-  content: string;
-  created_at: Date;
-}
