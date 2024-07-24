@@ -3,6 +3,7 @@ import { WaitlistService } from '../waitlist.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Waitlist } from '../waitlist.entity';
 import { CreateWaitlistUserDto } from '../dto/create-waitlist-user.dto';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 describe('WaitlistService', () => {
   let service: WaitlistService;
@@ -10,7 +11,7 @@ describe('WaitlistService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [WaitlistService],
-      imports: [TypeOrmModule.forFeature([Waitlist])],
+      imports: [TypeOrmModule.forFeature([Waitlist]), MailerModule],
     }).compile();
 
     service = module.get<WaitlistService>(WaitlistService);
