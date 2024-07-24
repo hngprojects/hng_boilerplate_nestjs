@@ -4,7 +4,6 @@ import { CreateLanguageDto } from './dto/create-language.dto';
 import { Response } from 'express';
 import { skipAuth } from '../../helpers/skipAuth';
 
-@skipAuth()
 @Controller('language')
 export class LanguageController {
   constructor(private readonly languageService: LanguageService) {}

@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Language } from '../language/entities/language.entity';
@@ -42,7 +35,7 @@ export class LanguageService {
       return {
         status_code: HttpStatus.CREATED,
         message: LANGUAGE_CREATED_SUCCESSFULLY,
-        data: newLanguage,
+        language: newLanguage,
       };
     } catch (error) {
       Logger.log('LanguageServiceError ~  createLanguage ~', error);
@@ -62,7 +55,7 @@ export class LanguageService {
       return {
         status_code: HttpStatus.OK,
         message: SUCCESS,
-        data: languages,
+        languages,
       };
     } catch (error) {
       Logger.log('LanguageServiceError ~  fetchLanguages ~', error);

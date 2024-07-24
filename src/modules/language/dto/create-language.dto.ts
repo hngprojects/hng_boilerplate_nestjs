@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { DirectionEnum } from './direction.enum';
 
 export class CreateLanguageDto {
   @IsString()
@@ -12,6 +13,6 @@ export class CreateLanguageDto {
   @IsString()
   native_name?: string;
 
-  @IsEnum(['LTR', 'RTL'])
+  @IsEnum(DirectionEnum, { message: 'direction must be one of the following values: LTR, RTL' })
   direction: 'LTR' | 'RTL';
 }
