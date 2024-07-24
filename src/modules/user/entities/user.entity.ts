@@ -3,8 +3,6 @@ import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Testimonial } from '../../testimonials/entities/testimonials.entity';
-import { Blog } from '../../blog/entities/blog.entity';
-import { BlogComment } from '../../blog/entities/blog-comments.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',

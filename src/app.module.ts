@@ -1,5 +1,3 @@
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -17,6 +15,7 @@ import { EmailModule } from './modules/email/email.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { UserModule } from './modules/user/user.module';
+// eslint-disable-next-line import/no-unresolved
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
