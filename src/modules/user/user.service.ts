@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { User, UserType } from './entities/user.entity';
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
@@ -50,7 +50,11 @@ export default class UserService {
     currentUser: UserPayload
   ): Promise<UpdateUserResponseDTO> {
     if (!userId) {
-      throw new BadRequestException('UserId is required');
+      throw new BadRequestException({
+        error: 'Bad Request',
+        message: 'UserId is required',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
     }
 
     const identifierOptions: UserIdentifierOptionsType = {
@@ -59,19 +63,31 @@ export default class UserService {
     };
     const user = await this.getUserRecord(identifierOptions);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException({
+        error: 'Not Found',
+        message: 'User not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
     }
 
     // Check if the current user is a super admin or the user being updated
     if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
-      throw new ForbiddenException('You are not authorized to update this user');
+      throw new ForbiddenException({
+        error: 'Forbidden',
+        message: 'You are not authorized to update this user',
+        status_code: HttpStatus.FORBIDDEN,
+      });
     }
 
     try {
       Object.assign(user, updateUserDto);
       await this.userRepository.save(user);
     } catch (error) {
-      throw new BadRequestException('Failed to update user');
+      throw new BadRequestException({
+        error: 'Bad Request',
+        message: 'Failed to update user',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
     }
 
     return {
