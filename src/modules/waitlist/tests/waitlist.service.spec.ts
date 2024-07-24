@@ -1,20 +1,45 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WaitlistService } from '../waitlist.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Waitlist } from '../waitlist.entity';
 import { CreateWaitlistUserDto } from '../dto/create-waitlist-user.dto';
-import { MailerModule } from '@nestjs-modules/mailer';
+import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { EmailService } from '../../email/email.service';
 
 describe('WaitlistService', () => {
   let service: WaitlistService;
-
+  let emailService: EmailService;
+  let mailerService: MailerService;
+  const mockWaitlistRepository = {
+    save: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+  };
+  const mockMailerService = {
+    sendMail: jest.fn().mockResolvedValue({}),
+  };
+  const mockEmailService = {
+    sendConfirmationEmail: jest.fn().mockResolvedValue({}),
+  };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WaitlistService],
-      imports: [TypeOrmModule.forFeature([Waitlist]), MailerModule],
+      providers: [
+        WaitlistService,
+        EmailService,
+        {
+          provide: getRepositoryToken(Waitlist),
+          useValue: mockWaitlistRepository,
+        },
+        {
+          provide: MailerService,
+          useValue: mockMailerService,
+        },
+      ],
     }).compile();
 
     service = module.get<WaitlistService>(WaitlistService);
+    emailService = module.get<EmailService>(EmailService);
+    mailerService = module.get<MailerService>(MailerService);
   });
 
   it('should be defined', () => {
@@ -26,9 +51,8 @@ describe('WaitlistService', () => {
       email: 'test@example.com',
       fullName: 'Test User',
     };
-    const waitlistEntry = await service.create(data);
-    expect(waitlistEntry).toHaveBeenCalledWith(expect.objectContaining(waitlistEntry));
-    expect(waitlistEntry.user.id).toBeDefined();
-    expect(waitlistEntry.user.created_at).toBeDefined();
+    mockWaitlistRepository.create.mockReturnValue(data);
+    mockWaitlistRepository.save.mockResolvedValue(data);
+    expect(mockWaitlistRepository.save).toHaveBeenCalledWith(expect.objectContaining(data));
   });
 });

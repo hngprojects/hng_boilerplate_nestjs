@@ -23,8 +23,8 @@ export class WaitlistService {
       };
     }
     const waitlistUser = await this.waitlistRepo.create(createWaitlistUserDto);
-    await this.emailService.sendWaitListMail(waitlistUser.email, process.env.CLIENT_URL);
     const user = await this.waitlistRepo.save(waitlistUser);
+    await this.emailService.sendWaitListMail(createWaitlistUserDto.email, process.env.CLIENT_URL);
     return {
       status_code: HttpStatus.CREATED,
       message: WAITLIST_USER_CREATED_SUCCESSFULLY,
