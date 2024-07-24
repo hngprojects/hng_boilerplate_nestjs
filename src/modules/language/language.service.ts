@@ -24,7 +24,7 @@ export class LanguageService {
 
       if (languageExists) {
         return {
-          status_code: HttpStatus.BAD_REQUEST,
+          status_code: HttpStatus.CONFLICT,
           message: LANGUAGE_ALREADY_EXISTS,
         };
       }
