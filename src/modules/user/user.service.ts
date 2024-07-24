@@ -71,6 +71,7 @@ export default class UserService {
     }
 
     user.is_active = false;
+
     await this.userRepository.save(user);
 
     //send email to user about deactivation
