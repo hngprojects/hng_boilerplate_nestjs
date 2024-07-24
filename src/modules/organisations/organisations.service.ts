@@ -4,6 +4,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
+  UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Organisation } from './entities/organisations.entity';
@@ -70,5 +72,90 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
+  }
+
+  async addUser(orgId: string, userId: string, currentUserId: string) {
+    try {
+      const org = await this.checkIfOrgExists(orgId);
+
+      if (!this.verifyOwner(org, currentUserId)) {
+        throw new UnauthorizedException({
+          status: 'Forbidden',
+          message: 'Only admins can add users',
+          status_code: 403,
+        });
+      }
+
+      const user = await this.checkIfUserExists(userId);
+
+      const findUser = org.members.filter(member => member.id == userId);
+
+      if (findUser.length > 0) {
+        throw new ConflictException({
+          status: 'error',
+          message: 'User already added to organization.',
+          status_code: 409,
+        });
+      }
+
+      org.members = [user, ...org.members];
+
+      await this.organisationRepository.save(org);
+
+      return {
+        status: 'Success',
+        message: 'User added successfully',
+        status_code: 200,
+      };
+    } catch (err) {
+      if (
+        err instanceof NotFoundException ||
+        err instanceof UnauthorizedException ||
+        err instanceof ConflictException
+      ) {
+        throw err;
+      } else {
+        throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
+      }
+    }
+  }
+
+  async checkIfOrgExists(orgId: string) {
+    const org = await this.organisationRepository.findOne({
+      where: {
+        id: orgId,
+      },
+    });
+    if (!org) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'Organisation not found',
+        status_code: 404,
+      });
+    }
+
+    return org;
+  }
+
+  async checkIfUserExists(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'User not found',
+        status_code: 404,
+      });
+    }
+
+    return user;
+  }
+
+  verifyOwner(org: Organisation, ownerId: string) {
+    return org.owner.id == ownerId;
   }
 }
