@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductController } from '../products.controller';
-import { ProductsService } from '.././products.service';
-import { CreateProductDto } from '.././dto/create-product.dto';
+import { ProductsService } from '../products.service';
+import { CreateProductDto } from '../dto/create-product.dto';
 import { AuthGuard } from '../../../guards/auth.guard';
-import { skipAuth } from '../../../helpers/skipAuth';
 
 describe('ProductController', () => {
   let controller: ProductController;
@@ -16,6 +15,7 @@ describe('ProductController', () => {
         product_name: dto.product_name,
         description: dto.description,
         price: dto.price,
+        quantity: dto.quantity,
         category: { name: 'CategoryName' },
         created_at: new Date(),
         updated_at: new Date(),
@@ -50,6 +50,7 @@ describe('ProductController', () => {
       product_name: 'Product1',
       description: 'Product Description',
       price: 100,
+      quantity: 10,
       categoryId: '1',
     };
 
@@ -63,6 +64,7 @@ describe('ProductController', () => {
         name: dto.product_name,
         description: dto.description,
         price: dto.price,
+        quantity: dto.quantity,
         category: 'CategoryName',
         created_at: expect.any(String),
         updated_at: expect.any(String),

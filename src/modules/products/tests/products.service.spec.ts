@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsService } from '.././products.service';
+import { ProductsService } from '../products.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Product } from '.././entities/product.entity';
+import { Product } from '../entities/product.entity';
 import { ProductCategory } from '../../product-category/entities/product-category.entity';
-import { CreateProductDto } from '.././dto/create-product.dto';
+import { CreateProductDto } from '../dto/create-product.dto';
 import { NotFoundException } from '@nestjs/common';
 
 describe('ProductsService', () => {
@@ -55,6 +55,7 @@ describe('ProductsService', () => {
       product_name: 'Product1',
       description: 'Product Description',
       price: 100,
+      quantity: 10,
       categoryId: '1',
     };
 
@@ -65,7 +66,9 @@ describe('ProductsService', () => {
       product_name: dto.product_name,
       description: dto.description,
       price: dto.price,
+      quantity: dto.quantity,
       category: { id: '1', name: 'CategoryName' },
+      categoryId: '1', // Add this line
     });
     expect(productRepository.create).toHaveBeenCalledWith(expect.objectContaining(dto));
     expect(productRepository.save).toHaveBeenCalledWith(expect.objectContaining(dto));
@@ -76,7 +79,8 @@ describe('ProductsService', () => {
       product_name: 'Product1',
       description: 'Product Description',
       price: 100,
-      categoryId: '2', // Non-existing category ID
+      quantity: 10,
+      categoryId: '2',
     };
 
     await expect(service.create(dto)).rejects.toThrow(NotFoundException);
