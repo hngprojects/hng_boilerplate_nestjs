@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsEmail, IsString, ValidateNested } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsEmail, IsString, ValidateNested } from 'class-validator';
 
 export class SqueezeRequestDto {
   @IsString()
@@ -25,8 +25,8 @@ export class SqueezeRequestDto {
   readonly company: string;
 
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => String)
+  @ArrayNotEmpty()
+  @IsString({ each: true })
   readonly interests: string[];
 
   @IsString()
