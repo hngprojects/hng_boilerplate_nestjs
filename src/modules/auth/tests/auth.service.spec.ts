@@ -3,7 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import UserService from '../../user/user.service';
 import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
+import {
+  ERROR_OCCURED,
+  INVALID_REFRESH_TOKEN,
+  USER_ACCOUNT_EXIST,
+  USER_CREATED_SUCCESSFULLY,
+} from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import AuthenticationService from '../auth.service';
@@ -116,5 +121,40 @@ describe('Authentication Service tests', () => {
         HttpStatus.INTERNAL_SERVER_ERROR
       )
     );
+  });
+
+  describe('refreshAccessToken', () => {
+    it('should return UNAUTHORIZED if refresh token is invalid', async () => {
+      const invalidToken = 'invalid-refresh-token';
+
+      jest.spyOn(jwtService, 'verify').mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
+
+      const response = await authService.refreshAccessToken(invalidToken);
+
+      expect(response).toEqual({
+        status_code: HttpStatus.UNAUTHORIZED,
+        message: INVALID_REFRESH_TOKEN,
+      });
+    });
+
+    it('should return new access token if refresh token is valid', async () => {
+      const validToken = 'valid-refresh-token';
+      const userPayload = {
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        sub: '1',
+      };
+      const newAccessToken = 'new-access-token';
+
+      jest.spyOn(jwtService, 'verify').mockReturnValue(userPayload);
+      jest.spyOn(authService, 'generateAccessToken').mockResolvedValue(newAccessToken);
+
+      const response = await authService.refreshAccessToken(validToken);
+
+      expect(response).toEqual({ accessToken: newAccessToken });
+    });
   });
 });
