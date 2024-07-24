@@ -18,6 +18,7 @@ import { OrganisationsModule } from './modules/organisations/organisations.modul
 import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EmailService } from './modules/email/email.service';
 
 @Module({
   providers: [

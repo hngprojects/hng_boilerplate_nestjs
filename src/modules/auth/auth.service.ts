@@ -90,8 +90,11 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      const html = `<p>Your OTP code is: <strong>${token}</strong></p>`;
-      await this.emailService.sendMail(email, 'Password Reset Request', `Your OTP code is: ${token}`, html);
+      await this.emailService.sendForgotPasswordMail(email, `${process.env.BASE_URL}/auth/reset-password`, token);
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Email sent successfully',
+      };
     } catch (forgotPasswordError) {
       Logger.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
       throw new HttpException(

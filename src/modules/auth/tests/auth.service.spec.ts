@@ -12,9 +12,8 @@ import {
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
 } from '../../../helpers/SystemMessages';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import AuthenticationService from '../auth.service';
-import UserResponseDTO from '../../user/dto/user-response.dto';
+import { User, UserType } from '../../user/entities/user.entity';
+import { Otp } from '../../otp/entities/otp.entity';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -49,7 +48,7 @@ describe('AuthenticationService', () => {
         {
           provide: EmailService,
           useValue: {
-            sendMail: jest.fn(),
+            sendForgotPasswordMail: jest.fn(),
           },
         },
       ],
@@ -74,16 +73,22 @@ describe('AuthenticationService', () => {
       last_name: 'Doe',
     };
 
+    const mockUser: Partial<User> = {
+      id: '1',
+      email: createUserDto.email,
+      first_name: createUserDto.first_name,
+      last_name: createUserDto.last_name,
+      created_at: new Date(),
+      user_type: UserType.USER,
+      is_active: true,
+      attempts_left: 3,
+      time_left: 0,
+    };
+
     it('should create a new user successfully', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
-      userServiceMock.getUserRecord.mockResolvedValueOnce({
-        id: '1',
-        email: createUserDto.email,
-        first_name: createUserDto.first_name,
-        last_name: createUserDto.last_name,
-        created_at: new Date(),
-      });
+      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
 
       const result = await service.createNewUser(createUserDto);
@@ -104,7 +109,7 @@ describe('AuthenticationService', () => {
     });
 
     it('should return error if user already exists', async () => {
-      userServiceMock.getUserRecord.mockResolvedValueOnce({ id: '1' });
+      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
 
       const result = await service.createNewUser(createUserDto);
 
@@ -137,39 +142,37 @@ describe('AuthenticationService', () => {
   describe('forgotPassword', () => {
     const email = 'test@example.com';
 
+    beforeEach(() => {
+      process.env.BASE_URL = 'http://example.com';
+    });
+
     it('should send reset password email successfully', async () => {
-      userServiceMock.getUserRecord.mockResolvedValueOnce({ id: '1' });
-      otpServiceMock.createOtp.mockResolvedValueOnce({
-        token: '123456',
-        expiry: new Date(),
-        user_id: '1',
+      const mockUser: Partial<User> = { id: '1', email };
+      const mockOtp: Otp = {
         id: '1',
-        user: {
-          id: '1',
-          email,
-          first_name: 'John',
-          last_name: 'Doe',
-          hashPassword: jest.fn(),
-          is_active: true,
-          created_at: new Date(),
-          updated_at: new Date(),
-          password: 'password',
-          attempts_left: 0,
-          time_left: 0,
-        },
+        token: '123456',
+        expiry: new Date(Date.now() + 3600000), // 1 hour from now
+        user: mockUser as User,
+        user_id: '1',
         created_at: new Date(),
         updated_at: new Date(),
-      });
-      emailServiceMock.sendMail.mockResolvedValueOnce(undefined);
+      };
 
-      await service.forgotPassword(email);
+      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
+      otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
+      emailServiceMock.sendForgotPasswordMail.mockResolvedValueOnce(undefined);
 
-      expect(emailServiceMock.sendMail).toHaveBeenCalledWith(
+      const result = await service.forgotPassword(email);
+
+      expect(emailServiceMock.sendForgotPasswordMail).toHaveBeenCalledWith(
         email,
-        'Password Reset Request',
-        'Your OTP code is: 123456',
-        '<p>Your OTP code is: <strong>123456</strong></p>'
+        'http://example.com/auth/reset-password',
+        '123456'
       );
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: 'Email sent successfully',
+      });
     });
 
     it('should return error if user not found', async () => {
