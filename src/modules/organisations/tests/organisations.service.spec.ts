@@ -13,7 +13,10 @@ import {
   InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
+  UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
+import { newUser } from './mocks/new-user.mock';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -125,6 +128,71 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
 
       await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('it should validate before adding a user', () => {
+    it('should throw an error if the organisation does not exist', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.addUser(orgMock.owner.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+        new NotFoundException({
+          status: 'error',
+          message: 'Organisation not found',
+          status_code: 404,
+        })
+      );
+    });
+
+    it("should throw if current user does't own the organisation", async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+
+      await expect(service.addUser(orgMock.id, newUser.id, newUser.id)).rejects.toThrow(
+        new UnauthorizedException({
+          status: 'Forbidden',
+          message: 'Only admins can add users',
+          status_code: 403,
+        })
+      );
+    });
+
+    it('should throw an error if the specified user does not exist', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.addUser(orgMock.id, orgMock.id, orgMock.owner.id)).rejects.toThrow(
+        new NotFoundException({
+          status: 'error',
+          message: 'User not found',
+          status_code: 404,
+        })
+      );
+    });
+  });
+
+  describe('it should successfully add a user', () => {
+    it('should successfully add user', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
+
+      const result = await service.addUser(orgMock.id, newUser.id, orgMock.owner.id);
+
+      expect(result.status).toEqual('Success');
+      expect(result.message).toEqual('User added successfully');
+      expect(result.status_code).toEqual(200);
+    });
+
+    it('should throw an error if the user is already a member', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
+
+      await expect(service.addUser(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+        new ConflictException({
+          status: 'error',
+          message: 'User already added to organization.',
+          status_code: 409,
+        })
+      );
     });
   });
 });
