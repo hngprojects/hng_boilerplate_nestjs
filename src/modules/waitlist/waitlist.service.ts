@@ -31,7 +31,7 @@ export class WaitlistService {
   })
 
   const mailOptions = {
-    from: process.env.EMAIL,
+    from: process.env.FROM_EMAIL,
     to: email,
     subject: 'Waitlist Confirmation',
     text: 'You are all signed up!',

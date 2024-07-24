@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../modules/user/entities/user.entity';
-import { Waitlist } from '../modules/waitlist/waitlist.entity';
+import { User } from 'src/modules/user/entities/user.entity';
+import { Waitlist } from 'src/modules/waitlist/waitlist.entity';
 
 @Module({
   imports: [
