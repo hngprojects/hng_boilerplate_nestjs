@@ -12,6 +12,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as useragent from 'useragent';
 
 @Injectable()
 export default class AuthenticationService {
@@ -132,5 +133,19 @@ export default class AuthenticationService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private parseUserAgent(userAgentString: string) {
+    const agent = useragent.parse(userAgentString || '');
+
+    return {
+      device_browser: agent.family || 'unknown',
+      device_browser_version: agent.toVersion() || 'unknown',
+      device_os: agent.os.family || 'unknown',
+      device_os_version: agent.os.toVersion() || 'unknown',
+      device_type: agent.device.family || 'unknown',
+      device_brand: agent.device.brand || 'unknown',
+      device_model: agent.device.model || 'unknown',
+    };
   }
 }
