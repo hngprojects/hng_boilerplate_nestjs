@@ -6,3 +6,4 @@ export const UNAUTHENTICATED_MESSAGE = 'User is currently unauthorized, kindly a
 export const TWO_FACTOR_VERIFIED_SUCCESSFULLY = '2FA verified and enabled';
 export const INCORRECT_TOTP_CODE = 'Incorrect totp code';
 export const USER_ACCOUNT_DOES_NOT_EXIST = 'User not found';
+export const USER_NOT_ENABLED_2FA = 'Two factor Auth not initiated. Visit api/auth/2fa/enable';

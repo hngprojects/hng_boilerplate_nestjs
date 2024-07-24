@@ -1,5 +1,5 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { CreateUserDTO } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
@@ -8,11 +8,17 @@ import {
   USER_ACCOUNT_DOES_NOT_EXIST,
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
+  USER_NOT_ENABLED_2FA,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
 import * as speakeasy from 'speakeasy';
 import { Verify2FADto } from './dto/verify-2fa.dto';
+import { LoginDto } from './dto/login.dto';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { error } from 'console';
 
 @Injectable()
 export default class AuthenticationService {
@@ -97,6 +103,12 @@ export default class AuthenticationService {
       };
     }
 
+    if (!user.two_factor_secret) {
+      throw new BadRequestException({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: USER_NOT_ENABLED_2FA,
+      });
+    }
     // check if totp code is valid
     const verify = speakeasy.totp.verify({
       secret: user.two_factor_secret,
@@ -123,5 +135,60 @@ export default class AuthenticationService {
       message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
       data: { backup_codes: codes },
     };
+  }
+
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
+    try {
+      const { email, password } = loginDto;
+
+      const user = await this.userService.getUserRecord({
+        identifier: email,
+        identifierType: 'email',
+      });
+
+      if (!user) {
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+
+      const access_token = this.jwtService.sign({ id: user.id });
+
+      const responsePayload = {
+        access_token,
+        data: {
+          user: {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            id: user.id,
+          },
+        },
+      };
+
+      return { message: 'Login successful', ...responsePayload };
+    } catch (error) {
+      if (error instanceof CustomHttpException) {
+        throw error;
+      }
+      Logger.log('AuthenticationServiceError ~ loginError ~', error);
+      throw new HttpException(
+        {
+          message: 'An error occurred during login',
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }
