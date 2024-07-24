@@ -15,7 +15,7 @@ export class CreateProductCategoryDto {
     example: 'Electronic devices and accessories',
     required: false,
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   description?: string;
 
@@ -24,7 +24,7 @@ export class CreateProductCategoryDto {
     example: 'electronics',
     required: false,
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   slug?: string;
 
