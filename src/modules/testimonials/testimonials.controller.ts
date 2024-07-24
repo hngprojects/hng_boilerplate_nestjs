@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpStatus,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  Req,
-  UseFilters,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, HttpStatus, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import UserService from '../user/user.service';
@@ -49,6 +38,11 @@ export class TestimonialsController {
     };
   }
 
+  @ApiOperation({ summary: 'Delete Testimonial' })
+  @ApiResponse({ status: 200, description: 'Testimonial deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Testimonial not found' })
+  @ApiResponse({ status: 403, description: 'Access denied' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   @Delete(':id')
   async deleteTestimonial(@Param('id', ParseUUIDPipe) id: string) {
     await this.testimonialsService.deleteTestimonial(id);

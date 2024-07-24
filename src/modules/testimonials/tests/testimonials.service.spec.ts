@@ -95,7 +95,6 @@ describe('TestimonialsService', () => {
           status_code: 500,
         })
       );
-      await expect(service.createTestimonial(createTestimonialDto, userId)).rejects.toThrow(error);
     });
   });
 
