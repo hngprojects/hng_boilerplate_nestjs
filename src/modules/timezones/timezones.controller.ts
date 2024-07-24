@@ -11,7 +11,7 @@ export class TimezonesController {
   constructor(private readonly timezonesService: TimezonesService) {}
 
   // Without authentication
-  @Get('public')
+  @Get()
   @ApiOperation({ summary: 'Get supported timezones without authentication' })
   @ApiResponse({ status: 200, description: 'Successfully fetched timezones.' })
   async getTimezonesWithoutAuth(): Promise<{ status: string; data: { timezones: CreateTimezoneDto[] } }> {
