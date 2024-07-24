@@ -11,11 +11,6 @@ export class ProductsService {
     private productRepository: Repository<Product>
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    const product = this.productRepository.create(createProductDto);
-    return await this.productRepository.save(product);
-  }
-
   async remove(id: string) {
     const result = await this.productRepository.delete(id);
     if (result.affected === 0) {
