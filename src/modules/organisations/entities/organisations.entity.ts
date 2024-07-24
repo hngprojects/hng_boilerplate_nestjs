@@ -1,6 +1,15 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { User } from '../../user/entities/user.entity';
+import { OrganisationPreference } from './org-preferences.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Entity, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Organisation extends AbstractBaseEntity {
@@ -25,15 +34,18 @@ export class Organisation extends AbstractBaseEntity {
   @Column('text', { nullable: false })
   address: string;
 
-  @ManyToOne(() => User, user => user.ownedOrganisations, { nullable: false })
+  @ManyToOne(() => User, user => user.owned_organisations, { nullable: false })
   owner: User;
 
   @Column({ nullable: false })
   state: string;
 
-  @ManyToOne(() => User, user => user.createdOrganisations, { nullable: false })
+  @ManyToOne(() => User, user => user.created_organisations, { nullable: false })
   creator: User;
 
   @Column('boolean', { default: false, nullable: false })
   isDeleted: boolean;
+
+  @OneToMany(() => OrganisationPreference, preference => preference.organisation)
+  preferences: OrganisationPreference[];
 }
