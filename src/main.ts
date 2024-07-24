@@ -1,13 +1,12 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { Logger } from 'nestjs-pino';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
-import { DataSource } from 'typeorm';
-import dataSource, { initializeDataSource } from './database/data-source';
-import { SeedingService } from './database/seeding/seeding.service';
-import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
+import {NestFactory} from '@nestjs/core';
+import {AppModule} from './app.module';
+import {NestExpressApplication} from '@nestjs/platform-express';
+import {Logger} from 'nestjs-pino';
+import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
+import {ConfigService} from '@nestjs/config';
+import {DataSource} from 'typeorm';
+import {initializeDataSource} from './database/data-source';
+import {SeedingService} from './database/seeding/seeding.service';
 
 async function bootstrap() {
   try {
