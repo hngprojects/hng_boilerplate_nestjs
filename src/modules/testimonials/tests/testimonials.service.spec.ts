@@ -48,7 +48,7 @@ describe('TestimonialsService', () => {
       jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(user);
       jest.spyOn(testimonialRepository, 'save').mockResolvedValue(undefined);
 
-      const result = await service.create(createTestimonialDto, userId);
+      const result = await service.createTestimonial(createTestimonialDto, userId);
 
       expect(result).toEqual({
         user_id: userId,
@@ -66,7 +66,7 @@ describe('TestimonialsService', () => {
 
       jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(null);
 
-      await expect(service.create(createTestimonialDto, userId)).rejects.toThrow(
+      await expect(service.createTestimonial(createTestimonialDto, userId)).rejects.toThrow(
         new NotFoundException({
           status: 'Not Found',
           message: 'User not found',
@@ -87,7 +87,7 @@ describe('TestimonialsService', () => {
       jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(user);
       jest.spyOn(testimonialRepository, 'save').mockRejectedValue(error);
 
-      await expect(service.create(createTestimonialDto, userId)).rejects.toThrow(error);
+      await expect(service.createTestimonial(createTestimonialDto, userId)).rejects.toThrow(error);
     });
   });
 
