@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res } fr
 import { CreateWaitlistUserDto } from './dto/create-waitlist-user.dto';
 import { WaitlistService } from './waitlist.service';
 import { Response } from 'express';
+import { EmailService } from '../email/email.service';
 
 @Controller('waitlist')
 export class WaitlistController {

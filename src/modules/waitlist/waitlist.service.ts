@@ -6,11 +6,15 @@ import { Repository } from 'typeorm';
 import * as nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
 import { EMAIL_EXISTS, WAITLIST_USER_CREATED_SUCCESSFULLY } from 'src/helpers/SystemMessages';
+import { EmailService } from '../email/email.service';
 dotenv.config();
 
 @Injectable()
 export class WaitlistService {
-  constructor(@InjectRepository(Waitlist) private readonly waitlistRepo: Repository<Waitlist>) {}
+  constructor(
+    @InjectRepository(Waitlist) private readonly waitlistRepo: Repository<Waitlist>,
+    private readonly emailService: EmailService
+  ) {}
   async create(createWaitlistUserDto: CreateWaitlistUserDto) {
     const emailExist = await this.waitlistRepo.findOne({ where: { email: createWaitlistUserDto.email } });
     if (emailExist) {
@@ -34,6 +38,7 @@ export class WaitlistService {
       text: 'You are all signed up!',
     };
     await transporter.sendMail(mailOptions);
+    await this.emailService.sendWaitListMail(waitlistUser.email, process.env.CLIENT_URL);
     const user = await this.waitlistRepo.save(waitlistUser);
     return {
       status_code: HttpStatus.CREATED,
