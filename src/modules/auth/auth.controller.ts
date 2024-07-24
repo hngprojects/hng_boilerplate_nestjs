@@ -8,21 +8,19 @@ import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export default class RegistrationController {
-  constructor(
-    private authService: AuthenticationService,
-  ) { }
+  constructor(private authService: AuthenticationService) {}
 
   @skipAuth()
-  @Post("register")
+  @Post('register')
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
-    const createUserResponse = await this.authService.createNewUser(body)
-    return response.status(createUserResponse.status_code).send(createUserResponse)
+    const createUserResponse = await this.authService.createNewUser(body);
+    return response.status(createUserResponse.status_code).send(createUserResponse);
   }
 
   @skipAuth()
   @Post('login')
   @HttpCode(200)
-  login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+    return this.authService.loginUser(loginDto);
   }
 }
