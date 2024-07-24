@@ -70,7 +70,9 @@ describe('TestimonialsService', () => {
 
       await expect(service.createTestimonial(createTestimonialDto, null)).rejects.toThrow(
         new NotFoundException({
+          status: 'error',
           error: 'Not Found',
+          status_code: 404,
         })
       );
     });
@@ -88,7 +90,9 @@ describe('TestimonialsService', () => {
 
       await expect(service.createTestimonial(createTestimonialDto, user)).rejects.toThrow(
         new InternalServerErrorException({
+          status: 'error',
           error: `An internal server error occurred: ${error.message}`,
+          status_code: 500,
         })
       );
     });

@@ -1,4 +1,10 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
@@ -16,7 +22,9 @@ export class TestimonialsService {
 
       if (!user) {
         throw new NotFoundException({
+          status: 'error',
           error: 'Not Found',
+          status_code: HttpStatus.NOT_FOUND,
         });
       }
 
@@ -35,7 +43,11 @@ export class TestimonialsService {
       if (error instanceof NotFoundException || error instanceof UnauthorizedException) {
         throw error;
       } else {
-        throw new InternalServerErrorException({ error: `An internal server error occurred: ${error.message}` });
+        throw new InternalServerErrorException({
+          status: 'error',
+          error: `An internal server error occurred: ${error.message}`,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
       }
     }
   }
