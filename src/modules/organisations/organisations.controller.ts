@@ -1,10 +1,8 @@
-import { Body, Controller, HttpException, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, Request } from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { skipAuth } from 'src/helpers/skipAuth';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')

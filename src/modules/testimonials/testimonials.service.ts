@@ -20,6 +20,14 @@ export class TestimonialsService {
     try {
       const { content, name } = createTestimonialDto;
 
+      if (!user) {
+        throw new NotFoundException({
+          status: 'error',
+          error: 'Not Found',
+          status_code: HttpStatus.NOT_FOUND,
+        });
+      }
+
       await this.testimonialRepository.save({
         user,
         name,
@@ -34,8 +42,13 @@ export class TestimonialsService {
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof UnauthorizedException) {
         throw error;
+      } else {
+        throw new InternalServerErrorException({
+          status: 'error',
+          error: `An internal server error occurred: ${error.message}`,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
       }
-      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
 

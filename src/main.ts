@@ -35,7 +35,7 @@ async function bootstrap() {
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()
-    .setTitle('<project-title-here>')
+    .setTitle('Remote Bingo')
     .setDescription('<project-description-here>')
     .setVersion('1.0')
     .addBearerAuth()

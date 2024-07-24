@@ -12,14 +12,12 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { CustomExceptionFilter } from '../../helpers/custom-exception.filter';
 import UserService from '../user/user.service';
 import { CreateTestimonialResponseDto } from './dto/create-testimonial-response.dto';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
 
 @ApiTags('Testimonials')
-@UseFilters(CustomExceptionFilter)
 @Controller('testimonials')
 export class TestimonialsController {
   constructor(
