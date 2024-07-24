@@ -11,6 +11,7 @@ import HealthController from './health.controller';
 import authConfig from 'config/auth.config';
 import { User } from './modules/user/entities/user.entity';
 import { ExportController } from './modules/export/export.controller';
+import { ExportService } from './modules/export/export.service';
 
 @Module({
   providers: [
@@ -26,6 +27,7 @@ import { ExportController } from './modules/export/export.controller';
           forbidNonWhitelisted: true,
         }),
     },
+    ExportService,
   ],
   imports: [
     ConfigModule.forRoot({

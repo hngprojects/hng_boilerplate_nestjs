@@ -13,7 +13,7 @@ export class ExportService {
   async getUserData(user_id: string): Promise<User> {
     return this.userRepository.findOne({
       where: { id: user_id },
-      relations: ['profile', 'products', 'organisations'],
+      //relations: ['profile', 'products', 'organisations'],
     });
   }
 
