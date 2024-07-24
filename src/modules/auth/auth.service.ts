@@ -69,10 +69,13 @@ export default class AuthenticationService {
       };
     } catch (createNewUserError) {
       Logger.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
-      return {
-        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: ERROR_OCCURED,
-      };
+      throw new HttpException(
+        {
+          message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
