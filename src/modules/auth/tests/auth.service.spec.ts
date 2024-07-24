@@ -9,6 +9,7 @@ import { CreateUserDTO } from '../dto/create-user.dto';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
+  USER_ACCOUNT_DOES_NOT_EXIST,
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
 } from '../../../helpers/SystemMessages';
@@ -162,7 +163,7 @@ describe('AuthenticationService', () => {
       otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
       emailServiceMock.sendForgotPasswordMail.mockResolvedValueOnce(undefined);
 
-      const result = await service.forgotPassword(email);
+      const result = await service.forgotPassword({ email });
 
       expect(emailServiceMock.sendForgotPasswordMail).toHaveBeenCalledWith(
         email,
@@ -178,18 +179,18 @@ describe('AuthenticationService', () => {
     it('should return error if user not found', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
 
-      const result = await service.forgotPassword(email);
+      const result = await service.forgotPassword({ email });
 
       expect(result).toEqual({
         status_code: HttpStatus.BAD_REQUEST,
-        message: FAILED_TO_CREATE_USER,
+        message: USER_ACCOUNT_DOES_NOT_EXIST,
       });
     });
 
     it('should throw HttpException on unexpected error', async () => {
       userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
 
-      await expect(service.forgotPassword(email)).rejects.toThrow(HttpException);
+      await expect(service.forgotPassword({ email })).rejects.toThrow(HttpException);
     });
   });
 });

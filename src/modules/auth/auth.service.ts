@@ -3,6 +3,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
+  USER_ACCOUNT_DOES_NOT_EXIST,
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
 } from '../../helpers/SystemMessages';
@@ -10,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import UserService from '../user/user.service';
 import { OtpService } from '../otp/otp.service';
 import { EmailService } from '../email/email.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -79,18 +81,18 @@ export default class AuthenticationService {
     }
   }
 
-  async forgotPassword(email: string): Promise<any> {
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ status_code: number; message: string } | null> {
     try {
-      const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
+      const user = await this.userService.getUserRecord({ identifier: dto.email, identifierType: 'email' });
       if (!user) {
         return {
           status_code: HttpStatus.BAD_REQUEST,
-          message: FAILED_TO_CREATE_USER,
+          message: USER_ACCOUNT_DOES_NOT_EXIST,
         };
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendForgotPasswordMail(email, `${process.env.BASE_URL}/auth/reset-password`, token);
+      await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
       return {
         status_code: HttpStatus.OK,
         message: 'Email sent successfully',

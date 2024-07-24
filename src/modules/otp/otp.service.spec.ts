@@ -4,26 +4,16 @@ import { Repository } from 'typeorm';
 import { OtpService } from './otp.service';
 import { Otp } from './entities/otp.entity';
 import { User } from '../user/entities/user.entity';
-import { generateSixDigitToken } from '../../utils/generate-token';
 
+// Mock the generateSixDigitToken function
 jest.mock('../../utils/generate-token', () => ({
-  generateSixDigitToken: jest.fn(),
+  generateSixDigitToken: jest.fn().mockReturnValue('123456'),
 }));
 
 describe('OtpService', () => {
   let service: OtpService;
-  let otpRepository: Repository<Otp>;
-  let userRepository: Repository<User>;
-
-  const mockOtpRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    findOne: jest.fn(),
-  };
-
-  const mockUserRepository = {
-    findOne: jest.fn(),
-  };
+  let otpRepositoryMock: jest.Mocked<Repository<Otp>>;
+  let userRepositoryMock: jest.Mocked<Repository<User>>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,22 +21,24 @@ describe('OtpService', () => {
         OtpService,
         {
           provide: getRepositoryToken(Otp),
-          useValue: mockOtpRepository,
+          useValue: {
+            create: jest.fn(),
+            save: jest.fn(),
+            findOne: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(User),
-          useValue: mockUserRepository,
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get<OtpService>(OtpService);
-    otpRepository = module.get<Repository<Otp>>(getRepositoryToken(Otp));
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
+    otpRepositoryMock = module.get(getRepositoryToken(Otp)) as jest.Mocked<Repository<Otp>>;
+    userRepositoryMock = module.get(getRepositoryToken(User)) as jest.Mocked<Repository<User>>;
   });
 
   it('should be defined', () => {
@@ -54,76 +46,97 @@ describe('OtpService', () => {
   });
 
   describe('createOtp', () => {
-    it('should create an OTP for a valid user', async () => {
-      const userId = 'some-user-id';
-      const mockUser = { id: userId };
-      const token = '123456';
-      const expiry = new Date(Date.now() + 5 * 60 * 1000);
-      const mockOtp = { token, expiry, user: mockUser, user_id: userId };
+    it('should create an OTP successfully', async () => {
+      const userId = '123';
+      const user = { id: userId } as User;
+      const otp = {
+        id: '1',
+        token: '123456',
+        expiry: expect.any(Date),
+        user,
+        user_id: userId,
+      } as Otp;
 
-      mockUserRepository.findOne.mockResolvedValueOnce(mockUser);
-      (generateSixDigitToken as jest.Mock).mockReturnValue(token);
-      mockOtpRepository.create.mockReturnValue(mockOtp);
-      mockOtpRepository.save.mockResolvedValueOnce(mockOtp);
+      userRepositoryMock.findOne.mockResolvedValue(user);
+      otpRepositoryMock.create.mockReturnValue(otp);
+      otpRepositoryMock.save.mockResolvedValue(otp);
 
       const result = await service.createOtp(userId);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
-      expect(generateSixDigitToken).toHaveBeenCalled();
-      expect(otpRepository.create).toHaveBeenCalled();
-      expect(otpRepository.save).toHaveBeenCalled();
+      expect(result).toEqual(otp);
+      expect(userRepositoryMock.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(otpRepositoryMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: '123456',
+          expiry: expect.any(Date),
+          user,
+          user_id: userId,
+        })
+      );
+      expect(otpRepositoryMock.save).toHaveBeenCalledWith(otp);
     });
 
     it('should return null if user is not found', async () => {
-      const userId = 'non-existent-user-id';
-      mockUserRepository.findOne.mockResolvedValueOnce(null);
+      const userId = '123';
+
+      userRepositoryMock.findOne.mockResolvedValue(null);
 
       const result = await service.createOtp(userId);
 
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
       expect(result).toBeNull();
+      expect(userRepositoryMock.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(otpRepositoryMock.create).not.toHaveBeenCalled();
+      expect(otpRepositoryMock.save).not.toHaveBeenCalled();
     });
   });
 
   describe('verifyOtp', () => {
-    it('should verify a valid OTP', async () => {
-      const userId = 'some-user-id';
+    it('should return true for a valid OTP', async () => {
+      const userId = '123';
       const token = '123456';
-      const expiry = new Date(Date.now() + 5 * 60 * 1000);
-      const mockOtp = { token, expiry, user_id: userId };
+      const otp = {
+        id: '1',
+        token,
+        expiry: new Date(Date.now() + 1000 * 60), // 1 minute in the future
+        user_id: userId,
+      } as Otp;
 
-      mockOtpRepository.findOne.mockResolvedValueOnce(mockOtp);
+      otpRepositoryMock.findOne.mockResolvedValue(otp);
 
       const result = await service.verifyOtp(userId, token);
 
-      expect(otpRepository.findOne).toHaveBeenCalledWith({ where: { token, user_id: userId } });
       expect(result).toBe(true);
+      expect(otpRepositoryMock.findOne).toHaveBeenCalledWith({ where: { token, user_id: userId } });
     });
 
     it('should return false for an invalid OTP', async () => {
-      const userId = 'some-user-id';
-      const token = 'invalid-token';
+      const userId = '123';
+      const token = '123456';
 
-      mockOtpRepository.findOne.mockResolvedValueOnce(null);
+      otpRepositoryMock.findOne.mockResolvedValue(null);
 
       const result = await service.verifyOtp(userId, token);
 
-      expect(otpRepository.findOne).toHaveBeenCalledWith({ where: { token, user_id: userId } });
       expect(result).toBe(false);
+      expect(otpRepositoryMock.findOne).toHaveBeenCalledWith({ where: { token, user_id: userId } });
     });
 
     it('should return false for an expired OTP', async () => {
-      const userId = 'some-user-id';
+      const userId = '123';
       const token = '123456';
-      const expiry = new Date(Date.now() - 5 * 60 * 1000); // expired OTP
-      const mockOtp = { token, expiry, user_id: userId };
+      const otp = {
+        id: '1',
+        token,
+        expiry: new Date(Date.now() - 1000 * 60), // 1 minute in the past
+        user_id: userId,
+      } as Otp;
 
-      mockOtpRepository.findOne.mockResolvedValueOnce(mockOtp);
+      otpRepositoryMock.findOne.mockResolvedValue(otp);
 
       const result = await service.verifyOtp(userId, token);
 
-      expect(otpRepository.findOne).toHaveBeenCalledWith({ where: { token, user_id: userId } });
       expect(result).toBe(false);
+      expect(otpRepositoryMock.findOne).toHaveBeenCalledWith({ where: { token, user_id: userId } });
     });
   });
 });
