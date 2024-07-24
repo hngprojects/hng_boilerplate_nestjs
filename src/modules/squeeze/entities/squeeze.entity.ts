@@ -1,10 +1,8 @@
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Squeeze {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Squeeze extends AbstractBaseEntity {
   @Column({ unique: true, nullable: false })
   email: string;
 
@@ -27,7 +25,7 @@ export class Squeeze {
   company: string;
 
   @Column('simple-array')
-  interest: string[];
+  interests: string[];
 
   @Column({ nullable: false })
   referral_source: string;

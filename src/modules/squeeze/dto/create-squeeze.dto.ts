@@ -1,46 +1,39 @@
-import { ArrayNotEmpty, IsArray, IsEmail, IsNotEmpty, IsString } from 'class-validator';
-
-/*
-{
-  "email": "user@example.com",
-  "first_name": "John",
-  "last_name": "Doe",
-  "phone": "08098761234",
-  "location": "Lagos, Nigeria",
-  "job_title": "Software Engineer",
-  "company": "X-Corp",
-  "interests": ["Web Development", "Cloud Computing"],
-  "referral_source": "LinkedIn"
-}
- */
+import { ArrayNotEmpty, IsArray, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateSqueezeDto {
   @IsEmail()
   email: string;
 
+  @IsString()
   @IsNotEmpty()
   first_name: string;
 
+  @IsString()
   @IsNotEmpty()
   last_name: string;
 
+  @IsString()
   @IsNotEmpty()
   phone: string;
 
+  @IsString()
   @IsNotEmpty()
   location: string;
 
+  @IsString()
   @IsNotEmpty()
   job_title: string;
 
+  @IsString()
   @IsNotEmpty()
   company: string;
 
+  @IsString()
   @IsNotEmpty()
   referral_source: string;
 
   @IsArray()
-  @ArrayNotEmpty()
   @IsString({ each: true })
+  @IsNotEmpty()
   interests: string[];
 }
