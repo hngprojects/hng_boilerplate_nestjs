@@ -18,6 +18,8 @@ interface UserInterface {
   created_at: Date;
 
   updated_at: Date;
+
+  phone_number?: string;
 }
 
 export default UserInterface;
