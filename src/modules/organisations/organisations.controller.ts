@@ -24,12 +24,11 @@ export class OrganisationsController {
     description: 'The found record',
     type: UpdateOrganisationDto,
   })
-  @skipAuth()
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateOrganisationDto: UpdateOrganisationDto) {
     try {
       const updatedOrg = await this.organisationsService.update(id, updateOrganisationDto);
-      return { message: 'Product successfully updated', org: updatedOrg };
+      return { message: 'Organisation successfully updated', org: updatedOrg };
     } catch (error) {
       throw new HttpException(error.message, error.status || 500);
     }

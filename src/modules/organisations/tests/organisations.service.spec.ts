@@ -31,6 +31,8 @@ describe('OrganisationsService', () => {
             findOne: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
           },
         },
         UserService,
@@ -44,6 +46,7 @@ describe('OrganisationsService', () => {
         },
       ],
     }).compile();
+
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
@@ -53,7 +56,7 @@ describe('OrganisationsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('it should create an organisation', () => {
+  describe('create organisation', () => {
     beforeEach(async () => {
       const errors = await validate(createMockOrganisationRequestDto());
       expect(errors).toHaveLength(0);
@@ -73,13 +76,6 @@ describe('OrganisationsService', () => {
       expect(result.status).toEqual('success');
       expect(result.message).toEqual('organisation created successfully');
     });
-  });
-
-  describe('error for an exsiting email', () => {
-    beforeEach(async () => {
-      const errors = await validate(createMockOrganisationRequestDto());
-      expect(errors).toHaveLength(0);
-    });
 
     it('should throw an error if the email already exists', async () => {
       jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([orgMock]);
@@ -92,41 +88,23 @@ describe('OrganisationsService', () => {
       );
     });
   });
-});
 
-describe('OrganisationService', () => {
-  let service: OrganisationsService;
-  let repository: Repository<Organisation>;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OrganisationsService,
-        {
-          provide: getRepositoryToken(Organisation),
-          useClass: Repository,
-        },
-      ],
-    }).compile();
-
-    service = module.get<OrganisationsService>(OrganisationsService);
-    repository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
-  });
-
-  describe('update', () => {
+  describe('update organisation', () => {
     it('should update an organisation successfully', async () => {
       const id = '1';
       const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
       const organisation = new Organisation();
 
-      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(organisation);
-      jest.spyOn(repository, 'update').mockResolvedValueOnce({ affected: 1 } as any);
-      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce({ ...organisation, ...updateOrganisationDto });
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
+      jest.spyOn(organisationRepository, 'update').mockResolvedValueOnce({ affected: 1 } as any);
+      jest
+        .spyOn(organisationRepository, 'findOneBy')
+        .mockResolvedValueOnce({ ...organisation, ...updateOrganisationDto });
 
       const result = await service.update(id, updateOrganisationDto);
 
       expect(result).toEqual({
-        message: 'Product successfully updated',
+        message: 'Organisation successfully updated',
         org: { ...organisation, ...updateOrganisationDto },
       });
     });
@@ -135,7 +113,7 @@ describe('OrganisationService', () => {
       const id = '1';
       const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
 
-      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null);
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
 
       await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
     });
@@ -145,9 +123,9 @@ describe('OrganisationService', () => {
       const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
       const organisation = new Organisation();
 
-      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(organisation);
-      jest.spyOn(repository, 'update').mockResolvedValueOnce({ affected: 0 } as any);
-      jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(null);
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
+      jest.spyOn(organisationRepository, 'update').mockResolvedValueOnce({ affected: 0 } as any);
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
 
       await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(BadRequestException);
     });
@@ -156,7 +134,7 @@ describe('OrganisationService', () => {
       const id = '1';
       const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
 
-      jest.spyOn(repository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
+      jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
 
       await expect(service.update(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
     });

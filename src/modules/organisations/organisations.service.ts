@@ -70,7 +70,7 @@ export class OrganisationsService {
         throw new BadRequestException('Error updating organization');
       }
 
-      return { message: 'Product successfully updated', org: updatedOrg };
+      return { message: 'Organisation successfully updated', org: updatedOrg };
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
