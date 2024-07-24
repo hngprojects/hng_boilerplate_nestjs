@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Organisation } from './entities/organisations.entity';
 import { OrganisationRequestDto } from './dto/organisation.dto';
@@ -6,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
+import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 
 @Injectable()
 export class OrganisationsService {
@@ -44,6 +52,27 @@ export class OrganisationsService {
     return emailFound?.length ? true : false;
   }
 
+  async updateOrganisation(
+    id: string,
+    updateOrganisationDto: UpdateOrganisationDto
+  ): Promise<{ message: string; org: Organisation }> {
+    try {
+      const org = await this.organisationRepository.findOneBy({ id });
+      if (!org) {
+        throw new NotFoundException('Organization not found');
+      }
+      await this.organisationRepository.update(id, updateOrganisationDto);
+      const updatedOrg = await this.organisationRepository.findOneBy({ id });
+
+      return { message: 'Organisation successfully updated', org: updatedOrg };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+  }
+  
   async removeUser(orgId: string, userId: string, currentUserId: string) {
     const org = await this.organisationRepository.findOne({
       where: {
@@ -92,5 +121,4 @@ export class OrganisationsService {
       message: 'User removed successfully',
       status_code: 200,
     };
-  }
 }
