@@ -6,6 +6,7 @@ import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
+import UpdateUserResponseDTO from './dto/update-user-response.dto';
 
 @Injectable()
 export default class UserService {
@@ -42,7 +43,7 @@ export default class UserService {
     return await GetRecord[identifierType]();
   }
 
-  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<UserResponseDTO> {
+  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<UpdateUserResponseDTO> {
     if (!userId) {
       throw new BadRequestException('UserId is required');
     }
@@ -63,13 +64,14 @@ export default class UserService {
       throw new BadRequestException('Failed to update user');
     }
 
-    const updatedUser: UserResponseDTO = {
-      id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      phone_number: user.phone_number,
+    return {
+      status: 'success',
+      message: 'User Updated Successfully',
+      user: {
+        id: user.id,
+        name: `${user.first_name} ${user.last_name}`,
+        phone_number: user.phone_number,
+      },
     };
-
-    return updatedUser;
   }
 }

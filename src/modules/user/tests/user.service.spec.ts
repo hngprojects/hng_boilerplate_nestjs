@@ -120,7 +120,15 @@ describe('UserService', () => {
 
       const result = await service.updateUser(userId, updateOptions);
 
-      expect(result).toEqual(updatedUser);
+      expect(result).toEqual({
+        status: 'success',
+        message: 'User Updated Successfully',
+        user: {
+          id: userId,
+          name: 'Jane Doe',
+          phone_number: '1234567890',
+        },
+      });
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
       expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
     });
