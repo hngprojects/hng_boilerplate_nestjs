@@ -3,6 +3,12 @@ import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 
+export enum UserType {
+  SUPER_ADMIN = 'super_admin',
+  ADMIN = 'admin',
+  USER = 'vendor',
+}
+
 @Entity()
 export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
@@ -26,11 +32,18 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true })
   time_left: number;
 
+  @Column({
+    type: 'enum',
+    enum: UserType,
+    default: UserType.USER,
+  })
+  user_type: UserType;
+
   @OneToMany(() => Organisation, organisation => organisation.owner)
-  ownedOrganisations: Organisation[];
+  owned_organisations: Organisation[];
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
-  createdOrganisations: Organisation[];
+  created_organisations: Organisation[];
 
   @BeforeInsert()
   async hashPassword() {
