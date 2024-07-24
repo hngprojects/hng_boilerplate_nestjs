@@ -12,7 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
-    "dev": "PROFILE=local ./node_modules/.bin/ts-node-dev -r dotenv/config --respawn src/main",
+    "dev": "cross-env PROFILE=local ./node_modules/.bin/ts-node-dev -r dotenv/config --respawn src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

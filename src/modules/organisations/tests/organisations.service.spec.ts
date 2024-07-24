@@ -13,6 +13,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
+  ForbiddenException,
 } from '@nestjs/common';
 
 describe('OrganisationsService', () => {
@@ -125,6 +126,53 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
 
       await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('getOrganisationById', () => {
+    it('should return an organisation by ID if user is the owner', async () => {
+      const id = '1';
+      const userId = 'owner-id';
+      const organisation = { id, name: 'Test Org', email: 'test@example.com', owner: { id: userId } } as Organisation;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValueOnce(organisation);
+
+      const result = await service.getOrganisationById(id, userId);
+
+      expect(result).toEqual(organisation);
+    });
+
+    it('should throw NotFoundException if organisation not found', async () => {
+      const id = '1';
+      const userId = 'owner-id';
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(service.getOrganisationById(id, userId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException if user is not the owner', async () => {
+      const id = '1';
+      const userId = 'another-user-id';
+      const organisation = {
+        id,
+        name: 'Test Org',
+        email: 'test@example.com',
+        owner: { id: 'owner-id' },
+      } as Organisation;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValueOnce(organisation);
+
+      await expect(service.getOrganisationById(id, userId)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
+      const id = '1';
+      const userId = 'owner-id';
+
+      jest.spyOn(organisationRepository, 'findOne').mockRejectedValueOnce(new Error('An unexpected error occurred'));
+
+      await expect(service.getOrganisationById(id, userId)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

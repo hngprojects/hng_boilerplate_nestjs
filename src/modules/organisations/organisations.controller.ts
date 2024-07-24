@@ -1,4 +1,14 @@
-import { Body, Controller, Param, Patch, Post, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Get,
+  Patch,
+  Post,
+  Request,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -26,5 +36,20 @@ export class OrganisationsController {
   async update(@Param('id') id: string, @Body() updateOrganisationDto: UpdateOrganisationDto) {
     const updatedOrg = await this.organisationsService.updateOrganisation(id, updateOrganisationDto);
     return { message: 'Organisation successfully updated', org: updatedOrg };
+  }
+
+  @ApiOperation({ summary: 'Get Organisation by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'The found record',
+  })
+  @Get(':id')
+  async getOrganisationById(@Param('id') id: string, @Request() req) {
+    const user = req['user'];
+    const organisation = await this.organisationsService.getOrganisationById(id, user.sub);
+    if (!organisation) {
+      throw new NotFoundException('Organisation not found');
+    }
+    return organisation;
   }
 }

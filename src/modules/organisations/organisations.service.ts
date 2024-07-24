@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Organisation } from './entities/organisations.entity';
@@ -69,6 +70,36 @@ export class OrganisationsService {
         throw error;
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+  }
+  async getOrganisationById(id: string, userId: string): Promise<Organisation> {
+    try {
+      const organisation = await this.organisationRepository.findOne({
+        where: { id },
+        relations: ['owner'],
+      });
+
+      if (!organisation) {
+        throw new NotFoundException('Organisation not found');
+      }
+
+      if (organisation.owner.id !== userId) {
+        throw new ForbiddenException('You do not have access to this organisation');
+      }
+
+      return organisation;
+    } catch (error: unknown) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+      }
+      throw new InternalServerErrorException('An unknown error occurred');
     }
   }
 }
