@@ -12,6 +12,9 @@ import {
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
 } from '../../../helpers/SystemMessages';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import AuthenticationService from '../auth.service';
+import UserResponseDTO from '../../user/dto/user-response.dto';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
