@@ -82,10 +82,7 @@ export default class AuthenticationService {
   async generateRefreshToken(user: any) {
     return this.jwtService.sign(
       {
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        sub: user.id,
+        id: user.id,
       },
       {
         secret: appConfig().jwtRefreshSecret,
@@ -97,10 +94,7 @@ export default class AuthenticationService {
   async generateAccessToken(user: any) {
     return this.jwtService.sign(
       {
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        sub: user.id,
+        id: user.id,
       },
       {
         secret: appConfig().jwtSecret,
