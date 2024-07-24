@@ -2,9 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
-import { BlogComment } from '../../blog/entities/blog-comments.entity';
-import { Blog } from '../../blog/entities/blog.entity';
-import { Testimonial } from '../../testimonials/entities/testimonials.entity';
+import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -47,12 +45,6 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
-
-  @OneToMany(() => Blog, blog => blog.author, { nullable: true })
-  blogs?: Blog[];
-
-  @OneToMany(() => BlogComment, comment => comment.author, { nullable: true })
-  comments?: BlogComment[];
 
   @BeforeInsert()
   async hashPassword() {

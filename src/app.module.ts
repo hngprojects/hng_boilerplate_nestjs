@@ -13,11 +13,8 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import { AuthGuard } from './guards/auth.guard';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
-import { BlogModule } from './modules/blog/blog.module';
 import { EmailModule } from './modules/email/email.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
-import { TestimonialsModule } from './modules/testimonials/testimonials.module';
-import { UserModule } from './modules/user/user.module';
 
 @Module({
   providers: [
@@ -69,7 +66,6 @@ import { UserModule } from './modules/user/user.module';
     AuthModule,
     UserModule,
     EmailModule,
-    BlogModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
