@@ -19,49 +19,6 @@
 |--- tsconfig.json
 ```
 
-## COMPONENTS
-1. User Registration and Authentication
-2. Social Authentication
-3. User management
-5. Magic Link Authentication
-6. Super Admin and Authorization
-7. Organisation Management
-8. Profile Settings
-9. Settings
-10. Messaging
-11. Payments
-12. Blog
-13. Notification
-14. Language and Region
-15. Waitlist
-
-## API DESIGN
-This is the system architecture of the API Design (a detailed and comprehensive API documentation design ).
-- [API DOC DESIGN](https://app.swaggerhub.com/apis-docs/TheCodeGhinux/Team-Abidoshaker/1.0.0#/)
-
-  ### Endpoints
-  - Authentication: /auth/register, /auth/login, /auth/passport/login, /auth/passport/callback, /auth/magic-link/send, /auth/magic-link/verify, /auth/social/login, /auth/social/callback, /auth/password/change
-  - Users: /users, /users/{id}, /users/{userId}/language, /users/{userId}/region,
-  - Settings: /settings
-  - Profile Settings: /profile-settings
-  - Super Admin
-
-## DATABASE DESIGN
-This is the system architecture dealing with Database schema design.
-- [DATABASE DESIGN](https://dbdiagram.io/d/abidoshaker-66923b569939893daed2fb95)
-  ### Entity-Relationship Design
-  ![DATABASE DESIGN](https://github.com/TheCodeGhinux/team-abidoshaker/blob/b1f047ca500327d2a1e4a59d80a067a2675368f5/abidoshaker.png)
-
-## CONNTRIBUTORS
-- JC CODER  <josephchimezie2003@gmail.com>
-- Kliuvert <kliuvertegbe@gmail.com>
-- Gbenga Black <odedeleg@gmail.com>
-- OriginalTimi <timileyinoyelekan11@gmail.com>
-- CodeGhinux <ilesanmibry@gmail.com>
-
-
-
-
 ## Dependencies (Dev)
 
 - Node.js
@@ -78,6 +35,12 @@ Before you begin, ensure you have the following installed on your machine:
 - [npm](https://www.npmjs.com/) (Node Package Manager, included with Node.js)
 - [NestJs](https://docs.nestjs.com) (NestJS' Documentation)
 - [Git](https://git-scm.com/)
+
+## Setup Guide
+
+#### Detailed guide on setting and starting the Application
+
+- [Setup Guide](setup-guide.md)
 
 ## Contribution Guide
 
