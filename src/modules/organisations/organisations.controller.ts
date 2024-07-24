@@ -1,8 +1,9 @@
-import { Body, Controller, Param, Patch, Post, Request } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Request, Res } from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
+import { number } from 'joi';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')
@@ -14,6 +15,12 @@ export class OrganisationsController {
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Request() req) {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
+  }
+
+  @Delete(':org_id')
+  async delete(@Param('org_id') id: string, @Res() response: Response) {
+    this.organisationsService;
+    return this.organisationsService.deleteOrganization(id);
   }
 
   @ApiOperation({ summary: 'Update Organisation' })

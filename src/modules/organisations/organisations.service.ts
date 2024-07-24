@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -46,6 +47,12 @@ export class OrganisationsService {
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }
 
+  async deleteOrganization(id: string) {
+    const org = await this.organisationRepository.findOneBy({ id });
+    org.isDeleted = true;
+    await this.organisationRepository.save(org);
+    return HttpStatus.NO_CONTENT;
+  }
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
     return emailFound?.length ? true : false;
