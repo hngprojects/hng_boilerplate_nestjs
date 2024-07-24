@@ -1,5 +1,5 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column } from 'typeorm';
 
 @Entity()
 export class Language extends AbstractBaseEntity {
