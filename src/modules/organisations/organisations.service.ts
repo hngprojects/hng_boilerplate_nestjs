@@ -1,4 +1,4 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Organisation } from './entities/organisations.entity';
 import { OrganisationRequestDto } from './dto/organisation.dto';
@@ -42,5 +42,55 @@ export class OrganisationsService {
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
     return emailFound?.length ? true : false;
+  }
+
+  async removeUser(orgId: string, userId: string, currentUserId: string) {
+    const org = await this.organisationRepository.findOne({
+      where: {
+        id: orgId,
+      },
+      relations: {
+        owner: true,
+        members: true,
+      },
+    });
+
+    if (!org) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'Organisation not found',
+        status_code: 404,
+      });
+    }
+
+    const isOwner = org.owner.id == currentUserId;
+
+    if (!isOwner) {
+      throw new UnauthorizedException({
+        status: 'Forbidden',
+        message: 'Only admin can remove users',
+        status_code: 403,
+      });
+    }
+
+    const findUser = org.members.filter(member => member.id == userId);
+
+    if (findUser.length <= 0) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'User not found',
+        status_code: 404,
+      });
+    }
+
+    org.members = org.members.filter(member => member.id != userId);
+
+    await this.organisationRepository.save(org);
+
+    return {
+      status: 'Success',
+      message: 'User removed successfully',
+      status_code: 200,
+    };
   }
 }
