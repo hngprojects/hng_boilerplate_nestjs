@@ -22,7 +22,7 @@ export class ProductsService {
         };
       }
       return {
-        status_code: HttpStatus.CREATED,
+        status_code: HttpStatus.OK,
         message: 'Product fetched successfully',
         data: productExists,
       };

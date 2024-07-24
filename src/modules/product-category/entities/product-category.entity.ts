@@ -1,4 +1,4 @@
-import { Product } from 'src/modules/products/entities/product.entity';
+import { Product } from '../../../modules/products/entities/product.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { ManyToOne } from 'typeorm';

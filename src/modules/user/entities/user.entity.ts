@@ -4,13 +4,13 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Product } from '../../../modules/products/entities/product.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }
-import { Product } from 'src/modules/products/entities/product.entity';
 
 @Entity({ name: 'users' })
 export class User extends AbstractBaseEntity {
@@ -53,6 +53,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
+
   @OneToMany(() => Product, product => product.user, { cascade: true })
   products: Product[];
 
