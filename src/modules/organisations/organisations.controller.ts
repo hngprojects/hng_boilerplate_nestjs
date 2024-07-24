@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post, Request } from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
