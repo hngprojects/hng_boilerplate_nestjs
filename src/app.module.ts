@@ -9,6 +9,10 @@ import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import { DatabaseModule } from './database/database.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
+import HealthController from './health.controller';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import authConfig from 'config/auth.config';
 
 @Module({
   providers: [
@@ -35,7 +39,7 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
        */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
-      load: [serverConfig],
+      load: [serverConfig, authConfig],
       /**
        * See ".env.local" file to list all environment variables needed by the app
        */
@@ -55,6 +59,9 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
     SeedingModule,
     DatabaseModule,
     WaitlistModule,
+    AuthModule,
+    UserModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

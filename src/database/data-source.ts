@@ -1,7 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 import * as dotenv from 'dotenv';
-import { Waitlist } from './entities/waitlist.entity';
+import { Waitlist } from '../modules/waitlist/waitlist.entity';
 
 dotenv.config();
 

@@ -4,7 +4,7 @@ import { User } from './entities/user.entity';
 import { Profile } from './entities/profile.entity';
 import { HelpCenterTopic } from './entities/help-center-topic.entity';
 import { Organisation } from './entities/org.entity';
-import { Waitlist } from './entities/waitlist.entity';
+import { Waitlist } from '../modules/waitlist/waitlist.entity';
 import { Testimonial } from './entities/testimonials.entity';
 import { SubscriptionPlan } from './entities/subscription-plans.entity';
 import { Squeeze } from './entities/squeeze.entity';

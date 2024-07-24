@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateWaitlistUserDto } from './dto/create-waitlist-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Waitlist } from '../../database/entities/waitlist.entity';
+import { Waitlist } from './waitlist.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
