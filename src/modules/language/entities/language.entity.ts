@@ -3,9 +3,6 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 @Entity()
 export class Language extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
   @Column({ unique: true })
   code: string;
 
@@ -17,10 +14,4 @@ export class Language extends AbstractBaseEntity {
 
   @Column({ type: 'enum', enum: ['LTR', 'RTL'] })
   direction: 'LTR' | 'RTL';
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 }
