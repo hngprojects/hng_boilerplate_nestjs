@@ -8,6 +8,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import { User } from './entities/user.entity';
+import { Profile } from './entities/profile.entity';
+import { Product } from './entities/product.entity';
+import { Organisation } from './entities/organisation.entity';
+import { ExportModule } from './export/export.module';
+import { ExportController } from './export/export.controller';
+import { ExportService } from './export/export.service';
 
 @Module({
   providers: [
@@ -23,6 +30,7 @@ import HealthController from './health.controller';
           forbidNonWhitelisted: true,
         }),
     },
+    ExportService,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -48,11 +56,13 @@ import HealthController from './health.controller';
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...dataSource.options,
+        entities: [User, Profile, Product, Organisation],
       }),
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    ExportModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, ExportController],
 })
 export class AppModule {}
