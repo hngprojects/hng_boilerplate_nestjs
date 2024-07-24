@@ -26,7 +26,7 @@ export class OrganisationsController {
   })
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateOrganisationDto: UpdateOrganisationDto) {
-    const updatedOrg = await this.organisationsService.update(id, updateOrganisationDto);
+    const updatedOrg = await this.organisationsService.updateOrganisation(id, updateOrganisationDto);
     return { message: 'Organisation successfully updated', org: updatedOrg };
   }
 }

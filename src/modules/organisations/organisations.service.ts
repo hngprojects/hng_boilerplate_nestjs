@@ -51,7 +51,7 @@ export class OrganisationsService {
     return emailFound?.length ? true : false;
   }
 
-  async update(
+  async updateOrganisation(
     id: string,
     updateOrganisationDto: UpdateOrganisationDto
   ): Promise<{ message: string; org: Organisation }> {
