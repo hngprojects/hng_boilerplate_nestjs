@@ -38,7 +38,6 @@ export class OrganisationsController {
     return { message: 'Organisation successfully updated', org: updatedOrg };
   }
 
-  //// Get Organisation by ID started here
   @ApiOperation({ summary: 'Get Organisation by ID' })
   @ApiResponse({
     status: 200,

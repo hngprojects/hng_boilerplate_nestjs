@@ -46,7 +46,6 @@ export class AuthGuard implements CanActivate {
       }
       request['user'] = payload;
       request['token'] = token;
-      console.log('Token:', token);
     } catch {
       throw new UnauthorizedException({
         message: UNAUTHENTICATED_MESSAGE,

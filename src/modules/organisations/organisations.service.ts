@@ -73,7 +73,6 @@ export class OrganisationsService {
     }
   }
 
-  //// Get Organisation by ID started here
   async getOrganisationById(id: string, userId: string): Promise<Organisation> {
     try {
       const organisation = await this.organisationRepository.findOne({
