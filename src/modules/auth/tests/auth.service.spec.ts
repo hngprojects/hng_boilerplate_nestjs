@@ -88,11 +88,15 @@ describe('Authentication Service tests', () => {
         updated_at: new Date(),
       };
       const accessToken = 'fake-jwt-token';
-      const refresh_token = 'fake-jwt-token';
+      const refreshToken = 'fake-jwt-token';
 
       jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(null);
       jest.spyOn(userService, 'createUser').mockResolvedValueOnce(user);
-      jest.spyOn(jwtService, 'sign').mockReturnValue(accessToken);
+      jest.spyOn(jwtService, 'sign').mockImplementation((payload, options) => {
+        if (options?.expiresIn === '15m') return accessToken;
+        if (options?.expiresIn === '7d') return refreshToken;
+        return '';
+      });
 
       const newUserResponse = await authService.createNewUser(body);
 
@@ -103,7 +107,7 @@ describe('Authentication Service tests', () => {
         message: USER_CREATED_SUCCESSFULLY,
         data: {
           accessToken: accessToken,
-          refresh_token: refresh_token,
+          refresh_token: refreshToken,
           user: {
             first_name: user.first_name,
             last_name: user.last_name,
@@ -213,7 +217,7 @@ describe('Authentication Service tests', () => {
     });
   });
 
-  describe('refreshAccessToken', () => {
+  describe('refreshAccessToken tests', () => {
     it('should return UNAUTHORIZED if refresh token is invalid', async () => {
       const invalidToken = 'invalid-refresh-token';
 
