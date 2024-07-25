@@ -43,6 +43,8 @@ describe('InviteService', () => {
       hashPassword: () => null,
       password: 'password123',
       time_left: 5,
+      secret: 'secret',
+      is_2fa_enabled: true,
     };
 
     const mockOrg: Organisation = {
