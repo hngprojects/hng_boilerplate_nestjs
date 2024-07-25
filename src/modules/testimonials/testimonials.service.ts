@@ -20,6 +20,13 @@ export class TestimonialsService {
     try {
       const { content, name } = createTestimonialDto;
 
+      if (!user) {
+        throw new NotFoundException({
+          message: 'User is currently unauthorized, kindly authenticate to continue',
+          status_code: HttpStatus.NOT_FOUND,
+        });
+      }
+
       await this.testimonialRepository.save({
         user,
         name,
@@ -31,13 +38,13 @@ export class TestimonialsService {
         ...createTestimonialDto,
         created_at: new Date(),
       };
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof UnauthorizedException) {
-        throw error;
+    } catch (err) {
+      if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
+        throw err;
       } else {
         throw new InternalServerErrorException({
           status: 'error',
-          error: `An internal server error occurred: ${error.message}`,
+          error: `An internal server error occurred: ${err.message}`,
           status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         });
       }
