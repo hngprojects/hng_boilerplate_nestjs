@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
-import { BAD_REQUEST, TWO_FA_INITIATED } from 'src/helpers/SystemMessages';
+import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -43,5 +43,16 @@ export default class RegistrationController {
     const { password } = body;
     const { id: user_id } = request['user'];
     return this.authService.enable2FA(user_id, password);
+  }
+
+  @skipAuth()
+  @Post('password-reset-email')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Send password reset email' })
+  @ApiResponse({ status: 200, description: 'Password reset email sent' })
+  @ApiResponse({ status: 400, description: 'Invalid email' })
+  async sendPasswordResetEmail(@Body('email') email: string): Promise<any> {
+    await this.authService.sendPasswordResetEmail(email);
+    return { message: 'Password reset email sent' };
   }
 }

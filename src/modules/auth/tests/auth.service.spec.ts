@@ -20,6 +20,7 @@ import AuthenticationService from '../auth.service';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { EmailService } from '../../email/email.service';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
