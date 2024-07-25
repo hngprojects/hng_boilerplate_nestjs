@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
+import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
 import { UserPayload } from './interfaces/user-payload.interface';
@@ -29,6 +30,13 @@ export default class UserService {
     Object.assign(newUser, user);
     newUser.is_active = true;
     await this.userRepository.save(newUser);
+  }
+
+  async updateUserRecord(userUpdateOptions: UpdateUserRecordOption) {
+    const { updatePayload, identifierOptions } = userUpdateOptions;
+    const user = await this.getUserRecord(identifierOptions);
+    Object.assign(user, updatePayload);
+    await this.userRepository.save(user);
   }
 
   private async getUserByEmail(email: string) {
