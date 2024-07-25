@@ -1,3 +1,4 @@
+import * as speakeasy from 'speakeasy';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import UserService from '../../user/user.service';
