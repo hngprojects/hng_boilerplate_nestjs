@@ -20,7 +20,7 @@ import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { SessionService } from '../session/session.service';
 import { CreateSessionDto } from '../session/dto/create-session.dto';
 import * as useragent from 'useragent';
-import { Request } from 'express';
+import { Request } from '@nestjs/common';
 
 @Injectable()
 export default class AuthenticationService {
