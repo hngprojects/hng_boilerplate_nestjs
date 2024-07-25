@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
 import { BlogCategory } from '../entities/blog-category.entity';
+import { CategoryResponseDto } from '../dto/blog-category-response.dto';
 
 @Injectable()
 export class BlogCategoryService {
@@ -11,21 +12,21 @@ export class BlogCategoryService {
     private readonly blogCategoryRepository: Repository<BlogCategory>
   ) {}
 
-  async createCategory(createBlogCategoryDto: CreateBlogCategoryDto): Promise<any> {
-    const { name } = createBlogCategoryDto;
-
-    const existingCategory = await this.blogCategoryRepository.findOne({ where: { name } });
-    if (existingCategory) {
-      throw new BadRequestException({
-        status: 'error',
-        message: 'Category name already exists.',
-        status_code: 400,
-      });
-    }
-
-    const category = this.blogCategoryRepository.create({ name });
-
+  async createCategory(createBlogCategoryDto: CreateBlogCategoryDto): Promise<CategoryResponseDto> {
     try {
+      const { name } = createBlogCategoryDto;
+
+      const existingCategory = await this.blogCategoryRepository.findOne({ where: { name } });
+      if (existingCategory) {
+        throw new BadRequestException({
+          status: 'error',
+          message: 'Category name already exists.',
+          status_code: 400,
+        });
+      }
+
+      const category = this.blogCategoryRepository.create({ name });
+
       const savedCategory = await this.blogCategoryRepository.save(category);
       return {
         status: 'success',

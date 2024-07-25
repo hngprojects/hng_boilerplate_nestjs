@@ -2,32 +2,20 @@ import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/commo
 import { BlogService } from '../services/blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { Blog } from '../entities/blog.entity';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ResponseDto } from '../dto/blog-response.dto';
 
-@Controller('api/v1/blogs')
+@ApiTags('blogs')
+@Controller('/blogs')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Post()
-  async create(
-    @Body() createBlogDto: CreateBlogDto
-  ): Promise<{ status: string; message: string; status_code: number; data?: Blog }> {
-    try {
-      const blog = await this.blogService.create(createBlogDto);
-      return {
-        status: 'success',
-        message: 'Blog created successfully',
-        status_code: HttpStatus.CREATED,
-        data: blog,
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          status: 'error',
-          message: error.message || 'Error creating blog',
-          status_code: HttpStatus.BAD_REQUEST,
-        },
-        HttpStatus.BAD_REQUEST
-      );
-    }
+  @ApiOperation({ summary: 'Create a new blog' })
+  @ApiBody({ type: CreateBlogDto })
+  @ApiResponse({ status: 201, description: 'Blog created successfully', type: Blog })
+  @ApiResponse({ status: 500, description: 'Error creating blog' })
+  async create(@Body() createBlogDto: CreateBlogDto): Promise<ResponseDto> {
+    return this.blogService.create(createBlogDto);
   }
 }

@@ -2,6 +2,7 @@ import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
 import { BlogCategoryService } from '../services/blog-category.service';
+import { CategoryResponseDto } from '../dto/blog-category-response.dto';
 
 @ApiTags('blog-categories')
 @ApiBearerAuth()
@@ -19,7 +20,7 @@ export class BlogCategoryController {
     type: CreateBlogCategoryDto,
     schema: { example: { name: 'Technology' } },
   })
-  async createCategory(@Body() createBlogCategoryDto: CreateBlogCategoryDto) {
+  async createCategory(@Body() createBlogCategoryDto: CreateBlogCategoryDto): Promise<CategoryResponseDto> {
     return this.blogCategoryService.createCategory(createBlogCategoryDto);
   }
 }
