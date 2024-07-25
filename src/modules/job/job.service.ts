@@ -15,22 +15,26 @@ export class JobService {
   ) {}
 
   async createJob(job: CreateNewJobOption) {
-    const newJob = new Job();
+    try {
+      const newJob = new Job();
 
-    const organisation = await this.organisationService.findById(job.organisation);
+      const organisation = await this.organisationService.findById(job.organisation);
 
-    if (!organisation) {
-      throw new Error('Organisation not found');
+      if (!organisation) {
+        throw new Error('Organisation not found');
+      }
+
+      newJob.title = job.title;
+      newJob.description = job.description;
+      newJob.location = job.location;
+      newJob.salary = job.salary;
+      newJob.job_type = job.job_type;
+      newJob.organisation = organisation;
+
+      await this.jobRepository.save(newJob);
+      return newJob;
+    } catch (error) {
+      throw new Error(error.message);
     }
-
-    newJob.title = job.title;
-    newJob.description = job.description;
-    newJob.location = job.location;
-    newJob.salary = job.salary;
-    newJob.job_type = job.job_type;
-    newJob.organisation = organisation;
-
-    await this.jobRepository.save(newJob);
-    return newJob;
   }
 }
