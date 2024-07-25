@@ -18,7 +18,7 @@ export class CreateTestimonialResponseDto {
     description: 'Message',
     example: 'Testimonial created successfully',
   })
-  'message': string;
+  message: string;
   @IsNotEmpty()
   @ApiProperty({
     type: TestimonialData,
@@ -30,5 +30,5 @@ export class CreateTestimonialResponseDto {
       created_at: new Date(),
     },
   })
-  'data': TestimonialData;
+  data: TestimonialData;
 }
