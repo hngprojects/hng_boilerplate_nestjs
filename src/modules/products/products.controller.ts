@@ -39,6 +39,7 @@ export class ProductController {
           name: product.product_name,
           description: product.description,
           price: product.price,
+          quantity: product.quantity,
           category: category,
           created_at: product.created_at.toISOString().split('T')[0],
           updated_at: product.updated_at.toISOString().split('T')[0],

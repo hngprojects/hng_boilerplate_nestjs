@@ -9,12 +9,17 @@ import { UpdateProductCategoryDto } from '../dto/update-product-category.dto';
 describe('ProductCategoryService', () => {
   let service: ProductCategoryService;
   let mockRepository;
+  let mockQueryBuilder;
 
   beforeEach(async () => {
-    mockRepository = {
-      createQueryBuilder: jest.fn().mockReturnThis(),
+    mockQueryBuilder = {
       take: jest.fn().mockReturnThis(),
       skip: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]), // mock getMany method
+    };
+
+    mockRepository = {
+      createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
       find: jest.fn(),
       findOneBy: jest.fn(),
       create: jest.fn(),
@@ -42,7 +47,7 @@ describe('ProductCategoryService', () => {
   describe('findAll', () => {
     it('should return all categories', async () => {
       const categories = [{ id: '1', name: 'Category 1' }];
-      mockRepository.find.mockResolvedValue(categories);
+      mockQueryBuilder.getMany.mockResolvedValue(categories);
 
       const result = await service.findAll();
       expect(result).toEqual(categories);
@@ -52,8 +57,8 @@ describe('ProductCategoryService', () => {
     it('should apply limit and offset', async () => {
       await service.findAll(10, 5);
       expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('category');
-      expect(mockRepository.take).toHaveBeenCalledWith(10);
-      expect(mockRepository.skip).toHaveBeenCalledWith(5);
+      expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
+      expect(mockQueryBuilder.skip).toHaveBeenCalledWith(5);
     });
   });
 
