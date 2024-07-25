@@ -1,14 +1,16 @@
-import { Controller, Post, Body, Req, UseGuards, Get, Query } from '@nestjs/common';
+import { Controller, UseGuards, Get, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiTags} from '@nestjs/swagger';
 import { AuthGuard } from '../../guards/auth.guard';
 import { PaginationQueryDto } from './dto/ PaginationQueryDto';
 import { Product } from './entities/product.entity';
 
 @Controller('products')
-export class ProductController {
+export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  
   
   @UseGuards(AuthGuard)
   @ApiTags('Products')

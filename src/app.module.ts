@@ -17,6 +17,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { EmailModule } from './modules/email/email.module';
 import { ProductsModule } from './modules/products/products.module';
+import { ProductsampleModule } from './modules/productsample/productsample.module';
 
 @Module({
   providers: [
@@ -94,6 +95,7 @@ import { ProductsModule } from './modules/products/products.module';
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    ProductsampleModule,
   ],
   controllers: [HealthController],
 })

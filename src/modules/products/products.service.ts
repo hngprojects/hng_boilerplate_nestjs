@@ -13,9 +13,6 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
-
-    @InjectRepository(ProductCategory)
-    private categoryRepository: Repository<ProductCategory>
   ) {}
   async findAll(paginationQuery: PaginationQueryDto){
     const { limit, page } = paginationQuery;
