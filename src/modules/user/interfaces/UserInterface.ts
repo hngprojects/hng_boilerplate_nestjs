@@ -9,13 +9,13 @@ interface UserInterface {
 
   password: string;
 
-  is_active: boolean;
-
-  two_factor_secret: string;
-
-  is_two_factor_enabled: boolean;
-
   backup_codes: string[];
+
+  secret: string;
+
+  is_2fa_enabled: boolean;
+
+  is_active: boolean;
 
   attempts_left: number;
 

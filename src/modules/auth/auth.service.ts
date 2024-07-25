@@ -1,20 +1,23 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import * as speakeasy from 'speakeasy';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
   INCORRECT_TOTP_CODE,
   TWO_FACTOR_VERIFIED_SUCCESSFULLY,
-  USER_ACCOUNT_DOES_NOT_EXIST,
   USER_ACCOUNT_EXIST,
-  USER_CREATED_SUCCESSFULLY,
   USER_NOT_ENABLED_2FA,
+  INVALID_PASSWORD,
+  TWO_FA_ENABLED,
+  TWO_FA_INITIATED,
+  USER_CREATED_SUCCESSFULLY,
+  USER_NOT_FOUND,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
-import * as speakeasy from 'speakeasy';
 import { Verify2FADto } from './dto/verify-2fa.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
@@ -85,57 +88,6 @@ export default class AuthenticationService {
     }
   }
 
-  generateBackupCodes(): string[] {
-    const codes = [];
-    for (let i = 0; i < 5; i++) {
-      codes.push(Math.floor(10000000 + Math.random() * 90000000).toString());
-    }
-    return codes;
-  }
-
-  async verify2fa(verify2faDto: Verify2FADto, user_id: string) {
-    const user = await this.userService.getUserRecord({ identifier: user_id, identifierType: 'id' });
-    if (!user) {
-      return {
-        status_code: HttpStatus.NOT_FOUND,
-        message: USER_ACCOUNT_DOES_NOT_EXIST,
-      };
-    }
-
-    if (!user.two_factor_secret) {
-      throw new BadRequestException({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: USER_NOT_ENABLED_2FA,
-      });
-    }
-    // check if totp code is valid
-    const verify = speakeasy.totp.verify({
-      secret: user.two_factor_secret,
-      encoding: 'base32',
-      token: verify2faDto.totp_code,
-    });
-    if (!verify) {
-      throw new BadRequestException({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: INCORRECT_TOTP_CODE,
-      });
-    }
-
-    // generate, hash and store backup codes
-    const codes = this.generateBackupCodes();
-    user.backup_codes = codes;
-
-    // update two factor status to true
-    user.is_two_factor_enabled = true;
-
-    await this.userService.saveUser(user);
-    return {
-      status_code: HttpStatus.OK,
-      message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
-      data: { backup_codes: codes },
-    };
-  }
-
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
     try {
       const { email, password } = loginDto;
@@ -189,5 +141,136 @@ export default class AuthenticationService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private async validateUserAndPassword(user_id: string, password: string) {
+    const user = await this.userService.getUserRecord({
+      identifier: user_id,
+      identifierType: 'id',
+    });
+
+    if (!user) {
+      throw new HttpException(
+        {
+          status_code: HttpStatus.NOT_FOUND,
+          message: USER_NOT_FOUND,
+        },
+        HttpStatus.NOT_FOUND,
+        {
+          cause: USER_NOT_FOUND,
+        }
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new HttpException(
+        {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: INVALID_PASSWORD,
+        },
+        HttpStatus.BAD_REQUEST,
+        {
+          cause: INVALID_PASSWORD,
+        }
+      );
+    }
+
+    if (user.is_2fa_enabled) {
+      throw new HttpException(
+        {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: TWO_FA_ENABLED,
+        },
+        HttpStatus.BAD_REQUEST,
+        {
+          cause: TWO_FA_ENABLED,
+        }
+      );
+    }
+
+    return { user, isValid: true };
+  }
+
+  async enable2FA(user_id: string, password: string) {
+    const { user, isValid, ...validationResponse } = await this.validateUserAndPassword(user_id, password);
+
+    if (!isValid) {
+      throw validationResponse;
+    }
+
+    const secret = speakeasy.generateSecret({ length: 32 });
+    const payload = {
+      secret: secret.base32,
+      is_2fa_enabled: true,
+    };
+
+    await this.userService.updateUserRecord({
+      updatePayload: payload,
+      identifierOptions: {
+        identifierType: 'id',
+        identifier: user.id,
+      },
+    });
+
+    const qrCodeUrl = speakeasy.otpauthURL({
+      secret: secret.ascii,
+      label: `Hng:${user.email}`,
+      issuer: 'Hng Boilerplate',
+    });
+
+    return {
+      status_code: HttpStatus.OK,
+      message: TWO_FA_INITIATED,
+      data: {
+        secret: secret.base32,
+        qr_code_url: qrCodeUrl,
+      },
+    };
+  }
+  generateBackupCodes(): string[] {
+    const codes = [];
+    for (let i = 0; i < 5; i++) {
+      codes.push(Math.floor(10000000 + Math.random() * 90000000).toString());
+    }
+    return codes;
+  }
+
+  async verify2fa(verify2faDto: Verify2FADto, user_id: string) {
+    const user = await this.userService.getUserRecord({ identifier: user_id, identifierType: 'id' });
+    if (!user) {
+      return { status_code: 404, message: USER_NOT_FOUND };
+    }
+    if (!user.secret) {
+      throw new BadRequestException({ status_code: 400, message: USER_NOT_ENABLED_2FA });
+    }
+
+    const verify = speakeasy.totp.verify({
+      secret: user.secret,
+      encoding: 'base32',
+      token: verify2faDto.totp_code,
+    });
+    if (!verify) {
+      throw new BadRequestException({ status_code: 400, message: INCORRECT_TOTP_CODE });
+    }
+
+    const backup_codes = this.generateBackupCodes();
+    const payload = {
+      backup_codes,
+      is_2fa_enabled: true,
+    };
+    await this.userService.updateUserRecord({
+      updatePayload: payload,
+      identifierOptions: {
+        identifierType: 'id',
+        identifier: user.id,
+      },
+    });
+
+    return {
+      status_code: HttpStatus.OK,
+      message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+      data: { backup_codes: backup_codes },
+    };
   }
 }

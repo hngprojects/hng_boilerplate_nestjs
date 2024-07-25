@@ -1,7 +1,8 @@
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Invite } from '../../invite/entities/invite.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -9,6 +10,7 @@ export enum UserType {
   USER = 'vendor',
 }
 
+@Entity({ name: 'users' })
 export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
   first_name: string;
@@ -40,6 +42,12 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true })
   time_left: number;
 
+  @Column({ nullable: true })
+  secret: string;
+
+  @Column({ default: false })
+  is_2fa_enabled: boolean;
+
   @Column({
     type: 'enum',
     enum: UserType,
@@ -52,6 +60,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
+
+  @OneToMany(() => Invite, invite => invite.user)
+  invites: Invite[];
 
   @BeforeInsert()
   async hashPassword() {
