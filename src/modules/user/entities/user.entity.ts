@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Session } from '../../session/entities/session.entity';
+import { Invite } from '../../invite/entities/invite.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -54,6 +55,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Session, session => session.user, { cascade: true })
   sessions: Session[];
+
+  @OneToMany(() => Invite, invite => invite.user)
+  invites: Invite[];
 
   @BeforeInsert()
   async hashPassword() {
