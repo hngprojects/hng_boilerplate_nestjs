@@ -3,9 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import UserService from '../../user/user.service';
 import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
+import {
+  ERROR_OCCURED,
+  USER_ACCOUNT_EXIST,
+  USER_CREATED_SUCCESSFULLY,
+  USER_NOT_FOUND,
+} from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import AuthenticationService from '../auth.service';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
@@ -14,6 +19,7 @@ import * as bcrypt from 'bcryptjs';
 import OtpService from '../../otp/otp.service';
 import { EmailService } from '../../email/email.service';
 import { Otp } from '../../otp/entities/otp.entity';
+import { RequestSigninTokenDto } from '../dto/request-signin-token.dto';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
@@ -222,5 +228,4 @@ describe('Authentication Service tests', () => {
       );
     });
   });
-  describe('Signin with token tests', () => {});
 });
