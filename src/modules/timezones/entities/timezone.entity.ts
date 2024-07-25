@@ -7,4 +7,10 @@ export class Timezone {
 
   @Column()
   timezone: string;
+
+  @Column()
+  gmtOffset: string;
+
+  @Column({ nullable: true })
+  description?: string;
 }

@@ -13,9 +13,6 @@ import {
 
 @Injectable()
 export class TimezonesService {
-  create(createTimezoneDto: CreateTimezoneDto) {
-    throw new Error('Method not implemented.');
-  }
   constructor(
     @InjectRepository(Timezone)
     private readonly timezoneRepository: Repository<Timezone>
@@ -23,7 +20,9 @@ export class TimezonesService {
 
   async createTimezone(createTimezoneDto: CreateTimezoneDto): Promise<any> {
     try {
-      const timezoneExists = await this.timezoneRepository.findOne({ where: { timezone: createTimezoneDto.timezone } });
+      const timezoneExists = await this.timezoneRepository.findOne({
+        where: { timezone: createTimezoneDto.timezone },
+      });
 
       if (timezoneExists) {
         return {
@@ -41,7 +40,7 @@ export class TimezonesService {
         timezone: newTimezone,
       };
     } catch (error) {
-      Logger.log('TimezonesServiceError ~  createTimezone ~', error);
+      Logger.error('TimezonesServiceError ~ createTimezone ~', error);
       throw new HttpException(
         {
           message: ERROR_OCCURED,
@@ -61,7 +60,7 @@ export class TimezonesService {
         timezones,
       };
     } catch (error) {
-      Logger.log('TimezonesServiceError ~  fetchTimezones ~', error);
+      Logger.error('TimezonesServiceError ~ fetchTimezones ~', error);
       throw new HttpException(
         {
           message: FETCH_TIMEZONE_FAILURE,
