@@ -111,26 +111,35 @@ export default class AuthenticationService {
       const passwordIsCorrect = bcrypt.compareSync(password, user.password);
 
       if (!passwordIsCorrect)
-        return {
-          status_code: HttpStatus.UNAUTHORIZED,
-          error: 'Unauthorized',
-          message: 'Authentication required',
-        };
+        throw new CustomHttpException(
+          {
+            status_code: HttpStatus.UNAUTHORIZED,
+            error: 'Unauthorized',
+            message: 'Authentication required',
+          },
+          HttpStatus.UNAUTHORIZED
+        );
 
       if (!user.is_2fa_enabled) {
-        return {
-          status_code: HttpStatus.BAD_REQUEST,
-          error: 'Invalid Request',
-          message: '2-Factor Authentication has not been enabled',
-        };
+        throw new CustomHttpException(
+          {
+            status_code: HttpStatus.BAD_REQUEST,
+            error: 'Invalid Request',
+            message: '2-Factor Authentication has not been enabled',
+          },
+          HttpStatus.BAD_REQUEST
+        );
       }
 
       if (user.totp_code !== totp_code) {
-        return {
-          status_code: HttpStatus.BAD_REQUEST,
-          error: 'Invalid Request',
-          message: 'TOTP code provided is invalid',
-        };
+        throw new CustomHttpException(
+          {
+            status_code: HttpStatus.BAD_REQUEST,
+            error: 'Invalid Request',
+            message: 'TOTP code provided is invalid',
+          },
+          HttpStatus.BAD_REQUEST
+        );
       }
       const backupCodes: number[] = this.generateRandomBackupCode(5);
 
@@ -145,11 +154,16 @@ export default class AuthenticationService {
         },
       };
     } catch (error) {
-      return {
-        status_code: HttpStatus.BAD_REQUEST,
-        error: 'Invalid request',
-        message: 'The request sent was invalid.',
-      };
+      if (error instanceof CustomHttpException) throw error;
+
+      Logger.log('AuthenticationServiceError ~ generateBackupCodeError ~', error);
+      throw new HttpException(
+        {
+          message: 'An error occured while generating backup code',
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 

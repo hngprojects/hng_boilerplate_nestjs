@@ -8,3 +8,5 @@ export const INVALID_PASSWORD = 'Invalid password';
 export const TWO_FA_INITIATED = '2FA setup initiated';
 export const TWO_FA_ENABLED = '2FA is already enabled';
 export const BAD_REQUEST = 'Bad Request';
+export const BACKUP_CODES_GENERATED = 'New backup codes generated';
+export const UNAUTHORIZED = 'Unauthorized';

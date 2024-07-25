@@ -1,10 +1,9 @@
-
 import { Body, Controller, HttpCode, HttpStatus, Post, Request, Req, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
-import { BAD_REQUEST, TWO_FA_INITIATED } from 'src/helpers/SystemMessages';
+import { BAD_REQUEST, TWO_FA_INITIATED, BACKUP_CODES_GENERATED, UNAUTHORIZED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -28,7 +27,7 @@ export default class RegistrationController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 401, description: UNAUTHORIZED })
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.loginUser(loginDto);
   }
@@ -37,17 +36,13 @@ export default class RegistrationController {
   @HttpCode(200)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate backup codes for 2 factor authenticaton' })
-  @ApiResponse({ status: 200, description: 'New backup codes generated' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 400, description: 'Invalid or Bad Request' })
-  async generateBackupCodes(
-    @Body() backupCodesReqBodyDTO: BackupCodesReqBodyDTO,
-    @Req() request,
-    @Res() response: Response
-  ): Promise<any> {
+  @ApiResponse({ status: 200, description: BACKUP_CODES_GENERATED })
+  @ApiResponse({ status: 401, description: UNAUTHORIZED })
+  @ApiResponse({ status: 400, description: BAD_REQUEST })
+  async generateBackupCodes(@Body() backupCodesReqBodyDTO: BackupCodesReqBodyDTO, @Req() request): Promise<any> {
     const userId: string = request.user.sub;
-    const generatedResult = await this.authService.generateBackupCodes(backupCodesReqBodyDTO, userId);
-    return response.status(generatedResult.status_code).send(generatedResult);
+    return this.authService.generateBackupCodes(backupCodesReqBodyDTO, userId);
+  }
 
   @Post('2fa/enable')
   @ApiBody({
