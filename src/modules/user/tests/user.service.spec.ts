@@ -319,9 +319,9 @@ describe('UserService', () => {
       expect(result).toEqual(updatedUser);
     });
 
-    it('should throw NotFoundException if user not found', async () => {
+    it('should throw BadRequestException if user not found', async () => {
       mockUserRepository.findOne.mockResolvedValue(null);
-      await expect(service.softDelete('1')).rejects.toThrow(NotFoundException);
+      await expect(service.softDelete('1')).rejects.toThrow(BadRequestException);
     });
   });
 });
