@@ -16,6 +16,7 @@ import { OrganisationsModule } from './modules/organisations/organisations.modul
 import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 
 @Module({
   providers: [
@@ -92,6 +93,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    NotificationSettingsModule,
   ],
   controllers: [HealthController],
 })
