@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ProductCategoryService } from '../product-category.service';
 import { ProductCategory } from '../entities/product-category.entity';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateProductCategoryDto } from '../dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from '../dto/update-product-category.dto';
 
@@ -91,14 +91,14 @@ describe('ProductCategoryService', () => {
       mockRepository.findOneBy.mockResolvedValue(existingCategory);
       mockRepository.save.mockResolvedValue(updatedCategory);
 
-      const result = await service.update('1', updateDto);
+      const result = await service.updateCategory('1', updateDto);
       expect(result).toEqual(updatedCategory);
     });
 
     it('should throw NotFoundException if category to update is not found', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.update('1', { name: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(service.updateCategory('1', { name: 'Updated' })).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -107,14 +107,14 @@ describe('ProductCategoryService', () => {
       const category = { id: '1', name: 'Category to Remove' };
       mockRepository.findOneBy.mockResolvedValue(category);
 
-      await service.remove('1');
+      await service.removeCategory('1');
       expect(mockRepository.remove).toHaveBeenCalledWith(category);
     });
 
     it('should throw NotFoundException if category to remove is not found', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.remove('1')).rejects.toThrow(NotFoundException);
+      await expect(service.removeCategory('1')).rejects.toThrow(NotFoundException);
     });
   });
 });

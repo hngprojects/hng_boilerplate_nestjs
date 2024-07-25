@@ -389,5 +389,6 @@ Temporary Items
 # Local
 dist
 /.env
+/.env.development.local
 /.env.*.local
 *._local.ts

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductCategory } from './entities/product-category.entity';
@@ -13,46 +13,73 @@ export class ProductCategoryService {
   ) {}
 
   async create(createCategoryDto: CreateProductCategoryDto): Promise<ProductCategory> {
-    const category = this.categoryRepository.create(createCategoryDto);
-    return await this.categoryRepository.save(category);
+    try {
+      const category = this.categoryRepository.create(createCategoryDto);
+      return await this.categoryRepository.save(category);
+    } catch (error) {
+      throw error({ error: error.message });
+    }
   }
 
   async findAll(limit?: number, offset?: number): Promise<ProductCategory[]> {
-    if (limit !== undefined && (isNaN(Number(limit)) || Number(limit) < 0)) {
-      throw new BadRequestException('Limit must be a non-negative number');
-    }
-    if (offset !== undefined && (isNaN(Number(offset)) || Number(offset) < 0)) {
-      throw new BadRequestException('Offset must be a non-negative number');
-    }
-    const queryBuilder = this.categoryRepository.createQueryBuilder('category');
+    try {
+      if (limit !== undefined && (isNaN(Number(limit)) || Number(limit) < 0)) {
+        throw new BadRequestException('Limit must be a non-negative number');
+      }
+      if (offset !== undefined && (isNaN(Number(offset)) || Number(offset) < 0)) {
+        throw new BadRequestException('Offset must be a non-negative number');
+      }
 
-    const options: any = {};
-    if (limit !== undefined) {
-      options.take = Number(limit);
-    }
+      const options: any = {};
+      if (limit !== undefined) {
+        options.take = Number(limit);
+      }
 
-    if (offset !== undefined) {
-      options.skip = Number(offset);
+      if (offset !== undefined) {
+        options.skip = Number(offset);
+      }
+      return this.categoryRepository.find(options);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
     }
-    return this.categoryRepository.find(options);
   }
 
   async findOne(id: string): Promise<ProductCategory> {
-    const category = await this.categoryRepository.findOneBy({ id });
-    if (!category) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+    try {
+      const category = await this.categoryRepository.findOneBy({ id });
+      if (!category) {
+        throw new NotFoundException(`Category with ID ${id} not found`);
+      }
+      return category;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
     }
-    return category;
   }
 
-  async update(id: string, updateCategoryDto: UpdateProductCategoryDto): Promise<ProductCategory> {
-    const category = await this.findOne(id);
-    Object.assign(category, updateCategoryDto);
-    return await this.categoryRepository.save(category);
+  async updateCategory(id: string, updateCategoryDto: UpdateProductCategoryDto): Promise<ProductCategory> {
+    try {
+      const category = await this.findOne(id);
+      Object.assign(category, updateCategoryDto);
+      return await this.categoryRepository.save(category);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+    }
   }
 
-  async remove(id: string): Promise<void> {
-    const category = await this.findOne(id);
-    await this.categoryRepository.remove(category);
+  async removeCategory(id: string): Promise<void> {
+    try {
+      const category = await this.findOne(id);
+      await this.categoryRepository.remove(category);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+    }
   }
 }
