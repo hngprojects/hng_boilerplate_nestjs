@@ -46,14 +46,12 @@ describe('ProductCategoryService', () => {
 
       const result = await service.findAll();
       expect(result).toEqual(categories);
-      expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('category');
+      expect(mockRepository.find).toHaveBeenCalledWith({});
     });
 
     it('should apply limit and offset', async () => {
       await service.findAll(10, 5);
-      expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('category');
-      expect(mockRepository.take).toHaveBeenCalledWith(10);
-      expect(mockRepository.skip).toHaveBeenCalledWith(5);
+      expect(mockRepository.find).toHaveBeenCalledWith({ take: 10, skip: 5 });
     });
   });
 
@@ -120,4 +118,3 @@ describe('ProductCategoryService', () => {
     });
   });
 });
-

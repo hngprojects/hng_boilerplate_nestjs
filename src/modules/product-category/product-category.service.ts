@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException ,BadRequestException} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductCategory } from './entities/product-category.entity';
@@ -11,14 +11,13 @@ export class ProductCategoryService {
     @InjectRepository(ProductCategory)
     private categoryRepository: Repository<ProductCategory>
   ) {}
-  
+
   async create(createCategoryDto: CreateProductCategoryDto): Promise<ProductCategory> {
     const category = this.categoryRepository.create(createCategoryDto);
     return await this.categoryRepository.save(category);
   }
 
   async findAll(limit?: number, offset?: number): Promise<ProductCategory[]> {
-
     if (limit !== undefined && (isNaN(Number(limit)) || Number(limit) < 0)) {
       throw new BadRequestException('Limit must be a non-negative number');
     }
@@ -27,15 +26,15 @@ export class ProductCategoryService {
     }
     const queryBuilder = this.categoryRepository.createQueryBuilder('category');
 
+    const options: any = {};
     if (limit !== undefined) {
-      queryBuilder.take(limit);
+      options.take = Number(limit);
     }
 
     if (offset !== undefined) {
-      queryBuilder.skip(offset);
+      options.skip = Number(offset);
     }
-    return queryBuilder.getMany();
-    // return this.categoryRepository.find();
+    return this.categoryRepository.find(options);
   }
 
   async findOne(id: string): Promise<ProductCategory> {
@@ -45,8 +44,6 @@ export class ProductCategoryService {
     }
     return category;
   }
-
-  
 
   async update(id: string, updateCategoryDto: UpdateProductCategoryDto): Promise<ProductCategory> {
     const category = await this.findOne(id);
