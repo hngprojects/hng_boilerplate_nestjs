@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { BlogComment } from './blog-comments.entity';
@@ -6,6 +6,9 @@ import { BlogCategory } from './blog-category.entity';
 
 @Entity()
 export class Blog extends AbstractBaseEntity {
+  @PrimaryGeneratedColumn('uuid') // Use UUID for string ID
+  id: string;
+
   @Column()
   title: string;
 

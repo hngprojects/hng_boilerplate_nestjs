@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNotEmpty, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
 
 export class EditBlogDto {
   @IsString()
@@ -12,7 +12,8 @@ export class EditBlogDto {
   content?: string;
 
   @IsOptional()
-  categoryId?: number;
+  @IsString()
+  categoryId?: string;
 
   @IsNotEmpty()
   @IsString()

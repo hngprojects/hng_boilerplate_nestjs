@@ -37,7 +37,7 @@ export class BlogService {
 
   //Other blog service here
   // Edit method here
-  async editBlog(id: number, editBlogDto: EditBlogDto): Promise<Blog> {
+  async editBlog(id: string, editBlogDto: EditBlogDto): Promise<Blog> {
     const blog = await this.blogRepository.findOne({ where: { id }, relations: ['author', 'category'] });
     if (!blog) {
       throw new NotFoundException('Blog not found');
