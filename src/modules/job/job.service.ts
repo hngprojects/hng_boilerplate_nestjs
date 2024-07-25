@@ -3,7 +3,6 @@ import { Job } from './entities/job.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewJobOption from './options/CreateNewJobOption';
-import { Organisation } from '../organisations/entities/organisations.entity';
 import { OrganisationsService } from '../organisations/organisations.service';
 
 @Injectable()
@@ -25,6 +24,7 @@ export class JobService {
       }
 
       Object.assign(newJob, job);
+      newJob.organisation = organisation;
 
       await this.jobRepository.save(newJob);
       return newJob;

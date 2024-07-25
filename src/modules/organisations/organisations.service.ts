@@ -72,7 +72,7 @@ export class OrganisationsService {
     }
   }
 
-  async findOrganisationNyId(id: string): Promise<Organisation> {
+  async findOrganisationById(id: string): Promise<Organisation> {
     try {
       return this.organisationRepository.findOneBy({ id });
     } catch (error) {

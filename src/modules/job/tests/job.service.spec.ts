@@ -12,7 +12,7 @@ const mockJobRepository = {
 };
 
 const mockOrganisationService = {
-  findById: jest.fn(),
+  findOrganisationById: jest.fn(),
 };
 
 describe('JobService', () => {
@@ -60,9 +60,8 @@ describe('JobService', () => {
 
       const organisation = new Organisation();
       organisation.id = 'Tech Company';
-      mockOrganisationService.findById.mockResolvedValue(organisation);
+      mockOrganisationService.findOrganisationById.mockResolvedValue(organisation);
 
-      // Adjust the expected job entity
       const expectedJobEntity = { ...jobEntity, organisation };
 
       mockJobRepository.save.mockResolvedValue(expectedJobEntity);
