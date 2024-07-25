@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { User, UserType } from '../../user/entities/user.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Product } from '../../products/entities/product.entity';
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -40,6 +41,7 @@ describe('InviteService', () => {
       owned_organisations: [],
       created_organisations: [],
       invites: [],
+      products: [] as Product[],
       hashPassword: () => null,
       password: 'password123',
       time_left: 5,
