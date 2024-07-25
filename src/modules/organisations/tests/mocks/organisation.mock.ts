@@ -23,6 +23,8 @@ export const createMockOrganisation = (): Organisation => {
     owned_organisations: [],
     created_organisations: [],
     user_type: UserType.ADMIN,
+    secret: 'secret',
+    is_2fa_enabled: false,
   };
 
   return {
