@@ -5,9 +5,6 @@ export class Migration1721842630604 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "abstract_base_entity" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_723c213727b1038d476972ce2f2" PRIMARY KEY ("id"))`
-    );
-    await queryRunner.query(
       `CREATE TABLE "organisation_preference" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "name" character varying NOT NULL, "value" character varying NOT NULL, "organisationId" uuid NOT NULL, CONSTRAINT "PK_3149ecbe39a50d9b76f09b9dd44" PRIMARY KEY ("id"))`
     );
     await queryRunner.query(
@@ -52,6 +49,5 @@ export class Migration1721842630604 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "product_category"`);
     await queryRunner.query(`DROP TABLE "organisation"`);
     await queryRunner.query(`DROP TABLE "organisation_preference"`);
-    await queryRunner.query(`DROP TABLE "abstract_base_entity"`);
   }
 }
