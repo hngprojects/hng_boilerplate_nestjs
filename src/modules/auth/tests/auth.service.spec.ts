@@ -253,7 +253,6 @@ describe('Authentication Service tests', () => {
             const currentTime = new Date();
             const banEndTime = new Date(user.time_left);
             banEndTime.setMinutes(banEndTime.getMinutes() + 5);
-            console.log(user.time_left && currentTime < banEndTime);
             user.time_left = user.time_left === null ? new Date() : user.time_left;
 
             if (user.time_left && currentTime < banEndTime) {
@@ -264,13 +263,10 @@ describe('Authentication Service tests', () => {
       });
 
     for (let i = 0; i < 3; i++) {
-      console.log(user);
       await expect(authService.loginUser(loginDto)).rejects.toThrow(
         new CustomHttpException({ message: 'Invalid password or email', error: 'Bad Request' }, HttpStatus.UNAUTHORIZED)
       );
     }
-
-    console.log(user);
 
     await expect(authService.loginUser(loginDto)).rejects.toThrow(
       new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN)

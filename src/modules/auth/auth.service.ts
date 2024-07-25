@@ -148,10 +148,6 @@ export default class AuthenticationService {
       identifierType: 'id',
     });
 
-    console.log(isValidAttempt);
-    console.log(new Date());
-    // console.log(user);
-
     if (isValidAttempt) {
       user.attempts_left = 3;
       await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
