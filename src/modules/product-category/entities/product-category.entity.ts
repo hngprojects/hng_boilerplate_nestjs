@@ -5,10 +5,6 @@ import { Product } from '../../products/entities/product.entity';
 @Entity('categories')
 export class ProductCategory extends AbstractBaseEntity {
   @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @ApiProperty()
   @Column({ length: 500 })
   @Index()
   name: string;
@@ -21,10 +17,6 @@ export class ProductCategory extends AbstractBaseEntity {
   @ApiProperty()
   @Column('text')
   slug: string;
-
-  @ApiProperty()
-  @Column({ type: 'uuid', nullable: true })
-  parent_id: string;
 
   @OneToMany(() => Product, product => product.category)
   products: Product[];

@@ -2,11 +2,9 @@ import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards, Query } f
 import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
-import { AuthGuard } from '../../guards/auth.guard';
 import { ApiTags, ApiBody, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('products/categories')
-@UseGuards(AuthGuard)
 @Controller('products/categories')
 export class ProductCategoryController {
   constructor(private readonly categoryService: ProductCategoryService) {}

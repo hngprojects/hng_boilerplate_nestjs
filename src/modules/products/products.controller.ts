@@ -9,7 +9,6 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
-import { AuthGuard } from '../../guards/auth.guard';
 import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('products')
@@ -21,7 +20,6 @@ export class ProductController {
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @ApiNotFoundResponse({ description: 'Category not found' })
   @skipAuth()
-  @UseGuards(AuthGuard)
   @ApiTags('Products')
   @ApiBody({ type: CreateProductDto })
   @Post()
