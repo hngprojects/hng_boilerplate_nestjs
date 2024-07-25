@@ -13,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
 import UserService from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
