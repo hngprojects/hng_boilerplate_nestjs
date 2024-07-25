@@ -18,9 +18,8 @@ import UserService from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { SessionService } from '../session/session.service';
-import { CreateSessionDto } from '../session/dto/create-session.dto';
-import * as useragent from 'useragent';
 import { Request } from '@nestjs/common';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export default class AuthenticationService {
@@ -93,7 +92,6 @@ export default class AuthenticationService {
     try {
       const { email, password } = loginDto;
       const userAgentString = request.headers['user-agent'] || '';
-      const deviceInfo = this.parseUserAgent(userAgentString);
 
       const user = await this.userService.getUserRecord({
         identifier: email,
@@ -118,13 +116,7 @@ export default class AuthenticationService {
 
       const access_token = this.jwtService.sign({ id: user.id });
 
-      const createSessionDto: CreateSessionDto = {
-        user_id: user.id,
-        ...deviceInfo,
-        expires_at: new Date(Date.now() + 3600 * 1000),
-      };
-
-      const session = await this.sessionService.createSession(createSessionDto);
+      const session = await this.sessionService.createSessionWithDeviceInfo(user, userAgentString);
 
       const responsePayload = {
         access_token,
@@ -134,7 +126,15 @@ export default class AuthenticationService {
             last_name: user.last_name,
             email: user.email,
             id: user.id,
-            last_login_device: deviceInfo,
+            last_login_device: {
+              device_browser: session.device_browser,
+              device_browser_version: session.device_browser_version,
+              device_os: session.device_os,
+              device_os_version: session.device_os_version,
+              device_type: session.device_type,
+              device_brand: session.device_brand,
+              device_model: session.device_model,
+            },
           },
           session_id: session.id,
         },
@@ -154,20 +154,6 @@ export default class AuthenticationService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-  }
-
-  private parseUserAgent(userAgentString: string) {
-    const agent = useragent.parse(userAgentString || '');
-
-    return {
-      device_browser: agent.family || 'unknown',
-      device_browser_version: agent.toVersion() || 'unknown',
-      device_os: agent.os.family || 'unknown',
-      device_os_version: agent.os.toVersion() || 'unknown',
-      device_type: agent.device.family || 'unknown',
-      device_brand: agent.device.brand || 'unknown',
-      device_model: agent.device.model || 'unknown',
-    };
   }
 
   private async validateUserAndPassword(user_id: string, password: string) {

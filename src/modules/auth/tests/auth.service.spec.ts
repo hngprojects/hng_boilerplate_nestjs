@@ -86,7 +86,7 @@ describe('Authentication Service tests', () => {
         {
           provide: SessionService,
           useValue: {
-            createSession: jest.fn(),
+            createSessionWithDeviceInfo: jest.fn(),
           },
         },
         {
@@ -238,7 +238,7 @@ describe('Authentication Service tests', () => {
       jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => true);
       jest.spyOn(jwtService, 'sign').mockReturnValue('jwt_token');
-      jest.spyOn(sessionService, 'createSession').mockResolvedValue(session);
+      jest.spyOn(sessionService, 'createSessionWithDeviceInfo').mockResolvedValue(session);
 
       const result = await authService.loginUser(loginDto, request as Request);
 
