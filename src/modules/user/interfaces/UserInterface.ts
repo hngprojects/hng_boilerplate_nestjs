@@ -8,10 +8,12 @@ interface UserInterface {
   last_name: string;
 
   password: string;
-
+  
   is_2fa_enabled: boolean;
 
   backup_codes_2fa: string;
+
+  secret: string;
 
   is_active: boolean;
 

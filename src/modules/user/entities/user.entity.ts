@@ -11,7 +11,7 @@ export enum UserType {
   USER = 'vendor',
 }
 
-@Entity()
+@Entity({ name: 'users' })
 export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
   first_name: string;
@@ -42,6 +42,12 @@ export class User extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   time_left: number;
+
+  @Column({ nullable: true })
+  secret: string;
+
+  @Column({ default: false })
+  is_2fa_enabled: boolean;
 
   @Column({
     type: 'enum',
