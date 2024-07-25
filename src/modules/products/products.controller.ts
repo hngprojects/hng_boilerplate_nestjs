@@ -9,7 +9,6 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
-import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('products')
 @ApiTags('Products')
@@ -17,7 +16,6 @@ export class ProductController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @skipAuth()
   @ApiOperation({ summary: 'Create a new product' })
   @ApiOkResponse({ description: 'Product created successfully' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })

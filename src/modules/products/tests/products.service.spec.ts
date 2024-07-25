@@ -68,7 +68,7 @@ describe('ProductsService', () => {
       price: dto.price,
       quantity: dto.quantity,
       category: { id: '1', name: 'CategoryName' },
-      categoryId: '1', // Add this line
+      categoryId: '1',
     });
     expect(productRepository.create).toHaveBeenCalledWith(expect.objectContaining(dto));
     expect(productRepository.save).toHaveBeenCalledWith(expect.objectContaining(dto));
