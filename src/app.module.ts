@@ -18,7 +18,7 @@ import { OrganisationsModule } from './modules/organisations/organisations.modul
 import { EmailModule } from './modules/email/email.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
-
+import { InviteModule } from './modules/invite/invite.module';
 @Module({
   providers: [
     {
@@ -71,6 +71,7 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
     EmailModule,
     ProductsModule,
     ProductCategoryModule,
+    InviteModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

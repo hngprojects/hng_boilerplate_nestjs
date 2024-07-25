@@ -3,12 +3,15 @@ import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { Invite } from '../../invite/entities/invite.entity';
+
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }
-@Entity()
+
+@Entity({ name: 'users' })
 export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
   first_name: string;
@@ -24,6 +27,10 @@ export class User extends AbstractBaseEntity {
   attempts_left: number;
   @Column({ nullable: true })
   time_left: number;
+  @Column({ nullable: true })
+  secret: string;
+  @Column({ default: false })
+  is_2fa_enabled: boolean;
   @Column({
     type: 'enum',
     enum: UserType,
@@ -36,6 +43,9 @@ export class User extends AbstractBaseEntity {
   created_organisations: Organisation[];
   @OneToMany(() => Product, product => product.user, { cascade: true })
   products: Product[];
+
+  @OneToMany(() => Invite, invite => invite.user)
+  invites: Invite[];
 
   @BeforeInsert()
   async hashPassword() {
