@@ -23,7 +23,6 @@ export class SqueezeService {
       }
 
       if (squeeze.updated_at > squeeze.created_at) {
-        // the squeeze was previously updated
         throw new ForbiddenException({
           message: 'The squeeze page record can only be updated once.',
           status_code: 403,
