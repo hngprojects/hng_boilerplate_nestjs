@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from '../entities/blog.entity';
@@ -35,4 +35,19 @@ export class BlogService {
   }
 
   //Other blog service here
+  // async fetchLatestBlogs(page: number, pageSize: number): Promise<{ blogs: Blog[]; count: number }> {
+  //   try {
+  //     const [blogs, count] = await this.blogRepository.findAndCount({
+  //       order: { created_at: 'DESC' },
+  //       skip: (page - 1) * pageSize,
+  //       take: pageSize,
+  //       relations: ['author', 'category'],
+  //     });
+
+  //     return { blogs, count };
+  //   } catch (error) {
+  //     Logger.log(error);
+  //     throw new Error('Error fetching latest blogs');
+  //   }
+  // }
 }

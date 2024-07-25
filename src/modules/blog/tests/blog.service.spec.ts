@@ -17,6 +17,7 @@ describe('BlogService', () => {
     blogRepository = {
       create: jest.fn(),
       save: jest.fn(),
+      // findAndCount: jest.fn(),
     };
     userRepository = {
       findOne: jest.fn(),
@@ -96,4 +97,61 @@ describe('BlogService', () => {
       expect(blogRepository.save).toHaveBeenCalledWith(blogData);
     });
   });
+
+  // describe('fetchLatestBlogs', () => {
+  //   it('should return paginated latest blogs', async () => {
+  //     const blogData = [
+  //       {
+  //         authorId: 'authoruid',
+  //         categoryId: 'categoryuid',
+  //         title: 'Test Blog',
+  //         image_url: 'https/exemple.com/img.jpg',
+  //         content: 'Test blog content lorren ipsum',
+  //       },
+  //       {
+  //         authorId: 'authoruid',
+  //         categoryId: 'categoryuid',
+  //         title: 'Test Blog',
+  //         image_url: 'https/exemple.com/img.jpg',
+  //         content: 'Test blog content lorren ipsum',
+  //       },
+  //     ];
+  //     userRepository.findOne.mockResolvedValue({ id: 'useruid' } as User);
+  //     categoryRepository.findOne.mockResolvedValue({ id: 'categoryuid' } as BlogCategory);
+  //     blogRepository.create.mockReturnValue(blogData as Blog);
+  //     blogRepository.findAndCount.mockResolvedValue([blogData as unknown as Blog, 10]);
+
+  //     // const blogs: Blog[] = [
+  //     //   {
+  //     //     title: 'Blog 1',
+  //     //     content: 'Content 1',
+  //     //     createdAt: new Date(),
+  //     //     author: user,
+  //     //     category: category,
+  //     //   },
+  //     //   {
+  //     //     title: 'Blog 2',
+  //     //     content: 'Content 2',
+  //     //     createdAt: new Date(),
+  //     //     author: user,
+  //     //     category: category,
+  //     //   },
+  //     // ];
+
+  //     // jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue(blogs)
+  //     const result = await service.fetchLatestBlogs(1, 10);
+
+  //     expect(result).toBeDefined();
+  //     expect(result.blogs).toHaveLength(2);
+  //     expect(result.count).toBe(2);
+  //   });
+
+  //   it('should handle errors and throw an exception', async () => {
+  //     jest.spyOn(blogRepository, 'findAndCount').mockRejectedValue(new Error('Error fetching latest blogs'));
+
+  //     await expect(service.fetchLatestBlogs(1, 10)).rejects.toThrow('Error fetching latest blogs');
+  //   });
+  // });
+
+  // Other service tests here
 });

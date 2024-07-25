@@ -89,5 +89,55 @@ describe('BlogController', () => {
     });
   });
 
+  // describe('fetchLatestBlogs', () => {
+  //   it('should fetch latest blogs and return a success response', async () => {
+
+  //     const result = await controller.fetchLatestBlogs(1, 10);
+
+  //     expect(result).toEqual({
+  //       count: expect.any(Number),
+  //       next: null,
+  //       previous: null,
+  //       results: expect.arrayContaining([
+  //         expect.objectContaining({
+  //           title: expect.any(String),
+  //           excerpt: expect.any(String),
+  //           publish_date: expect.any(Date),
+  //           author: expect.any(String),
+  //         }),
+  //       ]),
+  //     });
+  //   });
+
+  //   it('should handle errors and return an error response', async () => {
+  //     jest.spyOn(service, 'fetchLatestBlogs').mockRejectedValue(new Error('Error fetching latest blogs'));
+
+  //     try {
+  //       await controller.fetchLatestBlogs(1, 10);
+  //     } catch (error) {
+  //       expect(error.response).toEqual({
+  //         status: 'error',
+  //         message: 'Error fetching latest blogs',
+  //         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+  //       });
+  //     }
+  //   });
+
+  //   it('should return a bad request response for invalid pagination parameters', async () => {
+  //     const page = -1;
+  //     const pageSize = 10;
+
+  //     try {
+  //       await controller.fetchLatestBlogs(page, pageSize);
+  //     } catch (error) {
+  //       expect(error.response).toEqual({
+  //         status: 'error',
+  //         message: 'Invalid pagination parameters',
+  //         status_code: HttpStatus.BAD_REQUEST,
+  //       });
+  //     }
+  //   });
+  // });
+
   // Other endpoint tests here
 });
