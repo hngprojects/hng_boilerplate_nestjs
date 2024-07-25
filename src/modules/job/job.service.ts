@@ -11,13 +11,12 @@ export class JobService {
   constructor(
     @InjectRepository(Job)
     private jobRepository: Repository<Job>,
-    private organisationService: OrganisationsService // Inject OrganisationsService directly
+    private organisationService: OrganisationsService
   ) {}
 
   async createJob(job: CreateNewJobOption) {
     const newJob = new Job();
 
-    // Find the organisation by its id or any other identifier
     const organisation = await this.organisationService.findById(job.organisation);
 
     if (!organisation) {

@@ -26,7 +26,7 @@ export const createMockOrganisation = (): Organisation => {
     user_type: UserType.ADMIN,
   };
 
-  const jobs: Job[] = []; // Add an empty array or some mock jobs if needed
+  const jobs: Job[] = [];
 
   return {
     id: uuidv4(),
@@ -44,7 +44,7 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
-    jobs, // Add the jobs property
+    jobs,
   };
 };
 

@@ -7,7 +7,6 @@ import CreateNewJobOption from '../options/CreateNewJobOption';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { OrganisationsService } from '../../organisations/organisations.service';
 
-// Mock repositories
 const mockJobRepository = {
   save: jest.fn(),
 };

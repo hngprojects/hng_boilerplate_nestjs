@@ -73,6 +73,13 @@ export class OrganisationsService {
   }
 
   async findById(id: string): Promise<Organisation> {
-    return this.organisationRepository.findOneBy({ id });
+    try {
+      return this.organisationRepository.findOneBy({ id });
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
   }
 }
