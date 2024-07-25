@@ -40,11 +40,7 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: RequestSigninTokenDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signInToken(@Body() body: RequestSigninTokenDto, @Res() response: Response) {
-    await this.authService.requestSignInToken(body);
-    return response.status(HttpStatus.OK).json({
-      message: 'Sign-in token sent to email',
-      status_code: 200,
-    });
+    return await this.authService.requestSignInToken(body);
   }
 
   @skipAuth()

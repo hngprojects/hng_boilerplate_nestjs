@@ -183,7 +183,10 @@ export default class AuthenticationService {
     await this.otpService.createOtp({ token: hash, email });
     await this.emailService.sendLoginOtp(email, newOtp);
 
-    return;
+    return {
+      message: 'Sign-in token sent to email',
+      status_code: 200,
+    };
   }
 
   async verifySignInToken(verifyOtp: OtpDto) {
