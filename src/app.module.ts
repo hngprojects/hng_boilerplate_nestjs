@@ -17,7 +17,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { EmailModule } from './modules/email/email.module';
 import { ProductsModule } from './modules/products/products.module';
-import { ProductsampleModule } from './modules/productsample/productsample.module';
+import { ProductCategoryModule } from './modules/product-category/product-category.module';
 
 @Module({
   providers: [
@@ -70,6 +70,7 @@ import { ProductsampleModule } from './modules/productsample/productsample.modul
     UserModule,
     EmailModule,
     ProductsModule,
+    ProductCategoryModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -95,7 +96,6 @@ import { ProductsampleModule } from './modules/productsample/productsample.modul
       inject: [ConfigService],
     }),
     OrganisationsModule,
-    ProductsampleModule,
   ],
   controllers: [HealthController],
 })

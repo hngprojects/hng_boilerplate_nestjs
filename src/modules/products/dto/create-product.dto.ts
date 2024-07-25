@@ -8,7 +8,7 @@ export class CreateProductDto {
   })
   @IsNotEmpty()
   @IsString()
-  productName: string;
+  product_name: string;
 
   @ApiProperty({
     description: 'Description of the product',

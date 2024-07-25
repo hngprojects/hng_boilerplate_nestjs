@@ -4,6 +4,7 @@ import { ProductCategory } from '../../product-category/entities/product-categor
 import { ApiProperty } from '@nestjs/swagger';
 
 import { Column, Entity, ManyToOne } from 'typeorm';
+import { IsOptional } from 'class-validator';
 
 @Entity()
 export class Product extends AbstractBaseEntity {
@@ -23,9 +24,10 @@ export class Product extends AbstractBaseEntity {
   @Column('int')
   price: number;
 
+  @IsOptional()
   @ManyToOne(() => User, user => user.products)
   user: User;
-
+  @IsOptional()
   @ManyToOne(() => ProductCategory, category => category.product)
   category: ProductCategory;
 }
