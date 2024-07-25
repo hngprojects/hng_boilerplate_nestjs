@@ -21,6 +21,7 @@ import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
+import { ExportUserModule } from './modules/export-user/export-user-module.module';
 
 @Module({
   providers: [
@@ -102,6 +103,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     }),
     OrganisationsModule,
     TestimonialsModule,
+    ExportUserModule
   ],
   controllers: [HealthController],
 })
