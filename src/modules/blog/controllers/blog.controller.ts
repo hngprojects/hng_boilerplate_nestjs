@@ -30,6 +30,4 @@ export class BlogController {
       );
     }
   }
-
-  //Other blog method endpoint here
 }

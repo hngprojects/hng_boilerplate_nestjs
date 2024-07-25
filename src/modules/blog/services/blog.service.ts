@@ -33,6 +33,4 @@ export class BlogService {
     const blog = this.blogRepository.create({ ...rest, author, category });
     return await this.blogRepository.save(blog);
   }
-
-  //Other blog service here
 }

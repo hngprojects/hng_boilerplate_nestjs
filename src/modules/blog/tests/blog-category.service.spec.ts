@@ -40,7 +40,7 @@ describe('BlogCategoryService', () => {
       category.name = 'New Category';
       const savedCategory = { ...category };
 
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null); // No existing category
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
       jest.spyOn(repository, 'create').mockReturnValue(category);
       jest.spyOn(repository, 'save').mockResolvedValue(savedCategory);
 
@@ -75,7 +75,7 @@ describe('BlogCategoryService', () => {
 
     it('should throw InternalServerErrorException if save fails', async () => {
       const createBlogCategoryDto: CreateBlogCategoryDto = { name: 'New Category' };
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null); // No existing category
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
       jest.spyOn(repository, 'create').mockReturnValue(new BlogCategory());
       jest.spyOn(repository, 'save').mockRejectedValue(new Error('Database error'));
 
