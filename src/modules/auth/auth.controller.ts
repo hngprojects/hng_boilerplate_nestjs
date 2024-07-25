@@ -65,8 +65,8 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'Send password reset email' })
   @ApiResponse({ status: 200, description: 'Password reset email sent' })
   @ApiResponse({ status: 400, description: 'Invalid email' })
-  async sendPasswordResetEmail(@Body('email') email: string): Promise<any> {
-    await this.authService.sendPasswordResetEmail(email);
-    return { message: 'Password reset email sent' };
+  async sendPasswordResetEmail(@Body('email') email: string, @Res() response: Response): Promise<any> {
+    const passwordReset = await this.authService.sendPasswordResetEmail(email);
+    return response.status(passwordReset.status_code).send(passwordReset);
   }
 }
