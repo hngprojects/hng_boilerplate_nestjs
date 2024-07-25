@@ -1,8 +1,7 @@
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { Controller, Post, Body, Get, Param, UseGuards, HttpStatus, Request, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Request, Req } from '@nestjs/common';
 import { NotificationSettingsService } from './notification-settings.service';
 import { NotificationSettingsDto } from './dto/notification-settings.dto';
-import { AuthGuard } from '../../../guards/auth.guard';
 import { NotificationSettings } from './entities/notification-setting.entity';
 
 @ApiBearerAuth()
