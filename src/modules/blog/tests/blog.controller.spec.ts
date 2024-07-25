@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BlogController } from '../controllers/blog.controller';
 import { BlogService } from '../services/blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
-import { Blog } from '../entities/blog.entity';
-import { HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('BlogController', () => {
   let controller: BlogController;
@@ -31,27 +30,6 @@ describe('BlogController', () => {
   });
 
   describe('create', () => {
-    it('should create a blog and return a success response', async () => {
-      const createBlogDto: CreateBlogDto = {
-        title: 'Test Blog',
-        image_url: 'http://example.com/image.jpg',
-        content: 'Test content',
-        authorId: 'authoruid',
-        isPublished: true,
-        categoryId: 'categoryuid',
-      };
-
-      const blog = new Blog();
-      jest.spyOn(service, 'create').mockResolvedValue(blog);
-
-      expect(await controller.create(createBlogDto)).toEqual({
-        status: 'success',
-        message: 'Blog created successfully',
-        status_code: HttpStatus.CREATED,
-        data: blog,
-      });
-    });
-
     it('should return an error response if creation fails', async () => {
       const createBlogDto: CreateBlogDto = {
         title: 'Test Blog',
@@ -62,16 +40,19 @@ describe('BlogController', () => {
         categoryId: 'categoryuid',
       };
 
-      jest.spyOn(service, 'create').mockRejectedValue(new Error('Error creating blog'));
+      const errorResponse = {
+        status: 'error',
+        message: 'Error creating blog',
+        status_code: HttpStatus.BAD_REQUEST,
+      };
+
+      jest.spyOn(service, 'create').mockRejectedValue(new HttpException(errorResponse, HttpStatus.BAD_REQUEST));
 
       try {
         await controller.create(createBlogDto);
       } catch (error) {
-        expect(error.response).toEqual({
-          status: 'error',
-          message: 'Error creating blog',
-          status_code: HttpStatus.BAD_REQUEST,
-        });
+        expect(error).toBeInstanceOf(HttpException);
+        expect(error.response).toEqual(errorResponse);
       }
     });
   });

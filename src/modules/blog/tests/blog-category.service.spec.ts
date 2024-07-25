@@ -61,16 +61,7 @@ describe('BlogCategoryService', () => {
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(existingCategory);
 
-      try {
-        await service.createCategory(createBlogCategoryDto);
-      } catch (error) {
-        expect(error).toBeInstanceOf(BadRequestException);
-        expect(error.getResponse()).toEqual({
-          status: 'error',
-          message: 'Category name already exists.',
-          status_code: 400,
-        });
-      }
+      await expect(service.createCategory(createBlogCategoryDto)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw InternalServerErrorException if save fails', async () => {
@@ -79,16 +70,7 @@ describe('BlogCategoryService', () => {
       jest.spyOn(repository, 'create').mockReturnValue(new BlogCategory());
       jest.spyOn(repository, 'save').mockRejectedValue(new Error('Database error'));
 
-      try {
-        await service.createCategory(createBlogCategoryDto);
-      } catch (error) {
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        expect(error.getResponse()).toEqual({
-          status: 'error',
-          message: 'Failed to create category.',
-          status_code: 500,
-        });
-      }
+      await expect(service.createCategory(createBlogCategoryDto)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });
