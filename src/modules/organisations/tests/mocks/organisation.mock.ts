@@ -25,8 +25,9 @@ export const createMockOrganisation = (): Organisation => {
     created_organisations: [],
     user_type: UserType.ADMIN,
     products: [] as Product[],
+    secret: 'secret',
+    is_2fa_enabled: false,
   };
-
   return {
     id: uuidv4(),
     name: 'John & Co',
