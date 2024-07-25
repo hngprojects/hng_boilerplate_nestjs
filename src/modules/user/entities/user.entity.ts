@@ -1,10 +1,13 @@
+
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { promisify } from 'util';
+import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -68,6 +71,7 @@ export class User extends AbstractBaseEntity {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
+        
   @BeforeInsert()
   @BeforeUpdate()
   async encryptBackupCodes(): Promise<void> {
@@ -83,4 +87,7 @@ export class User extends AbstractBaseEntity {
 
     this.backup_codes_2fa = iv.toString('hex') + ':' + encryptedBackupCodes.toString('hex');
   }
+  
+  @OneToMany(() => Testimonial, testimonial => testimonial.user)
+  testimonials: Testimonial[];
 }

@@ -7,6 +7,7 @@ import * as speakeasy from 'speakeasy';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
+  USER_ACCOUNT_DOES_NOT_EXIST,
   INVALID_PASSWORD,
   TWO_FA_ENABLED,
   TWO_FA_INITIATED,
@@ -17,6 +18,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
 import UserService from '../user/user.service';
+import { OtpService } from '../otp/otp.service';
+import { EmailService } from '../email/email.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
@@ -27,7 +31,9 @@ export default class AuthenticationService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private otpService: OtpService,
+    private emailService: EmailService
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -160,6 +166,34 @@ export default class AuthenticationService {
       throw new HttpException(
         {
           message: 'An error occured while generating backup code',
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ status_code: number; message: string } | null> {
+    try {
+      const user = await this.userService.getUserRecord({ identifier: dto.email, identifierType: 'email' });
+      if (!user) {
+        return {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: USER_ACCOUNT_DOES_NOT_EXIST,
+        };
+      }
+
+      const token = (await this.otpService.createOtp(user.id)).token;
+      await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Email sent successfully',
+      };
+    } catch (forgotPasswordError) {
+      Logger.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
+      throw new HttpException(
+        {
+          message: ERROR_OCCURED,
           status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         },
         HttpStatus.INTERNAL_SERVER_ERROR
