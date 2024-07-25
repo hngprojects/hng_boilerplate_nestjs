@@ -20,7 +20,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
-import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 
 @Module({
