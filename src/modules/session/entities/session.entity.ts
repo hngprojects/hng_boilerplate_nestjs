@@ -29,6 +29,8 @@ export class Session extends AbstractBaseEntity {
   expires_at: Date;
 
   @ManyToOne(() => User, user => user.sessions)
-  @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @Column({ name: 'user_id' })
+  userId: string;
 }

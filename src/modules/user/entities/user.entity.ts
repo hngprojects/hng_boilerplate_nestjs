@@ -53,7 +53,7 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
 
-  @OneToMany(() => Session, session => session.user, { cascade: true })
+  @OneToMany(() => Session, session => session.user)
   sessions: Session[];
 
   @OneToMany(() => Invite, invite => invite.user)

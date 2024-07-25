@@ -14,15 +14,10 @@ export class SessionService {
     private sessionsRepository: Repository<Session>
   ) {}
 
-  async createSession(createSessionDto: CreateSessionDto) {
-    const session = this.sessionsRepository.create(createSessionDto);
-    return await this.sessionsRepository.save(session);
-  }
-
-  async createSessionWithDeviceInfo(user: Partial<UserInterface>, userAgentString: string): Promise<Session> {
+  async createSession(user: Partial<UserInterface>, userAgentString: string): Promise<Session> {
     const deviceInfo = this.parseUserAgent(userAgentString);
     const createSessionDto: CreateSessionDto = {
-      user_id: user.id,
+      userId: user.id,
       expires_at: new Date(Date.now() + 3600 * 1000),
       device_browser: deviceInfo.device_browser,
       device_browser_version: deviceInfo.device_browser_version,
@@ -33,7 +28,8 @@ export class SessionService {
       device_model: deviceInfo.device_model,
     };
 
-    return await this.createSession(createSessionDto);
+    const session = this.sessionsRepository.create(createSessionDto);
+    return await this.sessionsRepository.save(session);
   }
 
   private parseUserAgent(userAgentString: string) {

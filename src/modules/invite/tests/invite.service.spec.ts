@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { User, UserType } from '../../user/entities/user.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Session } from '../../session/entities/session.entity';
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -45,6 +46,7 @@ describe('InviteService', () => {
       time_left: 5,
       secret: 'secret',
       is_2fa_enabled: true,
+      sessions: [] as Session[],
     };
 
     const mockOrg: Organisation = {

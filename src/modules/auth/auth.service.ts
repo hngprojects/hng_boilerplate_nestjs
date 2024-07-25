@@ -116,7 +116,7 @@ export default class AuthenticationService {
 
       const access_token = this.jwtService.sign({ id: user.id });
 
-      const session = await this.sessionService.createSessionWithDeviceInfo(user, userAgentString);
+      const session = await this.sessionService.createSession(user, userAgentString);
 
       const responsePayload = {
         access_token,
