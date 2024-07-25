@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import OtpService from './otp.service';
-import { Repository } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
+import { Repository } from 'typeorm';
+import { User } from '../user/entities/user.entity';
+import OtpService from './otp.service';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Otp, User])],
   providers: [OtpService, Repository],
-  imports: [TypeOrmModule.forFeature([Otp])],
-  exports: [OtpService],
+  exports: [OtpService, TypeOrmModule.forFeature([Otp])],
 })
 export class OtpModule {}

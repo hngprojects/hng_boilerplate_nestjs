@@ -11,25 +11,27 @@ import * as speakeasy from 'speakeasy';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
+  USER_ACCOUNT_DOES_NOT_EXIST,
   INVALID_PASSWORD,
   TWO_FA_ENABLED,
   TWO_FA_INITIATED,
-  UNAUTHORISED_TOKEN,
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
+  UNAUTHORISED_TOKEN,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
+import { EmailService } from '../email/email.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { OtpDto } from '../otp/dto/otp.dto';
-import OtpService from '../otp/otp.service';
-import { EmailService } from '../email/email.service';
 import { generateOtp } from '../../helpers/generateOtp';
+import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
+import OtpService from '../otp/otp.service';
 
 @Injectable()
 export default class AuthenticationService {
@@ -99,6 +101,37 @@ export default class AuthenticationService {
     }
   }
 
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ status_code: number; message: string } | null> {
+    try {
+      const user = await this.userService.getUserRecord({ identifier: dto.email, identifierType: 'email' });
+      if (!user) {
+        return {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: USER_ACCOUNT_DOES_NOT_EXIST,
+        };
+      }
+
+      const newOtp = generateOtp(6);
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(newOtp, salt);
+
+      await this.otpService.createOtp({ token: hash, email: user.email });
+      await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, newOtp);
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Email sent successfully',
+      };
+    } catch (forgotPasswordError) {
+      Logger.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
+      throw new HttpException(
+        {
+          message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
     try {
       const { email, password } = loginDto;
@@ -152,69 +185,6 @@ export default class AuthenticationService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-  }
-
-  async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
-    const { email } = requestSignInTokenDto;
-    const user = await this.userService.getUserByEmail(email);
-
-    if (!user) {
-      throw new NotFoundException({
-        message: USER_NOT_FOUND,
-        status_code: HttpStatus.NOT_FOUND,
-      });
-    }
-
-    const otpExist = await this.otpService.findOtp(email);
-
-    const newOtp = generateOtp(6);
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(newOtp, salt);
-
-    if (otpExist) {
-      await this.otpService.deleteOtp(email);
-
-      await this.otpService.createOtp({ token: hash, email });
-
-      await this.emailService.sendLoginOtp(email, newOtp);
-
-      return;
-    }
-    await this.otpService.createOtp({ token: hash, email });
-    await this.emailService.sendLoginOtp(email, newOtp);
-
-    return {
-      message: 'Sign-in token sent to email',
-      status_code: 200,
-    };
-  }
-
-  async verifySignInToken(verifyOtp: OtpDto) {
-    const { token, email } = verifyOtp;
-
-    const user = await this.userService.getUserByEmail(email);
-    const otp = await this.otpService.findOtp(email);
-    const isOtp = await bcrypt.compare(token, otp.token);
-
-    if (!user || !otp || !isOtp) {
-      throw new UnauthorizedException({
-        message: UNAUTHORISED_TOKEN,
-        status_code: HttpStatus.UNAUTHORIZED,
-      });
-    }
-
-    const accessToken = this.jwtService.sign({
-      email: user.email,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      sub: user.id,
-    });
-
-    return {
-      message: 'Sign-in successful',
-      token: accessToken,
-      status_code: 200,
-    };
   }
 
   private async validateUserAndPassword(user_id: string, password: string) {
@@ -300,6 +270,69 @@ export default class AuthenticationService {
         secret: secret.base32,
         qr_code_url: qrCodeUrl,
       },
+    };
+  }
+
+  async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
+    const { email } = requestSignInTokenDto;
+    const user = await this.userService.getUserByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException({
+        message: USER_NOT_FOUND,
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    const otpExist = await this.otpService.findOtp(email);
+
+    const newOtp = generateOtp(6);
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(newOtp, salt);
+
+    if (otpExist) {
+      await this.otpService.deleteOtp(email);
+
+      await this.otpService.createOtp({ token: hash, email });
+
+      await this.emailService.sendLoginOtp(email, newOtp);
+
+      return;
+    }
+    await this.otpService.createOtp({ token: hash, email });
+    await this.emailService.sendLoginOtp(email, newOtp);
+
+    return {
+      message: 'Sign-in token sent to email',
+      status_code: 200,
+    };
+  }
+
+  async verifySignInToken(verifyOtp: OtpDto) {
+    const { token, email } = verifyOtp;
+
+    const user = await this.userService.getUserByEmail(email);
+    const otp = await this.otpService.findOtp(email);
+    const isOtp = await bcrypt.compare(token, otp.token);
+
+    if (!user || !otp || !isOtp) {
+      throw new UnauthorizedException({
+        message: UNAUTHORISED_TOKEN,
+        status_code: HttpStatus.UNAUTHORIZED,
+      });
+    }
+
+    const accessToken = this.jwtService.sign({
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      sub: user.id,
+    });
+
+    return {
+      message: 'Sign-in successful',
+      token: accessToken,
+      status_code: 200,
     };
   }
 }

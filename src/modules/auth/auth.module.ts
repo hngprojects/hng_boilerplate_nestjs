@@ -8,9 +8,11 @@ import appConfig from '../../../config/auth.config';
 import { Repository } from 'typeorm';
 import AuthenticationService from './auth.service';
 import UserService from '../user/user.service';
-import OtpService from '../otp/otp.service';
+import { EmailModule } from '../email/email.module';
 import { EmailService } from '../email/email.service';
 import { Otp } from '../otp/entities/otp.entity';
+import OtpService from '../otp/otp.service';
+import { OtpModule } from '../otp/otp.module';
 
 @Module({
   controllers: [RegistrationController],
@@ -18,6 +20,8 @@ import { Otp } from '../otp/entities/otp.entity';
   imports: [
     TypeOrmModule.forFeature([User, Otp]),
     PassportModule,
+    OtpModule,
+    EmailModule,
     JwtModule.register({
       global: true,
       secret: appConfig().jwtSecret,

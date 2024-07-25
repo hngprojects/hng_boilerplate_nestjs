@@ -10,8 +10,9 @@ import { LoginDto } from './dto/login.dto';
 import { ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { OtpDto } from '../otp/dto/otp.dto';
+import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
 
-@ApiTags('auth')
+@ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
   constructor(private authService: AuthenticationService) {}
@@ -21,6 +22,19 @@ export default class RegistrationController {
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
     const createUserResponse = await this.authService.createNewUser(body);
     return response.status(createUserResponse.status_code).send(createUserResponse);
+  }
+
+  @ApiOperation({ summary: 'Generate forgot password reset token' })
+  @ApiResponse({
+    status: 200,
+    description: 'The forgot password reset token generated successfully',
+    type: ForgotPasswordResponseDto,
+  })
+  @skipAuth()
+  @HttpCode(200)
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Res() response: Response): Promise<any> {
+    return await this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @skipAuth()
