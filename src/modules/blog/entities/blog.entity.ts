@@ -6,7 +6,7 @@ import { BlogCategory } from './blog-category.entity';
 
 @Entity()
 export class Blog extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn('uuid') // Use UUID for string ID
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()

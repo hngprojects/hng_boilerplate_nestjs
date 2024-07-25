@@ -35,8 +35,6 @@ export class BlogService {
     return await this.blogRepository.save(blog);
   }
 
-  //Other blog service here
-  // Edit method here
   async editBlog(id: string, editBlogDto: EditBlogDto): Promise<Blog> {
     const blog = await this.blogRepository.findOne({ where: { id }, relations: ['author', 'category'] });
     if (!blog) {
@@ -60,6 +58,5 @@ export class BlogService {
     }
 
     return await this.blogRepository.save(blog);
-    // Other blog service methods here
   }
 }

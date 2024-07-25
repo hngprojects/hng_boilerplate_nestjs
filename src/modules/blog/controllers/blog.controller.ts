@@ -33,9 +33,6 @@ export class BlogController {
     }
   }
 
-  //Other blog method endpoint here
-  //edit blog endpoint
-
   @Put('edit/:id')
   async editBlog(@Param('id') id: string, @Body() editBlogDto: EditBlogDto): Promise<void> {
     await this.blogService.editBlog(id, editBlogDto);
