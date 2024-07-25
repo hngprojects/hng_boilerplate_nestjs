@@ -292,6 +292,7 @@ describe('AuthenticationService', () => {
 describe('Enabling two factor authentication', () => {
   let userService: UserService;
   let authService: AuthenticationService;
+  let otpService: OtpService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -303,11 +304,24 @@ describe('Enabling two factor authentication', () => {
           provide: getRepositoryToken(User),
           useValue: {},
         },
+        {
+          provide: OtpService,
+          useValue: {
+            createOtp: jest.fn(),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendForgotPasswordMail: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     userService = module.get<UserService>(UserService);
     authService = module.get<AuthenticationService>(AuthenticationService);
+    otpService = module.get<OtpService>(OtpService);
   });
 
   it('should return NOT FOUND if user does not exists', async () => {
