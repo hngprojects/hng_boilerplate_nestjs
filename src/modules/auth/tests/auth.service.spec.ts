@@ -6,7 +6,7 @@ import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
-import { HttpException, HttpStatus, RequestMethod } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import AuthenticationService from '../auth.service';
 import { SessionService } from '../../session/session.service';
 import { Session } from '../../session/entities/session.entity';
