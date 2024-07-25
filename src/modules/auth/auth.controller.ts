@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Body, Controller, HttpCode, HttpStatus, Post, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -28,5 +29,16 @@ export default class RegistrationController {
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.loginUser(loginDto);
+  }
+
+  @skipAuth()
+  @Post('password-reset-email')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Send password reset email' })
+  @ApiResponse({ status: 200, description: 'Password reset email sent' })
+  @ApiResponse({ status: 400, description: 'Invalid email' })
+  async sendPasswordResetEmail(@Body('email') email: string): Promise<any> {
+    await this.authService.sendPasswordResetEmail(email);
+    return { message: 'Password reset email sent' };
   }
 }

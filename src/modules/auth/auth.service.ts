@@ -12,12 +12,15 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { jwtConstants } from './constants';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export default class AuthenticationService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -132,5 +135,23 @@ export default class AuthenticationService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  async sendPasswordResetEmail(email: string ): Promise<any> {
+      const user = await this.userService.getUserRecord({
+        identifier: email,
+        identifierType: 'email',
+      });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const payload = { email: user.email, sub: user.id };
+    const token = this.jwtService.sign(payload, { secret: jwtConstants.secret, expiresIn: '1h' });
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password`;
+
+    await this.emailService.sendForgotPasswordMail(email, resetUrl, token);
   }
 }
