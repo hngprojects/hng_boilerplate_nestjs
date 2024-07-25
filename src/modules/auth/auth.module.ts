@@ -9,12 +9,14 @@ import { Repository } from 'typeorm';
 import AuthenticationService from './auth.service';
 import UserService from '../user/user.service';
 import { SessionModule } from '../session/session.module';
+import { SessionService } from '../session/session.service';
+import { Session } from '../session/entities/session.entity';
 
 @Module({
   controllers: [RegistrationController],
   providers: [AuthenticationService, Repository, UserService],
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Session]),
     PassportModule,
     JwtModule.register({
       global: true,
