@@ -11,7 +11,10 @@ import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import * as bcrypt from 'bcrypt';
-import { EmailService } from 'src/modules/email/email.service';
+import { EmailService } from '../../email/email.service';
+import { jwtConstants } from '../constants';
+import { EmailModule } from '../../email/email.module';
+import { MailerService } from '@nestjs-modules/mailer';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
@@ -21,21 +24,29 @@ describe('Authentication Service tests', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [EmailModule],
       providers: [
         JwtService,
         AuthenticationService,
         UserService,
-        
+        EmailService,
         {
           provide: getRepositoryToken(User),
           useValue: {},
         },
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn().mockResolvedValue({}), // Mock the sendMail method
+          }
+        }
       ],
     }).compile();
 
     userService = module.get<UserService>(UserService);
     authService = module.get<AuthenticationService>(AuthenticationService);
     jwtService = module.get<JwtService>(JwtService);
+    emailService = module.get<EmailService>(EmailService);
   });
 
   describe('createNewUser tests', () => {
@@ -207,6 +218,36 @@ describe('Authentication Service tests', () => {
           HttpStatus.INTERNAL_SERVER_ERROR
         )
       );
+    });
+  });
+
+  describe('sendPasswordResetEmail tests', () => {
+    it('should send a password reset email successfully', async () => {
+      const email = 'test@example.com';
+      const user = { id: '1', email: 'test@example.com' };
+      const token = 'jwt-token';
+
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
+      jest.spyOn(jwtService, 'sign').mockReturnValue(token);
+      jest.spyOn(emailService, 'sendForgotPasswordMail').mockResolvedValue(undefined);
+
+      await expect(authService.sendPasswordResetEmail(email)).resolves.toBeUndefined();
+
+      expect(userService.getUserRecord).toHaveBeenCalledWith({ identifier: email, identifierType: 'email' });
+      expect(jwtService.sign).toHaveBeenCalledWith({ email: user.email, sub: user.id }, { secret: jwtConstants.secret, expiresIn: '1h' });
+      expect(emailService.sendForgotPasswordMail).toHaveBeenCalledWith(email, `${process.env.FRONTEND_URL}/reset-password`, token);
+    });
+
+    it('should throw an error if user is not found', async () => {
+      const email = 'test@example.com';
+
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(null);
+
+      await expect(authService.sendPasswordResetEmail(email)).rejects.toThrow('User not found');
+
+      expect(userService.getUserRecord).toHaveBeenCalledWith({ identifier: email, identifierType: 'email' });
+      expect(jwtService.sign).not.toHaveBeenCalled();
+      expect(emailService.sendForgotPasswordMail).not.toHaveBeenCalled();
     });
   });
 });
