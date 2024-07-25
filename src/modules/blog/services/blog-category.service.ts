@@ -35,8 +35,6 @@ export class BlogCategoryService {
         status_code: 201,
       };
     } catch (error) {
-      console.error('Error creating category:', error);
-
       if (error instanceof BadRequestException) {
         throw error;
       }
