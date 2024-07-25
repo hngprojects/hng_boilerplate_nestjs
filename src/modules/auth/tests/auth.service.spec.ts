@@ -10,12 +10,17 @@ import AuthenticationService from '../auth.service';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
+import OtpService from '../../otp/otp.service';
+import { EmailService } from '../../email/email.service';
+import { Otp } from '../../otp/entities/otp.entity';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
   let authService: AuthenticationService;
   let jwtService: JwtService;
+  let otpService: OtpService;
+  let emailService: EmailService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,16 +28,27 @@ describe('Authentication Service tests', () => {
         JwtService,
         AuthenticationService,
         UserService,
+        OtpService,
+        EmailService,
         {
           provide: getRepositoryToken(User),
           useValue: {},
         },
+        {
+          provide: getRepositoryToken(Otp),
+          useValue: {},
+        },
       ],
-    }).compile();
+    })
+      .overrideProvider(EmailService)
+      .useValue({ serv: () => {} })
+      .compile();
 
     userService = module.get<UserService>(UserService);
     authService = module.get<AuthenticationService>(AuthenticationService);
     jwtService = module.get<JwtService>(JwtService);
+    otpService = module.get<OtpService>(OtpService);
+    emailService = module.get<EmailService>(EmailService);
   });
 
   describe('createNewUser tests', () => {
@@ -206,4 +222,5 @@ describe('Authentication Service tests', () => {
       );
     });
   });
+  describe('Signin with token tests', () => {});
 });
