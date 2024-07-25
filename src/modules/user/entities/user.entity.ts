@@ -1,5 +1,7 @@
-import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { promisify } from 'util';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 
@@ -27,6 +29,15 @@ export class User extends AbstractBaseEntity {
   is_active: boolean;
 
   @Column({ nullable: true })
+  is_2fa_enabled: boolean;
+
+  @Column({ nullable: true })
+  totp_code: number;
+
+  @Column({ nullable: true })
+  backup_codes_2fa: string;
+
+  @Column({ nullable: true })
   attempts_left: number;
 
   @Column({ nullable: true })
@@ -48,5 +59,21 @@ export class User extends AbstractBaseEntity {
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async encryptBackupCodes(): Promise<void> {
+    if (!this.backup_codes_2fa) return;
+
+    const iv = crypto.randomBytes(16);
+    const salt = crypto.randomBytes(16);
+    const password = process.env.BACKUP_CODES_2FA_PASSWORD || 'somePasswordForMyAPP';
+
+    const key = (await promisify(crypto.scrypt)(password, salt, 32)) as Buffer;
+    const cipher = crypto.createCipheriv('aes-256-ctr', key, iv);
+    const encryptedBackupCodes = Buffer.concat([cipher.update(this.backup_codes_2fa), cipher.final()]);
+
+    this.backup_codes_2fa = iv.toString('hex') + ':' + encryptedBackupCodes.toString('hex');
   }
 }

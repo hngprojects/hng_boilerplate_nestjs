@@ -9,16 +9,19 @@ interface UserInterface {
 
   password: string;
 
-  is_active: boolean
+  is_2fa_enabled: boolean;
 
-  attempts_left: number
+  backup_codes_2fa: string;
 
-  time_left: number
+  is_active: boolean;
+
+  attempts_left: number;
+
+  time_left: number;
 
   created_at: Date;
 
   updated_at: Date;
-
 }
 
-export default UserInterface
+export default UserInterface;

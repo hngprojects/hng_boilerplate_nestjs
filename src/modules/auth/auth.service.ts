@@ -1,5 +1,8 @@
+import { Repository } from 'typeorm';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
@@ -7,11 +10,14 @@ import {
   USER_CREATED_SUCCESSFULLY,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '../user/entities/user.entity';
 import UserService from '../user/user.service';
 
 @Injectable()
 export default class AuthenticationService {
   constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private userService: UserService,
     private jwtService: JwtService
   ) {}
@@ -72,6 +78,70 @@ export default class AuthenticationService {
         },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  private generateRandomBackupCode(numberOfCodes: number) {
+    const [minNumber, maxNumber] = [111111, 999999];
+    const codes = [];
+    for (let index = 0; index < numberOfCodes; index++) {
+      let repeatedCode = true;
+      while (repeatedCode) {
+        const code = Math.floor(Math.random() * (maxNumber - minNumber) + minNumber);
+        if (codes.includes(code)) continue;
+        codes[index] = code;
+        repeatedCode = false;
+      }
+    }
+
+    return codes;
+  }
+
+  async generateBackupCodes({ password, totp_code }, userId: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const passwordIsCorrect = bcrypt.compareSync(password, user.password);
+
+      if (!passwordIsCorrect)
+        return {
+          status_code: HttpStatus.UNAUTHORIZED,
+          error: 'Unauthorized',
+          message: 'Authentication required',
+        };
+
+      if (!user.is_2fa_enabled) {
+        return {
+          status_code: HttpStatus.BAD_REQUEST,
+          error: 'Invalid Request',
+          message: '2-Factor Authentication has not been enabled',
+        };
+      }
+
+      if (user.totp_code !== totp_code) {
+        return {
+          status_code: HttpStatus.BAD_REQUEST,
+          error: 'Invalid Request',
+          message: 'TOTP code provided is invalid',
+        };
+      }
+      const backupCodes: number[] = this.generateRandomBackupCode(5);
+
+      Object.assign(user, { backup_codes_2fa: JSON.stringify(backupCodes) });
+      await this.userRepository.save(user);
+
+      return {
+        status_code: HttpStatus.OK,
+        message: 'New backup codes generated',
+        data: {
+          backup_codes: backupCodes,
+        },
+      };
+    } catch (error) {
+      return {
+        status_code: HttpStatus.BAD_REQUEST,
+        error: 'Invalid request',
+        message: 'The request sent was invalid.',
+      };
     }
   }
 }
