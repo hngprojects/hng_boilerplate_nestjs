@@ -6,7 +6,7 @@ import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BackupCodesReqBodyDTO } from './dto/backup-codes-req-body.dto';
 
 @ApiTags('auth')
@@ -27,19 +27,24 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.loginUser(loginDto);
   }
 
   @Post('/2fa/backup-codes')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Generate backup codes for 2 factor authenticaton' })
+  @ApiResponse({ status: 200, description: 'New backup codes generated' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Invalid or Bad Request' })
   async generateBackupCodes(
     @Body() backupCodesReqBodyDTO: BackupCodesReqBodyDTO,
     @Req() request,
     @Res() response: Response
   ): Promise<any> {
     const userId: string = request.user.sub;
-    const generateBackupCodesResponse = await this.authService.generateBackupCodes(backupCodesReqBodyDTO, userId);
-    return response.status(generateBackupCodesResponse.status_code).send(generateBackupCodesResponse);
+    const generatedResult = await this.authService.generateBackupCodes(backupCodesReqBodyDTO, userId);
+    return response.status(generatedResult.status_code).send(generatedResult);
   }
 }
