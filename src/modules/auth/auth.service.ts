@@ -107,7 +107,7 @@ export default class AuthenticationService {
         user.attempts_left -= 1;
 
         if (user.attempts_left <= 0) {
-          const oneHourAgo = new Date(Date.now() - 30 * 1000);
+          const oneHourAgo = new Date(Date.now() + 60 * 60 * 1000);
           if (user.time_left && new Date(user.time_left) > oneHourAgo) {
             throw new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN);
           }
