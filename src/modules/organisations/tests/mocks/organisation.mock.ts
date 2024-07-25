@@ -19,7 +19,7 @@ export const createMockOrganisation = (): Organisation => {
     hashPassword: async () => {},
     is_active: true,
     attempts_left: 3,
-    time_left: 3600,
+    time_left: new Date(),
     owned_organisations: [],
     created_organisations: [],
     user_type: UserType.ADMIN,

@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export default class UserService {
@@ -39,5 +40,20 @@ export default class UserService {
     };
 
     return await GetRecord[identifierType]();
+  }
+
+  async updateUserAttempts(identifier: string, attemptsLeft: number, timeLeft: Date) {
+    const user = await this.getUserById(identifier);
+
+    user.attempts_left = attemptsLeft;
+    user.time_left = timeLeft;
+
+    await this.userRepository.save(user);
+  }
+
+  async validatePassword(existingPassword: string, NewPassword: string): Promise<boolean> {
+    console.log({ existingPassword, NewPassword });
+
+    return await bcrypt.compare(NewPassword, existingPassword);
   }
 }

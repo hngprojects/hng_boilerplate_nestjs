@@ -3,11 +3,18 @@ import { JwtService } from '@nestjs/jwt';
 import UserService from '../../user/user.service';
 import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
+import {
+  ERROR_OCCURED,
+  USER_ACCOUNT_EXIST,
+  USER_CREATED_SUCCESSFULLY,
+  USER_BANNED,
+} from '../../../helpers/SystemMessages';
 import { CreateUserDTO } from '../dto/create-user.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import AuthenticationService from '../auth.service';
 import UserResponseDTO from '../../user/dto/user-response.dto';
+import { LoginUserDTO } from '../dto/login-user.dto';
+import * as bcrypt from 'bcrypt';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
@@ -116,5 +123,54 @@ describe('Authentication Service tests', () => {
         HttpStatus.INTERNAL_SERVER_ERROR
       )
     );
+  });
+
+  it('should return FORBIDDEN on the fourth unsuccessful login attempts', async () => {
+    const body: LoginUserDTO = { email: 'john@doe.com', password: 'wrongpassword' };
+    const hashedPassword = await bcrypt.hash('correctpassword', 10);
+
+    const user: UserResponseDTO = {
+      id: '1',
+      email: body.email,
+      attempts_left: 3,
+      time_left: null,
+      password: hashedPassword,
+    };
+
+    jest.spyOn(userService, 'getUserRecord').mockImplementation(async ({ identifier, identifierType }) => {
+      return identifierType === 'email' && identifier === body.email ? user : null;
+    });
+
+    jest.spyOn(userService, 'updateUserAttempts').mockImplementation(async (id, attemptsLeft, timeLeft) => {
+      if (id === user.id) {
+        user.attempts_left = attemptsLeft;
+        user.time_left = timeLeft;
+      }
+    });
+    jest
+      .spyOn(userService, 'validatePassword')
+      .mockImplementation(async (storedPassword: string, inputPassword: string) => {
+        return await bcrypt.compare(inputPassword, storedPassword);
+      });
+
+    for (let i = 0; i < 4; i++) {
+      if (i < 3) {
+        expect(await authService.loginUser(body)).toEqual({
+          message: 'Invalid credentials',
+          status_code: HttpStatus.UNAUTHORIZED,
+        });
+      } else {
+        expect(await authService.loginUser(body)).toEqual({
+          message: USER_BANNED,
+          status_code: HttpStatus.FORBIDDEN,
+        });
+      }
+    }
+
+    expect(user.attempts_left).toBe(0);
+    expect(user.time_left).not.toBeNull();
+    const currentTime = new Date();
+    const timeDifference = (currentTime.getTime() - new Date(user.time_left).getTime()) / (60 * 1000);
+    expect(timeDifference).toBeLessThan(1);
   });
 });

@@ -26,11 +26,11 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true })
   is_active: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: 3 })
   attempts_left: number;
 
   @Column({ nullable: true })
-  time_left: number;
+  time_left: Date;
 
   @Column({
     type: 'enum',
