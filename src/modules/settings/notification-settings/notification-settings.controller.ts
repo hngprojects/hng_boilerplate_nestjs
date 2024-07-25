@@ -7,8 +7,6 @@ import { NotificationSettings } from './entities/notification-setting.entity';
 @ApiBearerAuth()
 @ApiTags('Notification Settings')
 @Controller('settings')
-
-// @UseGuards(AuthGuard)
 export class NotificationSettingsController {
   constructor(private readonly notificationSettingsService: NotificationSettingsService) {}
 
@@ -20,7 +18,7 @@ export class NotificationSettingsController {
   async create(@Body() notificationSettingsDto: NotificationSettingsDto, @Req() request: Request) {
     const user = request['user'];
 
-    const userId = user.sub;
+    const userId = user.id;
 
     const settings = await this.notificationSettingsService.create(notificationSettingsDto, userId);
     return {
@@ -33,7 +31,7 @@ export class NotificationSettingsController {
   async findByUserId(@Req() request: Request) {
     const user = request['user'];
 
-    const userId = user.sub;
+    const userId = user.id;
 
     const settings = await this.notificationSettingsService.findByUserId(userId);
     return {
