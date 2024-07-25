@@ -15,6 +15,6 @@ export class ProductsController {
   @ApiResponse({ status: 401, description: 'Unauthorized. You must be authenticated to delete a product.' })
   @ApiResponse({ status: 404, description: 'Product with specified ID does not exist.' })
   async remove(@Param('id') id: string) {
-    return this.productsService.remove(id);
+    return this.productsService.removeProduct(id);
   }
 }

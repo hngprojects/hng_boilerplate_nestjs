@@ -29,7 +29,7 @@ describe('ProductsService', () => {
       const productId = 'some-product-id';
       jest.spyOn(productRepository, 'delete').mockResolvedValue({ affected: 1 } as any);
 
-      const result = await service.remove(productId);
+      const result = await service.removeProduct(productId);
 
       expect(result).toEqual({
         message: 'Product deleted successfully.',
@@ -42,7 +42,7 @@ describe('ProductsService', () => {
       const productId = 'non-existing-product-id';
       jest.spyOn(productRepository, 'delete').mockResolvedValue({ affected: 0 } as any);
 
-      await expect(service.remove(productId)).rejects.toThrow(NotFoundException);
+      await expect(service.removeProduct(productId)).rejects.toThrow(NotFoundException);
       expect(productRepository.delete).toHaveBeenCalledWith(productId);
     });
   });

@@ -10,7 +10,7 @@ export class ProductsService {
     private productRepository: Repository<Product>
   ) {}
 
-  async remove(id: string) {
+  async removeProduct(id: string) {
     try {
       const result = await this.productRepository.delete(id);
 
