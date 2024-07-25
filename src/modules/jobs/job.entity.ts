@@ -3,21 +3,21 @@ import { Entity, Column } from 'typeorm';
 
 @Entity()
 export class Job extends AbstractBaseEntity {
-  @Column()
+  @Column({ nullable: false })
   title: string;
 
-  @Column()
+  @Column({ nullable: false })
   description: string;
 
-  @Column()
+  @Column({ nullable: false })
   location: string;
 
-  @Column()
+  @Column({ nullable: false })
   salary: string;
 
-  @Column()
+  @Column({ nullable: false })
   job_type: string;
 
-  @Column()
+  @Column({ nullable: false })
   company_name: string;
 }

@@ -4,6 +4,7 @@ import { JobService } from './job.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { PaginationResult } from './pagination-result.interface';
 import { Job } from './job.entity';
+import { mockJobService } from './job.service.mock';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -15,26 +16,7 @@ describe('JobController', () => {
       providers: [
         {
           provide: JobService,
-          useValue: {
-            findAll: jest.fn().mockResolvedValue({
-              message: 'Job listings retrieved successfully.',
-              data: [
-                {
-                  title: 'Software Engineer',
-                  description: 'Develop software applications',
-                  location: 'Remote',
-                  salary: '$100k',
-                  job_type: 'Full-time',
-                },
-              ],
-              pagination: {
-                current_page: 1,
-                total_pages: 1,
-                page_size: 10,
-                total_items: 1,
-              },
-            }),
-          },
+          useValue: mockJobService,
         },
       ],
     }).compile();
