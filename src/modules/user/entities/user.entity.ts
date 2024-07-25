@@ -2,6 +2,8 @@ import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Invite } from '../../invite/entities/invite.entity';
+import { Product } from '../../products/entities/product.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -39,6 +41,10 @@ export class User extends AbstractBaseEntity {
   owned_organisations: Organisation[];
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
+  @OneToMany(() => Invite, invite => invite.user)
+  invites: Invite[];
+  @OneToMany(() => Product, product => product.user)
+  products: Product[];
 
   @BeforeInsert()
   async hashPassword() {
