@@ -7,8 +7,6 @@ import {
   HttpException,
   HttpStatus,
   Body,
-  UsePipes,
-  ValidationPipe,
   Request,
 } from '@nestjs/common';
 import UserService from './user.service';
