@@ -1,9 +1,21 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req } from '@nestjs/common';
+import {
+  Controller,
+  Patch,
+  Param,
+  Body,
+  UsePipes,
+  ValidationPipe,
+  Request,
+  Req,
+  Get,
+  HttpException,
+} from '@nestjs/common';
 import UserService from './user.service';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
+import { GetUserByIdResponseDto } from './dto/get-user-by-id-response.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -44,5 +56,33 @@ export class UserController {
       status_code: 200,
       message: result.message,
     };
+  }
+
+  @ApiOperation({ summary: 'Get user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Get user by Id',
+    type: GetUserByIdResponseDto,
+  })
+  @Get(':userId')
+  async getUserById(@Param() { userId }: { userId: string }) {
+    try {
+      const { password, ...userData } = await this.userService.getUserRecord({
+        identifier: userId,
+        identifierType: 'id',
+      });
+      return {
+        status_code: 200,
+        user: userData,
+      };
+    } catch (e) {
+      throw new HttpException(
+        {
+          status_code: 500,
+          error: 'Internal Server Error',
+        },
+        500
+      );
+    }
   }
 }

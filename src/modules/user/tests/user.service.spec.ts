@@ -258,4 +258,48 @@ describe('UserService', () => {
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
   });
+
+  describe('getUserRecord', () => {
+    it('should return a user by email', async () => {
+      const email = 'test@example.com';
+      const userResponseDto: UserResponseDTO = {
+        id: 'uuid',
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(userResponseDto);
+
+      const result = await service.getUserRecord({ identifier: email, identifierType: 'email' });
+      expect(result).toEqual(userResponseDto);
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { email } });
+    });
+
+    it('should return a user by id', async () => {
+      const id = '1';
+      const userResponseDto: UserResponseDTO = {
+        id: 'some-uuid-here',
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(userResponseDto);
+
+      const result = await service.getUserRecord({ identifier: id, identifierType: 'id' });
+      expect(result).toEqual(userResponseDto);
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { id } });
+    });
+
+    it('should handle exceptions gracefully', async () => {
+      const identifierOptions: UserIdentifierOptionsType = { identifier: 'unknown', identifierType: 'email' };
+
+      mockUserRepository.findOne.mockImplementationOnce(() => {
+        throw new Error('Test error');
+      });
+
+      await expect(service.getUserRecord(identifierOptions)).rejects.toThrow('Test error');
+    });
+  });
 });
