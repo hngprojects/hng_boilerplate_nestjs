@@ -17,6 +17,7 @@ import { OrganisationsModule } from './modules/organisations/organisations.modul
 import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { InviteModule } from './modules/invite/invite.module';
 
 @Module({
   providers: [
@@ -69,6 +70,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     UserModule,
     ProductsModule,
     EmailModule,
+    InviteModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
