@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpStatus, NotFoundException, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import UserService from '../user/user.service';
@@ -29,6 +29,14 @@ export class TestimonialsController {
     const { sub: userId } = req?.user as { sub: string };
 
     const user = await this.userService.getUserRecord({ identifier: userId, identifierType: 'id' });
+
+    if (!user) {
+      throw new NotFoundException({
+        status: 'error',
+        error: 'Not Found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
 
     const data = await this.testimonialsService.createTestimonial(createTestimonialDto, user);
 

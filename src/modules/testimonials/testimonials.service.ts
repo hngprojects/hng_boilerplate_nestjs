@@ -20,14 +20,6 @@ export class TestimonialsService {
     try {
       const { content, name } = createTestimonialDto;
 
-      if (!user) {
-        throw new NotFoundException({
-          status: 'error',
-          error: 'Not Found',
-          status_code: HttpStatus.NOT_FOUND,
-        });
-      }
-
       await this.testimonialRepository.save({
         user,
         name,
