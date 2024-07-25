@@ -31,7 +31,6 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs'] });
 
-  // TODO: set options for swagger docs
   const options = new DocumentBuilder()
     .setTitle('<project-title-here>')
     .setDescription('<project-description-here>')
