@@ -1,5 +1,4 @@
 import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -10,14 +9,18 @@ import authConfig from '../config/auth.config';
 import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
-import { AuthGuard } from './guards/auth.guard';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import { OtpModule } from './modules/otp/otp.module';
+import { OtpService } from './modules/otp/otp.service';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
+import { AuthGuard } from './guards/auth.guard';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
-import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
-import { UserModule } from './modules/user/user.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 
 @Module({
@@ -34,6 +37,8 @@ import { SqueezeModule } from './modules/squeeze/squeeze.module';
           forbidNonWhitelisted: true,
         }),
     },
+    OtpService,
+    EmailService,
     {
       provide: 'APP_GUARD',
       useClass: AuthGuard,
@@ -69,6 +74,7 @@ import { SqueezeModule } from './modules/squeeze/squeeze.module';
     SeedingModule,
     AuthModule,
     UserModule,
+    OtpModule,
     EmailModule,
     InviteModule,
     MailerModule.forRootAsync({
