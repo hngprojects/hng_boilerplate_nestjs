@@ -21,6 +21,7 @@ import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
+import { RegionsModule } from './modules/regions/regions.module';
 
 @Module({
   providers: [
@@ -74,6 +75,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     AuthModule,
     UserModule,
     OtpModule,
+    RegionsModule,
     EmailModule,
     InviteModule,
     MailerModule.forRootAsync({
