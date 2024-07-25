@@ -3,9 +3,6 @@ import { AbstractBaseEntity } from '../../../entities/base.entity'; // Assume yo
 
 @Entity()
 export class Timezone extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
   @Column()
   timezone: string;
 
