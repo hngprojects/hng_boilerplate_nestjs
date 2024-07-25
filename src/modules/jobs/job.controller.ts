@@ -6,7 +6,7 @@ export class JobController {
   constructor(private readonly jobService: JobService) {}
 
   @Get()
-  async findAll(@Query('page') page = 1, @Query('pageSize') pageSize = 10): Promise<any> {
+  async getAllJobs(@Query('page') page = 1, @Query('pageSize') pageSize = 10): Promise<any> {
     return this.jobService.findAll(Number(page), Number(pageSize));
   }
 }
