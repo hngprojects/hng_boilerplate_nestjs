@@ -3,8 +3,6 @@ import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { skipAuth } from '../../../src/helpers/skipAuth';
-
 
 @ApiBearerAuth()
 @ApiTags('Organisation')

@@ -69,7 +69,7 @@ describe('JobService', () => {
 
       const result = await service.createJob(jobData);
 
-      expect(organisationService.findById).toHaveBeenCalledWith(jobData.organisation);
+      expect(organisationService.findOrganisationById).toHaveBeenCalledWith(jobData.organisation);
       expect(jobRepository.save).toHaveBeenCalledWith(expectedJobEntity);
       expect(result).toEqual(expectedJobEntity);
     });
