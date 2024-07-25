@@ -3,7 +3,7 @@ import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
 import { ApiTags, ApiBody, ApiParam } from '@nestjs/swagger';
-
+import { skipAuth } from '../../helpers/skipAuth';
 @ApiTags('products/categories')
 @Controller('products/categories')
 export class ProductCategoryController {
@@ -26,6 +26,7 @@ export class ProductCategoryController {
     };
   }
 
+  @skipAuth()
   @Post()
   @ApiBody({ type: CreateProductCategoryDto })
   async create(@Body() createCategoryDto: CreateProductCategoryDto) {

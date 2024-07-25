@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards, HttpException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Post, Body, Req, HttpException, InternalServerErrorException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import {
