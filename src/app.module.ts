@@ -17,6 +17,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { InviteModule } from './modules/invite/invite.module';
+import { SqueezeModule } from './modules/squeeze/squeeze.module';
 
 @Module({
   providers: [
@@ -94,6 +95,7 @@ import { InviteModule } from './modules/invite/invite.module';
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    SqueezeModule,
   ],
   controllers: [HealthController],
 })
