@@ -38,13 +38,17 @@ export default class UserService {
   }
 
   async softDelete(user_id: string): Promise<User> {
-    const user = await this.findOne(user_id);
-    if (!user) {
-      throw new NotFoundException('User not found');
+    try {
+      const user = await this.findOne(user_id);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      user.is_active = false;
+      await this.userRepository.save(user);
+      return user;
+    } catch (error) {
+      throw new BadRequestException('Failed to delete user');
     }
-    user.is_active = false;
-    await this.userRepository.save(user);
-    return user;
   }
 
   async createUser(user: CreateNewUserOptions) {
