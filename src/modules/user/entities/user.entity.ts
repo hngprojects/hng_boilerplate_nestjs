@@ -2,7 +2,7 @@ import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
-import { Product } from '../../../modules/products/entities/product.entity';
+
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
@@ -39,8 +39,7 @@ export class User extends AbstractBaseEntity {
   owned_organisations: Organisation[];
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
-  @OneToMany(() => Product, product => product.user, { cascade: true })
-  products: Product[];
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
