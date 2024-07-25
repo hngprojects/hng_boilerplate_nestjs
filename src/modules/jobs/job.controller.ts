@@ -1,22 +1,21 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { JobService } from './job.service';
-import { Job } from './job.entity';
 import { PaginationResult } from './pagination-result.interface';
+import { Job } from './job.entity';
 
-@ApiTags('jobs')
+@ApiTags('Jobs')
 @Controller('jobs')
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Retrieve all job listings' })
+  @ApiOperation({ summary: 'Get all job listings' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'Job listings retrieved successfully.' })
-  @ApiResponse({ status: 400, description: 'Invalid request data.' })
-  async getAllJobs(
-    @Query('page') page: number = 1,
-    @Query('pageSize') pageSize: number = 10
-  ): Promise<PaginationResult<Job>> {
+  @ApiResponse({ status: 500, description: 'Failed to retrieve job listings.' })
+  async getAllJobs(@Query('page') page = 1, @Query('pageSize') pageSize = 10): Promise<PaginationResult<Job>> {
     return this.jobService.findAll(Number(page), Number(pageSize));
   }
 }

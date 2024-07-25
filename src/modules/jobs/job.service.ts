@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job } from './job.entity';
@@ -6,6 +6,8 @@ import { PaginationResult } from './pagination-result.interface';
 
 @Injectable()
 export class JobService {
+  private readonly logger = new Logger(JobService.name);
+
   constructor(
     @InjectRepository(Job)
     private jobRepository: Repository<Job>
@@ -31,7 +33,7 @@ export class JobService {
         },
       };
     } catch (error) {
-      console.error('Error retrieving job listings:', error);
+      this.logger.error('Error retrieving job listings:', error.stack);
       throw new InternalServerErrorException('Failed to retrieve job listings.');
     }
   }

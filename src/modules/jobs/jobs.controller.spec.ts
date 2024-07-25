@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
+import { InternalServerErrorException } from '@nestjs/common';
+import { PaginationResult } from './pagination-result.interface';
+import { Job } from './job.entity';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -14,26 +17,26 @@ describe('JobController', () => {
           provide: JobService,
           useValue: {
             findAll: jest.fn().mockResolvedValue({
-              message: "Job listings retrieved successfully.",
+              message: 'Job listings retrieved successfully.',
               data: [
                 {
-                  title: "Software Engineer",
-                  description: "Develop software applications",
-                  location: "Remote",
-                  salary: "$100k",
-                  job_type: "Full-time"
-                }
+                  title: 'Software Engineer',
+                  description: 'Develop software applications',
+                  location: 'Remote',
+                  salary: '$100k',
+                  job_type: 'Full-time',
+                },
               ],
               pagination: {
                 current_page: 1,
                 total_pages: 1,
                 page_size: 10,
-                total_items: 1
-              }
-            })
-          }
-        }
-      ]
+                total_items: 1,
+              },
+            }),
+          },
+        },
+      ],
     }).compile();
 
     jobController = module.get<JobController>(JobController);
@@ -42,28 +45,34 @@ describe('JobController', () => {
 
   describe('getAllJobs', () => {
     it('should return a list of job listings with pagination', async () => {
-      const result = await jobController.getAllJobs();
+      const result: PaginationResult<Job> = await jobController.getAllJobs();
 
       expect(result).toEqual({
-        message: "Job listings retrieved successfully.",
+        message: 'Job listings retrieved successfully.',
         data: [
           {
-            title: "Software Engineer",
-            description: "Develop software applications",
-            location: "Remote",
-            salary: "$100k",
-            job_type: "Full-time"
-          }
+            title: 'Software Engineer',
+            description: 'Develop software applications',
+            location: 'Remote',
+            salary: '$100k',
+            job_type: 'Full-time',
+          },
         ],
         pagination: {
           current_page: 1,
           total_pages: 1,
           page_size: 10,
-          total_items: 1
-        }
+          total_items: 1,
+        },
       });
 
       expect(jobService.findAll).toHaveBeenCalled();
+    });
+
+    it('should handle errors gracefully', async () => {
+      jest.spyOn(jobService, 'findAll').mockRejectedValueOnce(new InternalServerErrorException('Failed to retrieve job listings.'));
+
+      await expect(jobController.getAllJobs()).rejects.toThrow(InternalServerErrorException);
     });
   });
 });
