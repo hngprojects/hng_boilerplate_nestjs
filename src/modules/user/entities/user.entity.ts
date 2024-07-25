@@ -1,7 +1,7 @@
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Session } from '../../session/entities/session.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 
