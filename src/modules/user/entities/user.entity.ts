@@ -4,6 +4,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Blog } from '../../../modules/blog/entities/blog.entity';
 import { BlogComment } from '../../../modules/blog/entities/blog-comments.entity';
+import { Invite } from '../../invite/entities/invite.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -11,7 +12,7 @@ export enum UserType {
   USER = 'vendor',
 }
 
-@Entity()
+@Entity({ name: 'users' })
 export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
   first_name: string;
@@ -34,6 +35,12 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true })
   time_left: number;
 
+  @Column({ nullable: true })
+  secret: string;
+
+  @Column({ default: false })
+  is_2fa_enabled: boolean;
+
   @Column({
     type: 'enum',
     enum: UserType,
@@ -52,6 +59,8 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => BlogComment, comment => comment.author, { nullable: true })
   comments?: BlogComment[];
+  @OneToMany(() => Invite, invite => invite.user)
+  invites: Invite[];
 
   @BeforeInsert()
   async hashPassword() {
