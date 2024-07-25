@@ -3,7 +3,6 @@ import * as bcrypt from 'bcrypt';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Product } from '../../products/entities/product.entity';
-import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 
 export enum UserType {
@@ -56,7 +55,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Product, product => product.user)
   products: Product[];
-  
+
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
