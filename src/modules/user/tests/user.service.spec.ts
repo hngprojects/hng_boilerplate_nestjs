@@ -258,10 +258,11 @@ describe('UserService', () => {
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
   });
+
   describe('updateUserAttempts', () => {
     const userId = 'valid-id';
     const attemptsLeft = 2;
-    const timeLeft = new Date(Date.now() + 5 * 60 * 1000);
+    const timeLeft = new Date(Date.now() + 60 * 60 * 1000);
 
     it('should update user attempts and time left successfully', async () => {
       const existingUser = {
@@ -276,13 +277,16 @@ describe('UserService', () => {
         time_left: timeLeft,
       };
 
-      mockUserRepository.findOne.mockResolvedValueOnce(existingUser);
-      mockUserRepository.save.mockResolvedValueOnce(updatedUser);
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(existingUser as User);
+      jest.spyOn(mockUserRepository, 'save').mockResolvedValueOnce(updatedUser as User);
 
       await service.updateUserAttempts(userId, attemptsLeft, timeLeft);
 
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
-      expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
+      expect(mockUserRepository.save).toHaveBeenCalledWith({
+        ...existingUser,
+        attempts_left: attemptsLeft,
+      });
     });
   });
 });

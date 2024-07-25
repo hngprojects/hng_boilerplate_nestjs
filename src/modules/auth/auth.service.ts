@@ -104,31 +104,14 @@ export default class AuthenticationService {
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        user.attempts_left -= 1;
-
-        if (user.attempts_left <= 0) {
-          const currentTime = new Date();
-          const banEndTime = new Date(user.time_left);
-          banEndTime.setMinutes(banEndTime.getMinutes() + 5);
-
-          if (user.time_left && currentTime < banEndTime) {
-            throw new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN);
-          }
-
-          user.time_left = new Date();
-          user.attempts_left = 3;
-        }
-
-        await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
+        await this.handleLoginAttempts(user.id, false);
         throw new CustomHttpException(
           { message: 'Invalid password or email', error: 'Bad Request' },
           HttpStatus.UNAUTHORIZED
         );
-      } else {
-        user.attempts_left = 3;
-        await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
       }
 
+      await this.handleLoginAttempts(user.id, true);
       const access_token = this.jwtService.sign({ id: user.id });
 
       const responsePayload = {
@@ -156,6 +139,40 @@ export default class AuthenticationService {
         },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
+    }
+  }
+
+  async handleLoginAttempts(userId: string, isValidAttempt: Boolean) {
+    const user = await this.userService.getUserRecord({
+      identifier: userId,
+      identifierType: 'id',
+    });
+
+    console.log(isValidAttempt);
+    console.log(new Date());
+    // console.log(user);
+
+    if (isValidAttempt) {
+      user.attempts_left = 3;
+      await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
+    } else {
+      user.attempts_left -= 1;
+      user.time_left = user.time_left === null ? new Date() : user.time_left;
+
+      if (user.attempts_left <= 0) {
+        const currentTime = new Date();
+        const banEndTime = new Date(user.time_left);
+        banEndTime.setMinutes(banEndTime.getMinutes() + 60);
+
+        if (user.time_left && currentTime < banEndTime) {
+          throw new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN);
+        }
+
+        user.time_left = new Date();
+        user.attempts_left = 3;
+      }
+
+      await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
     }
   }
 

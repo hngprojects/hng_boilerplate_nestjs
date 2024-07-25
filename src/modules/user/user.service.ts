@@ -70,7 +70,7 @@ export default class UserService {
       const user = await this.getUserById(userId);
 
       user.attempts_left = attemptsLeft;
-      user.time_left = timeLeft;
+      user.time_left = user.time_left === null ? new Date() : user.time_left;
 
       await this.userRepository.save(user);
     } catch (error) {

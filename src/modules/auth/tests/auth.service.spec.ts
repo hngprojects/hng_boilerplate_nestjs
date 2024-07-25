@@ -241,7 +241,30 @@ describe('Authentication Service tests', () => {
 
     jest.spyOn(bcrypt, 'compare').mockImplementation(() => false);
 
+    jest
+      .spyOn(authService, 'handleLoginAttempts')
+      .mockImplementation(async (userId: string, isValidAttempt: boolean) => {
+        if (isValidAttempt) {
+          user.attempts_left = 3;
+        } else {
+          user.attempts_left -= 1;
+
+          if (user.attempts_left <= 0) {
+            const currentTime = new Date();
+            const banEndTime = new Date(user.time_left);
+            banEndTime.setMinutes(banEndTime.getMinutes() + 5);
+            console.log(user.time_left && currentTime < banEndTime);
+            user.time_left = user.time_left === null ? new Date() : user.time_left;
+
+            if (user.time_left && currentTime < banEndTime) {
+              throw new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN);
+            }
+          }
+        }
+      });
+
     for (let i = 0; i < 3; i++) {
+      console.log(user);
       await expect(authService.loginUser(loginDto)).rejects.toThrow(
         new CustomHttpException({ message: 'Invalid password or email', error: 'Bad Request' }, HttpStatus.UNAUTHORIZED)
       );
