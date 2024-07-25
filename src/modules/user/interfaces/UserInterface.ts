@@ -9,6 +9,10 @@ interface UserInterface {
 
   password: string;
 
+  secret: string;
+
+  is_2fa_enabled: boolean;
+
   is_active: boolean;
 
   attempts_left: number;
