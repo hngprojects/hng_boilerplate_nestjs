@@ -3,13 +3,14 @@ import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
+import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('auth')
+@ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
   constructor(private authService: AuthenticationService) {}
@@ -19,6 +20,19 @@ export default class RegistrationController {
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
     const createUserResponse = await this.authService.createNewUser(body);
     return response.status(createUserResponse.status_code).send(createUserResponse);
+  }
+
+  @ApiOperation({ summary: 'Generate forgot password reset token' })
+  @ApiResponse({
+    status: 200,
+    description: 'The forgot password reset token generated successfully',
+    type: ForgotPasswordResponseDto,
+  })
+  @skipAuth()
+  @HttpCode(200)
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Res() response: Response): Promise<any> {
+    return await this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @skipAuth()
