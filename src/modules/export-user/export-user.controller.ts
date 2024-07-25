@@ -1,24 +1,17 @@
 import {
     Controller,
     Get,
-    Res,
-    Req,
     Query,
-    UseGuards,
     InternalServerErrorException,
-    HttpStatus,
     NotFoundException
 } from '@nestjs/common';
-import { Response, Request } from 'express';
 import { ExportUserService } from './export-user.service';
-import { AuthGuard } from 'src/guards/auth.guard';
 import { User } from '../user/entities/user.entity';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 
 @ApiTags('export')
 @Controller('export')
-@UseGuards(AuthGuard)
 export class ExportUserController {
   constructor(private readonly exportUserService: ExportUserService) {}
 
