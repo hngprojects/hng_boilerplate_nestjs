@@ -1,17 +1,13 @@
-import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
-  private readonly logger = new Logger(ProductsService.name);
-
   constructor(@InjectRepository(Product) private productRepository: Repository<Product>) {}
 
   async fetchSingleProduct(productId: string) {
-    this.logger.log(`Attempting to retrieve product with id: ${productId}`);
-
     const productExists = await this.productRepository.findOne({
       where: {
         id: productId,
@@ -19,7 +15,6 @@ export class ProductsService {
       relations: ['category'],
     });
     if (!productExists) {
-      this.logger.log(`Product with id: ${productId} does not exist`);
       throw new NotFoundException({
         error: 'Product not found',
         status_code: HttpStatus.NOT_FOUND,
