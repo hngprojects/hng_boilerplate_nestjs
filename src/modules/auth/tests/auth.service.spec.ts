@@ -11,11 +11,13 @@ import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import * as bcrypt from 'bcrypt';
+import { EmailService } from 'src/modules/email/email.service';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
   let authService: AuthenticationService;
   let jwtService: JwtService;
+  let emailService: EmailService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,6 +25,7 @@ describe('Authentication Service tests', () => {
         JwtService,
         AuthenticationService,
         UserService,
+        
         {
           provide: getRepositoryToken(User),
           useValue: {},
