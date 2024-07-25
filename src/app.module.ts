@@ -77,7 +77,6 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     UserModule,
     ProductsModule,
     ProductCategoryModule,
-
     OtpModule,
     EmailModule,
     InviteModule,
