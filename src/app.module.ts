@@ -1,5 +1,4 @@
 import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -17,6 +16,12 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
 import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
+import { OtpModule } from './modules/otp/otp.module';
+import { OtpService } from './modules/otp/otp.service';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
+import { AuthGuard } from './guards/auth.guard';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
@@ -35,6 +40,8 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
           forbidNonWhitelisted: true,
         }),
     },
+    OtpService,
+    EmailService,
     {
       provide: 'APP_GUARD',
       useClass: AuthGuard,
@@ -73,6 +80,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     ProductsModule,
     ProductCategoryModule,
 
+    OtpModule,
     EmailModule,
     InviteModule,
     MailerModule.forRootAsync({
