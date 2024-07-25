@@ -1,58 +1,85 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WaitlistService } from '../waitlist.service';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Waitlist } from '../waitlist.entity';
 import { CreateWaitlistUserDto } from '../dto/create-waitlist-user.dto';
-import { MailerModule, MailerService } from '@nestjs-modules/mailer';
 import { EmailService } from '../../email/email.service';
+import { HttpStatus } from '@nestjs/common';
 
 describe('WaitlistService', () => {
   let service: WaitlistService;
   let emailService: EmailService;
-  let mailerService: MailerService;
+
   const mockWaitlistRepository = {
     save: jest.fn(),
     findOne: jest.fn(),
     create: jest.fn(),
   };
-  const mockMailerService = {
-    sendMail: jest.fn().mockResolvedValue({}),
-  };
+
   const mockEmailService = {
-    sendConfirmationEmail: jest.fn().mockResolvedValue({}),
+    sendWaitListMail: jest.fn().mockResolvedValue({}),
   };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WaitlistService,
-        EmailService,
+        {
+          provide: EmailService,
+          useValue: mockEmailService,
+        },
         {
           provide: getRepositoryToken(Waitlist),
           useValue: mockWaitlistRepository,
-        },
-        {
-          provide: MailerService,
-          useValue: mockMailerService,
         },
       ],
     }).compile();
 
     service = module.get<WaitlistService>(WaitlistService);
     emailService = module.get<EmailService>(EmailService);
-    mailerService = module.get<MailerService>(MailerService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a waitlist entry', async () => {
+  it('should return conflict if email exists', async () => {
     const data: CreateWaitlistUserDto = {
       email: 'test@example.com',
       fullName: 'Test User',
     };
-    mockWaitlistRepository.create.mockReturnValue(data);
-    mockWaitlistRepository.save.mockResolvedValue(data);
-    expect(mockWaitlistRepository.save).toHaveBeenCalledWith(expect.objectContaining(data));
+
+    mockWaitlistRepository.findOne.mockResolvedValue(data);
+
+    const result = await service.create(data);
+
+    expect(result).toEqual({
+      status_code: HttpStatus.CONFLICT,
+      message: 'Duplicate email',
+    });
+  });
+
+  it('should create a waitlist entry if email does not exist', async () => {
+    const data: CreateWaitlistUserDto = {
+      email: 'test@example.com',
+      fullName: 'Test User',
+    };
+
+    const waitlistEntry = { ...data, id: 1, createdAt: new Date() };
+
+    mockWaitlistRepository.findOne.mockResolvedValue(null);
+    mockWaitlistRepository.create.mockReturnValue(waitlistEntry);
+    mockWaitlistRepository.save.mockResolvedValue(waitlistEntry);
+
+    const result = await service.create(data);
+
+    expect(mockWaitlistRepository.create).toHaveBeenCalledWith(data);
+    expect(mockWaitlistRepository.save).toHaveBeenCalledWith(waitlistEntry);
+    expect(mockEmailService.sendWaitListMail).toHaveBeenCalledWith(data.email, process.env.CLIENT_URL);
+    expect(result).toEqual({
+      status_code: HttpStatus.CREATED,
+      message: 'You are signed up successfully',
+      user: waitlistEntry,
+    });
   });
 });
