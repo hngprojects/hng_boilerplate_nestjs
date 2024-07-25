@@ -5,7 +5,7 @@
 
 
 # ignore migration folder
-db/migrations
+*migration.ts
 
 # User-specific stuff:
 .idea/**/workspace.xml
