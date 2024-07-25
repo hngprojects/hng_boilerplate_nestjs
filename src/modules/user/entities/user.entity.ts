@@ -5,8 +5,6 @@ import { Organisation } from '../../../modules/organisations/entities/organisati
 import { Invite } from '../../invite/entities/invite.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
-import { Invite } from '../../invite/entities/invite.entity';
-import { Organisation } from '../../organisations/entities/organisations.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',

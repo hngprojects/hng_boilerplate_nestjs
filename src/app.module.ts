@@ -6,27 +6,20 @@ import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import authConfig from '../config/auth.config';
 import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
-import { AuthGuard } from './guards/auth.guard';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import authConfig from '../config/auth.config';
-import { EmailModule } from './modules/email/email.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
-import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
-import { UserModule } from './modules/user/user.module';
 
 @Module({
   providers: [

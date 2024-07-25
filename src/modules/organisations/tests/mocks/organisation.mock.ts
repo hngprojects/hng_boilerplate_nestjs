@@ -1,8 +1,6 @@
-
 import { Product } from '../../../products/entities/product.entity';
 import { Organisation } from '../../entities/organisations.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { Organisation } from '../../entities/organisations.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
