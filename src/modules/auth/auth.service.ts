@@ -226,6 +226,7 @@ export default class AuthenticationService {
       },
     };
   }
+
   async generateRefreshToken(user: any) {
     return this.jwtService.sign(
       {
