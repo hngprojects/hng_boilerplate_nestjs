@@ -1,10 +1,20 @@
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { User, UserType } from './entities/user.entity';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
+import { UpdateUserDto } from './dto/update-user-dto';
+import UpdateUserResponseDTO from './dto/update-user-response.dto';
+import { UserPayload } from './interfaces/user-payload.interface';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -42,18 +52,78 @@ export default class UserService {
     return await GetRecord[identifierType]();
   }
 
-  async updateUserAttempts(identifier: string, attemptsLeft: number, timeLeft: Date) {
-    const user = await this.getUserById(identifier);
+  async updateUserAttempts(userId: string, attemptsLeft: number, timeLeft: Date): Promise<void> {
+    try {
+      if (!attemptsLeft || !timeLeft) {
+        return;
+      }
 
-    user.attempts_left = attemptsLeft;
-    user.time_left = timeLeft;
+      const user = await this.getUserById(userId);
 
-    await this.userRepository.save(user);
+      user.attempts_left = attemptsLeft;
+      user.time_left = timeLeft;
+
+      await this.userRepository.save(user);
+    } catch (error) {
+      Logger.error(error);
+      throw new Error('failed to update user attempts');
+    }
   }
 
-  async validatePassword(existingPassword: string, NewPassword: string): Promise<boolean> {
-    console.log({ existingPassword, NewPassword });
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+    currentUser: UserPayload
+  ): Promise<UpdateUserResponseDTO> {
+    if (!userId) {
+      throw new BadRequestException({
+        error: 'Bad Request',
+        message: 'UserId is required',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
+    }
 
-    return await bcrypt.compare(NewPassword, existingPassword);
+    const identifierOptions: UserIdentifierOptionsType = {
+      identifierType: 'id',
+      identifier: userId,
+    };
+    const user = await this.getUserRecord(identifierOptions);
+    if (!user) {
+      throw new NotFoundException({
+        error: 'Not Found',
+        message: 'User not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    // Check if the current user is a super admin or the user being updated
+    if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
+      throw new ForbiddenException({
+        error: 'Forbidden',
+        message: 'You are not authorized to update this user',
+        status_code: HttpStatus.FORBIDDEN,
+      });
+    }
+
+    try {
+      Object.assign(user, updateUserDto);
+      await this.userRepository.save(user);
+    } catch (error) {
+      throw new BadRequestException({
+        error: 'Bad Request',
+        message: 'Failed to update user',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    return {
+      status: 'success',
+      message: 'User Updated Successfully',
+      user: {
+        id: user.id,
+        name: `${user.first_name} ${user.last_name}`,
+        phone_number: user.phone_number,
+      },
+    };
   }
 }

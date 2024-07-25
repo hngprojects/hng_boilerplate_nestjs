@@ -1,16 +1,18 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { CreateUserDTO } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 import {
   ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
   USER_BANNED,
-  USER_NOT_FOUND,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
-import { LoginUserDTO } from './dto/login-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -78,46 +80,70 @@ export default class AuthenticationService {
     }
   }
 
-  async loginUser(body: LoginUserDTO): Promise<any> {
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
     try {
-      const user = await this.userService.getUserRecord({ identifier: body.email, identifierType: 'email' });
+      const { email, password } = loginDto;
+
+      const user = await this.userService.getUserRecord({
+        identifier: email,
+        identifierType: 'email',
+      });
+
       if (!user) {
-        throw new HttpException({ message: USER_NOT_FOUND, status_code: HttpStatus.NOT_FOUND }, HttpStatus.NOT_FOUND);
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
       }
 
-      const isPasswordValid = await this.userService.validatePassword(user.password, body.password);
+      const isMatch = await bcrypt.compare(password, user.password);
 
-      if (!isPasswordValid) {
+      if (!isMatch) {
         user.attempts_left -= 1;
-        if (user.attempts_left <= 0) {
-          user.attempts_left = 0;
-          await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
 
-          const oneHourAgo = new Date(Date.now() - 5 * 60 * 1000);
+        if (user.attempts_left <= 0) {
+          const oneHourAgo = new Date(Date.now() - 30 * 1000);
           if (user.time_left && new Date(user.time_left) > oneHourAgo) {
-            return { message: USER_BANNED, status_code: HttpStatus.FORBIDDEN };
+            throw new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN);
           }
+
           user.time_left = new Date();
+          user.attempts_left = 3;
         }
 
         await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
-
-        return { message: 'Invalid credentials', status_code: HttpStatus.UNAUTHORIZED };
+        throw new CustomHttpException(
+          { message: 'Invalid password or email', error: 'Bad Request' },
+          HttpStatus.UNAUTHORIZED
+        );
+      } else {
+        user.attempts_left = 3;
+        await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);
       }
 
-      await this.userService.updateUserAttempts(user.id, 3, new Date());
-      const accessToken = this.jwtService.sign({ userId: user.id });
+      const access_token = this.jwtService.sign({ id: user.id });
 
-      return {
-        status_code: HttpStatus.OK,
-        message: 'Login successfull',
-        data: { token: accessToken },
+      const responsePayload = {
+        access_token,
+        data: {
+          user: {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            id: user.id,
+          },
+        },
       };
-    } catch (loginError) {
-      Logger.log('AuthenticationServiceError ~ loginError ~', loginError);
+
+      return { message: 'Login successful', ...responsePayload };
+    } catch (error) {
+      if (error instanceof CustomHttpException) {
+        throw error;
+      }
+      Logger.log('AuthenticationServiceError ~ loginError ~', error);
       throw new HttpException(
         {
-          message: ERROR_OCCURED,
+          message: 'An error occurred during login',
           status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         },
         HttpStatus.INTERNAL_SERVER_ERROR
