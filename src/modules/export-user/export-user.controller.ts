@@ -5,7 +5,9 @@ import {
     Req,
     Query,
     UseGuards,
-    InternalServerErrorException
+    InternalServerErrorException,
+    HttpStatus,
+    NotFoundException
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { ExportUserService } from './export-user.service';
@@ -27,14 +29,20 @@ export class ExportUserController {
   @ApiResponse({ status: 400, description: 'User ID is required' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async exportUserData(@Query('userId') userId: string, @Res() res: Response) {
+  async exportUserData(@Query('userId') userId: string) {
     try {
       const userData = await this.exportUserService.getUserData(userId);
       const jsonData = await this.exportUserService.exportToJson(userData);
-      res.setHeader('Content-Type', 'application/json');
-      res.send(jsonData);
+      return {
+        status: 'success',
+        data: jsonData
+      };
     } catch (error) {
-      throw new InternalServerErrorException('An error occured');
+      if (error.message == 'User not found'){
+        throw new NotFoundException('User not found')
+      } else {
+        throw new InternalServerErrorException('An unexpected error occurred');
+      }  
     }
   }
 }
