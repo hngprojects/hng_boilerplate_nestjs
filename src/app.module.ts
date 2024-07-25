@@ -17,6 +17,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ExportUserModule } from './modules/export-user/export-user-module.module';
+import { InviteModule } from './modules/invite/invite.module';
 
 @Module({
   providers: [
@@ -68,6 +69,7 @@ import { ExportUserModule } from './modules/export-user/export-user-module.modul
     AuthModule,
     UserModule,
     EmailModule,
+    InviteModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
