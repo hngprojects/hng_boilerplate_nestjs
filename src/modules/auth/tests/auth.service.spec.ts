@@ -247,6 +247,8 @@ describe('Authentication Service tests', () => {
       );
     }
 
+    console.log(user);
+
     await expect(authService.loginUser(loginDto)).rejects.toThrow(
       new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN)
     );

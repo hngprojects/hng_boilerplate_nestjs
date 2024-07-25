@@ -107,13 +107,18 @@ export default class AuthenticationService {
         user.attempts_left -= 1;
 
         if (user.attempts_left <= 0) {
-          const oneHourAgo = new Date(Date.now() + 60 * 60 * 1000);
-          if (user.time_left && new Date(user.time_left) > oneHourAgo) {
-            throw new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN);
-          }
+          if (user.attempts_left <= 0) {
+            const currentTime = new Date();
+            const banEndTime = new Date(user.time_left);
+            banEndTime.setMinutes(banEndTime.getMinutes() + 5);
 
-          user.time_left = new Date();
-          user.attempts_left = 3;
+            if (user.time_left && currentTime < banEndTime) {
+              throw new CustomHttpException({ message: USER_BANNED, error: 'Forbidden' }, HttpStatus.FORBIDDEN);
+            }
+
+            user.time_left = new Date();
+            user.attempts_left = 3;
+          }
         }
 
         await this.userService.updateUserAttempts(user.id, user.attempts_left, user.time_left);

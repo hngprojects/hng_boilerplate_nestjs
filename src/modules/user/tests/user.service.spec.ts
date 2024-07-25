@@ -6,9 +6,10 @@ import { User, UserType } from '../entities/user.entity';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserResponseDTO from '../dto/user-response.dto';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
+import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
 
 describe('UserService', () => {
   let service: UserService;
@@ -211,6 +212,52 @@ describe('UserService', () => {
     });
   });
 
+  describe('deactivateUser', () => {
+    it('should deactivate a user', async () => {
+      const userId = '1';
+      const deactivationDetails: DeactivateAccountDto = {
+        confirmation: true,
+        reason: 'User requested deactivation',
+      };
+      const userToUpdate = {
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        password: 'hashedpassword',
+        is_active: true,
+        attempts_left: 3,
+        time_left: 60,
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(userToUpdate);
+
+      const result = await service.deactivateUser(userId, deactivationDetails);
+
+      expect(result.is_active).toBe(false);
+      expect(result.message).toBe('Account Deactivated Successfully');
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.save).toHaveBeenCalledWith({ ...userToUpdate, is_active: false });
+    });
+
+    it('should throw an error if user is not found', async () => {
+      const userId = '1';
+      const deactivationDetails: DeactivateAccountDto = {
+        confirmation: true,
+        reason: 'User requested deactivation',
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(null);
+
+      await expect(service.deactivateUser(userId, deactivationDetails)).rejects.toThrow(HttpException);
+      await expect(service.deactivateUser(userId, deactivationDetails)).rejects.toHaveProperty('response', {
+        status_code: 404,
+        error: 'User not found',
+      });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.save).not.toHaveBeenCalled();
+    });
+  });
   describe('updateUserAttempts', () => {
     const userId = 'valid-id';
     const attemptsLeft = 2;
