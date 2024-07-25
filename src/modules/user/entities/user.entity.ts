@@ -10,7 +10,7 @@ export enum UserType {
   USER = 'vendor',
 }
 
-@Entity({ name: 'users' })
+@Entity()
 export class User extends AbstractBaseEntity {
   @Column({ nullable: false })
   first_name: string;
