@@ -1,113 +1,117 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsController } from '../products.controller';
-import { ProductsService} from '../products.service';
-import { Repository } from 'typeorm';
-import { Product } from '../entities/product.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-
-
-// describe('ProductsService', () => {
-//   let service: ProductsService;
-
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       providers: [ProductsService],
-//     }).compile();
-
-//     service = module.get<ProductsService>(ProductsService);
-//   });
-
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
-// });
-
+import { Repository } from 'typeorm';
+import { ProductsService } from '../products.service';
+import { Product } from '../entities/product.entity';
+import { BadRequestException } from '@nestjs/common';
+import { User } from '../../user/entities/user.entity';
+import { ProductCategory } from '../../product-category/entities/product-category.entity';
 
 describe('ProductsService', () => {
-  let controller: ProductsController;
-  let productsService: ProductsService;
+  let service: ProductsService;
   let repository: Repository<Product>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ProductsController],
-      providers: [{
-        provide: ProductsService,
-        useValue: {
-          findAll: jest.fn().mockResolvedValue({
-            products: [],
-          }),
+      providers: [
+        ProductsService,
+        {
+          provide: getRepositoryToken(Product),
+          useValue: {
+            findAndCount: jest.fn(),
+          },
         },
-      }],
+      ],
     }).compile();
 
-    productsService = module.get<ProductsService>(ProductsService);
+    service = module.get<ProductsService>(ProductsService);
     repository = module.get<Repository<Product>>(getRepositoryToken(Product));
   });
 
   it('should be defined', () => {
-    expect(productsService).toBeDefined();
+    expect(service).toBeDefined();
   });
 
   describe('findAll', () => {
-    it('should return paginated products and metadata', async () => {
-      const page = 1;
-      const limit = 5;
-      const products:Product[] = [
-      {
-        id: "0c6091f0-6759-4e3d-a2c0-6c982ca9e139",
-        product_name: "Homes Collection",
-        description: "This is a detailed description of the product for Homes collection",
-        quantity: 30,
-        price: 400,
-        user: {
-          first_name: '',
-          last_name: '',
-          email: '',
-          password: '',
-          is_active: false,
-          attempts_left: 0,
-          time_left: 0,
-          user_type: "/Users/a0000/Desktop/HNG11/stage4-hng-task-current/hng_boilerplate_nestjs/src/modules/user/entities/user.entity".SUPER_ADMIN,
-          owned_organisations: [],
-          created_organisations: [],
-          products: [],
-          hashPassword: function (): Promise<void> {
-            throw new Error('Function not implemented.');
-          },
-          id: '',
-          created_at: undefined,
-          updated_at: undefined
+    it('should return paginated products', async () => {
+      const mockProducts: Partial<Product>[] = [
+        {
+          id: '1',
+          product_name: 'Product 1',
+          description: 'Description 1',
+          quantity: 10,
+          price: 100,
+          user: {} as User,
+          category: {} as ProductCategory,
+          created_at: new Date(),
+          updated_at: new Date()
         },
-        category: {
-          name: '',
-          description: '',
-          product: new Product,
-          id: '',
-          created_at: undefined,
-          updated_at: undefined
-        },
-        created_at: undefined,
-        updated_at: undefined
-      }
+        {
+          id: '2',
+          product_name: 'Product 2',
+          description: 'Description 2',
+          quantity: 20,
+          price: 200,
+          user: {} as User,
+          category: {} as ProductCategory,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
       ];
-      const totalCount = 10;
+      const mockTotalCount = 10;
 
-      jest.spyOn(repository, 'findAndCount').mockResolvedValue([products, totalCount]);
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([mockProducts as Product[], mockTotalCount]);
 
-      const result = await productsService.findAll(page, limit);
+      const result = await service.findAllProducts(1, 5);
 
       expect(result).toEqual({
-        products,
-        totalCount,
-        totalPages: Math.ceil(totalCount / limit),
-        currentPage: page,
-      });
-      expect(repository.findAndCount).toHaveBeenCalledWith({
-        take: limit,
-        skip: limit * (page - 1),
+        success: true,
+        message: "Product retrieved successfully",
+        products: mockProducts,
+        pagination: {
+          totalItems: mockTotalCount,
+          totalPages: 2,
+          currentPage: 1
+        },
+        status_code: 200
       });
     });
-});
 
-})
+    it('should throw BadRequestException for invalid limit', async () => {
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([[], 0]);
+      await expect(service.findAllProducts(1, -5)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException for invalid page', async () => {
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([[], 0]);
+      await expect(service.findAllProducts(-1, 5)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should use default values when page and limit are not provided', async () => {
+      const mockProducts: Partial<Product>[] = [
+        {
+          id: '1',
+          product_name: 'Product 1',
+          description: 'Description 1',
+          quantity: 10,
+          price: 100,
+          user: {} as User,
+          category: {} as ProductCategory,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ];
+      const mockTotalCount = 1;
+
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([mockProducts as Product[], mockTotalCount]);
+
+      const result = await service.findAllProducts();
+
+      expect(result.pagination.currentPage).toBe(1);
+      expect(repository.findAndCount).toHaveBeenCalledWith({
+        take: 5,
+        skip: 0
+      });
+    });
+  });
+});

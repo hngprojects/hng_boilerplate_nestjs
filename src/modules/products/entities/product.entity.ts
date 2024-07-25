@@ -24,10 +24,9 @@ export class Product extends AbstractBaseEntity {
   @Column('int')
   price: number;
 
-  @IsOptional()
   @ManyToOne(() => User, user => user.products)
   user: User;
-  @IsOptional()
+  
   @ManyToOne(() => ProductCategory, category => category.product)
   category: ProductCategory;
 }
