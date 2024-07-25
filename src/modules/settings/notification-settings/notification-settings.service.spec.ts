@@ -41,7 +41,7 @@ describe('NotificationSettingsService', () => {
       jest.spyOn(repo, 'create').mockReturnValue(dto as NotificationSettings);
       jest.spyOn(repo, 'save').mockResolvedValue(dto as NotificationSettings);
 
-      const result = await service.createOrUpdate(dto);
+      const result = await service.create(dto);
       expect(result).toEqual(dto);
     });
 
@@ -56,7 +56,7 @@ describe('NotificationSettingsService', () => {
       jest.spyOn(repo, 'findOne').mockResolvedValue(existingSettings as NotificationSettings);
       jest.spyOn(repo, 'save').mockResolvedValue(existingSettings as NotificationSettings);
 
-      const result = await service.createOrUpdate(dto);
+      const result = await service.create(dto);
       expect(result).toEqual(existingSettings);
     });
   });

@@ -11,9 +11,9 @@ export class NotificationSettingsService {
     private notificationSettingsRepository: Repository<NotificationSettings>
   ) {}
 
-  async createOrUpdate(notificationSettingsDto: NotificationSettingsDto): Promise<NotificationSettings> {
+  async create(notificationSettingsDto: NotificationSettingsDto, userId: string): Promise<NotificationSettings> {
     const existingSettings = await this.notificationSettingsRepository.findOne({
-      where: { user_id: notificationSettingsDto.user_id },
+      where: { user_id: userId },
     });
 
     if (existingSettings) {
