@@ -20,10 +20,9 @@ import AuthenticationService from '../auth.service';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import OtpService from '../../otp/otp.service';
 import { EmailService } from '../../email/email.service';
 import { Otp } from '../../otp/entities/otp.entity';
-import { RequestSigninTokenDto } from '../dto/request-signin-token.dto';
+import OtpService from '../../otp/otp.service';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
@@ -37,9 +36,9 @@ describe('Authentication Service tests', () => {
       providers: [
         JwtService,
         AuthenticationService,
-        UserService,
         OtpService,
         EmailService,
+        UserService,
         {
           provide: getRepositoryToken(User),
           useValue: {},
@@ -238,29 +237,12 @@ describe('Enabling two factor authentication', () => {
   let userService: UserService;
   let authService: AuthenticationService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        JwtService,
-        AuthenticationService,
-        UserService,
-        {
-          provide: getRepositoryToken(User),
-          useValue: {},
-        },
-      ],
-    }).compile();
-
-    userService = module.get<UserService>(UserService);
-    authService = module.get<AuthenticationService>(AuthenticationService);
-  });
-
   it('should return NOT FOUND if user does not exists', async () => {
     const user_id = 'another-uuid-value-over-here';
     const password = 'password';
 
     const existingRecord = null;
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
+    jest.spyOn(UserService.prototype, 'getUserRecord').mockImplementation(existingRecord);
     await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
       new HttpException(
         {
