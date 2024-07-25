@@ -35,7 +35,6 @@ export class SqueezeService {
       return updatedSqueeze;
     } catch (err) {
       if (this.isInstanceOfAny(err, [ForbiddenException, NotFoundException])) {
-        console.log(err);
         throw err;
       } else {
         throw new InternalServerErrorException({
