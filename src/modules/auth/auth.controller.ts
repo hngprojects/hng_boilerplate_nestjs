@@ -32,16 +32,16 @@ export default class RegistrationController {
     return this.authService.loginUser(loginDto, req);
   }
 
-  // @Post('2fa/enable')
-  // @ApiBody({
-  //   description: 'Enable two factor authentication',
-  //   type: Enable2FADto,
-  // })
-  // @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
-  // @ApiResponse({ status: 400, description: BAD_REQUEST })
-  // public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
-  //   const { password } = body;
-  //   const { id: user_id } = request['user'];
-  //   return this.authService.enable2FA(user_id, password);
-  // }
+  @Post('2fa/enable')
+  @ApiBody({
+    description: 'Enable two factor authentication',
+    type: Enable2FADto,
+  })
+  @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
+  @ApiResponse({ status: 400, description: BAD_REQUEST })
+  public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
+    const { password } = body;
+    const { id: user_id } = request['user'];
+    return this.authService.enable2FA(user_id, password);
+  }
 }
