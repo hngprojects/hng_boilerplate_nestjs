@@ -152,4 +152,9 @@ export default class UserService {
 
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
   }
+
+  async findUserByEmail(email: string) {
+    const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
+    return user;
+  }
 }

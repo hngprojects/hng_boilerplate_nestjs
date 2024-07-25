@@ -447,21 +447,44 @@ describe('Enabling two factor authentication', () => {
 });
 
 describe('sendPasswordResetEmail tests', () => {
-  let userService: UserService;
   let authService: AuthenticationService;
-  let jwtService: JwtService;
-  let emailService: EmailService;
+  let userServiceMock: jest.Mocked<UserService>;
+  let jwtServiceMock: jest.Mocked<JwtService>;
+  let otpServiceMock: jest.Mocked<OtpService>;
+  let emailServiceMock: jest.Mocked<EmailService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        JwtService,
         AuthenticationService,
-        UserService,
-        EmailService,
         {
           provide: getRepositoryToken(User),
           useValue: {},
+        },
+        {
+          provide: UserService,
+          useValue: {
+            findUserByEmail: jest.fn(),
+            createUser: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
+        },
+        {
+          provide: OtpService,
+          useValue: {
+            createOtp: jest.fn(),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendForgotPasswordMail: jest.fn(),
+          },
         },
         {
           provide: MailerService,
@@ -472,10 +495,11 @@ describe('sendPasswordResetEmail tests', () => {
       ],
     }).compile();
 
-    userService = module.get<UserService>(UserService);
     authService = module.get<AuthenticationService>(AuthenticationService);
-    jwtService = module.get<JwtService>(JwtService);
-    emailService = module.get<EmailService>(EmailService);
+    userServiceMock = module.get(UserService) as jest.Mocked<UserService>;
+    jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;
+    otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
+    emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
   });
 
   it('should send a password reset email successfully', async () => {
@@ -483,18 +507,23 @@ describe('sendPasswordResetEmail tests', () => {
     const user = { id: '1', email: 'test@example.com' };
     const token = 'jwt-token';
 
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
-    jest.spyOn(jwtService, 'sign').mockReturnValue(token);
-    jest.spyOn(emailService, 'sendForgotPasswordMail').mockResolvedValue(undefined);
+    jest.spyOn(userServiceMock, 'findUserByEmail').mockResolvedValue(user);
+    jest.spyOn(jwtServiceMock, 'sign').mockReturnValue(token);
+    jest.spyOn(emailServiceMock, 'sendForgotPasswordMail').mockResolvedValue(undefined);
 
-    await expect(authService.sendPasswordResetEmail(email)).resolves.toBeUndefined();
+    const result = await authService.sendPasswordResetEmail(email);
 
-    expect(userService.getUserRecord).toHaveBeenCalledWith({ identifier: email, identifierType: 'email' });
-    expect(jwtService.sign).toHaveBeenCalledWith(
+    expect(result).toEqual({
+      status_code: HttpStatus.OK,
+      message: 'Passwords reset successfully sent to email',
+    });
+
+    expect(userServiceMock.findUserByEmail).toHaveBeenCalledWith(email);
+    expect(jwtServiceMock.sign).toHaveBeenCalledWith(
       { email: user.email, sub: user.id },
       { secret: jwtConstants.secret, expiresIn: '1h' }
     );
-    expect(emailService.sendForgotPasswordMail).toHaveBeenCalledWith(
+    expect(emailServiceMock.sendForgotPasswordMail).toHaveBeenCalledWith(
       email,
       `${process.env.FRONTEND_URL}/reset-password`,
       token
@@ -504,12 +533,17 @@ describe('sendPasswordResetEmail tests', () => {
   it('should throw an error if user is not found', async () => {
     const email = 'test@example.com';
 
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValue(null);
+    jest.spyOn(userServiceMock, 'findUserByEmail').mockResolvedValue(null);
 
-    await expect(authService.sendPasswordResetEmail(email)).rejects.toThrow('User not found');
+    const result = await authService.sendPasswordResetEmail(email);
 
-    expect(userService.getUserRecord).toHaveBeenCalledWith({ identifier: email, identifierType: 'email' });
-    expect(jwtService.sign).not.toHaveBeenCalled();
-    expect(emailService.sendForgotPasswordMail).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      status_code: HttpStatus.NOT_FOUND,
+      message: 'User not found',
+    });
+
+    expect(userServiceMock.findUserByEmail).toHaveBeenCalledWith(email);
+    expect(jwtServiceMock.sign).not.toHaveBeenCalled();
+    expect(emailServiceMock.sendForgotPasswordMail).not.toHaveBeenCalled();
   });
 });

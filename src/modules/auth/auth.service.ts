@@ -259,20 +259,35 @@ export default class AuthenticationService {
     };
   }
   async sendPasswordResetEmail(email: string): Promise<any> {
-    const user = await this.userService.getUserRecord({
-      identifier: email,
-      identifierType: 'email',
-    });
+    try {
+      const user = await this.userService.findUserByEmail(email);
 
-    if (!user) {
-      throw new Error('User not found');
+      if (!user) {
+        return {
+          status_code: HttpStatus.NOT_FOUND,
+          message: 'User not found',
+        };
+      }
+
+      const payload = { email: user.email, sub: user.id };
+      const token = this.jwtService.sign(payload, { secret: jwtConstants.secret, expiresIn: '1h' });
+
+      const resetUrl = `${process.env.FRONTEND_URL}/reset-password`;
+
+      await this.emailService.sendForgotPasswordMail(email, resetUrl, token);
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Passwords reset successfully sent to email',
+      };
+    } catch (passwordResetError) {
+      Logger.log('AuthenticationServiceError ~ passwordResetError ~', passwordResetError);
+      throw new HttpException(
+        {
+          message: ERROR_OCCURED,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-
-    const payload = { email: user.email, sub: user.id };
-    const token = this.jwtService.sign(payload, { secret: jwtConstants.secret, expiresIn: '1h' });
-
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password`;
-
-    await this.emailService.sendForgotPasswordMail(email, resetUrl, token);
   }
 }
