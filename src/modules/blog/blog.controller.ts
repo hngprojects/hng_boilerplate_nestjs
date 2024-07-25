@@ -1,13 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('blogs')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
-  // @skipAuth()
+  @skipAuth()
   @Get('latest')
   findLatest() {
     return this.blogService.findLatest();

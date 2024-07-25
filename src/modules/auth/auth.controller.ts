@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
-import { BAD_REQUEST, TWO_FA_INITIATED } from 'src/helpers/SystemMessages';
+import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
