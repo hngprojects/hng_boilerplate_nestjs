@@ -30,7 +30,7 @@ export class RegionsService {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async findAll(): Promise<Regions[]> {
+  async getAllRegions(): Promise<Regions[]> {
     return await this.regionsRepository.find();
   }
 }

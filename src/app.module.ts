@@ -23,6 +23,7 @@ import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { RegionsModule } from './modules/regions/regions.module';
 
+
 @Module({
   providers: [
     {

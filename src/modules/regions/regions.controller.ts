@@ -29,7 +29,7 @@ export class RegionsController {
   @Get()
   async findAll(): Promise<any> {
     try {
-      const regions = await this.regionsService.findAll();
+      const regions = await this.regionsService.getAllRegions();
       const formattedRegions = regions.map(region => ({
         id: region.id,
         region: region.regionName,
