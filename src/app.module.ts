@@ -14,8 +14,6 @@ import { UserModule } from './modules/user/user.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import authConfig from '../config/auth.config';
-import { OrganisationsModule } from './modules/organisations/organisations.module';
-import { AuthGuard } from './guards/auth.guard';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
