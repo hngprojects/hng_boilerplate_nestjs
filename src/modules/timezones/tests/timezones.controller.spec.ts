@@ -92,6 +92,7 @@ describe('TimezonesController', () => {
     it('should handle errors during creation', async () => {
       const createTimezoneDto: CreateTimezoneDto = {
         timezone: 'UTC',
+        gmtOffset: '',
       };
 
       mockTimezonesService.createTimezone.mockRejectedValue(
@@ -119,8 +120,22 @@ describe('TimezonesController', () => {
   describe('getSupportedTimezones', () => {
     it('should return a list of timezones', async () => {
       const timezones: Timezone[] = [
-        { id: '1', timezone: 'UTC', gmtOffset: '+00:00', description: 'Coordinated Universal Time' },
-        { id: '2', timezone: 'America/New_York', gmtOffset: '-05:00', description: 'Eastern Standard Time' },
+        {
+          id: '1',
+          timezone: 'UTC',
+          gmtOffset: '+00:00',
+          description: 'Coordinated Universal Time',
+          created_at: undefined,
+          updated_at: undefined,
+        },
+        {
+          id: '2',
+          timezone: 'America/New_York',
+          gmtOffset: '-05:00',
+          description: 'Eastern Standard Time',
+          created_at: undefined,
+          updated_at: undefined,
+        },
       ];
 
       mockTimezonesService.getSupportedTimezones.mockResolvedValue({

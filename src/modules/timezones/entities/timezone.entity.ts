@@ -1,7 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity'; // Assume you have a BaseEntity defined
 
 @Entity()
-export class Timezone {
+export class Timezone extends AbstractBaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
