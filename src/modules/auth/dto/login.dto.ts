@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
   @ApiProperty({
@@ -16,5 +16,8 @@ export class LoginDto {
   })
   @IsNotEmpty()
   @IsString()
+  @MinLength(8, {
+    message: 'Password must be at least 5 characters long',
+  })
   readonly password: string;
 }
