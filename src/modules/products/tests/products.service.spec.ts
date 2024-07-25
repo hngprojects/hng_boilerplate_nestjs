@@ -59,7 +59,7 @@ describe('ProductsService', () => {
       categoryId: '1',
     };
 
-    const product = await service.create(dto);
+    const product = await service.createProduct(dto);
 
     expect(product).toEqual({
       id: '1',
@@ -83,7 +83,7 @@ describe('ProductsService', () => {
       categoryId: '2',
     };
 
-    await expect(service.create(dto)).rejects.toThrow(NotFoundException);
+    await expect(service.createProduct(dto)).rejects.toThrow(NotFoundException);
     expect(categoryRepository.findOneBy).toHaveBeenCalledWith({ id: '2' });
   });
 });

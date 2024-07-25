@@ -13,7 +13,7 @@ export class ProductCategoryController {
   async findAll(@Query('limit') limit?: number, @Query('offset') offset?: number) {
     return {
       status_code: 200,
-      categories: await this.categoryService.findAll(limit, offset),
+      categories: await this.categoryService.getAllCategories(limit, offset),
     };
   }
 
@@ -22,7 +22,7 @@ export class ProductCategoryController {
   async findOne(@Param('id') id: string) {
     return {
       status_code: 200,
-      category: await this.categoryService.findOne(id),
+      category: await this.categoryService.getCategoryById(id),
     };
   }
 
@@ -32,7 +32,7 @@ export class ProductCategoryController {
   async create(@Body() createCategoryDto: CreateProductCategoryDto) {
     return {
       status_code: 201,
-      category: await this.categoryService.create(createCategoryDto),
+      category: await this.categoryService.createCategory(createCategoryDto),
     };
   }
 
@@ -42,14 +42,14 @@ export class ProductCategoryController {
   async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateProductCategoryDto) {
     return {
       status_code: 200,
-      category: await this.categoryService.update(id, updateCategoryDto),
+      category: await this.categoryService.updateCategory(id, updateCategoryDto),
     };
   }
 
   @Delete(':id')
   @ApiParam({ name: 'id', description: 'Category ID', example: 'uuid-of-category' })
   async remove(@Param('id') id: string) {
-    await this.categoryService.remove(id);
+    await this.categoryService.removeCategory(id);
     return {
       status_code: 200,
       message: 'Category deleted successfully',

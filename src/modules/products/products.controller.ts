@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, HttpException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, HttpException, InternalServerErrorException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import {
@@ -12,20 +12,20 @@ import {
 import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('products')
+@ApiTags('Products')
 export class ProductController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Post()
+  @skipAuth()
   @ApiOperation({ summary: 'Create a new product' })
   @ApiOkResponse({ description: 'Product created successfully' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @ApiNotFoundResponse({ description: 'Category not found' })
-  @skipAuth()
-  @ApiTags('Products')
   @ApiBody({ type: CreateProductDto })
-  @Post()
   async createProduct(@Body() createProductDto: CreateProductDto, @Req() req): Promise<any> {
     try {
-      const product = await this.productsService.create(createProductDto);
+      const product = await this.productsService.createProduct(createProductDto); // Updated method call
 
       const category = product.category ? product.category.name : null;
 

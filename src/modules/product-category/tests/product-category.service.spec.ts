@@ -15,7 +15,7 @@ describe('ProductCategoryService', () => {
     mockQueryBuilder = {
       take: jest.fn().mockReturnThis(),
       skip: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockResolvedValue([]), // mock getMany method
+      getMany: jest.fn().mockResolvedValue([]),
     };
 
     mockRepository = {
@@ -49,13 +49,13 @@ describe('ProductCategoryService', () => {
       const categories = [{ id: '1', name: 'Category 1' }];
       mockQueryBuilder.getMany.mockResolvedValue(categories);
 
-      const result = await service.findAll();
+      const result = await service.getAllCategories();
       expect(result).toEqual(categories);
       expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('category');
     });
 
     it('should apply limit and offset', async () => {
-      await service.findAll(10, 5);
+      await service.getAllCategories(10, 5);
       expect(mockRepository.createQueryBuilder).toHaveBeenCalledWith('category');
       expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
       expect(mockQueryBuilder.skip).toHaveBeenCalledWith(5);
@@ -67,14 +67,14 @@ describe('ProductCategoryService', () => {
       const category = { id: '1', name: 'Category 1' };
       mockRepository.findOneBy.mockResolvedValue(category);
 
-      const result = await service.findOne('1');
+      const result = await service.getCategoryById('1');
       expect(result).toEqual(category);
     });
 
     it('should throw NotFoundException if category not found', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.findOne('1')).rejects.toThrow(NotFoundException);
+      await expect(service.getCategoryById('1')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -85,7 +85,7 @@ describe('ProductCategoryService', () => {
       mockRepository.create.mockReturnValue(newCategory);
       mockRepository.save.mockResolvedValue(newCategory);
 
-      const result = await service.create(createDto);
+      const result = await service.createCategory(createDto);
       expect(result).toEqual(newCategory);
     });
   });
@@ -98,14 +98,14 @@ describe('ProductCategoryService', () => {
       mockRepository.findOneBy.mockResolvedValue(existingCategory);
       mockRepository.save.mockResolvedValue(updatedCategory);
 
-      const result = await service.update('1', updateDto);
+      const result = await service.updateCategory('1', updateDto);
       expect(result).toEqual(updatedCategory);
     });
 
     it('should throw NotFoundException if category to update is not found', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.update('1', { name: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(service.updateCategory('1', { name: 'Updated' })).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -114,14 +114,14 @@ describe('ProductCategoryService', () => {
       const category = { id: '1', name: 'Category to Remove' };
       mockRepository.findOneBy.mockResolvedValue(category);
 
-      await service.remove('1');
+      await service.removeCategory('1');
       expect(mockRepository.remove).toHaveBeenCalledWith(category);
     });
 
     it('should throw NotFoundException if category to remove is not found', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.remove('1')).rejects.toThrow(NotFoundException);
+      await expect(service.removeCategory('1')).rejects.toThrow(NotFoundException);
     });
   });
 });

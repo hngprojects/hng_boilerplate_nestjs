@@ -9,7 +9,7 @@ describe('ProductController', () => {
   let service: ProductsService;
 
   const mockProductService = {
-    create: jest.fn(dto => {
+    createProduct: jest.fn(dto => {
       return {
         id: '1',
         product_name: dto.product_name,
@@ -70,6 +70,6 @@ describe('ProductController', () => {
         updated_at: expect.any(String),
       },
     });
-    expect(service.create).toHaveBeenCalledWith(dto);
+    expect(service.createProduct).toHaveBeenCalledWith(dto);
   });
 });

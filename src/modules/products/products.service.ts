@@ -15,7 +15,7 @@ export class ProductsService {
     private categoryRepository: Repository<ProductCategory>
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
+  async createProduct(createProductDto: CreateProductDto): Promise<Product> {
     const category = await this.categoryRepository.findOneBy({ id: createProductDto.categoryId });
 
     if (!category) {
