@@ -8,9 +8,6 @@ on:
     branches:
       - dev
 
-permissions:
-  contents: read
-
 env:
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -27,7 +24,7 @@ env:
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
-    environment: pr_environment
+    # environment: pr_environment
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
