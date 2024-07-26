@@ -23,56 +23,7 @@ import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { Repository } from 'typeorm';
-
-class MockHeaders implements Headers {
-  private headers: Record<string, string> = {};
-
-  constructor(headers: Record<string, string>) {
-    this.headers = headers;
-  }
-  getSetCookie(): string[] {
-    throw new Error('Method not implemented.');
-  }
-  keys(): IterableIterator<string> {
-    throw new Error('Method not implemented.');
-  }
-  values(): IterableIterator<string> {
-    throw new Error('Method not implemented.');
-  }
-  [Symbol.iterator](): IterableIterator<[string, string]> {
-    throw new Error('Method not implemented.');
-  }
-
-  append(name: string, value: string): void {
-    this.headers[name.toLowerCase()] = value;
-  }
-
-  delete(name: string): void {
-    delete this.headers[name.toLowerCase()];
-  }
-
-  get(name: string): string | null {
-    return this.headers[name.toLowerCase()] || null;
-  }
-
-  has(name: string): boolean {
-    return this.headers.hasOwnProperty(name.toLowerCase());
-  }
-
-  set(name: string, value: string): void {
-    this.headers[name.toLowerCase()] = value;
-  }
-
-  entries(): IterableIterator<[string, string]> {
-    return Object.entries(this.headers)[Symbol.iterator]();
-  }
-
-  forEach(callbackfn: (value: string, key: string, map: Headers) => void, thisArg?: any): void {
-    for (const [key, value] of Object.entries(this.headers)) {
-      callbackfn.call(thisArg, value, key, this);
-    }
-  }
-}
+import { Request } from 'express';
 
 describe('Authentication Service tests', () => {
   let userService: UserService;
@@ -215,16 +166,16 @@ describe('Authentication Service tests', () => {
       };
 
       const request: Partial<Request> = {
-        headers: new MockHeaders({
+        headers: {
           'user-agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        }),
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        },
       };
 
       const deviceInfo = {
-        device_browser: 'Other',
-        device_browser_version: '0.0.0',
-        device_os: 'Other',
+        device_browser: 'Chrome',
+        device_browser_version: '126.0.0',
+        device_os: 'Linux',
         device_os_version: '0.0.0',
         device_type: 'Other',
         device_brand: 'unknown',
@@ -268,11 +219,12 @@ describe('Authentication Service tests', () => {
 
     it('should throw an unauthorized error for invalid email', async () => {
       const request: Partial<Request> = {
-        headers: new MockHeaders({
+        headers: {
           'user-agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        }),
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        },
       };
+
       const loginDto: LoginDto = { email: 'invalid@example.com', password: 'password123' };
 
       jest.spyOn(userService, 'getUserRecord').mockResolvedValue(null);
@@ -284,10 +236,10 @@ describe('Authentication Service tests', () => {
 
     it('should throw an unauthorized error for invalid password', async () => {
       const request: Partial<Request> = {
-        headers: new MockHeaders({
+        headers: {
           'user-agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        }),
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        },
       };
 
       const loginDto: LoginDto = { email: 'test@example.com', password: 'wrongpassword' };
@@ -313,10 +265,10 @@ describe('Authentication Service tests', () => {
 
     it('should handle unexpected errors gracefully', async () => {
       const request: Partial<Request> = {
-        headers: new MockHeaders({
+        headers: {
           'user-agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        }),
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        },
       };
 
       const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };

@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request as ExpressRequest } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
@@ -28,7 +28,7 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto, @Req() req: Request): Promise<LoginResponseDto> {
+  async login(@Body() loginDto: LoginDto, @Req() req: ExpressRequest): Promise<LoginResponseDto> {
     return this.authService.loginUser(loginDto, req);
   }
 
