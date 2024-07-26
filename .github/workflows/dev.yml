@@ -1,12 +1,15 @@
 name: CI/CD--Dev
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - dev
   push:
     branches:
       - dev
+
+permissions:
+  contents: read
 
 env:
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -20,16 +23,17 @@ env:
   PROFILE: 'staging'
   NODE_ENV: 'development'
   PORT: 3000
-  APPLEBOY: ${{ secrets.SERVER_PORT }}
 
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request_target'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -39,14 +43,6 @@ jobs:
       - name: Install dependencies
         run: npm install --include=dev
 
-      - name: Print environment variables
-        run: |
-          echo "DB_USERNAME: $DB_USERNAME"
-          echo "DB_HOST: $DB_HOST"
-          echo "DB_PORT: $DB_PORT"
-          echo "NODE_ENV: $NODE_ENV"
-          echo ${{ secrets.DB_HOST }}
-
       - name: Build project
         run: npm run build
 
@@ -55,18 +51,6 @@ jobs:
 
       - name: Generate migrations
         run: npm run migration:generate
-        env:
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_ENTITIES: ${{ secrets.DB_ENTITIES }}
-          DB_MIGRATIONS: ${{ secrets.DB_MIGRATIONS }}
-          DB_TYPE: 'postgres'
-          PROFILE: 'staging'
-          NODE_ENV: 'development'
-          PORT: 3000
 
       - name: Run migrations
         run: npm run migration:run
