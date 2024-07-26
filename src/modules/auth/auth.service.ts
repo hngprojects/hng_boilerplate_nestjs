@@ -264,8 +264,8 @@ export default class AuthenticationService {
 
       if (!user) {
         return {
-          status_code: HttpStatus.NOT_FOUND,
-          message: 'User not found',
+          status_code: HttpStatus.OK,
+          message: 'If an account with this email exists, a reset password link will be sent',
         };
       }
 

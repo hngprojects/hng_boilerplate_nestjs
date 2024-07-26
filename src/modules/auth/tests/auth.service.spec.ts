@@ -538,8 +538,8 @@ describe('sendPasswordResetEmail tests', () => {
     const result = await authService.sendPasswordResetEmail(email);
 
     expect(result).toEqual({
-      status_code: HttpStatus.NOT_FOUND,
-      message: 'User not found',
+      status_code: HttpStatus.OK,
+      message: 'If an account with this email exists, a reset password link will be sent',
     });
 
     expect(userServiceMock.findUserByEmail).toHaveBeenCalledWith(email);
