@@ -12,6 +12,7 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Invite } from '../../invite/entities/invite.entity';
 
 @Entity()
 export class Organisation extends AbstractBaseEntity {
@@ -54,4 +55,7 @@ export class Organisation extends AbstractBaseEntity {
   @ManyToMany(() => User, user => user.member_organisations)
   @JoinTable()
   members: User[];
+
+  @OneToMany(() => Invite, invite => invite.organisation)
+  invites: Invite[];
 }
