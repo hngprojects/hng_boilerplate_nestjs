@@ -27,6 +27,7 @@ env:
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
+    environment: pr_environment
     if: github.event_name == 'pull_request_target'
 
     steps:
