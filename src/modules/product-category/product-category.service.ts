@@ -12,8 +12,6 @@ export class ProductCategoryService {
     private categoryRepository: Repository<ProductCategory>
   ) {}
 
-
-
   async create(createCategoryDto: CreateProductCategoryDto): Promise<ProductCategory> {
     const category = this.categoryRepository.create(createCategoryDto);
     return await this.categoryRepository.save(category);
