@@ -2,13 +2,11 @@ import { Controller, Post, Body, Req, HttpException, InternalServerErrorExceptio
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
-import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('products')
 export class ProductController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @skipAuth()
   @ApiTags('Products')
   @ApiBody({ type: CreateProductDto })
   @Post()
