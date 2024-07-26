@@ -13,9 +13,8 @@ export class FaqsService {
   ) {}
 
   async createFaq(createFaqs: CreateFaqDto, userId: string) {
-    const user = await this.userRepo.findOneBy({ id: userId });
-
     try {
+      const user = await this.userRepo.findOneBy({ id: userId });
       const existingFaq = await this.faqsRepo.findOneBy({ question: createFaqs.question });
 
       if (user?.user_type !== 'admin') {
