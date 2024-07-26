@@ -283,24 +283,20 @@ export default class AuthenticationService {
 
     const otpExist = await this.otpService.findOtp(user.id);
 
-    const newOtp = generateSixDigitToken();
-
     if (otpExist) {
       await this.otpService.deleteOtp(user.id);
-
-      await this.otpService.createOtp(user.id);
-
-      await this.emailService.sendLoginOtp(user.email, newOtp);
-
-      return;
     }
+
+    // Generate a new OTP and save it
+    const newOtp = generateSixDigitToken();
     await this.otpService.createOtp(user.id);
 
+    // Send the OTP to the user's email
     await this.emailService.sendLoginOtp(user.email, newOtp);
 
     return {
       message: 'Sign-in token sent to email',
-      status_code: 200,
+      status_code: HttpStatus.OK,
     };
   }
 
@@ -327,7 +323,7 @@ export default class AuthenticationService {
     return {
       message: 'Sign-in successful',
       token: accessToken,
-      status_code: 200,
+      status_code: HttpStatus.OK,
     };
   }
 }
