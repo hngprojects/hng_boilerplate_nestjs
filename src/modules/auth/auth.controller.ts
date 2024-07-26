@@ -5,13 +5,14 @@ import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
-import { BAD_REQUEST, TWO_FA_INITIATED } from 'src/helpers/SystemMessages';
-import { Enable2FADto } from './dto/enable-2fa.dto';
+import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { Verify2FADto } from './dto/verify-2fa.dto';
+import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
+import { Enable2FADto } from './dto/enable-2fa.dto';
 
-@ApiTags('auth')
+@ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
   constructor(private authService: AuthenticationService) {}
@@ -40,6 +41,19 @@ export default class RegistrationController {
   @Post('2fa/verify')
   verify2fa(@Body() verify2faDto: Verify2FADto, @Req() req) {
     return this.authService.verify2fa(verify2faDto, req.user.sub);
+  }
+
+  @ApiOperation({ summary: 'Generate forgot password reset token' })
+  @ApiResponse({
+    status: 200,
+    description: 'The forgot password reset token generated successfully',
+    type: ForgotPasswordResponseDto,
+  })
+  @skipAuth()
+  @HttpCode(200)
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Res() response: Response): Promise<any> {
+    return await this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @skipAuth()
