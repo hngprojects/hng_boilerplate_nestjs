@@ -38,6 +38,13 @@ jobs:
       - name: Install dependencies
         run: npm install --include=dev
 
+      - name: Print environment variables
+        run: |
+          echo "DB_USERNAME: $DB_USERNAME"
+          echo "DB_HOST: $DB_HOST"
+          echo "DB_PORT: $DB_PORT"
+          echo "NODE_ENV: $NODE_ENV"
+
       - name: Build project
         run: npm run build
 
