@@ -3,7 +3,6 @@ import { CreateFaqDto } from './dto/createFaqsDto';
 import { FaqsService } from './faqs.service';
 
 @Controller('admin/faqs')
-@UseGuards()
 export class FaqsController {
   constructor(private readonly faqService: FaqsService) {}
   @Post('/')
