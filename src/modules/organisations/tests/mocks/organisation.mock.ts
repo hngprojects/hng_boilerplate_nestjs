@@ -24,6 +24,7 @@ export const createMockOrganisation = (): Organisation => {
     owned_organisations: [],
     created_organisations: [],
     invites: [],
+    testimonials: [],
     user_type: UserType.ADMIN,
     sessions: [] as Session[],
     secret: 'secret',

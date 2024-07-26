@@ -11,13 +11,20 @@ import UserService from '../user/user.service';
 import { SessionModule } from '../session/session.module';
 import { SessionService } from '../session/session.service';
 import { Session } from '../session/entities/session.entity';
+import { OtpModule } from '../otp/otp.module';
+import { EmailModule } from '../email/email.module';
+import { OtpService } from '../otp/otp.service';
+import { EmailService } from '../email/email.service';
+import { Otp } from '../otp/entities/otp.entity';
 
 @Module({
   controllers: [RegistrationController],
-  providers: [AuthenticationService, Repository, UserService],
+  providers: [AuthenticationService, Repository, UserService, SessionService, OtpService, EmailService],
   imports: [
-    TypeOrmModule.forFeature([User, Session]),
+    TypeOrmModule.forFeature([User, Session, Otp]),
     PassportModule,
+    OtpModule,
+    EmailModule,
     JwtModule.register({
       global: true,
       secret: appConfig().jwtSecret,

@@ -1,22 +1,26 @@
+import { MailerModule } from '@nestjs-modules/mailer';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
-import serverConfig from '../config/server.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import authConfig from '../config/auth.config';
+import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import { EmailModule } from './modules/email/email.module';
-import authConfig from '../config/auth.config';
+import { OtpModule } from './modules/otp/otp.module';
+import { OtpService } from './modules/otp/otp.service';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
-import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EmailService } from './modules/email/email.service';
+import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
+import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 
 @Module({
   providers: [
@@ -32,6 +36,8 @@ import { InviteModule } from './modules/invite/invite.module';
           forbidNonWhitelisted: true,
         }),
     },
+    OtpService,
+    EmailService,
     {
       provide: 'APP_GUARD',
       useClass: AuthGuard,
@@ -67,6 +73,7 @@ import { InviteModule } from './modules/invite/invite.module';
     SeedingModule,
     AuthModule,
     UserModule,
+    OtpModule,
     EmailModule,
     InviteModule,
     MailerModule.forRootAsync({
@@ -94,6 +101,7 @@ import { InviteModule } from './modules/invite/invite.module';
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    TestimonialsModule,
   ],
   controllers: [HealthController],
 })

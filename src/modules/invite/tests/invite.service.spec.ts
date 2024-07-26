@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InviteService } from '../invite.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Invite } from '../entities/invite.entity';
-import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
-import { User, UserType } from '../../user/entities/user.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Session } from '../../session/entities/session.entity';
+import { User, UserType } from '../../user/entities/user.entity';
+import { Invite } from '../entities/invite.entity';
+import { InviteService } from '../invite.service';
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -47,6 +47,7 @@ describe('InviteService', () => {
       secret: 'secret',
       is_2fa_enabled: true,
       sessions: [] as Session[],
+      testimonials: [],
     };
 
     const mockOrg: Organisation = {

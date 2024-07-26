@@ -1,8 +1,9 @@
-import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Session } from '../../session/entities/session.entity';
+import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 
 export enum UserType {
@@ -63,4 +64,7 @@ export class User extends AbstractBaseEntity {
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
+
+  @OneToMany(() => Testimonial, testimonial => testimonial.user)
+  testimonials: Testimonial[];
 }
