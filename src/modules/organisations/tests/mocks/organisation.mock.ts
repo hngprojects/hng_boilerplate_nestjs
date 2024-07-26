@@ -1,5 +1,5 @@
-import { Organisation } from '../../entities/organisations.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Organisation } from '../../entities/organisations.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -22,6 +22,8 @@ export const createMockOrganisation = (): Organisation => {
     time_left: new Date(),
     owned_organisations: [],
     created_organisations: [],
+    invites: [],
+    testimonials: [],
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
@@ -43,6 +45,7 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
+    invites: [],
   };
 };
 
