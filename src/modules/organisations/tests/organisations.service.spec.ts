@@ -10,7 +10,6 @@ import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dt
 import UserService from '../../user/user.service';
 import { newUser } from './mocks/new-user.mock';
 import {
-  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
