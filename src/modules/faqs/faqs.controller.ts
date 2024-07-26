@@ -1,8 +1,9 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { CreateFaqDto } from './dto/createFaqsDto';
 import { FaqsService } from './faqs.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('admin/faqs')
 @ApiTags('faqs')
 export class FaqsController {
