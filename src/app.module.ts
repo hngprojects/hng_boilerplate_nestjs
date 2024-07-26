@@ -17,6 +17,7 @@ import { OtpService } from './modules/otp/otp.service';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ExportUserModule } from './modules/export-user/export-user-module.module';
 import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
@@ -102,9 +103,10 @@ import { ExportUserModule } from './modules/export-user/export-user-module.modul
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    ExportUserModule,
     TestimonialsModule,
     ExportUserModule
-  ],
+  ]
   controllers: [HealthController],
 })
 export class AppModule {}
