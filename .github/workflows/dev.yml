@@ -1,7 +1,7 @@
 name: CI/CD--Dev
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - dev
   push:
@@ -11,7 +11,7 @@ on:
 env:
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  DB_DATABASE: ${{ secrets.DB_DATABASE }}'
+  DB_DATABASE: ${{ secrets.DB_DATABASE }}
   DB_HOST: ${{ secrets.DB_HOST }}
   DB_PORT: ${{ secrets.DB_PORT }}
   DB_ENTITIES: ${{ secrets.DB_ENTITIES }}
@@ -24,11 +24,12 @@ env:
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
+    # environment: pr_environment
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -38,11 +39,11 @@ jobs:
       - name: Install dependencies
         run: npm install --include=dev
 
-      - name: Build project
-        run: npm run build
-
       - name: Run tests
         run: npm run test
+
+      - name: Build project
+        run: npm run build
 
       - name: Generate migrations
         run: npm run migration:generate
@@ -103,7 +104,6 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          # key: ${{ secrets.SERVER_PRIVATE_KEY }}
           password: ${{ secrets.SERVER_PASSWORD }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
