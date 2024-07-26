@@ -27,8 +27,7 @@ env:
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
-    environment: pr_environment
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout code
@@ -44,11 +43,11 @@ jobs:
       - name: Install dependencies
         run: npm install --include=dev
 
-      - name: Build project
-        run: npm run build
-
       - name: Run tests
         run: npm run test
+
+      - name: Build project
+        run: npm run build
 
       - name: Generate migrations
         run: npm run migration:generate
