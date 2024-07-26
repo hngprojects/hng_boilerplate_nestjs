@@ -276,8 +276,8 @@ export default class AuthenticationService {
 
     if (!user) {
       throw new NotFoundException({
-        message: USER_NOT_FOUND,
-        status_code: HttpStatus.NOT_FOUND,
+        message: "Invalid credentials",
+        status_code: HttpStatus.BAD_REQUEST,
       });
     }
 
