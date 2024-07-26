@@ -16,7 +16,6 @@ import { UserModule } from './modules/user/user.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
-import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
