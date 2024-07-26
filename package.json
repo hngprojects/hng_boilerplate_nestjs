@@ -34,7 +34,6 @@
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
     "@nestjs-modules/mailer": "^2.0.2",
-    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
@@ -53,7 +52,6 @@
     "nodemailer": "^6.9.14",
     "passport-jwt": "^4.0.1",
     "pg": "^8.12.0",
-    "pg-promise": "^11.9.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "speakeasy": "^2.0.0",

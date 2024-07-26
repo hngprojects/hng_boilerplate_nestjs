@@ -395,4 +395,3 @@ dist
 /.env
 /.env.*.local
 *._local.ts
-/ormconfig.json
