@@ -8,6 +8,19 @@ on:
     branches:
       - main
 
+env:
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_DATABASE: ${{ secrets.DB_DATABASE }}'
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_PORT: ${{ secrets.DB_PORT }}
+  DB_ENTITIES: ${{ secrets.DB_ENTITIES }}
+  DB_MIGRATIONS: ${{ secrets.DB_MIGRATIONS }}
+  DB_TYPE: 'postgres'
+  PROFILE: 'staging'
+  NODE_ENV: 'development'
+  PORT: 3000
+
 jobs:
   test-and-build-main:
     runs-on: ubuntu-latest
@@ -31,9 +44,40 @@ jobs:
       - name: Run tests
         run: npm run test
 
+      - name: Generate migrations
+        run: npm run migration:generate
+
+      - name: Run migrations
+        run: npm run migration:run
+
+      - name: Start application
+        run: |
+          npm run start:prod > app.log 2>&1 &
+          APP_PID=$!
+          echo $APP_PID
+          echo "Application started with PID $APP_PID"
+          sleep 30 # Wait for the application to start
+          tail -f app.log &
+          # Check application status with curl
+          if curl --retry 5 --retry-delay 5 --max-time 10 http://localhost:3000/health; then
+              echo "Application is up and running."
+          else
+              echo "Application failed to start. Logs:"
+              cat app.log
+              echo "Exiting workflow due to application failure."
+              kill $APP_PID
+              exit 1
+          fi
+
+          kill $APP_PID
+          echo "Application terminated Successfully."
+
+      - name: Revert Migrations
+        run: npm run migration:revert
+        if: always()
+
   deploy-main:
     runs-on: ubuntu-latest
-    # needs: test-and-build-main
     if: github.event_name == 'push'
 
     steps:
