@@ -51,11 +51,11 @@ export default class UserService {
     }
   }
 
-  async createUser(user: CreateNewUserOptions) {
+    async createUser(user: CreateNewUserOptions): Promise<any> {
     const newUser = new User();
     Object.assign(newUser, user);
     newUser.is_active = true;
-    await this.userRepository.save(newUser);
+    return this.userRepository.save(newUser);
   }
 
   async updateUserRecord(userUpdateOptions: UpdateUserRecordOption) {
