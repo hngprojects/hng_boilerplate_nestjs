@@ -8,19 +8,15 @@ import { IsOptional } from 'class-validator';
 
 @Entity()
 export class Product extends AbstractBaseEntity {
-  @ApiProperty()
   @Column({ type: 'text' })
   product_name: string;
 
-  @ApiProperty()
   @Column('text')
   description: string;
 
-  @ApiProperty()
   @Column('int')
   quantity: number;
 
-  @ApiProperty()
   @Column('int')
   price: number;
 
