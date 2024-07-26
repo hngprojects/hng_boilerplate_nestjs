@@ -8,6 +8,7 @@ on:
     branches:
       - dev
 
+# run build and test
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
