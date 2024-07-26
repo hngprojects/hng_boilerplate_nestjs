@@ -21,6 +21,7 @@ import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
+import { FaqsModule } from './modules/faqs/faqs.module';
 
 @Module({
   providers: [
@@ -71,6 +72,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    FaqsModule,
     AuthModule,
     UserModule,
     OtpModule,
