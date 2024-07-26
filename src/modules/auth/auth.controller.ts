@@ -1,8 +1,13 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Request, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpCode, HttpStatus, Post, Req, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
+import { BAD_REQUEST, TWO_FA_INITIATED } from 'src/helpers/SystemMessages';
+import { Enable2FADto } from './dto/enable-2fa.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { LoginDto } from './dto/login.dto';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -21,12 +26,24 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('login')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.loginUser(loginDto);
+  }
+
+  @Post('2fa/enable')
+  @ApiBody({
+    description: 'Enable two factor authentication',
+    type: Enable2FADto,
+  })
+  @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
+  @ApiResponse({ status: 400, description: BAD_REQUEST })
+  public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
+    const { password } = body;
+    const { id: user_id } = request['user'];
+    return this.authService.enable2FA(user_id, password);
   }
 }

@@ -1,25 +1,22 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
+import { AbstractBaseEntity } from './../../../../entities/base.entity';
+import { Entity, Column } from 'typeorm';
 
 @Entity()
-export class NotificationSettings {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class NotificationSettings extends AbstractBaseEntity {
+  @ApiProperty()
   @Column({ unique: true })
   user_id: string;
 
+  @ApiProperty()
   @Column()
   email_notifications: boolean;
 
+  @ApiProperty()
   @Column()
   push_notifications: boolean;
 
+  @ApiProperty()
   @Column()
   sms_notifications: boolean;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 }

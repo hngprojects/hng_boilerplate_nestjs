@@ -4,11 +4,17 @@ import { Repository } from 'typeorm';
 import { NotificationSettingsService } from './notification-settings.service';
 import { NotificationSettings } from './entities/notification-setting.entity';
 import { NotificationSettingsDto } from './dto/notification-settings.dto';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('NotificationSettingsService', () => {
   let service: NotificationSettingsService;
-  let repo: Repository<NotificationSettings>;
+  let repository: Repository<NotificationSettings>;
+
+  const mockNotificationSettingsRepository = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -16,70 +22,106 @@ describe('NotificationSettingsService', () => {
         NotificationSettingsService,
         {
           provide: getRepositoryToken(NotificationSettings),
-          useClass: Repository,
+          useValue: mockNotificationSettingsRepository,
         },
       ],
     }).compile();
 
     service = module.get<NotificationSettingsService>(NotificationSettingsService);
-    repo = module.get<Repository<NotificationSettings>>(getRepositoryToken(NotificationSettings));
+    repository = module.get<Repository<NotificationSettings>>(getRepositoryToken(NotificationSettings));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('createOrUpdate', () => {
-    it('should create new settings if they do not exist', async () => {
+  describe('create', () => {
+    it('should create new notification settings if not existing', async () => {
       const dto: NotificationSettingsDto = {
-        user_id: 'test@example.com',
-        email_notifications: true,
+        settingName: '',
+        settingValue: '',
+        email_notifications: false,
         push_notifications: false,
-        sms_notifications: true,
+        sms_notifications: false,
       };
-      jest.spyOn(repo, 'findOne').mockResolvedValue(null);
-      jest.spyOn(repo, 'create').mockReturnValue(dto as NotificationSettings);
-      jest.spyOn(repo, 'save').mockResolvedValue(dto as NotificationSettings);
+      const userId = 'some-user-id';
 
-      const result = await service.createOrUpdate(dto);
+      mockNotificationSettingsRepository.findOne.mockResolvedValue(null);
+      mockNotificationSettingsRepository.create.mockReturnValue(dto);
+      mockNotificationSettingsRepository.save.mockResolvedValue(dto);
+
+      const result = await service.create(dto, userId);
+
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { user_id: userId } });
+      expect(repository.create).toHaveBeenCalledWith(dto);
+      expect(repository.save).toHaveBeenCalledWith(dto);
       expect(result).toEqual(dto);
     });
 
-    it('should update existing settings', async () => {
+    it('should update existing notification settings', async () => {
       const dto: NotificationSettingsDto = {
-        user_id: 'test@example.com',
-        email_notifications: true,
+        settingName: '',
+        settingValue: '',
+        email_notifications: false,
         push_notifications: false,
-        sms_notifications: true,
+        sms_notifications: false,
       };
-      const existingSettings = { ...dto, id: '1' };
-      jest.spyOn(repo, 'findOne').mockResolvedValue(existingSettings as NotificationSettings);
-      jest.spyOn(repo, 'save').mockResolvedValue(existingSettings as NotificationSettings);
+      const existingSettings = { id: 1, ...dto };
+      const userId = 'some-user-id';
 
-      const result = await service.createOrUpdate(dto);
+      mockNotificationSettingsRepository.findOne.mockResolvedValue(existingSettings);
+      mockNotificationSettingsRepository.save.mockResolvedValue(existingSettings);
+
+      const result = await service.create(dto, userId);
+
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { user_id: userId } });
+      expect(repository.save).toHaveBeenCalledWith(existingSettings);
       expect(result).toEqual(existingSettings);
+    });
+
+    it('should throw BadRequestException on error', async () => {
+      const dto: NotificationSettingsDto = {
+        settingName: '',
+        settingValue: '',
+        email_notifications: false,
+        push_notifications: false,
+        sms_notifications: false,
+      };
+      const userId = 'some-user-id';
+
+      mockNotificationSettingsRepository.findOne.mockRejectedValue(new Error('Some error'));
+
+      await expect(service.create(dto, userId)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('findByUserId', () => {
-    it('should return settings if they exist', async () => {
-      const settings = {
-        id: '1',
-        user_id: 'test@example.com',
-        email_notifications: true,
-        push_notifications: false,
-        sms_notifications: true,
-      };
-      jest.spyOn(repo, 'findOne').mockResolvedValue(settings as NotificationSettings);
+    it('should return notification settings for given user ID', async () => {
+      const userId = 'some-user-id';
+      const settings = { id: 1, user_id: userId /* other properties */ };
 
-      const result = await service.findByUserId('test@example.com');
+      mockNotificationSettingsRepository.findOne.mockResolvedValue(settings);
+
+      const result = await service.findByUserId(userId);
+
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { user_id: userId } });
       expect(result).toEqual(settings);
     });
 
-    it('should throw NotFoundException if settings do not exist', async () => {
-      jest.spyOn(repo, 'findOne').mockResolvedValue(null);
+    it('should throw NotFoundException if settings not found', async () => {
+      const userId = 'some-user-id';
 
-      await expect(service.findByUserId('test@example.com')).rejects.toThrow(NotFoundException);
+      mockNotificationSettingsRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.findByUserId(userId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException on error', async () => {
+      const userId = 'some-user-id';
+
+      mockNotificationSettingsRepository.findOne.mockRejectedValue(new Error('Some error'));
+
+      await expect(service.findByUserId(userId)).rejects.toThrow(BadRequestException);
     });
   });
 });
