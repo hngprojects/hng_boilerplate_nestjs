@@ -265,7 +265,7 @@ export default class AuthenticationService {
       if (!user) {
         return {
           status_code: HttpStatus.OK,
-          message: 'If an account with this email exists, a reset password link will be sent',
+          message: 'If an account with this email exists, a reset password link has been sent',
         };
       }
 
@@ -277,7 +277,7 @@ export default class AuthenticationService {
       await this.emailService.sendForgotPasswordMail(email, resetUrl, token);
       return {
         status_code: HttpStatus.OK,
-        message: 'Passwords reset successfully sent to email',
+        message: 'If an account with this email exists, a reset password link has been sent',
       };
     } catch (passwordResetError) {
       Logger.log('AuthenticationServiceError ~ passwordResetError ~', passwordResetError);

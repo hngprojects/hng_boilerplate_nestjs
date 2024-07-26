@@ -515,7 +515,7 @@ describe('sendPasswordResetEmail tests', () => {
 
     expect(result).toEqual({
       status_code: HttpStatus.OK,
-      message: 'Passwords reset successfully sent to email',
+      message: 'If an account with this email exists, a reset password link has been sent',
     });
 
     expect(userServiceMock.findUserByEmail).toHaveBeenCalledWith(email);
@@ -539,7 +539,7 @@ describe('sendPasswordResetEmail tests', () => {
 
     expect(result).toEqual({
       status_code: HttpStatus.OK,
-      message: 'If an account with this email exists, a reset password link will be sent',
+      message: 'If an account with this email exists, a reset password link has been sent',
     });
 
     expect(userServiceMock.findUserByEmail).toHaveBeenCalledWith(email);
