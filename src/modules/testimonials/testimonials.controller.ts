@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, HttpStatus, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserPayload } from '../user/interfaces/user-payload.interface';
 import UserService from '../user/user.service';
 import { CreateTestimonialResponseDto } from './dto/create-testimonial-response.dto';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
 
+@ApiBearerAuth()
 @ApiTags('Testimonials')
 @Controller('testimonials')
 export class TestimonialsController {
@@ -23,9 +24,9 @@ export class TestimonialsController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async create(
     @Body() createTestimonialDto: CreateTestimonialDto,
-    @Req() req: Request
+    @Req() req: { user: UserPayload }
   ): Promise<CreateTestimonialResponseDto> {
-    const { sub: userId } = req?.user as { sub: string };
+    const userId = req?.user.id;
 
     const user = await this.userService.getUserRecord({ identifier: userId, identifierType: 'id' });
 

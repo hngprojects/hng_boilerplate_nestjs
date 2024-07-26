@@ -22,8 +22,11 @@ export const createMockOrganisation = (): Organisation => {
     time_left: 3600,
     owned_organisations: [],
     created_organisations: [],
+    invites: [],
     testimonials: [],
     user_type: UserType.ADMIN,
+    secret: 'secret',
+    is_2fa_enabled: false,
   };
 
   return {
@@ -42,6 +45,7 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
+    invites: [],
   };
 };
 
