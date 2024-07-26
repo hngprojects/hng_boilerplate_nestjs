@@ -77,6 +77,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     OtpModule,
     EmailModule,
     InviteModule,
+    BlogModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
