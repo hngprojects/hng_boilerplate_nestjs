@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException,
   UnauthorizedException,
+  BadRequestException
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
@@ -275,7 +276,7 @@ export default class AuthenticationService {
     const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
 
     if (!user) {
-      throw new NotFoundException({
+      throw new BadRequestException({
         message: "Invalid credentials",
         status_code: HttpStatus.BAD_REQUEST,
       });
