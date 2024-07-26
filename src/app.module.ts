@@ -75,6 +75,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     AuthModule,
     TimezonesModule,
     UserModule,
+    OtpModule,
     TestimonialsModule,
     EmailModule,
     InviteModule,
