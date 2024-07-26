@@ -51,8 +51,8 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User data fetched successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @Get(':userId')
-  async getUserDataById(@Param('userId') userId: string) {
-    return this.userService.getUserDataWithoutPasswordById(userId);
+  @Get(':id')
+  async getUserDataById(@Param('id') id: string) {
+    return this.userService.getUserDataWithoutPasswordById(id);
   }
 }
