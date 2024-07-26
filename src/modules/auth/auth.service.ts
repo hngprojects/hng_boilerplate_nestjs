@@ -22,7 +22,6 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { SessionService } from '../session/session.service';
-// import { Request } from '@nestjs/common';
 import { Request } from 'express';
 import { User } from '../user/entities/user.entity';
 

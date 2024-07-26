@@ -30,11 +30,6 @@ import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { Repository } from 'typeorm';
 import { Request } from 'express';
 
-// let userService: UserService;
-// let authService: AuthenticationService;
-// let jwtService: JwtService;
-// let sessionService: SessionService;
-// let sessionRepository: Repository<Session>;
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userServiceMock: jest.Mocked<UserService>;
@@ -47,10 +42,6 @@ describe('AuthenticationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
-        {
-          provide: getRepositoryToken(Session),
-          useClass: Repository,
-        },
         {
           provide: SessionService,
           useValue: {
@@ -85,11 +76,6 @@ describe('AuthenticationService', () => {
       ],
     }).compile();
 
-    // userService = module.get<UserService>(UserService);
-    // authService = module.get<AuthenticationService>(AuthenticationService);
-    // jwtService = module.get<JwtService>(JwtService);
-    // sessionService = module.get<SessionService>(SessionService);
-    // sessionRepository = module.get<Repository<Session>>(getRepositoryToken(Session));
     service = module.get<AuthenticationService>(AuthenticationService);
     userServiceMock = module.get(UserService) as jest.Mocked<UserService>;
     jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;

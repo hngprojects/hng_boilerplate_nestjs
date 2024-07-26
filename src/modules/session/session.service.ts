@@ -5,7 +5,6 @@ import { Session } from './entities/session.entity';
 import { Repository } from 'typeorm';
 import UserInterface from '../user/interfaces/UserInterface';
 import * as useragent from 'useragent';
-import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class SessionService {
