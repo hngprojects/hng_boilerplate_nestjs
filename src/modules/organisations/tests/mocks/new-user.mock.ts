@@ -7,7 +7,7 @@ export enum UserType {
   USER = 'vendor',
 }
 
-export const newUser = {
+export const newUser: User = {
   id: uuidv4(),
   created_at: new Date(),
   updated_at: new Date(),
@@ -23,4 +23,8 @@ export const newUser = {
   created_organisations: [],
   member_organisations: [],
   user_type: UserType.USER,
+  invites: [],
+  testimonials: [],
+  secret: 'secret',
+  is_2fa_enabled: false,
 };

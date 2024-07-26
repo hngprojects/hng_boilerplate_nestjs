@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -8,7 +9,7 @@ export enum UserType {
 }
 
 export const createMockOrganisation = (): Organisation => {
-  const ownerAndCreator = {
+  const ownerAndCreator: User = {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
@@ -16,7 +17,9 @@ export const createMockOrganisation = (): Organisation => {
     last_name: 'Smith',
     email: 'john.smith@example.com',
     password: 'pass123',
-    hashPassword: async () => {},
+    async hashPassword() {
+      return;
+    },
     is_active: true,
     attempts_left: 3,
     time_left: 3600,
@@ -24,9 +27,13 @@ export const createMockOrganisation = (): Organisation => {
     created_organisations: [],
     member_organisations: [],
     user_type: UserType.ADMIN,
+    secret: '',
+    invites: [],
+    is_2fa_enabled: false,
+    testimonials: [],
   };
 
-  const member = {
+  const member: User = {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
@@ -34,7 +41,9 @@ export const createMockOrganisation = (): Organisation => {
     last_name: 'James',
     email: 'marie.james@example.com',
     password: 'pass123',
-    hashPassword: async () => {},
+    async hashPassword() {
+      return;
+    },
     is_active: true,
     attempts_left: 3,
     time_left: 3600,
@@ -48,6 +57,14 @@ export const createMockOrganisation = (): Organisation => {
     is_2fa_enabled: false,
   };
 
+  const creator: User = {
+    ...ownerAndCreator,
+    async hashPassword() {
+      return;
+    },
+    user_type: UserType.USER,
+  };
+
   return {
     id: uuidv4(),
     name: 'John & Co',
@@ -59,7 +76,7 @@ export const createMockOrganisation = (): Organisation => {
     address: 'Street 101 Building 26',
     state: 'Lagos',
     owner: ownerAndCreator,
-    creator: { ...ownerAndCreator, user_type: UserType.USER },
+    creator: creator,
     created_at: new Date(),
     updated_at: new Date(),
     isDeleted: false,
