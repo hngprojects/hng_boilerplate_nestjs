@@ -45,7 +45,7 @@ jobs:
           echo "DB_HOST: $DB_HOST"
           echo "DB_PORT: $DB_PORT"
           echo "NODE_ENV: $NODE_ENV"
-          echo "NODE_ENV: $APPLEBOY"
+          echo ${{ secrets.DB_HOST }}
 
       - name: Build project
         run: npm run build
