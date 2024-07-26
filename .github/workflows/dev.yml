@@ -20,6 +20,7 @@ env:
   PROFILE: 'staging'
   NODE_ENV: 'development'
   PORT: 3000
+  APPLEBOY: ${{ secrets.SERVER_PORT }}
 
 jobs:
   test-and-build-dev:
@@ -44,6 +45,7 @@ jobs:
           echo "DB_HOST: $DB_HOST"
           echo "DB_PORT: $DB_PORT"
           echo "NODE_ENV: $NODE_ENV"
+          echo "NODE_ENV: $APPLEBOY"
 
       - name: Build project
         run: npm run build
