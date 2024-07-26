@@ -1,12 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InviteService } from '../invite.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Invite } from '../entities/invite.entity';
-import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
-import { User, UserType } from '../../user/entities/user.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
-import { Product } from 'src/modules/products/entities/product.entity';
+import { InviteService } from '../invite.service';
+import { Invite } from '../entities/invite.entity';
+import { User, UserType } from 'src/modules/user/entities/user.entity';
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -46,7 +45,7 @@ describe('InviteService', () => {
       time_left: 5,
       secret: 'secret',
       is_2fa_enabled: true,
-      products: [] as Product[],
+      products: []
     };
 
     const mockOrg: Organisation = {
