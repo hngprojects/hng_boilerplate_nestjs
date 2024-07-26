@@ -1,5 +1,12 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import {
   ERROR_OCCURED,
@@ -11,6 +18,7 @@ import {
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
+  UNAUTHORISED_TOKEN,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -21,6 +29,9 @@ import { EmailService } from '../email/email.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
+import { generateSixDigitToken } from '../../utils/generate-token';
+import { OtpDto } from '../otp/dto/otp.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -255,6 +266,68 @@ export default class AuthenticationService {
         secret: secret.base32,
         qr_code_url: qrCodeUrl,
       },
+    };
+  }
+
+  async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
+    const { email } = requestSignInTokenDto;
+
+    const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
+
+    if (!user) {
+      throw new NotFoundException({
+        message: USER_NOT_FOUND,
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    const otpExist = await this.otpService.findOtp(user.id);
+
+    const newOtp = generateSixDigitToken();
+
+    if (otpExist) {
+      await this.otpService.deleteOtp(user.id);
+
+      await this.otpService.createOtp(user.id);
+
+      await this.emailService.sendLoginOtp(user.email, newOtp);
+
+      return;
+    }
+    await this.otpService.createOtp(user.id);
+
+    await this.emailService.sendLoginOtp(user.email, newOtp);
+
+    return {
+      message: 'Sign-in token sent to email',
+      status_code: 200,
+    };
+  }
+
+  async verifySignInToken(verifyOtp: OtpDto) {
+    const { token, email } = verifyOtp;
+
+    const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
+    const otp = await this.otpService.verifyOtp(user.id, token);
+
+    if (!user || !otp) {
+      throw new UnauthorizedException({
+        message: UNAUTHORISED_TOKEN,
+        status_code: HttpStatus.UNAUTHORIZED,
+      });
+    }
+
+    const accessToken = this.jwtService.sign({
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      sub: user.id,
+    });
+
+    return {
+      message: 'Sign-in successful',
+      token: accessToken,
+      status_code: 200,
     };
   }
 }

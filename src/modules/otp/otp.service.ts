@@ -53,4 +53,13 @@ export class OtpService {
       return false;
     }
   }
+
+  async findOtp(userId: string): Promise<Otp | null> {
+    const otp = await this.otpRepository.findOne({ where: { user_id: userId } });
+    return otp;
+  }
+
+  async deleteOtp(userId: string) {
+    return await this.otpRepository.delete({ user_id: userId });
+  }
 }

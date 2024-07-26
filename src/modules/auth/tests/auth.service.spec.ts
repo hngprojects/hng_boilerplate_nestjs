@@ -3,7 +3,6 @@ import * as speakeasy from 'speakeasy';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
-  ERROR_OCCURED,
   INVALID_PASSWORD,
   TWO_FA_ENABLED,
   TWO_FA_INITIATED,
@@ -293,6 +292,8 @@ describe('Enabling two factor authentication', () => {
   let userService: UserService;
   let authService: AuthenticationService;
   let otpService: OtpService;
+  let jwtService: JwtService;
+  let emailService: EmailService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -322,6 +323,8 @@ describe('Enabling two factor authentication', () => {
     userService = module.get<UserService>(UserService);
     authService = module.get<AuthenticationService>(AuthenticationService);
     otpService = module.get<OtpService>(OtpService);
+    jwtService = module.get<JwtService>(JwtService);
+    emailService = module.get<EmailService>(EmailService);
   });
 
   it('should return NOT FOUND if user does not exists', async () => {

@@ -9,6 +9,8 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
+import { OtpDto } from '../otp/dto/otp.dto';
+import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -57,5 +59,23 @@ export default class RegistrationController {
     const { password } = body;
     const { id: user_id } = request['user'];
     return this.authService.enable2FA(user_id, password);
+  }
+
+  @skipAuth()
+  @Post('signin-token')
+  @ApiOperation({ summary: 'Request Signin Token' })
+  @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: RequestSigninTokenDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  public async signInToken(@Body() body: RequestSigninTokenDto, @Res() response: Response) {
+    return await this.authService.requestSignInToken(body);
+  }
+
+  @skipAuth()
+  @Post('verify-signin-token')
+  @ApiOperation({ summary: 'Verify Signin Token' })
+  @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  public async verifySignInToken(@Body() body: OtpDto) {
+    return await this.authService.verifySignInToken(body);
   }
 }
