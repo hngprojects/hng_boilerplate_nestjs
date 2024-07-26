@@ -8,4 +8,10 @@ export class Faqs extends AbstractBaseEntity {
 
   @Column({ nullable: false })
   answer: string;
+
+  @Column({ nullable: true })
+  category: string;
+
+  @Column({ nullable: true })
+  tags: string;
 }

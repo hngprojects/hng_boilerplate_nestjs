@@ -47,7 +47,7 @@ describe('FaqsService', () => {
 
   it('should create and return the new FAQ if valid', async () => {
     const user = { user_type: 'admin' } as User;
-    const createFaqDto = { question: 'Test Question', answer: 'Test Answer' } as CreateFaqDto;
+    const createFaqDto = { question: 'Test Question', answer: 'Test Answer', category: '', tags: '' } as CreateFaqDto;
     const newFaq = createFaqDto as Faqs;
 
     jest.spyOn(userRepository, 'findOneBy').mockResolvedValueOnce(user);

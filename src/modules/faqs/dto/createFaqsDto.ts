@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateFaqDto {
   @IsString()
@@ -6,4 +6,12 @@ export class CreateFaqDto {
 
   @IsString()
   answer: string;
+
+  @IsString()
+  @IsOptional()
+  category: string;
+
+  @IsString()
+  @IsOptional()
+  tags: string;
 }
