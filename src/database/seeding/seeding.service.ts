@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Job } from '../../modules/job/entities/job.entity';
+import { Invite } from '../../modules/invite/entities/invite.entity';
 
 @Injectable()
 export class SeedingService {
@@ -10,6 +11,7 @@ export class SeedingService {
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
+    const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
     const jobRepository = this.dataSource.getRepository(Job);
 
@@ -103,6 +105,26 @@ export class SeedingService {
         const savedJobs = await jobRepository.find();
         if (savedJobs.length !== 2) {
           throw new Error('Failed to create all jobs');
+
+        const inv1 = inviteRepository.create({
+          email: 'Org 1',
+          status: 'pending',
+          user: savedUsers[0],
+          organisation: savedOrganisations[0],
+        });
+
+        const inv2 = inviteRepository.create({
+          email: 'Org 1',
+          status: 'pending',
+          user: savedUsers[1],
+          organisation: savedOrganisations[1],
+        });
+
+        await inviteRepository.save([inv1, inv2]);
+        const savedInvite = await inviteRepository.find();
+        if (savedInvite.length !== 2) {
+          throw new Error('Failed to create all organisations');
+
         }
 
         await queryRunner.commitTransaction();
