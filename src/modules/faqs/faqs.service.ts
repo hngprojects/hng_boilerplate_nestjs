@@ -4,19 +4,16 @@ import { Repository } from 'typeorm';
 import { Faqs } from './entities/faqs.entity';
 import { CreateFaqDto } from './dto/createFaqsDto';
 import { User } from '../user/entities/user.entity';
-import UserService from '../user/user.service';
 
 @Injectable()
 export class FaqsService {
   constructor(
     @InjectRepository(Faqs) private readonly faqsRepo: Repository<Faqs>,
-    @InjectRepository(User) private readonly userRepo: Repository<User>,
-    private readonly userService: UserService
+    @InjectRepository(User) private readonly userRepo: Repository<User>
   ) {}
 
   async createFaq(createFaqs: CreateFaqDto, userId: string) {
     try {
-      // const user = await this.userService.getUserById(userId);
       const user = await this.userRepo.findOneBy({ id: userId });
       const existingFaq = await this.faqsRepo.findOneBy({ question: createFaqs.question });
 
@@ -39,13 +36,19 @@ export class FaqsService {
       let newFaqs = this.faqsRepo.create(createFaqs);
 
       newFaqs = await this.faqsRepo.save(newFaqs);
+
       return { message: 'FAQ created successfully', data: newFaqs };
     } catch (error) {
-      throw new ForbiddenException({
-        status: 'Inter server error',
-        message: 'An error occured, please try again',
-        status_code: 500,
-      });
+      // console.log(error);
+      if (error instanceof BadRequestException || error instanceof ForbiddenException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException({
+          status: 'Internal server error',
+          message: 'An error occurred, please try again',
+          status_code: 500,
+        });
+      }
     }
   }
 }
