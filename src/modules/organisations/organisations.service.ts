@@ -75,43 +75,11 @@ export class OrganisationsService {
 
   async removeUser(orgId: string, userId: string, currentUserId: string) {
     try {
-      const org = await this.organisationRepository.findOne({
-        where: {
-          id: orgId,
-        },
-        relations: {
-          owner: true,
-          members: true,
-        },
-      });
+      const org = await this.checkIfOrgExists(orgId);
 
-      if (!org) {
-        throw new NotFoundException({
-          status: 'error',
-          message: 'Organisation not found',
-          status_code: 404,
-        });
-      }
+      this.verifyOwner(org, currentUserId);
 
-      const isOwner = org.owner.id == currentUserId;
-
-      if (!isOwner) {
-        throw new UnauthorizedException({
-          status: 'Forbidden',
-          message: 'Only admin can remove users',
-          status_code: 403,
-        });
-      }
-
-      const findUser = org.members.filter(member => member.id == userId);
-
-      if (findUser.length <= 0) {
-        throw new NotFoundException({
-          status: 'error',
-          message: 'User not found',
-          status_code: 404,
-        });
-      }
+      this.checkIfUserIsAMember(org, userId);
 
       org.members = org.members.filter(member => member.id != userId);
 
@@ -127,6 +95,47 @@ export class OrganisationsService {
         throw err;
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
+    }
+  }
+
+  async checkIfOrgExists(orgId: string) {
+    const org = await this.organisationRepository.findOne({
+      where: {
+        id: orgId,
+      },
+    });
+    if (!org) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'Organisation not found',
+        status_code: 404,
+      });
+    }
+
+    return org;
+  }
+
+  verifyOwner(org: Organisation, ownerId: string) {
+    const isOwner = org.owner.id == ownerId;
+
+    if (!isOwner) {
+      throw new UnauthorizedException({
+        status: 'Forbidden',
+        message: 'Only admin can remove users',
+        status_code: 403,
+      });
+    }
+  }
+
+  checkIfUserIsAMember(org: Organisation, userId: string) {
+    const findUser = org.members.filter(member => member.id == userId);
+
+    if (findUser.length <= 0) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'User not found',
+        status_code: 404,
+      });
     }
   }
 }
