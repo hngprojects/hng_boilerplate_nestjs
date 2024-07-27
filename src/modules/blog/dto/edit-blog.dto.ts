@@ -1,6 +1,6 @@
 import { IsString, IsOptional, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
 
-export class EditBlogDto {
+export class EditBlogPost {
   @IsString()
   @IsOptional()
   @IsNotEmpty()
