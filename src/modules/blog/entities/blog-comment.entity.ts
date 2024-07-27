@@ -4,7 +4,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity()
-export class BlogComment extends AbstractBaseEntity {
+export class BlogPostComment extends AbstractBaseEntity {
   @PrimaryGeneratedColumn()
   @Column('text')
   content: string;

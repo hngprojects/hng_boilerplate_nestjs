@@ -3,7 +3,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Blog } from './blog.entity';
 
 @Entity()
-export class BlogCategory extends AbstractBaseEntity {
+export class BlogPostCategory extends AbstractBaseEntity {
   @Column()
   name: string;
 
