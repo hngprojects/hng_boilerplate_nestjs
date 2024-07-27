@@ -1,16 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
-  Query,
-  HttpException,
-  InternalServerErrorException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpStatus } from '@nestjs/common';
 import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { UpdateProductCategoryDto } from './dto/update-product-category.dto';
@@ -24,28 +12,11 @@ export class ProductCategoryController {
   @ApiOperation({ summary: 'Get product categories' })
   @Get()
   async getAllCategories(@Query('limit') limit?: number, @Query('offset') offset?: number) {
-    try {
-      const categories = await this.categoryService.findAllCategories(limit, offset);
-      return {
-        status_code: 200,
-        categories: categories,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new InternalServerErrorException({
-          status_code: 500,
-          error: {
-            status: 'INTERNAL_SERVER_ERROR',
-            message: 'An unexpected error occurred while processing your request.',
-            details: {
-              support_email: 'support@example.com',
-            },
-          },
-        });
-      }
-    }
+    const categories = await this.categoryService.findAllCategories(limit, offset);
+    return {
+      status_code: 200,
+      categories: categories,
+    };
   }
 
   @ApiOperation({ summary: 'reate product categories' })

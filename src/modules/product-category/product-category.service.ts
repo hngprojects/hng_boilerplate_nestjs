@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+  HttpException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductCategory } from './entities/product-category.entity';
@@ -42,6 +48,19 @@ export class ProductCategoryService {
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
+      } else if (error instanceof HttpException) {
+        throw error;
+      } else if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          status_code: 500,
+          error: {
+            status: 'INTERNAL_SERVER_ERROR',
+            message: 'An unexpected error occurred while processing your request.',
+            details: {
+              support_email: 'support@example.com',
+            },
+          },
+        });
       }
     }
   }
