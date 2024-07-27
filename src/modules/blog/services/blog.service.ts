@@ -7,8 +7,10 @@ import { Blog } from '../entities/blog.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BlogMapper } from '../mappers/blog.mapper';
+import { ApiResponse, ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 
 @Injectable()
+@ApiTags('blogs')
 export class BlogService {
   constructor(
     @InjectRepository(Blog)
@@ -19,6 +21,11 @@ export class BlogService {
     private readonly categoryRepository: Repository<BlogCategory>
   ) {}
 
+  @ApiOperation({ summary: 'Create a new blog' })
+  @ApiBody({ type: CreateBlogDto })
+  @ApiResponse({ status: 201, description: 'Blog created successfully', type: ResponseDto })
+  @ApiResponse({ status: 404, description: 'User or Category not found' })
+  @ApiResponse({ status: 400, description: 'Error creating blog' })
   async create(createBlogDto: CreateBlogDto): Promise<ResponseDto> {
     const { authorId, categoryId, ...rest } = createBlogDto;
 

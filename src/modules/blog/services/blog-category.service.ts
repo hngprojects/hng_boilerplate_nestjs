@@ -4,14 +4,21 @@ import { Repository } from 'typeorm';
 import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
 import { BlogCategory } from '../entities/blog-category.entity';
 import { CategoryResponseDto } from '../dto/blog-category-response.dto';
+import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 
 @Injectable()
+@ApiTags('categories')
 export class BlogCategoryService {
   constructor(
     @InjectRepository(BlogCategory)
     private readonly blogCategoryRepository: Repository<BlogCategory>
   ) {}
 
+  @ApiOperation({ summary: 'Create a new blog category' })
+  @ApiBody({ type: CreateBlogCategoryDto })
+  @ApiResponse({ status: 201, description: 'Blog category created successfully.', type: CategoryResponseDto })
+  @ApiResponse({ status: 400, description: 'Category name already exists.' })
+  @ApiResponse({ status: 500, description: 'Failed to create category.' })
   async createCategory(createBlogCategoryDto: CreateBlogCategoryDto): Promise<CategoryResponseDto> {
     try {
       const { name } = createBlogCategoryDto;
