@@ -1,6 +1,6 @@
-
 import { IsNotEmpty, IsString, IsOptional, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Column } from 'typeorm';
 
 export class CreateProductCategoryDto {
   @ApiProperty({
@@ -9,6 +9,7 @@ export class CreateProductCategoryDto {
   })
   @IsNotEmpty()
   @IsString()
+  @Column({ type: 'varchar', length: 255, nullable: false })
   name: string;
 
   @ApiProperty({
@@ -18,7 +19,8 @@ export class CreateProductCategoryDto {
   })
   @IsNotEmpty()
   @IsString()
-  description?: string;
+  @Column({ type: 'text', nullable: false })
+  description: string;
 
   @ApiProperty({
     description: 'Slug for the product category',
@@ -27,7 +29,8 @@ export class CreateProductCategoryDto {
   })
   @IsNotEmpty()
   @IsString()
-  slug?: string;
+  @Column({ type: 'text', nullable: false })
+  slug: string;
 
   @ApiProperty({
     description: 'Parent ID of the category, if any',
@@ -36,5 +39,6 @@ export class CreateProductCategoryDto {
   })
   @IsOptional()
   @IsUUID()
+  @Column({ type: 'uuid', nullable: true })
   parentId?: string;
 }
