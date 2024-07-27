@@ -8,7 +8,7 @@ export class CreateProductDto {
   })
   @IsNotEmpty()
   @IsString()
-  product_name: string;
+  name: string;
 
   @ApiProperty({
     description: 'Description of the product',
@@ -19,13 +19,22 @@ export class CreateProductDto {
   description: string;
 
   @ApiProperty({
-    description: 'Quantity of the product',
+    description: 'Current stock of the product',
     example: 10,
   })
   @IsNotEmpty()
   @IsInt()
   @Min(0)
-  quantity: number;
+  current_stock: number;
+
+  @ApiProperty({
+    description: 'In stock of the product',
+    example: 10,
+  })
+  @IsNotEmpty()
+  @IsInt()
+  @Min(0)
+  in_stock: number;
 
   @ApiProperty({
     description: 'Price of the product',
@@ -38,9 +47,17 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product categories',
-    example: ['fan', 'motor'],
+    example: 'motor',
   })
   @IsNotEmpty()
   @IsUUID()
   categoryId: string;
+
+  @ApiProperty({
+    description: 'User id',
+    example: null,
+  })
+  @IsNotEmpty()
+  @IsUUID()
+  user_id: string;
 }

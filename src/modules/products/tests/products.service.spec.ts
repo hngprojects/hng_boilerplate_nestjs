@@ -37,20 +37,22 @@ describe('ProductsService', () => {
       const mockProducts: Partial<Product>[] = [
         {
           id: '1',
-          product_name: 'Product 1',
+          name: 'Product 1',
           description: 'Description 1',
-          quantity: 10,
           price: 100,
           user: {} as User,
+          current_stock: 20,
+          in_stock: 20,
           category: {} as ProductCategory,
           created_at: new Date(),
           updated_at: new Date()
         },
         {
           id: '2',
-          product_name: 'Product 2',
+          name: 'Product 2',
           description: 'Description 2',
-          quantity: 20,
+          current_stock: 20,
+          in_stock: 20,
           price: 200,
           user: {} as User,
           category: {} as ProductCategory,
@@ -91,9 +93,10 @@ describe('ProductsService', () => {
       const mockProducts: Partial<Product>[] = [
         {
           id: '1',
-          product_name: 'Product 1',
+          name: 'Product 1',
           description: 'Description 1',
-          quantity: 10,
+          current_stock: 20,
+          in_stock: 20,
           price: 100,
           user: {} as User,
           category: {} as ProductCategory,

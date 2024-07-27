@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { InviteService } from '../invite.service';
 import { Invite } from '../entities/invite.entity';
-import { User, UserType } from 'src/modules/user/entities/user.entity';
+import { User, UserType } from '../../user/entities/user.entity';
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -45,7 +45,8 @@ describe('InviteService', () => {
       time_left: 5,
       secret: 'secret',
       is_2fa_enabled: true,
-      products: []
+      products: [],
+      testimonials: [],
     };
 
     const mockOrg: Organisation = {

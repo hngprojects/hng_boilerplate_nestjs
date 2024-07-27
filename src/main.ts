@@ -7,7 +7,6 @@ import { DataSource } from 'typeorm';
 import { AppModule } from './app.module';
 import { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
-import { ValidationPipe } from '@nestjs/common';
 import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
 
 async function bootstrap() {
@@ -30,7 +29,6 @@ async function bootstrap() {
 
   app.enable('trust proxy');
   app.useLogger(logger);
-  app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs'] });
   app.useGlobalInterceptors(new ResponseInterceptor());

@@ -13,13 +13,6 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Product retrieved successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized. You must be authenticated to get list of products.' })
   async findAllProducts(@Query('page') page: number, @Query('limit') limit: number) {
-    try {
-      return await this.productsService.findAllProducts(page, limit)
-    } catch (error) {
-      if(error instanceof NotFoundException){
-        throw new HttpException(error.getResponse(), error.getStatus());
-      }
-      throw error
-    }
+    return await this.productsService.findAllProducts(page, limit)
   }
 }
