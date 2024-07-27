@@ -258,6 +258,29 @@ describe('UserService', () => {
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
   });
+
+  describe('getUserByDataByIdWithoutPassword', () => {
+    const userId = 'valid-id';
+    const userWithoutPassword = {
+      id: userId,
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'test@example.com',
+      is_active: true,
+    };
+
+    it('should return user data without password', async () => {
+      mockUserRepository.findOne.mockResolvedValueOnce({ password: 'hashedpassword', ...userWithoutPassword });
+
+      const result = await service.getUserDataWithoutPasswordById(userId);
+
+      expect(result.user).toEqual(userWithoutPassword);
+      expect(result.user).not.toHaveProperty('password');
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+      });
+    });
+  });
 });
 
 describe('UserService', () => {
