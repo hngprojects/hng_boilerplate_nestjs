@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductCategory } from './entities/product-category.entity';
@@ -12,15 +12,15 @@ export class ProductCategoryService {
   ) {}
 
   async createProductCategory(CreateProductCategoryDto: CreateProductCategoryDto): Promise<ProductCategory> {
-   try {
-    const category = this.categoryRepository.create(CreateProductCategoryDto);
-    return await this.categoryRepository.save(category);
-   } catch (error) {
-    throw new InternalServerErrorException({
-      message: "Internal server error",
-      status_code: 500
-    })
-   }
+    try {
+      const category = this.categoryRepository.create(CreateProductCategoryDto);
+      const data = await this.categoryRepository.save(category);
+      return data;
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Internal server error',
+        status_code: 500,
+      });
+    }
   }
-
 }

@@ -10,18 +10,20 @@ import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import { EmailModule } from './modules/email/email.module';
-import authConfig from '../config/auth.config';
+import { OtpModule } from './modules/otp/otp.module';
+import { OtpService } from './modules/otp/otp.service';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { InviteModule } from './modules/invite/invite.module';
-import { OtpModule } from './modules/otp/otp.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
-import { OtpService } from './modules/otp/otp.service';
+import authConfig from 'config/auth.config';
+import { TimezonesModule } from './modules/timezones/timezones.module';
+import { EmailModule } from './modules/email/email.module';
+import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { EmailService } from './modules/email/email.service';
 
 @Module({
@@ -74,8 +76,10 @@ import { EmailService } from './modules/email/email.service';
     }),
     SeedingModule,
     AuthModule,
+    TimezonesModule,
     UserModule,
     OtpModule,
+    TestimonialsModule,
     EmailModule,
     ProductsModule,
     ProductCategoryModule,
@@ -105,6 +109,7 @@ import { EmailService } from './modules/email/email.service';
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    NotificationSettingsModule,
     TestimonialsModule,
   ],
   controllers: [HealthController],

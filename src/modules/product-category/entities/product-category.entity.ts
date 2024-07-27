@@ -11,10 +11,7 @@ export class ProductCategory extends AbstractBaseEntity{
   description: string;
 
   @Column('text')
-  slug: string;
-
-  @Column({ type: 'uuid', nullable: true })
-  parent_id: string;
+  slug: string
 
   @OneToMany(() => Product, product => product.category)
   products: Product[];
