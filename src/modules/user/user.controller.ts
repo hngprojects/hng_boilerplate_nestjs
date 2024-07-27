@@ -1,4 +1,4 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req } from '@nestjs/common';
+import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req, Get } from '@nestjs/common';
 import UserService from './user.service';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
@@ -44,5 +44,15 @@ export class UserController {
       status_code: 200,
       message: result.message,
     };
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get User Data' })
+  @ApiResponse({ status: 200, description: 'User data fetched successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get(':id')
+  async getUserDataById(@Param('id') id: string) {
+    return this.userService.getUserDataWithoutPasswordById(id);
   }
 }
