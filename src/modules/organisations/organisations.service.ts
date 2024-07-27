@@ -123,7 +123,6 @@ export class OrganisationsService {
         status_code: 200,
       };
     } catch (err) {
-      console.error(err);
       if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
         throw err;
       }
