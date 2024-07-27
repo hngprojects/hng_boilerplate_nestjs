@@ -4,16 +4,19 @@ import { Repository } from 'typeorm';
 import { Faqs } from './entities/faqs.entity';
 import { CreateFaqDto } from './dto/createFaqsDto';
 import { User } from '../user/entities/user.entity';
+import UserService from '../user/user.service';
 
 @Injectable()
 export class FaqsService {
   constructor(
     @InjectRepository(Faqs) private readonly faqsRepo: Repository<Faqs>,
-    @InjectRepository(User) private readonly userRepo: Repository<User>
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
+    private readonly userService: UserService
   ) {}
 
   async createFaq(createFaqs: CreateFaqDto, userId: string) {
     try {
+      // const user = await this.userService.getUserById(userId);
       const user = await this.userRepo.findOneBy({ id: userId });
       const existingFaq = await this.faqsRepo.findOneBy({ question: createFaqs.question });
 
