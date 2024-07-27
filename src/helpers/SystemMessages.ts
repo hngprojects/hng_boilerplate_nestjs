@@ -18,3 +18,7 @@ export const BLOG_POST = {
   CATEGORY_CREATED_SUCCESS: 'Blog category created successfully.',
   CATEGORY_CREATION_ERROR: 'Failed to create category.',
 };
+export const TIMEZONE_CREATED_SUCCESSFULLY = 'Timezone created Successfully';
+export const FETCH_TIMEZONE_FAILURE = 'Error Occured while creating Timezone, kindly try again';
+export const SUCCESS = 'Timezone fetched successfully';
+export const TIMEZONE_ALREADY_EXISTS = 'Timezone already exists';
