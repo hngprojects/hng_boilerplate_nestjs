@@ -1,14 +1,14 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
-import { BlogCategoryService } from '../services/blog-category.service';
+import { BlogPostCategoryService } from '../services/blog-category.service';
 import { CategoryResponseDto } from '../dto/blog-category-response.dto';
 
 @ApiTags('blog-categories')
 @ApiBearerAuth()
 @Controller('/blog-categories')
-export class BlogCategoryController {
-  constructor(private readonly blogCategoryService: BlogCategoryService) {}
+export class BlogPostCategoryController {
+  constructor(private readonly blogCategoryService: BlogPostCategoryService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new blog category' })

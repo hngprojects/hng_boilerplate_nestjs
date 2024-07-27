@@ -1,19 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BlogCategoryController } from '../controllers/blog-category.controller';
+import { BlogPostCategoryController } from '../controllers/blog-category.controller';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { BlogCategoryService } from '../services/blog-category.service';
+import { BlogPostCategoryService } from '../services/blog-category.service';
 import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
 
 describe('BlogCategoryController', () => {
-  let controller: BlogCategoryController;
-  let service: BlogCategoryService;
+  let controller: BlogPostCategoryController;
+  let service: BlogPostCategoryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [BlogCategoryController],
+      controllers: [BlogPostCategoryController],
       providers: [
         {
-          provide: BlogCategoryService,
+          provide: BlogPostCategoryService,
           useValue: {
             createCategory: jest.fn(),
           },
@@ -23,8 +23,8 @@ describe('BlogCategoryController', () => {
 
       .compile();
 
-    controller = module.get<BlogCategoryController>(BlogCategoryController);
-    service = module.get<BlogCategoryService>(BlogCategoryService);
+    controller = module.get<BlogPostCategoryController>(BlogPostCategoryController);
+    service = module.get<BlogPostCategoryService>(BlogPostCategoryService);
   });
 
   it('should be defined', () => {

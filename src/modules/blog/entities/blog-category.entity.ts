@@ -1,12 +1,12 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Blog } from './blog.entity';
+import { BlogPost } from './blog.entity';
 
 @Entity()
-export class BlogCategory extends AbstractBaseEntity {
+export class createBlogPostCategory extends AbstractBaseEntity {
   @Column()
   name: string;
 
-  @OneToMany(() => Blog, blog => blog.category)
-  blogs: Blog[];
+  @OneToMany(() => BlogPost, blog => blog.category)
+  blogs: BlogPost[];
 }

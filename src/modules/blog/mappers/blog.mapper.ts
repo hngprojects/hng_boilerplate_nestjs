@@ -1,10 +1,10 @@
 import { User } from '../../../modules/user/entities/user.entity';
-import { ResponseDto } from '../dto/blog-response.dto';
-import { BlogCategory } from '../entities/blog-category.entity';
-import { Blog } from '../entities/blog.entity';
+import { BlogResponseDto } from '../dto/blog-response.dto';
+import { createBlogPostCategory } from '../entities/blog-category.entity';
+import { BlogPost } from '../entities/blog.entity';
 
 export class BlogMapper {
-  static toResponseDto(blog: Blog, author: User, category: BlogCategory): ResponseDto['data'] {
+  static toResponseDto(blog: BlogPost, author: User, category: createBlogPostCategory): BlogResponseDto['data'] {
     return {
       id: blog.id,
       title: blog.title,

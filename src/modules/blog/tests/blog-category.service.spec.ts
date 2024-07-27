@@ -2,20 +2,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { BlogCategoryService } from '../services/blog-category.service';
-import { BlogCategory } from '../entities/blog-category.entity';
+import { BlogPostCategoryService } from '../services/blog-category.service';
+import { createBlogPostCategory } from '../entities/blog-category.entity';
 import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
 
 describe('BlogCategoryService', () => {
-  let service: BlogCategoryService;
-  let repository: Repository<BlogCategory>;
+  let service: BlogPostCategoryService;
+  let repository: Repository<createBlogPostCategory>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        BlogCategoryService,
+        BlogPostCategoryService,
         {
-          provide: getRepositoryToken(BlogCategory),
+          provide: getRepositoryToken(createBlogPostCategory),
           useValue: {
             findOne: jest.fn(),
             create: jest.fn(),
@@ -25,8 +25,8 @@ describe('BlogCategoryService', () => {
       ],
     }).compile();
 
-    service = module.get<BlogCategoryService>(BlogCategoryService);
-    repository = module.get<Repository<BlogCategory>>(getRepositoryToken(BlogCategory));
+    service = module.get<BlogPostCategoryService>(BlogPostCategoryService);
+    repository = module.get<Repository<createBlogPostCategory>>(getRepositoryToken(createBlogPostCategory));
   });
 
   it('should be defined', () => {
@@ -36,7 +36,7 @@ describe('BlogCategoryService', () => {
   describe('createCategory', () => {
     it('should successfully create a category', async () => {
       const createBlogCategoryDto: CreateBlogCategoryDto = { name: 'New Category' };
-      const category = new BlogCategory();
+      const category = new createBlogPostCategory();
       category.name = 'New Category';
       const savedCategory = { ...category };
 
@@ -56,7 +56,7 @@ describe('BlogCategoryService', () => {
 
     it('should throw BadRequestException if category already exists', async () => {
       const createBlogCategoryDto: CreateBlogCategoryDto = { name: 'Existing Category' };
-      const existingCategory = new BlogCategory();
+      const existingCategory = new createBlogPostCategory();
       existingCategory.name = 'Existing Category';
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(existingCategory);
@@ -67,7 +67,7 @@ describe('BlogCategoryService', () => {
     it('should throw InternalServerErrorException if save fails', async () => {
       const createBlogCategoryDto: CreateBlogCategoryDto = { name: 'New Category' };
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
-      jest.spyOn(repository, 'create').mockReturnValue(new BlogCategory());
+      jest.spyOn(repository, 'create').mockReturnValue(new createBlogPostCategory());
       jest.spyOn(repository, 'save').mockRejectedValue(new Error('Database error'));
 
       await expect(service.createCategory(createBlogCategoryDto)).rejects.toThrow(InternalServerErrorException);

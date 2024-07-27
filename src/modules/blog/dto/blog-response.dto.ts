@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Blog } from '../entities/blog.entity';
+import { BlogPost } from '../entities/blog.entity';
 import { UserType } from '../../../modules/user/entities/user.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 
-export class ResponseDto {
+export class BlogResponseDto {
   @ApiProperty({ example: 'success', description: 'The status of the response' })
   status: string;
 
@@ -13,7 +13,7 @@ export class ResponseDto {
   @ApiProperty({ example: 201, description: 'The HTTP status code of the response' })
   status_code: number;
 
-  @ApiProperty({ type: Blog, description: 'The data of the response', required: false })
+  @ApiProperty({ type: BlogPost, description: 'The data of the response', required: false })
   data?: {
     id: string;
     title: string;

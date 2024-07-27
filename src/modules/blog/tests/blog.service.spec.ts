@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BlogService } from '../services/blog.service';
-import { Blog } from '../entities/blog.entity';
+import { BlogPostService } from '../services/blog.service';
+import { BlogPost } from '../entities/blog.entity';
 import { User } from '../../user/entities/user.entity';
-import { BlogCategory } from '../entities/blog-category.entity';
+import { createBlogPostCategory } from '../entities/blog-category.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException, HttpStatus } from '@nestjs/common';
 
-describe('BlogService', () => {
-  let service: BlogService;
-  let blogRepository: Partial<jest.Mocked<Repository<Blog>>>;
+describe('BlogPostService', () => {
+  let service: BlogPostService;
+  let blogRepository: Partial<jest.Mocked<Repository<BlogPost>>>;
   let userRepository: Partial<jest.Mocked<Repository<User>>>;
-  let categoryRepository: Partial<jest.Mocked<Repository<BlogCategory>>>;
+  let categoryRepository: Partial<jest.Mocked<Repository<createBlogPostCategory>>>;
 
   beforeEach(async () => {
     blogRepository = {
@@ -26,14 +26,14 @@ describe('BlogService', () => {
     };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        BlogService,
-        { provide: getRepositoryToken(Blog), useValue: blogRepository },
+        BlogPostService,
+        { provide: getRepositoryToken(BlogPost), useValue: blogRepository },
         { provide: getRepositoryToken(User), useValue: userRepository },
-        { provide: getRepositoryToken(BlogCategory), useValue: categoryRepository },
+        { provide: getRepositoryToken(createBlogPostCategory), useValue: categoryRepository },
       ],
     }).compile();
 
-    service = module.get<BlogService>(BlogService);
+    service = module.get<BlogPostService>(BlogPostService);
   });
 
   it('should be defined', () => {
@@ -94,18 +94,18 @@ describe('BlogService', () => {
         updated_at: new Date(),
       } as User;
 
-      const category: BlogCategory = {
+      const category: createBlogPostCategory = {
         id: 'categoryuid',
         name: 'Test Category',
-      } as BlogCategory;
+      } as createBlogPostCategory;
 
-      const savedBlog: Blog = {
+      const savedBlog: BlogPost = {
         id: 'blogid',
         ...createBlogDto,
         author,
         category,
         isPublished: false,
-      } as unknown as Blog;
+      } as unknown as BlogPost;
 
       userRepository.findOne.mockResolvedValue(author);
       categoryRepository.findOne.mockResolvedValue(category);

@@ -4,8 +4,8 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
-import { Blog } from '../../../modules/blog/entities/blog.entity';
-import { BlogComment } from '../../../modules/blog/entities/blog-comments.entity';
+import { BlogPost } from '../../../modules/blog/entities/blog.entity';
+import { BlogPostComment } from '../../../modules/blog/entities/blog-comments.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super_admin',
@@ -55,11 +55,11 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
 
-  @OneToMany(() => Blog, blog => blog.author, { nullable: true })
-  blogs?: Blog[];
+  @OneToMany(() => BlogPost, blog => blog.author, { nullable: true })
+  blogs?: BlogPost[];
 
-  @OneToMany(() => BlogComment, comment => comment.author, { nullable: true })
-  comments?: BlogComment[];
+  @OneToMany(() => BlogPostComment, comment => comment.author, { nullable: true })
+  comments?: BlogPostComment[];
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 

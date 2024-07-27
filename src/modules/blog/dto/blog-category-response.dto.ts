@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BlogCategory } from '../entities/blog-category.entity';
+import { createBlogPostCategory } from '../entities/blog-category.entity';
 
 export class CategoryResponseDto {
   @ApiProperty({ example: 'success', description: 'The status of the response' })
@@ -11,6 +11,6 @@ export class CategoryResponseDto {
   @ApiProperty({ example: 201, description: 'The HTTP status code of the response' })
   status_code: number;
 
-  @ApiProperty({ type: BlogCategory.name, description: 'The data of the response', required: false })
-  data?: { name: BlogCategory['name'] };
+  @ApiProperty({ type: createBlogPostCategory.name, description: 'The data of the response', required: false })
+  data?: { name: createBlogPostCategory['name'] };
 }

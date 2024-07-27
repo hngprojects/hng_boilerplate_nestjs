@@ -1,19 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BlogController } from '../controllers/blog.controller';
-import { BlogService } from '../services/blog.service';
+import { createBlogPostController } from '../controllers/blog.controller';
+import { BlogPostService } from '../services/blog.service';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-describe('BlogController', () => {
-  let controller: BlogController;
-  let service: BlogService;
+describe('createBlogPostController', () => {
+  let controller: createBlogPostController;
+  let service: BlogPostService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [BlogController],
+      controllers: [createBlogPostController],
       providers: [
         {
-          provide: BlogService,
+          provide: BlogPostService,
           useValue: {
             create: jest.fn(),
           },
@@ -21,8 +21,8 @@ describe('BlogController', () => {
       ],
     }).compile();
 
-    controller = module.get<BlogController>(BlogController);
-    service = module.get<BlogService>(BlogService);
+    controller = module.get<createBlogPostController>(createBlogPostController);
+    service = module.get<BlogPostService>(BlogPostService);
   });
 
   it('should be defined', () => {

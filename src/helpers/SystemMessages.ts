@@ -9,3 +9,12 @@ export const INVALID_PASSWORD = 'Invalid password';
 export const TWO_FA_INITIATED = '2FA setup initiated';
 export const TWO_FA_ENABLED = '2FA is already enabled';
 export const BAD_REQUEST = 'Bad Request';
+export const BLOG_POST = {
+  USER_NOT_FOUND: 'User not found',
+  CATEGORY_NOT_FOUND: 'Category not found',
+  BLOG_CREATED_SUCCESS: 'Blog created successfully',
+  BLOG_CREATION_ERROR: 'Error creating blog',
+  CATEGORY_NAME_EXISTS: 'Category name already exists.',
+  CATEGORY_CREATED_SUCCESS: 'Blog category created successfully.',
+  CATEGORY_CREATION_ERROR: 'Failed to create category.',
+};

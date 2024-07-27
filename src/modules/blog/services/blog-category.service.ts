@@ -2,23 +2,24 @@ import { Injectable, BadRequestException, InternalServerErrorException } from '@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
-import { BlogCategory } from '../entities/blog-category.entity';
+import { createBlogPostCategory } from '../entities/blog-category.entity';
 import { CategoryResponseDto } from '../dto/blog-category-response.dto';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { BLOG_POST } from '../../../helpers/SystemMessages';
 
 @Injectable()
 @ApiTags('categories')
-export class BlogCategoryService {
+export class BlogPostCategoryService {
   constructor(
-    @InjectRepository(BlogCategory)
-    private readonly blogCategoryRepository: Repository<BlogCategory>
+    @InjectRepository(createBlogPostCategory)
+    private readonly blogCategoryRepository: Repository<createBlogPostCategory>
   ) {}
 
   @ApiOperation({ summary: 'Create a new blog category' })
   @ApiBody({ type: CreateBlogCategoryDto })
-  @ApiResponse({ status: 201, description: 'Blog category created successfully.', type: CategoryResponseDto })
-  @ApiResponse({ status: 400, description: 'Category name already exists.' })
-  @ApiResponse({ status: 500, description: 'Failed to create category.' })
+  @ApiResponse({ status: 201, description: BLOG_POST.CATEGORY_CREATED_SUCCESS, type: CategoryResponseDto })
+  @ApiResponse({ status: 400, description: BLOG_POST.CATEGORY_NAME_EXISTS })
+  @ApiResponse({ status: 500, description: BLOG_POST.CATEGORY_CREATION_ERROR })
   async createCategory(createBlogCategoryDto: CreateBlogCategoryDto): Promise<CategoryResponseDto> {
     try {
       const { name } = createBlogCategoryDto;
@@ -27,7 +28,7 @@ export class BlogCategoryService {
       if (existingCategory) {
         throw new BadRequestException({
           status: 'error',
-          message: 'Category name already exists.',
+          message: BLOG_POST.CATEGORY_NAME_EXISTS,
           status_code: 400,
         });
       }
@@ -37,7 +38,7 @@ export class BlogCategoryService {
       const savedCategory = await this.blogCategoryRepository.save(category);
       return {
         status: 'success',
-        message: 'Blog category created successfully.',
+        message: BLOG_POST.CATEGORY_CREATED_SUCCESS,
         data: { name: savedCategory.name },
         status_code: 201,
       };
@@ -48,7 +49,7 @@ export class BlogCategoryService {
 
       throw new InternalServerErrorException({
         status: 'error',
-        message: 'Failed to create category.',
+        message: BLOG_POST.CATEGORY_CREATION_ERROR,
         status_code: 500,
       });
     }
