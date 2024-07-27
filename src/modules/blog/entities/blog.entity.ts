@@ -1,14 +1,11 @@
 import { Entity, Column, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
-import { BlogComment } from './blog-comment.entity';
-import { BlogCategory } from './blog-category.entity';
+import { BlogPostComment } from './blog-comment.entity';
+import { BlogPostCategory } from './blog-category.entity';
 
 @Entity()
 export class Blog extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
   @Column()
   title: string;
 
@@ -24,9 +21,9 @@ export class Blog extends AbstractBaseEntity {
   @Column({ default: true })
   isPublished: boolean;
 
-  @OneToMany(() => BlogComment, comment => comment.blog)
-  comments: BlogComment[];
+  @OneToMany(() => BlogPostComment, comment => comment.blog)
+  comments: BlogPostComment[];
 
-  @ManyToOne(() => BlogCategory, category => category.blogs)
-  category: BlogCategory;
+  @ManyToOne(() => BlogPostCategory, category => category.blogs)
+  category: BlogPostCategory;
 }

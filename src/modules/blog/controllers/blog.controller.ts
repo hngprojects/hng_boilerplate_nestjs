@@ -1,17 +1,15 @@
 import { Controller, Put, Param, Body, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
-import { BlogService } from '../services/blog.service';
-import { EditBlogDto } from '../dto/edit-blog.dto';
+import { BlogPostService } from '../services/blog.service';
+import { EditBlogPost } from '../dto/edit-blog.dto';
 import { Blog } from '../entities/blog.entity';
-import { AuthGuard } from '../../../guards/auth.guard';
 @Controller('blogs')
 export class BlogController {
-  constructor(private readonly blogService: BlogService) {}
+  constructor(private readonly blogService: BlogPostService) {}
 
-  @UseGuards(AuthGuard)
   @Put('edit/:id')
-  async editBlog(
+  async editBlogPost(
     @Param('id') id: string,
-    @Body() editBlogDto: EditBlogDto
+    @Body() editBlogDto: EditBlogPost
   ): Promise<{
     status: string;
     message: string;
@@ -19,7 +17,7 @@ export class BlogController {
     data?: Blog;
   }> {
     try {
-      const blog = await this.blogService.editBlog(id, editBlogDto);
+      const blog = await this.blogService.editBlogPost(id, editBlogDto);
       return {
         status: 'success',
         message: 'Blog updated successfully',
