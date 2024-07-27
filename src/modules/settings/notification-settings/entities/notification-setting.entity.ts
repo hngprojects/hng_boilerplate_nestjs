@@ -5,18 +5,18 @@ import { Entity, Column } from 'typeorm';
 @Entity()
 export class NotificationSettings extends AbstractBaseEntity {
   @ApiProperty()
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: false })
   user_id: string;
 
   @ApiProperty()
-  @Column()
+  @Column({ nullable: true })
   email_notifications: boolean;
 
   @ApiProperty()
-  @Column()
+  @Column({ nullable: true })
   push_notifications: boolean;
 
   @ApiProperty()
-  @Column()
+  @Column({ nullable: true })
   sms_notifications: boolean;
 }
