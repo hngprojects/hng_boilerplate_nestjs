@@ -5,16 +5,16 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class Product extends AbstractBaseEntity {
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: false })
   product_name: string;
 
-  @Column('text')
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column('int')
+  @Column({ type: 'int', nullable: false, default: 0 })
   quantity: number;
 
-  @Column('int')
+  @Column({ type: 'int', nullable: false, default: 0 })
   price: number;
 
   @ManyToOne(() => User, user => user.products)
