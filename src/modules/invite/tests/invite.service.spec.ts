@@ -6,6 +6,7 @@ import { Organisation } from '../../organisations/entities/organisations.entity'
 import { User, UserType } from '../../user/entities/user.entity';
 import { Invite } from '../entities/invite.entity';
 import { InviteService } from '../invite.service';
+import { Product } from '../../products/entities/product.entity';
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -46,6 +47,7 @@ describe('InviteService', () => {
       secret: 'secret',
       is_2fa_enabled: true,
       testimonials: [],
+      products: [] as Product[],
     };
 
     const mockOrg: Organisation = {

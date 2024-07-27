@@ -1,11 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index, OneToMany } from 'typeorm';
 import { Product } from '../../products/entities/product.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 
 @Entity('categories')
-export class ProductCategory {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class ProductCategory extends AbstractBaseEntity {
   @Column({ length: 500 })
   @Index()
   name: string;
