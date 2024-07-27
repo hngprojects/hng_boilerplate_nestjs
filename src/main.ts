@@ -33,6 +33,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs'] });
   app.useGlobalInterceptors(new ResponseInterceptor());
 
+  // TODO: set options for swagger docs
   const options = new DocumentBuilder()
     .setTitle('Remote Bingo')
     .setDescription('<project-description-here>')
