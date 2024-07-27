@@ -6,7 +6,7 @@ import { mockLanguageRepository } from './language.repository.mock';
 import {
   LANGUAGE_ALREADY_EXISTS,
   LANGUAGE_CREATED_SUCCESSFULLY,
-  SUCCESS,
+  OK,
   ERROR_OCCURED,
   FETCH_LANGUAGE_FAILURE,
 } from '../../../helpers/SystemMessages';
@@ -109,7 +109,7 @@ describe('LanguageService', () => {
     const result = await service.fetchAllLanguages();
     expect(result).toEqual({
       languages,
-      message: SUCCESS,
+      message: OK,
       status_code: HttpStatus.OK,
     });
   }, 100000);
