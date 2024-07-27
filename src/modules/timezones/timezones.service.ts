@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Timezone } from './entities/timezone.entity';
@@ -25,10 +32,10 @@ export class TimezonesService {
       });
 
       if (timezoneExists) {
-        return {
+        throw new ConflictException({
           status_code: HttpStatus.CONFLICT,
           message: TIMEZONE_ALREADY_EXISTS,
-        };
+        });
       }
 
       const newTimezone = this.timezoneRepository.create(createTimezoneDto);
@@ -41,13 +48,10 @@ export class TimezonesService {
       };
     } catch (error) {
       Logger.error('TimezonesServiceError ~ createTimezone ~', error);
-      throw new HttpException(
-        {
-          message: ERROR_OCCURED,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new InternalServerErrorException({
+        message: ERROR_OCCURED,
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
@@ -61,13 +65,10 @@ export class TimezonesService {
       };
     } catch (error) {
       Logger.error('TimezonesServiceError ~ fetchTimezones ~', error);
-      throw new HttpException(
-        {
-          message: FETCH_TIMEZONE_FAILURE,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new InternalServerErrorException({
+        message: FETCH_TIMEZONE_FAILURE,
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 }

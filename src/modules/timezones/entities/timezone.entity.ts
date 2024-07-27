@@ -1,6 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { AbstractBaseEntity } from '../../../entities/base.entity'; // Assume you have a BaseEntity defined
-
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 @Entity()
 export class Timezone extends AbstractBaseEntity {
   @Column()
