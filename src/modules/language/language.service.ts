@@ -7,7 +7,7 @@ import {
   ERROR_OCCURED,
   LANGUAGE_ALREADY_EXISTS,
   LANGUAGE_CREATED_SUCCESSFULLY,
-  SUCCESS,
+  OK,
   FETCH_LANGUAGE_FAILURE,
 } from '../../helpers/SystemMessages';
 
@@ -54,7 +54,7 @@ export class LanguageService {
       const languages = await this.languageRepository.find();
       return {
         status_code: HttpStatus.OK,
-        message: SUCCESS,
+        message: OK,
         languages,
       };
     } catch (error) {
