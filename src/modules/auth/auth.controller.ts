@@ -38,7 +38,6 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('login')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: UNAUTHORIZED })
