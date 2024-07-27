@@ -18,7 +18,7 @@ export class CreateJobDto {
   @IsString()
   salary: string;
 
-  @ApiProperty({ description: 'The type of the job (e.g., Full-time, Part-time)' })
+  @ApiProperty({ description: 'The type of the job (e.g. Full-time, Part-time)' })
   @IsString()
   job_type: string;
 
