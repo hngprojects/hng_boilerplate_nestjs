@@ -13,23 +13,23 @@ export class JobService {
     private jobRepository: Repository<Job>
   ) {}
 
-  async findAll(page: number = 1, pageSize: number = 10): Promise<PaginationResult<Job>> {
+  async getAllJobs(page: number = 1, pageSize: number = 10): Promise<PaginationResult<Job>> {
     try {
-      const [result, total] = await this.jobRepository.findAndCount({
+      const [jobs, totalJobs] = await this.jobRepository.findAndCount({
         skip: (page - 1) * pageSize,
         take: pageSize,
       });
 
-      const totalPages = Math.ceil(total / pageSize);
+      const totalPages = Math.ceil(totalJobs / pageSize);
 
       return {
         message: 'Job listings retrieved successfully.',
-        data: result,
+        data: jobs,
         pagination: {
           current_page: page,
           total_pages: totalPages,
           page_size: pageSize,
-          total_items: total,
+          total_items: totalJobs,
         },
       };
     } catch (error) {

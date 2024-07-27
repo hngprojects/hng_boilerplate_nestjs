@@ -16,6 +16,6 @@ export class JobController {
   @ApiResponse({ status: 200, description: 'Job listings retrieved successfully.' })
   @ApiResponse({ status: 500, description: 'Failed to retrieve job listings.' })
   async getAllJobs(@Query('page') page = 1, @Query('pageSize') pageSize = 10): Promise<PaginationResult<Job>> {
-    return this.jobService.findAll(Number(page), Number(pageSize));
+    return this.jobService.getAllJobs(Number(page), Number(pageSize));
   }
 }

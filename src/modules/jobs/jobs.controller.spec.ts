@@ -48,11 +48,11 @@ describe('JobController', () => {
         },
       });
 
-      expect(jobService.findAll).toHaveBeenCalled();
+      expect(jobService.getAllJobs).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', async () => {
-      jest.spyOn(jobService, 'findAll').mockRejectedValueOnce(new InternalServerErrorException('Failed to retrieve job listings.'));
+      jest.spyOn(jobService, 'getAllJobs').mockRejectedValueOnce(new InternalServerErrorException('Failed to retrieve job listings.'));
 
       await expect(jobController.getAllJobs()).rejects.toThrow(InternalServerErrorException);
     });
