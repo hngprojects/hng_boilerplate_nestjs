@@ -12,7 +12,7 @@ export class ProductCategoryService {
     private categoryRepository: Repository<ProductCategory>
   ) {}
 
-  async create(createCategoryDto: CreateProductCategoryDto): Promise<ProductCategory> {
+  async createCategory(createCategoryDto: CreateProductCategoryDto): Promise<ProductCategory> {
     try {
       const category = this.categoryRepository.create(createCategoryDto);
       return await this.categoryRepository.save(category);
@@ -21,7 +21,7 @@ export class ProductCategoryService {
     }
   }
 
-  async findAll(limit?: number, offset?: number): Promise<ProductCategory[]> {
+  async findAllCategories(limit?: number, offset?: number): Promise<ProductCategory[]> {
     try {
       if (limit !== undefined && (isNaN(Number(limit)) || Number(limit) < 0)) {
         throw new BadRequestException('Limit must be a non-negative number');
@@ -46,7 +46,7 @@ export class ProductCategoryService {
     }
   }
 
-  async findOne(id: string): Promise<ProductCategory> {
+  async findOneCategory(id: string): Promise<ProductCategory> {
     try {
       const category = await this.categoryRepository.findOneBy({ id });
       if (!category) {
@@ -62,7 +62,7 @@ export class ProductCategoryService {
 
   async updateCategory(id: string, updateCategoryDto: UpdateProductCategoryDto): Promise<ProductCategory> {
     try {
-      const category = await this.findOne(id);
+      const category = await this.findOneCategory(id);
       Object.assign(category, updateCategoryDto);
       return await this.categoryRepository.save(category);
     } catch (error) {
@@ -74,7 +74,7 @@ export class ProductCategoryService {
 
   async removeCategory(id: string): Promise<void> {
     try {
-      const category = await this.findOne(id);
+      const category = await this.findOneCategory(id);
       await this.categoryRepository.remove(category);
     } catch (error) {
       if (error instanceof NotFoundException) {

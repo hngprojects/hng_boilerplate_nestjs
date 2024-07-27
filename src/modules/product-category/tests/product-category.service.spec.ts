@@ -39,18 +39,18 @@ describe('ProductCategoryService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAll', () => {
+  describe('getAllCategories', () => {
     it('should return all categories', async () => {
       const categories = [{ id: '1', name: 'Category 1' }];
       mockRepository.find.mockResolvedValue(categories);
 
-      const result = await service.findAll();
+      const result = await service.findAllCategories();
       expect(result).toEqual(categories);
       expect(mockRepository.find).toHaveBeenCalledWith({});
     });
 
     it('should apply limit and offset', async () => {
-      await service.findAll(10, 5);
+      await service.findAllCategories(10, 5);
       expect(mockRepository.find).toHaveBeenCalledWith({ take: 10, skip: 5 });
     });
   });
@@ -60,30 +60,34 @@ describe('ProductCategoryService', () => {
       const category = { id: '1', name: 'Category 1' };
       mockRepository.findOneBy.mockResolvedValue(category);
 
-      const result = await service.findOne('1');
+      const result = await service.findOneCategory('1');
       expect(result).toEqual(category);
     });
 
     it('should throw NotFoundException if category not found', async () => {
       mockRepository.findOneBy.mockResolvedValue(null);
 
-      await expect(service.findOne('1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOneCategory('1')).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('create', () => {
+  describe('createNewCategory', () => {
     it('should create a new category', async () => {
-      const createDto: CreateProductCategoryDto = { name: 'New Category' };
+      const createDto: CreateProductCategoryDto = {
+        name: 'New Category',
+        description: '',
+        slug: '',
+      };
       const newCategory = { id: '1', ...createDto };
       mockRepository.create.mockReturnValue(newCategory);
       mockRepository.save.mockResolvedValue(newCategory);
 
-      const result = await service.create(createDto);
+      const result = await service.createCategory(createDto);
       expect(result).toEqual(newCategory);
     });
   });
 
-  describe('update', () => {
+  describe('updateCategoryById', () => {
     it('should update an existing category', async () => {
       const updateDto: UpdateProductCategoryDto = { name: 'Updated Category' };
       const existingCategory = { id: '1', name: 'Old Category' };
@@ -102,7 +106,7 @@ describe('ProductCategoryService', () => {
     });
   });
 
-  describe('remove', () => {
+  describe('deleteCategoryById', () => {
     it('should remove an existing category', async () => {
       const category = { id: '1', name: 'Category to Remove' };
       mockRepository.findOneBy.mockResolvedValue(category);

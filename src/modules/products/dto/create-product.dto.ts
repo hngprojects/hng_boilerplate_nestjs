@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString, IsInt, Min, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Column } from 'typeorm';
 
 export class CreateProductDto {
   @ApiProperty({

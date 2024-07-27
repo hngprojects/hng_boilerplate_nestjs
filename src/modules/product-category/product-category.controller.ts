@@ -23,9 +23,9 @@ export class ProductCategoryController {
 
   @ApiOperation({ summary: 'Get product categories' })
   @Get()
-  async findAll(@Query('limit') limit?: number, @Query('offset') offset?: number) {
+  async getAllCategories(@Query('limit') limit?: number, @Query('offset') offset?: number) {
     try {
-      const categories = await this.categoryService.findAll(limit, offset);
+      const categories = await this.categoryService.findAllCategories(limit, offset);
       return {
         status_code: 200,
         categories: categories,
@@ -51,8 +51,8 @@ export class ProductCategoryController {
   @ApiOperation({ summary: 'reate product categories' })
   @Post()
   @ApiBody({ type: CreateProductCategoryDto })
-  async create(@Body() createCategoryDto: CreateProductCategoryDto) {
-    const createdcategory = await this.categoryService.create(createCategoryDto);
+  async createNewCategory(@Body() createCategoryDto: CreateProductCategoryDto) {
+    const createdcategory = await this.categoryService.createCategory(createCategoryDto);
     return {
       status_code: 201,
       category: createdcategory,
@@ -63,7 +63,7 @@ export class ProductCategoryController {
   @Patch(':id')
   @ApiParam({ name: 'id', description: 'Category ID', example: '9dfcb8de-e36c-468f-acda-6f4d9a035451' })
   @ApiBody({ type: UpdateProductCategoryDto })
-  async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateProductCategoryDto) {
+  async updateCategoryById(@Param('id') id: string, @Body() updateCategoryDto: UpdateProductCategoryDto) {
     const updatedCategory = await this.categoryService.updateCategory(id, updateCategoryDto);
     return {
       status_code: HttpStatus.OK,
@@ -74,7 +74,7 @@ export class ProductCategoryController {
   @ApiOperation({ summary: 'Delete product categories' })
   @Delete(':id')
   @ApiParam({ name: 'id', description: 'Category ID', example: '9dfcb8de-e36c-468f-acda-6f4d9a035451' })
-  async remove(@Param('id') id: string) {
+  async deleteCategoryById(@Param('id') id: string) {
     await this.categoryService.removeCategory(id);
     return {
       status_code: 200,
