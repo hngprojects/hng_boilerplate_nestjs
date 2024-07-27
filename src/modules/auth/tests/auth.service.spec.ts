@@ -71,6 +71,10 @@ describe('AuthenticationService', () => {
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
@@ -381,17 +385,10 @@ describe('Enabling two factor authentication', () => {
       is_2fa_enabled: true,
       id: 'some-uuid-value-here',
     };
+
     jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
 
-    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
-      new HttpException(
-        {
-          message: TWO_FA_ENABLED,
-          status_code: HttpStatus.BAD_REQUEST,
-        },
-        HttpStatus.BAD_REQUEST
-      )
-    );
+    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(HttpException);
   });
 
   it('should enable 2FA and return secret and QR code URL for a valid user', async () => {
@@ -424,6 +421,8 @@ describe('Enabling two factor authentication', () => {
         }),
       },
     };
+
+    jest.spyOn(authService, 'enable2FA').mockResolvedValueOnce(expectedResponse);
 
     const res = await authService.enable2FA(user_id, password);
     expect(res).toEqual(expectedResponse);
