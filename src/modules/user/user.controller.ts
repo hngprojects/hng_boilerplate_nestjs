@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Req, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Req, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
@@ -44,5 +44,15 @@ export class UserController {
       status_code: 200,
       message: result.message,
     };
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get User Data' })
+  @ApiResponse({ status: 200, description: 'User data fetched successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get(':id')
+  async getUserDataById(@Param('id') id: string) {
+    return this.userService.getUserDataWithoutPasswordById(id);
   }
 }
