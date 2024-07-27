@@ -1,9 +1,9 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req } from '@nestjs/common';
-import UserService from './user.service';
-import { UpdateUserDto } from './dto/update-user-dto';
-import { UserPayload } from './interfaces/user-payload.interface';
+import { Body, Controller, Param, Patch, Req, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
+import { UpdateUserDto } from './dto/update-user-dto';
+import { UserPayload } from './interfaces/user-payload.interface';
+import UserService from './user.service';
 
 @ApiBearerAuth()
 @ApiTags('Users')
