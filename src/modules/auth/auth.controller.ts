@@ -39,7 +39,6 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('login')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -71,7 +70,6 @@ export default class RegistrationController {
     return await this.authService.requestSignInToken(body);
   }
 
-  @skipAuth()
   @Post('verify-signin-token')
   @HttpCode(200)
   @ApiOperation({ summary: 'Verify Signin Token' })
