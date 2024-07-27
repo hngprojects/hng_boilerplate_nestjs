@@ -4,7 +4,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 
 export enum UserType {
-  SUPER_ADMIN = 'super_admin',
+  SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }

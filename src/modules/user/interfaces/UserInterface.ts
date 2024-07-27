@@ -9,16 +9,17 @@ interface UserInterface {
 
   password: string;
 
-  is_active: boolean
+  user_type: string;
 
-  attempts_left: number
+  is_active: boolean;
 
-  time_left: number
+  attempts_left: number;
+
+  time_left: number;
 
   created_at: Date;
 
   updated_at: Date;
-
 }
 
-export default UserInterface
+export default UserInterface;
