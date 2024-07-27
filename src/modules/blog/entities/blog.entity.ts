@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
-import { BlogComment } from './blog-comments.entity';
+import { BlogComment } from './blog-comment.entity';
 import { BlogCategory } from './blog-category.entity';
 
 @Entity()
