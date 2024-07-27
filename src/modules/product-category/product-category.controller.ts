@@ -1,4 +1,4 @@
-import { Controller,Post, Body} from '@nestjs/common';
+import { Controller,Post, Body, HttpStatus} from '@nestjs/common';
 import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import { ApiTags, ApiBody} from '@nestjs/swagger';
@@ -11,9 +11,11 @@ export class ProductCategoryController {
   @Post()
   @ApiBody({ type: CreateProductCategoryDto })
   async createProductCategory(@Body() createProductCategoryDto: CreateProductCategoryDto) {
+    const data = await this.productCategoryService.createProductCategory(createProductCategoryDto)
     return {
-      status_code: 201,
-      category: await this.productCategoryService.createProductCategory(createProductCategoryDto),
+      message: 'Product Category created successfully',
+      status_code: HttpStatus.CREATED,
+      data,
     };
   }
 
