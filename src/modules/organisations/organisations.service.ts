@@ -51,7 +51,7 @@ export class OrganisationsService {
     try {
       const org = await this.organisationRepository.findOneBy({ id });
       if (!org) {
-        throw new NotFoundException(`Organisation with id ${id} not found`);
+        throw new NotFoundException(`Organisation with id: ${id} not found`);
       }
       org.isDeleted = true;
       await this.organisationRepository.save(org);
