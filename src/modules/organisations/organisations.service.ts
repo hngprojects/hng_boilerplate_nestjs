@@ -62,12 +62,6 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
-    // const org = await this.organisationRepository.findOneBy({ id });
-    // if (org.isDeleted === false) {
-    //   org.isDeleted = true;
-    // }
-    // await this.organisationRepository.save(org);
-    // return HttpStatus.NO_CONTENT;
   }
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
