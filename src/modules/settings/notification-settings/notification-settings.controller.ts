@@ -28,6 +28,10 @@ export class NotificationSettingsController {
   }
 
   @Get('notification-settings')
+  @ApiOkResponse({
+    description: 'Find notification settings by user ID',
+    type: NotificationSettings,
+  })
   async findByUserId(@Req() request: Request) {
     const user = request['user'];
 
