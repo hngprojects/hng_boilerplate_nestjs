@@ -3,7 +3,7 @@ import { Organisation } from '../../entities/organisations.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 
 export enum UserType {
-  SUPER_ADMIN = 'super_admin',
+  SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }
