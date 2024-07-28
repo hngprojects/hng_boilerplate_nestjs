@@ -4,13 +4,6 @@ import { join } from 'path';
 async function copyTemplates() {
   const srcDir = join(__dirname, '../../../src/modules/email/templates');
   const destDir = join(__dirname, '../modules/email/templates');
-  console.log('--------------------------------------------------------------');
-  console.log(srcDir);
-  console.log('--------------------------------------------------------------');
-  console.log(__dirname);
-  console.log('--------------------------------------------------------------');
-  console.log(destDir);
-  console.log('--------------------------------------------------------------');
   try {
     // Create the destination directory if it does not exist
     await fs.mkdir(destDir, { recursive: true });
