@@ -8,10 +8,11 @@ import { AppModule } from './app.module';
 import { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
 import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
+import copyTemplates from './utils/copy-templates';
 
 async function bootstrap() {
+  await copyTemplates();
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
-
   const logger = app.get(Logger);
 
   const dataSource = app.get(DataSource);

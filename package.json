@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "prestart": "copyfiles -u 2 src/modules/email/templates/**/* dist/src/modules/email/templates",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
     "dev": "PROFILE=local ./node_modules/.bin/ts-node-dev -r dotenv/config --respawn src/main",
@@ -29,7 +30,9 @@
     "premigration:run": "npm run build",
     "migration:run": "npx typeorm migration:run -d dist/src/database/data-source",
     "migration:revert": "npx typeorm migration:revert -d dist/src/database/data-source",
-    "seed": "ts-node src/seed.ts"
+    "seed": "ts-node src/seed.ts",
+    "copy-templates": "copyfiles -u 2 src/modules/email/templates/**/* dist/src/modules/email/templates",
+    "postbuild": "npm run copy-templates"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
@@ -75,6 +78,7 @@
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.29.1",
