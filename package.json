@@ -57,7 +57,8 @@
     "supertest": "^7.0.0",
     "typeorm": "^0.3.20",
     "typeorm-extension": "^3.5.1",
-    "types-joi": "^2.1.0"
+    "types-joi": "^2.1.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
