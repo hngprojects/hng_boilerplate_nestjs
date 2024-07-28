@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Body, Res, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { CreateLanguageDto } from './dto/create-language.dto';
 import { Response } from 'express';
-import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('language')
 export class LanguageController {
