@@ -3,7 +3,7 @@ import { Product } from '../../../products/entities/product.entity';
 import { v4 as uuidv4 } from 'uuid';
 
 export enum UserType {
-  SUPER_ADMIN = 'super_admin',
+  SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }
