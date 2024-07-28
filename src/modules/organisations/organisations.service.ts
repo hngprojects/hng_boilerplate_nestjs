@@ -14,6 +14,7 @@ import { User } from '../user/entities/user.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
+import { OrganisationDto } from './dto/get-organisation';
 
 @Injectable()
 export class OrganisationsService {
@@ -73,7 +74,7 @@ export class OrganisationsService {
     }
   }
 
-  async getOrganisationById(id: string, userId: string): Promise<Organisation> {
+  async getOrganisationById(id: string, userId: string): Promise<OrganisationDto> {
     try {
       const organisation = await this.organisationRepository.findOne({
         where: { id },
@@ -88,7 +89,28 @@ export class OrganisationsService {
         throw new ForbiddenException('You do not have access to this organisation');
       }
 
-      return organisation;
+      const organisationDto: OrganisationDto = {
+        id: organisation.id,
+        created_at: organisation.created_at,
+        updated_at: organisation.updated_at,
+        name: organisation.name,
+        description: organisation.description,
+        email: organisation.email,
+        industry: organisation.industry,
+        type: organisation.type,
+        country: organisation.country,
+        address: organisation.address,
+        state: organisation.state,
+        isDeleted: organisation.isDeleted,
+        owner: {
+          id: organisation.owner.id,
+          first_name: organisation.owner.first_name,
+          last_name: organisation.owner.last_name,
+          email: organisation.owner.email,
+        },
+      };
+
+      return organisationDto;
     } catch (error: unknown) {
       if (
         error instanceof NotFoundException ||
