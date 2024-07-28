@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
   UnauthorizedException,
-  BadRequestException
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
@@ -43,8 +43,7 @@ export default class AuthenticationService {
     private userService: UserService,
     private jwtService: JwtService,
     private otpService: OtpService,
-    private emailService: EmailService,
-    @InjectRepository(User) private readonly userRepository: Repository<User>
+    private emailService: EmailService
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -289,7 +288,7 @@ export default class AuthenticationService {
         first_name: user.first_name,
         last_name: user.last_name,
       },
-    }
+    };
   }
   async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
     const { email } = requestSignInTokenDto;
@@ -298,7 +297,7 @@ export default class AuthenticationService {
 
     if (!user) {
       throw new BadRequestException({
-        message: "Invalid credentials",
+        message: 'Invalid credentials',
         status_code: HttpStatus.BAD_REQUEST,
       });
     }
@@ -346,8 +345,6 @@ export default class AuthenticationService {
       message: 'Sign-in successful',
       token: accessToken,
       status_code: HttpStatus.OK,
-
-    }
+    };
   }
 }
-
