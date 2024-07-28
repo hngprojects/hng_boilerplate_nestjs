@@ -16,6 +16,7 @@ export const createMockOrganisation = (): Organisation => {
     last_name: 'Smith',
     email: 'john.smith@example.com',
     password: 'pass123',
+    jobs: [],
     hashPassword: async () => {},
     is_active: true,
     attempts_left: 3,

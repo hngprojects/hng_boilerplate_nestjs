@@ -4,6 +4,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Job } from '../../jobs/entities/job.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -55,6 +56,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
+
+  @OneToMany(() => Job, job => job.user)
+  jobs: Job[];
 
   @BeforeInsert()
   async hashPassword() {
