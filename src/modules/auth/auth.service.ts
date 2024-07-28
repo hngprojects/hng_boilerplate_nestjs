@@ -21,6 +21,9 @@ import { EmailService } from '../email/email.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { User } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export default class AuthenticationService {
@@ -28,7 +31,8 @@ export default class AuthenticationService {
     private userService: UserService,
     private jwtService: JwtService,
     private otpService: OtpService,
-    private emailService: EmailService
+    private emailService: EmailService,
+    @InjectRepository(User) private readonly userRepository: Repository<User>
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -254,6 +258,23 @@ export default class AuthenticationService {
       data: {
         secret: secret.base32,
         qr_code_url: qrCodeUrl,
+      },
+    };
+  }
+
+  async googleLogin(user: User) {
+    const payload = { userId: user.id };
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      status: 'success',
+      message: 'User successfully authenticated',
+      access_token: accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
       },
     };
   }
