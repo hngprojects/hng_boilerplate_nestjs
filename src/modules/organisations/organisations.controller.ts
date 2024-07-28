@@ -3,7 +3,7 @@ import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { AddUserDto } from './dto/add-user-dto';
+import { AddUserToOrganisationDto } from './dto/add-user-dto';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')
@@ -31,7 +31,7 @@ export class OrganisationsController {
 
   @ApiOperation({ summary: 'Add User To Organisation' })
   @Post('/:org_id/users')
-  async addUser(@Param('org_id') orgId: string, @Body() addUserDto: AddUserDto, @Request() req) {
+  async addUser(@Param('org_id') orgId: string, @Body() addUserDto: AddUserToOrganisationDto, @Request() req) {
     const userId = addUserDto.userId;
     const currentUser = req['user'];
     return this.organisationsService.addUser(orgId, userId, currentUser.sub);
