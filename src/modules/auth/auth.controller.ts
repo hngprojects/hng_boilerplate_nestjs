@@ -61,7 +61,7 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @Post('signin-token')
+  @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })
   @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: RequestSigninTokenDto })
@@ -70,7 +70,7 @@ export default class RegistrationController {
     return await this.authService.requestSignInToken(body);
   }
 
-  @Post('verify-signin-token')
+  @Post('magic-link/verify')
   @HttpCode(200)
   @ApiOperation({ summary: 'Verify Signin Token' })
   @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
