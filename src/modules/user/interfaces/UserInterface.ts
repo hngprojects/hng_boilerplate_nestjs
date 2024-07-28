@@ -15,6 +15,8 @@ interface UserInterface {
 
   is_2fa_enabled: boolean;
 
+  user_type: UserType;
+
   is_active: boolean;
 
   attempts_left: number;
