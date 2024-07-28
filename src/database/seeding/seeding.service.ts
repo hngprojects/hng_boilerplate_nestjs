@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
+import { Invite } from '../../modules/invite/entities/invite.entity';
 
 @Injectable()
 export class SeedingService {
@@ -9,6 +10,7 @@ export class SeedingService {
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
+    const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
 
     try {
@@ -74,6 +76,26 @@ export class SeedingService {
         await organisationRepository.save([or1, or2]);
         const savedOrganisations = await organisationRepository.find();
         if (savedOrganisations.length !== 2) {
+          throw new Error('Failed to create all organisations');
+        }
+
+        const inv1 = inviteRepository.create({
+          email: 'Org 1',
+          status: 'pending',
+          user: savedUsers[0],
+          organisation: savedOrganisations[0],
+        });
+
+        const inv2 = inviteRepository.create({
+          email: 'Org 1',
+          status: 'pending',
+          user: savedUsers[1],
+          organisation: savedOrganisations[1],
+        });
+
+        await inviteRepository.save([inv1, inv2]);
+        const savedInvite = await inviteRepository.find();
+        if (savedInvite.length !== 2) {
           throw new Error('Failed to create all organisations');
         }
 
