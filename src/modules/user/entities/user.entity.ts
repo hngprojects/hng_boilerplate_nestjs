@@ -7,7 +7,7 @@ import { Product } from '../../products/entities/product.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 
 export enum UserType {
-  SUPER_ADMIN = 'super_admin',
+  SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }

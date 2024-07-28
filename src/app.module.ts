@@ -16,6 +16,8 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
 import authConfig from '../config/auth.config';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
+import { TimezonesModule } from './modules/timezones/timezones.module';
+import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -23,6 +25,7 @@ import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
+import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 
 @Module({
   providers: [
@@ -74,10 +77,12 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     }),
     SeedingModule,
     AuthModule,
+    TimezonesModule,
     UserModule,
     ProductsModule,
     ProductCategoryModule,
     OtpModule,
+    TestimonialsModule,
     EmailModule,
     InviteModule,
     MailerModule.forRootAsync({
@@ -105,6 +110,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
       inject: [ConfigService],
     }),
     OrganisationsModule,
+    NotificationSettingsModule,
     TestimonialsModule,
   ],
   controllers: [HealthController],
