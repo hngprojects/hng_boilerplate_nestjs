@@ -5,17 +5,20 @@ import { Faqs } from '../entities/faqs.entity';
 import { User } from '../../../modules/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateFaqDto } from '../dto/createFaqsDto';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
+import UserService from '../../../modules/user/user.service';
+import { UserType } from '../../../modules/organisations/tests/mocks/organisation.mock';
 
 describe('FaqsService', () => {
   let service: FaqsService;
   let faqsRepository: Repository<Faqs>;
-  let userRepository: Repository<User>;
+  let userService: UserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FaqsService,
+        UserService,
         {
           provide: getRepositoryToken(Faqs),
           useClass: Repository,
@@ -29,7 +32,7 @@ describe('FaqsService', () => {
 
     service = module.get<FaqsService>(FaqsService);
     faqsRepository = module.get<Repository<Faqs>>(getRepositoryToken(Faqs));
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    userService = module.get<UserService>(UserService);
   });
 
   afterEach(() => {
@@ -37,7 +40,7 @@ describe('FaqsService', () => {
   });
 
   it('should throw BadRequestException if FAQ already exists', async () => {
-    jest.spyOn(userRepository, 'findOneBy').mockResolvedValueOnce({ user_type: 'admin' } as User);
+    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce({ user_type: UserType.ADMIN });
     jest.spyOn(faqsRepository, 'findOneBy').mockResolvedValueOnce({ question: 'Test Question' } as Faqs);
 
     await expect(service.createFaq({ question: 'Test Question' } as CreateFaqDto, 'userId')).rejects.toThrow(
@@ -46,11 +49,10 @@ describe('FaqsService', () => {
   });
 
   it('should create and return the new FAQ if valid', async () => {
-    const user = { user_type: 'admin' } as User;
     const createFaqDto = { question: 'Test Question', answer: 'Test Answer', category: '', tags: '' } as CreateFaqDto;
     const newFaq = createFaqDto as Faqs;
 
-    jest.spyOn(userRepository, 'findOneBy').mockResolvedValueOnce(user);
+    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce({ user_type: UserType.ADMIN });
     jest.spyOn(faqsRepository, 'findOneBy').mockResolvedValueOnce(null);
     jest.spyOn(faqsRepository, 'create').mockReturnValueOnce(newFaq);
     jest.spyOn(faqsRepository, 'save').mockResolvedValueOnce(newFaq);

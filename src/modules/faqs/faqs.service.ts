@@ -3,19 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Faqs } from './entities/faqs.entity';
 import { CreateFaqDto } from './dto/createFaqsDto';
-import { User } from '../user/entities/user.entity';
+import UserService from '../user/user.service';
 
 @Injectable()
 export class FaqsService {
   constructor(
     @InjectRepository(Faqs) private readonly faqsRepo: Repository<Faqs>,
-    @InjectRepository(User) private readonly userRepo: Repository<User>
+    private readonly userService: UserService
   ) {}
 
   async createFaq(createFaqs: CreateFaqDto, userId: string) {
     try {
-      const user = await this.userRepo.findOneBy({ id: userId });
       const existingFaq = await this.faqsRepo.findOneBy({ question: createFaqs.question });
+      const user = await this.userService.getUserRecord({ identifierType: 'id', identifier: userId });
 
       if (user?.user_type !== 'admin') {
         throw new ForbiddenException({
@@ -39,7 +39,6 @@ export class FaqsService {
 
       return { message: 'FAQ created successfully', data: newFaqs };
     } catch (error) {
-      // console.log(error);
       if (error instanceof BadRequestException || error instanceof ForbiddenException) {
         throw error;
       } else {
