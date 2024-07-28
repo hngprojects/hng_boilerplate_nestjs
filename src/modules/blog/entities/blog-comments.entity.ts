@@ -5,10 +5,6 @@ import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class BlogPostComment extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn()
-  @Column('text')
-  content: string;
-
   @ManyToOne(() => BlogPost, blog => blog.comments)
   blog: BlogPost;
 
