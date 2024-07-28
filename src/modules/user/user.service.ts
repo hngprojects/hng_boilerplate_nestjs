@@ -40,6 +40,17 @@ export default class UserService {
     await this.userRepository.save(user);
   }
 
+  async getUserDataWithoutPasswordById(id: string) {
+    const user = await this.getUserRecord({ identifier: id, identifierType: 'id' });
+
+    const { password, ...userData } = user;
+
+    return {
+      status_code: 200,
+      user: userData,
+    };
+  }
+
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
     return user;
