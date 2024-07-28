@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, Request, HttpCode } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Request, HttpCode, Query } from '@nestjs/common';
 // import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { EmailService } from './email.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -24,8 +24,12 @@ export class EmailController {
   @ApiResponse({ status: 200, description: 'Email templates retrieved successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 404, description: 'There are No Email Templates Available' })
-  async getAllEmailTemplate(@Request() req: Request) {
-    const content = await this.emailSevice.getAllTemplates();
+  async getAllEmailTemplate(
+    @Request() req: Request,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
+    const content = await this.emailSevice.getAllTemplates(page, limit);
     return content;
   }
 }

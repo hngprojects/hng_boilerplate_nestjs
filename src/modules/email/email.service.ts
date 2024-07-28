@@ -76,19 +76,32 @@ export class EmailService {
         message: 'Template not found',
       };
     return {
-      data: { template: template },
+      data: { name: templateName, content: template },
     };
   }
-
-  async getAllTemplates() {
+  async getAllTemplates(page: number = 1, limit: number = 10) {
     try {
       const files = await fs.readdir(this.templatesPath);
-      const templates = {};
+      const templates = [];
       for (const file of files) {
         const templateName = file.replace('.hbs', '');
-        templates[templateName] = await this.getTemp(templateName);
+        const template = await this.getTemp(templateName);
+
+        templates.push({ name: templateName, content: template });
       }
-      return { data: { templates } };
+
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedTemplates = templates.slice(startIndex, endIndex);
+
+      return {
+        data: {
+          total: templates.length,
+          page,
+          limit,
+          templates: paginatedTemplates,
+        },
+      };
     } catch (err) {
       throw new Error(`Error reading templates: ${err.message}`);
     }

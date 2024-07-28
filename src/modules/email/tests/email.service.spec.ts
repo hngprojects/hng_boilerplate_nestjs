@@ -9,10 +9,20 @@ describe('EmailService', () => {
   const mockMailerService = {
     sendMail: jest.fn().mockResolvedValue({}),
   };
+
   const mockEmailTemplate = { data: { Template1: '<h1>Template 1</h1>', Template2: '<h1>Template 2</h1>' } };
   const mockEmailTemplates = {
-    data: { templates: { Template1: '<h1>Template 1</h1>', Template2: '<h1>Template 2</h1>' } },
+    data: {
+      templates: [
+        { content: '<h1>Template 1</h1>', name: 'Template2' },
+        { content: '<h1>Template 2</h1>', name: 'Template2' },
+      ],
+      total: 2,
+      page: 1,
+      limit: 2,
+    },
   };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
