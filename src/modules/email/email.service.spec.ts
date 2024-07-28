@@ -110,4 +110,20 @@ describe('EmailService', () => {
       },
     });
   });
+
+  it('should send otp email', async () => {
+    const email = 'test@example.com';
+    const token = '123456';
+    await service.sendLoginOtp(email, token);
+
+    expect(mailerService.sendMail).toHaveBeenCalledWith({
+      to: email,
+      subject: 'Login with OTP',
+      template: 'login-otp',
+      context: {
+        email,
+        token,
+      },
+    });
+  });
 });
