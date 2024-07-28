@@ -78,5 +78,16 @@ export class EmailService {
     return {
       data: { name: templateName, content: template },
     };
+
+  async sendLoginOtp(email: string, token: string) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Login with OTP',
+      template: 'login-otp',
+      context: {
+        token,
+        email,
+      },
+    });
   }
 }
