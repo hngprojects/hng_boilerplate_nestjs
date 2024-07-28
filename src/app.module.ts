@@ -5,15 +5,17 @@ import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
-import authConfig from '../config/auth.config';
 import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import ProbeController from './probe.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
+import { TimezonesModule } from './modules/timezones/timezones.module';
+import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -73,8 +75,10 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
     }),
     SeedingModule,
     AuthModule,
+    TimezonesModule,
     UserModule,
     OtpModule,
+    TestimonialsModule,
     EmailModule,
     InviteModule,
     MailerModule.forRootAsync({
@@ -105,6 +109,6 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
     NotificationSettingsModule,
     TestimonialsModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, ProbeController],
 })
 export class AppModule {}
