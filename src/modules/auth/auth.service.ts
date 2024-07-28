@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
   UnauthorizedException,
-  BadRequestException
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
@@ -30,6 +30,9 @@ import { EmailService } from '../email/email.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { User } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { generateSixDigitToken } from '../../utils/generate-token';
 import { OtpDto } from '../otp/dto/otp.dto';
@@ -271,6 +274,22 @@ export default class AuthenticationService {
     };
   }
 
+  async googleLogin(user: User) {
+    const payload = { userId: user.id };
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      status: 'success',
+      message: 'User successfully authenticated',
+      access_token: accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      },
+    };
+  }
   async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
     const { email } = requestSignInTokenDto;
 
@@ -278,7 +297,7 @@ export default class AuthenticationService {
 
     if (!user) {
       throw new BadRequestException({
-        message: "Invalid credentials",
+        message: 'Invalid credentials',
         status_code: HttpStatus.BAD_REQUEST,
       });
     }

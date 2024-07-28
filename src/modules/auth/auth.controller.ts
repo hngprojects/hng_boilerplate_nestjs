@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
@@ -9,6 +9,7 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
+import { AuthGuard } from '@nestjs/passport';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 
@@ -61,6 +62,49 @@ export default class RegistrationController {
   }
 
   @skipAuth()
+  @Get('login/google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req: Request) {
+    // Initiates Google OAuth2 login flow
+  }
+
+  @skipAuth()
+  @Get('callback/google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const user = req['user'];
+    if (user) {
+      const jwt = await this.authService.googleLogin(user);
+
+      const response = {
+        status: 'success',
+        message: 'User successfully authenticated',
+        data: {
+          tokens: {
+            access_token: jwt.access_token,
+          },
+          user: {
+            id: user.id,
+            email: user.email,
+            name: `${user.given_name} ${user.family_name}`,
+            given_name: user.given_name,
+            family_name: user.family_name,
+            picture: user.picture,
+          },
+        },
+      };
+
+      return res.status(HttpStatus.OK).json(response);
+    } else {
+      const response = {
+        status: 'error',
+        message: 'Authentication failed',
+      };
+
+      return res.status(HttpStatus.UNAUTHORIZED).json(response);
+    }
+  }
+
   @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })
