@@ -38,8 +38,6 @@ describe('NotificationSettingsService', () => {
   describe('create', () => {
     it('should create new notification settings if not existing', async () => {
       const dto: NotificationSettingsDto = {
-        settingName: '',
-        settingValue: '',
         email_notifications: false,
         push_notifications: false,
         sms_notifications: false,
@@ -60,8 +58,6 @@ describe('NotificationSettingsService', () => {
 
     it('should update existing notification settings', async () => {
       const dto: NotificationSettingsDto = {
-        settingName: '',
-        settingValue: '',
         email_notifications: false,
         push_notifications: false,
         sms_notifications: false,
@@ -81,8 +77,6 @@ describe('NotificationSettingsService', () => {
 
     it('should throw BadRequestException on error', async () => {
       const dto: NotificationSettingsDto = {
-        settingName: '',
-        settingValue: '',
         email_notifications: false,
         push_notifications: false,
         sms_notifications: false,
