@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EmailService } from './email.service';
+import { EmailService } from '../email.service';
 import { MailerService } from '@nestjs-modules/mailer';
 
 describe('EmailService', () => {
@@ -9,7 +9,10 @@ describe('EmailService', () => {
   const mockMailerService = {
     sendMail: jest.fn().mockResolvedValue({}),
   };
-
+  const mockEmailTemplate = { data: { Template1: '<h1>Template 1</h1>', Template2: '<h1>Template 2</h1>' } };
+  const mockEmailTemplates = {
+    data: { templates: { Template1: '<h1>Template 1</h1>', Template2: '<h1>Template 2</h1>' } },
+  };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -109,5 +112,19 @@ describe('EmailService', () => {
         articles,
       },
     });
+  });
+  it('should get all email templates', async () => {
+    jest.spyOn(service, 'getAllTemplates').mockResolvedValue(mockEmailTemplates);
+
+    const templates = await service.getAllTemplates();
+    expect(templates).toEqual(mockEmailTemplates);
+  });
+
+  it('should get a single email template by name', async () => {
+    const templateName = 'Template1';
+    jest.spyOn(service, 'getTemplate').mockResolvedValue(mockEmailTemplate[0]);
+
+    const template = await service.getTemplate(templateName);
+    expect(template).toEqual(mockEmailTemplates[0]);
   });
 });
