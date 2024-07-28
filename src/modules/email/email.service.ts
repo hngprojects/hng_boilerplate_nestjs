@@ -79,31 +79,4 @@ export class EmailService {
       data: { name: templateName, content: template },
     };
   }
-  async getAllTemplates(page: number = 1, limit: number = 10) {
-    try {
-      const files = await fs.readdir(this.templatesPath);
-      const templates = [];
-      for (const file of files) {
-        const templateName = file.replace('.hbs', '');
-        const template = await this.getTemp(templateName);
-
-        templates.push({ name: templateName, content: template });
-      }
-
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedTemplates = templates.slice(startIndex, endIndex);
-
-      return {
-        data: {
-          total: templates.length,
-          page,
-          limit,
-          templates: paginatedTemplates,
-        },
-      };
-    } catch (err) {
-      throw new Error(`Error reading templates: ${err.message}`);
-    }
-  }
 }

@@ -19,17 +19,4 @@ export class EmailController {
     const content = await this.emailSevice.getTemplate(templateName);
     return content;
   }
-  @Get()
-  @ApiOperation({ summary: 'Get All Email Templates' })
-  @ApiResponse({ status: 200, description: 'Email templates retrieved successfully.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'There are No Email Templates Available' })
-  async getAllEmailTemplate(
-    @Request() req: Request,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
-  ) {
-    const content = await this.emailSevice.getAllTemplates(page, limit);
-    return content;
-  }
 }
