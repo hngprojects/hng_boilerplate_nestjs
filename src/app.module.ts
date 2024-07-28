@@ -17,7 +17,6 @@ import authConfig from '../config/auth.config';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { TimezonesModule } from './modules/timezones/timezones.module';
-import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
