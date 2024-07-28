@@ -40,7 +40,7 @@ export class JobsService {
       message: 'Job listing created successfully',
       data: pick(
         newJob,
-        Object.keys(newJob).filter(x => !['user', 'created_at', 'updated_at'].includes(x))
+        Object.keys(newJob).filter(x => !['user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
       ),
     };
   }
