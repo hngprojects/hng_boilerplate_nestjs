@@ -10,6 +10,8 @@ import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-passw
 import { LoginDto } from './dto/login.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BackupCodesReqBodyDTO } from './dto/backup-codes-req-body.dto';
+import { OtpDto } from '../otp/dto/otp.dto';
+import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -68,5 +70,24 @@ export default class RegistrationController {
     const { password } = body;
     const { id: user_id } = request['user'];
     return this.authService.enable2FA(user_id, password);
+  }
+
+  @skipAuth()
+  @Post('magic-link')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Request Signin Token' })
+  @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: RequestSigninTokenDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  public async signInToken(@Body() body: RequestSigninTokenDto) {
+    return await this.authService.requestSignInToken(body);
+  }
+
+  @Post('magic-link/verify')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Verify Signin Token' })
+  @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  public async verifySignInToken(@Body() body: OtpDto) {
+    return await this.authService.verifySignInToken(body);
   }
 }

@@ -1,9 +1,7 @@
-
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { promisify } from 'util';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs'
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
