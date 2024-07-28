@@ -2,7 +2,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
-@Entity({ name: 'notifications' })
+@Entity()
 export class Notification extends AbstractBaseEntity {
   @Column({ nullable: false })
   message: string;
