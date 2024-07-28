@@ -10,6 +10,8 @@ import { LoginDto } from './dto/login.dto';
 import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { OtpDto } from '../otp/dto/otp.dto';
+import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -101,5 +103,22 @@ export default class RegistrationController {
 
       return res.status(HttpStatus.UNAUTHORIZED).json(response);
     }
+
+  @Post('magic-link')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Request Signin Token' })
+  @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: RequestSigninTokenDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  public async signInToken(@Body() body: RequestSigninTokenDto) {
+    return await this.authService.requestSignInToken(body);
+  }
+
+  @Post('magic-link/verify')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Verify Signin Token' })
+  @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  public async verifySignInToken(@Body() body: OtpDto) {
+    return await this.authService.verifySignInToken(body);
   }
 }
