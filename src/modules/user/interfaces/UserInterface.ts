@@ -1,3 +1,5 @@
+import { UserType } from '../entities/user.entity';
+
 interface UserInterface {
   id: string;
 
@@ -14,6 +16,8 @@ interface UserInterface {
   backup_codes_2fa: string;
 
   secret: string;
+
+  user_type: UserType;
 
   is_active: boolean;
 
