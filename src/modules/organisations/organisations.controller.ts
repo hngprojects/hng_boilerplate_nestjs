@@ -1,9 +1,9 @@
-import { Body, Controller, Delete, Param, Patch, Post, Request, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { number } from 'joi';
+import { OwnershipGuard } from '../../guards/authorization.guard';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')
@@ -16,7 +16,7 @@ export class OrganisationsController {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
   }
-
+  @UseGuards(OwnershipGuard)
   @Delete(':org_id')
   async delete(@Param('org_id') id: string, @Res() response: Response) {
     this.organisationsService;
@@ -29,6 +29,7 @@ export class OrganisationsController {
     description: 'The found record',
     type: UpdateOrganisationDto,
   })
+  @UseGuards(OwnershipGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateOrganisationDto: UpdateOrganisationDto) {
     const updatedOrg = await this.organisationsService.updateOrganisation(id, updateOrganisationDto);
