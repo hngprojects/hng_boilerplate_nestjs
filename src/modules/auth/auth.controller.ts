@@ -103,6 +103,7 @@ export default class RegistrationController {
 
       return res.status(HttpStatus.UNAUTHORIZED).json(response);
     }
+  }
 
   @Post('magic-link')
   @HttpCode(200)
