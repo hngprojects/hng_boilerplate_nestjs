@@ -48,10 +48,26 @@ export class OrganisationsService {
   }
 
   async deleteOrganization(id: string) {
-    const org = await this.organisationRepository.findOneBy({ id });
-    org.isDeleted = true;
-    await this.organisationRepository.save(org);
-    return HttpStatus.NO_CONTENT;
+    try {
+      const org = await this.organisationRepository.findOneBy({ id });
+      if (!org) {
+        throw new NotFoundException(`Organisation with id ${id} not found`);
+      }
+      org.isDeleted = true;
+      await this.organisationRepository.save(org);
+      return HttpStatus.NO_CONTENT;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+    // const org = await this.organisationRepository.findOneBy({ id });
+    // if (org.isDeleted === false) {
+    //   org.isDeleted = true;
+    // }
+    // await this.organisationRepository.save(org);
+    // return HttpStatus.NO_CONTENT;
   }
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
