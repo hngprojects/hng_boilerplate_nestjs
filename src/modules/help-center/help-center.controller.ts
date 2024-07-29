@@ -8,9 +8,12 @@ import {
   Logger,
   ValidationPipe,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { HelpCenterService } from './help-center.service';
 import { CreateHelpCenterDto } from './create-help-center.dto';
 
+
+@ApiTags('Help Center')
 @Controller('help-center')
 export class HelpCenterController {
   private readonly logger = new Logger(HelpCenterController.name);
@@ -18,6 +21,10 @@ export class HelpCenterController {
   constructor(private readonly helpCenterService: HelpCenterService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a help center topic' })
+  @ApiBody({ type: CreateHelpCenterDto })
+  @ApiResponse({ status: 201, description: 'The help center topic has been successfully created.' })
+  @ApiResponse({ status: 422, description: 'Invalid input data' })
   async create(@Body(new ValidationPipe()) createHelpCenterDto: CreateHelpCenterDto) {
     try {
       const author = 'Admin';
@@ -34,6 +41,9 @@ export class HelpCenterController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all help center topics' })
+  @ApiResponse({ status: 200, description: 'Successfully fetched all help center topics.' })
+  @ApiResponse({ status: 422, description: 'Unable to fetch help centers' })
   async getAll() {
     try {
       const helpCenters = await this.helpCenterService.getAllHelpCenters();
@@ -49,6 +59,10 @@ export class HelpCenterController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a help center topic by ID' })
+  @ApiParam({ name: 'id', required: true, description: 'ID of the help center topic' })
+  @ApiResponse({ status: 200, description: 'Successfully fetched the help center topic.' })
+  @ApiResponse({ status: 422, description: 'Help center topic not found' })
   async getById(@Param('id', new ValidationPipe()) id: string) {
     try {
       const helpCenter = await this.helpCenterService.getHelpCenterById(id);
