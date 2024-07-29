@@ -22,6 +22,7 @@ export const createMockOrganisation = (): Organisation => {
     time_left: 3600,
     owned_organisations: [],
     created_organisations: [],
+    jobs: [],
     invites: [],
     testimonials: [],
     user_type: UserType.ADMIN,
