@@ -1,12 +1,13 @@
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Product } from '../../../modules/products/entities/product.entity';
 
 export enum UserType {
-  SUPER_ADMIN = 'super_admin',
+  SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }
@@ -52,6 +53,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
+
+  @OneToMany(() => Product, product => product.user, { cascade: true })
+  products: Product[];
 
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
