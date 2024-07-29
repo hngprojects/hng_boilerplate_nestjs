@@ -290,7 +290,6 @@ export default class AuthenticationService {
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
     try {
-      console.log(userPayload);
       const newUser = await this.userService.createUser(userPayload);
       const accessToken = await this.jwtService.sign({
         sub: newUser.id,

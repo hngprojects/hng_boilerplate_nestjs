@@ -51,7 +51,7 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('otp/email-verification')
-  public async verifyEmail(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
+  public async verifyEmail(@Body() body: OtpDto): Promise<any> {
     return this.authService.verifyToken(body);
   }
 
@@ -70,13 +70,8 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('google')
-  async googleAuth(
-    @Body() body: GoogleAuthPayload
-    //  @Res() res: Response
-  ) {
-    // const response = await this.authService.googleAuth(body);
+  async googleAuth(@Body() body: GoogleAuthPayload) {
     return this.authService.googleAuth(body);
-    // return res.status(HttpStatus.OK).send(response);
   }
 
   @Post('magic-link')
