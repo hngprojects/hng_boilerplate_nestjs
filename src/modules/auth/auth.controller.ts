@@ -12,6 +12,7 @@ import { Enable2FADto } from './dto/enable-2fa.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -44,7 +45,7 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | LoginErrorResponseDto> {
     return this.authService.loginUser(loginDto);
   }
 
@@ -76,25 +77,9 @@ export default class RegistrationController {
     if (user) {
       const jwt = await this.authService.googleLogin(user);
 
-      const response = {
-        status: 'success',
-        message: 'User successfully authenticated',
-        data: {
-          tokens: {
-            access_token: jwt.access_token,
-          },
-          user: {
-            id: user.id,
-            email: user.email,
-            name: `${user.given_name} ${user.family_name}`,
-            given_name: user.given_name,
-            family_name: user.family_name,
-            picture: user.picture,
-          },
-        },
-      };
+      const access_token = jwt.access_token;
 
-      return res.status(HttpStatus.OK).json(response);
+      return res.redirect(`${process.env.GOOGLE_LOGIN_REDIRECT}?access_token=${access_token}`);
     } else {
       const response = {
         status: 'error',
