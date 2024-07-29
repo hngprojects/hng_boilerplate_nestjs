@@ -110,6 +110,8 @@ import { ProductsModule } from './modules/products/products.module';
     OrganisationsModule,
     NotificationSettingsModule,
     TestimonialsModule,
+    JobsModule,
+    ProductsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
