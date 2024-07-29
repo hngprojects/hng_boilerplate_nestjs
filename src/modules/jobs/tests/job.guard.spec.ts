@@ -34,7 +34,7 @@ describe('JobGuard', () => {
     const mockContext = createMock<ExecutionContext>();
 
     mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { sub: 'user123' },
+      user: { id: 'user123' },
       params: { id: 1 },
     });
     const result = await guard.canActivate(mockContext);
@@ -49,7 +49,7 @@ describe('JobGuard', () => {
     const mockContext = createMock<ExecutionContext>();
 
     mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { sub: 'user123' },
+      user: { id: 'user123' },
       params: { id: 1 },
     });
 
@@ -63,7 +63,7 @@ describe('JobGuard', () => {
     const mockContext = createMock<ExecutionContext>();
 
     mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { sub: 'user123' },
+      user: { id: 'user123' },
       params: { id: 1 },
     });
 
@@ -77,7 +77,7 @@ describe('JobGuard', () => {
     const mockContext = createMock<ExecutionContext>();
 
     mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { sub: 'user456' },
+      user: { id: 'user456' },
       params: { id: 1 },
     });
 
