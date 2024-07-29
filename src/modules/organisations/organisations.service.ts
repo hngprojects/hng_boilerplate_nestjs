@@ -90,7 +90,7 @@ export class OrganisationsService {
     }
   }
 
-  async removeUser(orgId: string, userId: string, currentUserId: string) {
+  async removeMember(orgId: string, userId: string, currentUserId: string) {
     try {
       const org = await this.checkIfOrgExists(orgId);
 

@@ -16,7 +16,7 @@ export class OrganisationsController {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
   }
-  
+
   @UseGuards(OwnershipGuard)
   @Delete(':org_id')
   async delete(@Param('org_id') id: string, @Res() response: Response) {
@@ -36,11 +36,11 @@ export class OrganisationsController {
     const updatedOrg = await this.organisationsService.updateOrganisation(id, updateOrganisationDto);
     return { message: 'Organisation successfully updated', org: updatedOrg };
   }
-  
+
   @ApiOperation({ summary: 'Remove User From Organisation' })
   @Delete('/:org_id/users/:user_id')
   async removeUser(@Param('org_id') orgId: string, @Param('user_id') userId: string, @Request() req) {
     const currentUser = req['user'];
-    return this.organisationsService.removeUser(orgId, userId, currentUser.sub);
+    return this.organisationsService.removeMember(orgId, userId, currentUser.sub);
   }
 }
