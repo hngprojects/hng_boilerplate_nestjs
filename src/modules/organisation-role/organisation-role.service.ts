@@ -15,7 +15,7 @@ export class OrganisationRoleService {
     private organisationRepository: Repository<Organisation>
   ) {}
 
-  async getAllRoleInOrg(organisationID: string) {
+  async getAllRolesInOrg(organisationID: string) {
     const organisation = await this.organisationRepository.findOne({
       where: { id: organisationID },
       relations: ['roles'],

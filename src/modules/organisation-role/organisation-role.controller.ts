@@ -16,7 +16,7 @@ export class OrganisationRoleController {
   @ApiOperation({ summary: 'Get all organisation roles' })
   @ApiResponse({ status: 200, description: 'Success', type: [Object] })
   async getRoles(@Param('organisationId') organisationID: string) {
-    const roles = await this.organisationRoleService.getAllRoleInOrg(organisationID);
+    const roles = await this.organisationRoleService.getAllRolesInOrg(organisationID);
     return {
       status_code: 200,
       data: roles,
