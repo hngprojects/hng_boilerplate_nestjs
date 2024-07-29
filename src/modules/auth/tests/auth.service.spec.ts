@@ -54,13 +54,14 @@ describe('AuthenticationService', () => {
         {
           provide: OtpService,
           useValue: {
-            createOtp: jest.fn(),
+            createOtp: jest.fn().mockResolvedValue({ token: 999987 }),
           },
         },
         {
           provide: EmailService,
           useValue: {
             sendForgotPasswordMail: jest.fn(),
+            sendUserEmailConfirmationOtp: jest.fn(),
           },
         },
       ],
@@ -101,7 +102,7 @@ describe('AuthenticationService', () => {
       time_left: 0,
     };
 
-    it.skip('should create a new user successfully', async () => {
+    it('should create a new user successfully', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
@@ -113,7 +114,6 @@ describe('AuthenticationService', () => {
         status_code: HttpStatus.CREATED,
         message: USER_CREATED_SUCCESSFULLY,
         data: {
-          token: 'mocked_token',
           user: {
             first_name: createUserDto.first_name,
             last_name: createUserDto.last_name,
