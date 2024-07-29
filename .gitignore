@@ -392,3 +392,7 @@ dist
 /.env.*.local
 *._local.ts
 /.env.development.local
+
+# Migrations
+/db/migrations/*-migration.ts
+/db

@@ -1,4 +1,4 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req } from '@nestjs/common';
+import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req, Get } from '@nestjs/common';
 import UserService from './user.service';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
@@ -10,21 +10,6 @@ import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @ApiOperation({ summary: 'Update User' })
-  @ApiResponse({
-    status: 200,
-    description: 'User updated seuccessfully',
-    type: UpdateUserDto,
-  })
-  @Patch(':userId')
-  async updateUser(
-    @Request() req: { user: UserPayload },
-    @Param('userId') userId: string,
-    @Body() updatedUserDto: UpdateUserDto
-  ) {
-    return this.userService.updateUser(userId, updatedUserDto, req.user);
-  }
 
   @Patch('/deactivate')
   @ApiBearerAuth()
@@ -44,5 +29,30 @@ export class UserController {
       status_code: 200,
       message: result.message,
     };
+  }
+
+  @ApiOperation({ summary: 'Update User' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated seuccessfully',
+    type: UpdateUserDto,
+  })
+  @Patch(':userId')
+  async updateUser(
+    @Request() req: { user: UserPayload },
+    @Param('userId') userId: string,
+    @Body() updatedUserDto: UpdateUserDto
+  ) {
+    return this.userService.updateUser(userId, updatedUserDto, req.user);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get User Data' })
+  @ApiResponse({ status: 200, description: 'User data fetched successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @Get(':id')
+  async getUserDataById(@Param('id') id: string) {
+    return this.userService.getUserDataWithoutPasswordById(id);
   }
 }
