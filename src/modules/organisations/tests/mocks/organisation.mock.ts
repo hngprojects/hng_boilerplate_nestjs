@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
+import { Notification } from '../../../notifications/entities/notification.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -27,6 +28,7 @@ export const createMockOrganisation = (): Organisation => {
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
+    notifications: [] as Notification[],
   };
 
   return {

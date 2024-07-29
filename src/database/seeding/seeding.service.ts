@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
+import { Notification } from '../../modules/notifications/entities/notification.entity';
 
 @Injectable()
 export class SeedingService {
@@ -12,6 +13,7 @@ export class SeedingService {
     const userRepository = this.dataSource.getRepository(User);
     const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
+    const notificationRepository = this.dataSource.getRepository(Notification);
 
     try {
       const existingUsers = await userRepository.count();
@@ -43,6 +45,31 @@ export class SeedingService {
         const savedUsers = await userRepository.find();
         if (savedUsers.length !== 2) {
           throw new Error('Failed to create all users');
+        }
+
+        const notifications = [
+          notificationRepository.create({
+            message: 'Notification 1 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 1 for Jane',
+            user: savedUsers[1],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for Jane',
+            user: savedUsers[1],
+          }),
+        ];
+        console.log('Created notifications:', notifications);
+        await notificationRepository.save(notifications);
+        const savedNotifications = await notificationRepository.find();
+        if (savedNotifications.length !== 4) {
+          throw new Error('Failed to create all notifications');
         }
 
         const or1 = organisationRepository.create({
