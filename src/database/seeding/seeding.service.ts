@@ -5,6 +5,7 @@ import { Organisation } from '../../modules/organisations/entities/organisations
 import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product } from 'src/modules/products/entities/product.entity';
 import { ProductCategory } from 'src/modules/product-category/entities/product-category.entity';
+import { Profile } from '../../modules/profile/entities/profile.entity';
 
 @Injectable()
 export class SeedingService {
@@ -12,6 +13,7 @@ export class SeedingService {
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
+    const profileRepository = this.dataSource.getRepository(Profile);
     const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
     const productRepository = this.dataSource.getRepository(Product);
@@ -47,6 +49,24 @@ export class SeedingService {
         const savedUsers = await userRepository.find();
         if (savedUsers.length !== 2) {
           throw new Error('Failed to create all users');
+        }
+
+        const prf1 = profileRepository.create({
+          username: 'Johnsmith',
+          email: 'john.smith@example.com',
+          user: savedUsers[0],
+        });
+        const prf2 = profileRepository.create({
+          username: 'Janesmith',
+          email: 'jane.smith@example.com',
+          user: savedUsers[1],
+        });
+
+        await profileRepository.save([prf1, prf2]);
+
+        const savedProfile = await userRepository.find();
+        if (savedProfile.length !== 2) {
+          throw new Error('Failed to create all profile');
         }
 
         const or1 = organisationRepository.create({
