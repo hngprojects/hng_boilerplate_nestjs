@@ -3,6 +3,7 @@ import { OrganisationRoleService } from './organisation-role.service';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
+import { AuthGuard } from '../../guards/auth.guard';
 
 @ApiTags('Organisation Settings')
 @ApiBearerAuth()
@@ -11,7 +12,7 @@ export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
   @Get()
-  @UseGuards(OwnershipGuard)
+  @UseGuards(AuthGuard, OwnershipGuard)
   @ApiOperation({ summary: 'Get all organisation roles' })
   @ApiResponse({ status: 200, description: 'Success', type: [Object] })
   async getRoles(@Param('organisationId') organisationID: string) {
