@@ -158,7 +158,7 @@ export default class AuthenticationService {
         );
       }
 
-      const access_token = this.jwtService.sign({ id: user.id });
+      const access_token = this.jwtService.sign({ sub: user.id });
 
       const responsePayload = {
         access_token,
@@ -308,11 +308,9 @@ export default class AuthenticationService {
       await this.otpService.deleteOtp(user.id);
     }
 
-    // Generate a new OTP and save it
     const newOtp = generateSixDigitToken();
     await this.otpService.createOtp(user.id);
 
-    // Send the OTP to the user's email
     await this.emailService.sendLoginOtp(user.email, newOtp);
 
     return {
