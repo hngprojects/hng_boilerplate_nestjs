@@ -20,6 +20,7 @@ import {
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
   UNAUTHORISED_TOKEN,
+  INVALID_CREDENTIALS,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -36,6 +37,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { generateSixDigitToken } from '../../utils/generate-token';
 import { OtpDto } from '../otp/dto/otp.dto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -71,16 +73,10 @@ export default class AuthenticationService {
         };
       }
 
-      const accessToken = this.jwtService.sign({
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        sub: user.id,
-        user_type: user.user_type,
-      });
+      const token = (await this.otpService.createOtp(user.id)).token;
+      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
-        token: accessToken,
         user: {
           first_name: user.first_name,
           last_name: user.last_name,
@@ -143,19 +139,19 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new UnauthorizedException({
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new UnauthorizedException({
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        });
       }
 
       const access_token = this.jwtService.sign({ id: user.id });
@@ -174,9 +170,6 @@ export default class AuthenticationService {
 
       return { message: 'Login successful', ...responsePayload };
     } catch (error) {
-      if (error instanceof CustomHttpException) {
-        throw error;
-      }
       Logger.log('AuthenticationServiceError ~ loginError ~', error);
       throw new HttpException(
         {
@@ -347,7 +340,7 @@ export default class AuthenticationService {
     };
   }
 
-  async verifySignInToken(verifyOtp: OtpDto) {
+  async verifyToken(verifyOtp: OtpDto) {
     const { token, email } = verifyOtp;
 
     const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });

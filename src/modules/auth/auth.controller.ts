@@ -12,6 +12,7 @@ import { Enable2FADto } from './dto/enable-2fa.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
 import UserService from '../user/user.service';
 
 @ApiTags('Authentication')
@@ -52,6 +53,12 @@ export default class RegistrationController {
     return this.authService.loginUser(loginDto);
   }
 
+  @skipAuth()
+  @Post('otp/email-verification')
+  public async verifyEmail(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
+    return this.authService.verifyToken(body);
+  }
+
   @Post('2fa/enable')
   @ApiBody({
     description: 'Enable two factor authentication',
@@ -68,9 +75,7 @@ export default class RegistrationController {
   @skipAuth()
   @Get('login/google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req: Request) {
-    // Initiates Google OAuth2 login flow
-  }
+  async googleAuth(@Req() req: Request) {}
 
   @skipAuth()
   @Get('callback/google')
@@ -125,25 +130,9 @@ export default class RegistrationController {
       const userRegistered = await this;
       const jwt = await this.authService.googleLogin(user);
 
-      const response = {
-        status: 'success',
-        message: 'User successfully authenticated',
-        data: {
-          tokens: {
-            access_token: jwt.access_token,
-          },
-          user: {
-            id: user.id,
-            email: user.email,
-            name: `${user.given_name} ${user.family_name}`,
-            given_name: user.given_name,
-            family_name: user.family_name,
-            picture: user.picture,
-          },
-        },
-      };
+      const access_token = jwt.access_token;
 
-      return res.status(HttpStatus.OK).json(response);
+      return res.redirect(`${process.env.GOOGLE_LOGIN_REDIRECT}?access_token=${access_token}`);
     } else {
       const response = {
         status: 'error',
@@ -169,6 +158,6 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public async verifySignInToken(@Body() body: OtpDto) {
-    return await this.authService.verifySignInToken(body);
+    return await this.authService.verifyToken(body);
   }
 }
