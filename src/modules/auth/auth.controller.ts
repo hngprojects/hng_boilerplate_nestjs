@@ -51,7 +51,7 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('otp/email-verification')
-  public async verifyEmaul(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
+  public async verifyEmail(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
     return this.authService.verifyToken(body);
   }
 
