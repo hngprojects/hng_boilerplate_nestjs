@@ -29,6 +29,7 @@ export const createMockOrganisation = (): Organisation => {
     products: [] as Product[],
     secret: 'secret',
     is_2fa_enabled: false,
+    products: [],
   };
   return {
     id: uuidv4(),

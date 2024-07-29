@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
@@ -42,10 +42,11 @@ export class User extends AbstractBaseEntity {
   owned_organisations: Organisation[];
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
+
+  @OneToMany(() => Product, product => product.user, { cascade: true })
+  products: Product[];
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
-  @OneToMany(() => Product, product => product.user)
-  products: Product[];
 
   @BeforeInsert()
   async hashPassword() {
