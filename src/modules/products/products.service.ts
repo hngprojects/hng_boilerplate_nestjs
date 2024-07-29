@@ -1,19 +1,31 @@
-import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { Product, ProductStatusType } from './entities/product.entity';
+import { Organisation } from '../organisations/entities/organisations.entity';
 
 @Injectable()
 export class ProductsService {
-  constructor(@InjectRepository(Product) private productRepository: Repository<Product>) {}
+  constructor(
+    @InjectRepository(Product) private productRepository: Repository<Product>,
+    @InjectRepository(Product) private organisationRepository: Repository<Organisation>
+  ) {}
 
   async createProduct(orgId: string, dto: CreateProductRequestDto) {
     const { name, quantity, price } = dto;
+    const org = await this.organisationRepository.findOne({ where: { id: orgId } });
     const newProduct: Product = await this.productRepository.create({
       name,
       quantity,
       price,
+      org,
     });
     if (!newProduct)
       throw new InternalServerErrorException({
