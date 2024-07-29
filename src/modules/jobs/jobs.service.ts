@@ -52,18 +52,7 @@ export class JobsService {
    * @param {PaginationDto} paginationDto - The pagination parameters.
    * @return {Promise<{ message: string, data: Job[], pagination: { current_page: number, total_pages: number, page_size: number, total_items: number } }>} - The paginated list of job listings.
    */
-  async findAll(paginationDto: PaginationDto): Promise<{
-    status: string;
-    status_code: number;
-    message: string;
-    data: Job[];
-    pagination: {
-      current_page: number;
-      total_pages: number;
-      page_size: number;
-      total_items: number;
-    };
-  }> {
+  async findAll(paginationDto: PaginationDto) {
     const { page, size } = paginationDto;
 
     const [result, total] = await this.jobRepository.findAndCount({
@@ -78,7 +67,12 @@ export class JobsService {
       status: 'success',
       status_code: 200,
       message: 'Job listings retrieved successfully.',
-      data: result,
+      data: result.map(job =>
+        pick(
+          job,
+          Object.keys(job).filter(x => !['id', 'user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
+        )
+      ),
       pagination: {
         current_page: page,
         total_pages: totalPages,

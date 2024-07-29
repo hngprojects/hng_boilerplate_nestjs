@@ -7,6 +7,7 @@ import { User, UserType } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { PaginationDto } from '../dto/pagination.dto';
+import { pick } from '../../../helpers/pick';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -207,7 +208,14 @@ describe('JobsService', () => {
       expect(result.status_code).toEqual(200);
       expect(result.message).toEqual('Job listings retrieved successfully.');
       console.log(result.data);
-      expect(result.data).toEqual(mockJobs);
+      const expectedFilteredJobs = mockJobs.map(job =>
+        pick(
+          job,
+          Object.keys(job).filter(x => !['id', 'user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
+        )
+      );
+
+      expect(result.data).toEqual(expectedFilteredJobs);
       expect(result.pagination).toEqual({
         current_page: 1,
         total_pages: 1,
