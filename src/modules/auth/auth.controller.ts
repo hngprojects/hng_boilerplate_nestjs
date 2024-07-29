@@ -122,4 +122,20 @@ export default class RegistrationController {
   public async verifySignInToken(@Body() body: OtpDto) {
     return await this.authService.verifySignInToken(body);
   }
+
+  @skipAuth()
+  @Get('/facebook')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLogin(): Promise<any> {
+    return HttpStatus.OK;
+  }
+
+  @skipAuth()
+  @Get('/facebook/redirect')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLoginRedirect(@Request() req): Promise<any> {
+    return {
+      ...req.user,
+    };
+  }
 }
