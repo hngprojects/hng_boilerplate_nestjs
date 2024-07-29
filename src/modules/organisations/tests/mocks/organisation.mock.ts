@@ -26,7 +26,7 @@ export const createMockOrganisation = (): Organisation => {
     invites: [],
     testimonials: [],
     user_type: UserType.ADMIN,
-    products: [] as Product[],
+    products: [],
     secret: 'secret',
     is_2fa_enabled: false,
   };

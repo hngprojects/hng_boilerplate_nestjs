@@ -47,7 +47,7 @@ describe('InviteService', () => {
       secret: 'secret',
       is_2fa_enabled: true,
       testimonials: [],
-      products: [] as Product[],
+      products: [],
     };
 
     const mockOrg: Organisation = {
