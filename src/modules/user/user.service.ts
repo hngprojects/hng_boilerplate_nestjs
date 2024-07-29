@@ -17,6 +17,8 @@ import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
+import { error } from 'console';
+import GetUsersStatsResponseDTO from './dto/get-users-stats-response.dto';
 
 @Injectable()
 export default class UserService {
@@ -175,5 +177,30 @@ export default class UserService {
     await this.userRepository.save(user);
 
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
+  }
+
+  async getUsersStatsByAdmin(currentUser: UserPayload): Promise<GetUsersStatsResponseDTO> {
+    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
+      throw new ForbiddenException({
+        error: 'Forbidden',
+        message: 'Only super admins can access this enpoint',
+        status_code: HttpStatus.FORBIDDEN,
+      });
+    }
+
+    const totalUsers = await this.userRepository.count();
+    const activeUsers = await this.userRepository.count({ where: { is_active: true } });
+    const deletedUsers = totalUsers - activeUsers;
+
+    return {
+      status: 'success',
+      status_code: HttpStatus.OK,
+      message: 'Users stats retrieved successfully',
+      data: {
+        total_users: totalUsers,
+        active_users: activeUsers,
+        deleted_users: deletedUsers,
+      },
+    };
   }
 }

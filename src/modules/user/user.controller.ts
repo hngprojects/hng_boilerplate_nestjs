@@ -55,4 +55,13 @@ export class UserController {
   async getUserDataById(@Param('id') id: string) {
     return this.userService.getUserDataWithoutPasswordById(id);
   }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user statistics (Super Admin only)' })
+  @ApiResponse({ status: 200, description: 'User statistics retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async getUsersStatsByAdmin(@Request() req: { user: UserPayload }) {
+    return this.userService.getUsersStatsByAdmin(req.user);
+  }
 }

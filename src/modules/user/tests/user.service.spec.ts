@@ -10,6 +10,7 @@ import { BadRequestException, HttpException, ForbiddenException, NotFoundExcepti
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
+import GetUsersStatsResponseDTO from '../dto/get-users-stats-response.dto';
 
 describe('UserService', () => {
   let service: UserService;
@@ -18,6 +19,7 @@ describe('UserService', () => {
   const mockUserRepository = {
     save: jest.fn(),
     findOne: jest.fn(),
+    count: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -279,6 +281,56 @@ describe('UserService', () => {
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
       });
+    });
+  });
+
+  describe('getUsersStatsByAdmin', () => {
+    const superAdminPayload: UserPayload = {
+      id: 'super-admin-id',
+      email: 'superadmin@example.com',
+      user_type: UserType.SUPER_ADMIN,
+    };
+
+    const regularUserPayload: UserPayload = {
+      id: 'regular-user-id',
+      email: 'user@example.com',
+      user_type: UserType.USER,
+    };
+
+    it('should return user statistics for super admin', async () => {
+      const mockStats = {
+        total_users: 100,
+        active_users: 80,
+        deleted_users: 20,
+      };
+
+      mockUserRepository.count.mockResolvedValueOnce(mockStats.total_users);
+      mockUserRepository.count.mockResolvedValueOnce(mockStats.active_users);
+
+      const result = await service.getUsersStatsByAdmin(superAdminPayload);
+
+      expect(result).toEqual({
+        status: 'success',
+        status_code: 200,
+        message: 'Users stats retrieved successfully',
+        data: mockStats,
+      } as GetUsersStatsResponseDTO);
+
+      expect(mockUserRepository.count).toHaveBeenCalledTimes(2);
+      expect(mockUserRepository.count).toHaveBeenCalledWith();
+      expect(mockUserRepository.count).toHaveBeenCalledWith({ where: { is_active: true } });
+    });
+
+    it('should throw ForbiddenException for non-super admin users', async () => {
+      await expect(service.getUsersStatsByAdmin(regularUserPayload)).rejects.toThrow(ForbiddenException);
+      expect(mockUserRepository.count).not.toHaveBeenCalled();
+    });
+
+    it('should handle database errors gracefully', async () => {
+      mockUserRepository.count.mockRejectedValueOnce(new Error('Database error'));
+
+      await expect(service.getUsersStatsByAdmin(superAdminPayload)).rejects.toThrow('Database error');
+      expect(mockUserRepository.count).toHaveBeenCalledTimes(1);
     });
   });
 });
