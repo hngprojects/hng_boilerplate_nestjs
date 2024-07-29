@@ -5,10 +5,13 @@ import { Product } from '../../products/entities/product.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { productMock } from './mocks/product.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
+  let organisationRepository: Repository<Organisation>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,6 +26,12 @@ describe('ProductsService', () => {
             save: jest.fn().mockReturnValue(productMock),
             findOneBy: jest.fn(),
             update: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Organisation),
+          useValue: {
+            findOne: jest.fn().mockRejectedValue(orgMock),
           },
         },
       ],
