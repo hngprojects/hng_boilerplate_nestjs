@@ -45,6 +45,9 @@ describe('InviteService', () => {
       time_left: 5,
       secret: 'secret',
       is_2fa_enabled: true,
+      backup_codes_2fa: null,
+      totp_code: 28282828,
+      encryptBackupCodes: async () => {},
       testimonials: [],
     };
 

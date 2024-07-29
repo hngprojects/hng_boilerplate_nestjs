@@ -61,6 +61,13 @@ describe('AuthenticationService', () => {
             sendForgotPasswordMail: jest.fn(),
           },
         },
+        {
+          provide: getRepositoryToken(User),
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

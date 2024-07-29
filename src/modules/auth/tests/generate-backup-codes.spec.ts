@@ -1,17 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { OtpService } from '../../otp/otp.service';
+import { EmailService } from '../../email/email.service';
 import UserService from '../../user/user.service';
 import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-// import { ERROR_OCCURED, USER_ACCOUNT_EXIST, USER_CREATED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
-// import { CreateUserDTO } from '../dto/create-user.dto';
 import AuthenticationService from '../auth.service';
 import * as bcrypt from 'bcrypt';
+import { HttpStatus } from '@nestjs/common';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('Generate 2-Factor Authentication Backup Codes Test', () => {
   let userService: UserService;
   let authService: AuthenticationService;
   let jwtService: JwtService;
+  let otpService: OtpService;
+  let emailService: EmailService;
   let userRepository: any;
 
   beforeEach(async () => {
@@ -29,12 +33,26 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
           provide: getRepositoryToken(User),
           useValue: userRepository,
         },
+        {
+          provide: OtpService,
+          useValue: {
+            createOtp: jest.fn(),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendForgotPasswordMail: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     userService = module.get<UserService>(UserService);
     authService = module.get<AuthenticationService>(AuthenticationService);
     jwtService = module.get<JwtService>(JwtService);
+    otpService = module.get<OtpService>(OtpService);
+    emailService = module.get<EmailService>(EmailService);
   });
 
   it('should return unauthorized if password is incorrect', async () => {
@@ -49,10 +67,16 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
       totp_code: 123456,
     });
 
-    const result = await authService.generateBackupCodes({ password, totp_code }, userId);
-
-    expect(result.status_code).toBe(401);
-    expect(result.message).toBe('Authentication required');
+    await expect(authService.generateBackupCodes({ password, totp_code }, userId)).rejects.toThrow(
+      new CustomHttpException(
+        {
+          status_code: HttpStatus.UNAUTHORIZED,
+          error: 'Unauthorized',
+          message: 'Authentication required',
+        },
+        HttpStatus.UNAUTHORIZED
+      )
+    );
   });
 
   it('should return invalid request if 2fa is disabled', async () => {
@@ -67,13 +91,19 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
       totp_code: 123456,
     });
 
-    const result = await authService.generateBackupCodes({ password, totp_code }, userId);
-
-    expect(result.status_code).toBe(400);
-    expect(result.message).toBe('2-Factor Authentication has not been enabled');
+    await expect(authService.generateBackupCodes({ password, totp_code }, userId)).rejects.toThrow(
+      new CustomHttpException(
+        {
+          status_code: HttpStatus.BAD_REQUEST,
+          error: 'Invalid Request',
+          message: '2-Factor Authentication has not been enabled',
+        },
+        HttpStatus.BAD_REQUEST
+      )
+    );
   });
 
-  it('should return error if totp_code is incorrect', async () => {
+  it('should return invalid request if totp_code is incorrect', async () => {
     const userId = 'user-id';
     const password = 'correct-password';
     const totp_code = 123456;
@@ -85,10 +115,16 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
       totp_code: 654321,
     });
 
-    const result = await authService.generateBackupCodes({ password, totp_code }, userId);
-
-    expect(result.status_code).toBe(400);
-    expect(result.message).toBe('TOTP code provided is invalid');
+    await expect(authService.generateBackupCodes({ password, totp_code }, userId)).rejects.toThrow(
+      new CustomHttpException(
+        {
+          status_code: HttpStatus.BAD_REQUEST,
+          error: 'Invalid Request',
+          message: 'TOTP code provided is invalid',
+        },
+        HttpStatus.BAD_REQUEST
+      )
+    );
   });
 
   it('should confirm that 5 backup codes are issued', async () => {
