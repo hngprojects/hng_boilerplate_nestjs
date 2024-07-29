@@ -9,6 +9,7 @@ import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import HealthController from './health.controller';
+import ProbeController from './probe.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { OtpModule } from './modules/otp/otp.module';
@@ -25,6 +26,7 @@ import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { ExportUserModule } from './modules/export-user/export-user-module.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   providers: [
@@ -111,7 +113,8 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
     NotificationSettingsModule,
     TestimonialsModule,
     ExportUserModule
-  ]
-  controllers: [HealthController],
+    ProductsModule,
+  ],
+  controllers: [HealthController, ProbeController],
 })
 export class AppModule {}
