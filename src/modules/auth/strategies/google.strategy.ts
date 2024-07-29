@@ -33,6 +33,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       secret: '',
       is_2fa_enabled: false,
     };
+
     try {
       let existingUser = await this.userRepository.findOne({
         where: { email: user.email },

@@ -20,6 +20,7 @@ import {
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
   UNAUTHORISED_TOKEN,
+  INVALID_CREDENTIALS,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -36,6 +37,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { generateSixDigitToken } from '../../utils/generate-token';
 import { OtpDto } from '../otp/dto/otp.dto';
+import { LoginErrorResponseDto } from './dto/login-error-response.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -133,7 +135,7 @@ export default class AuthenticationService {
       );
     }
   }
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | LoginErrorResponseDto> {
     try {
       const { email, password } = loginDto;
 
@@ -143,19 +145,19 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        return {
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        };
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        return {
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        };
       }
 
       const access_token = this.jwtService.sign({ id: user.id });
