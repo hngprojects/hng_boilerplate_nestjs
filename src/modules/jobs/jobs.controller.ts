@@ -41,6 +41,7 @@ export class JobsController {
 
   @UseGuards(JobGuard)
   @Delete('/:id')
+  @ApiOperation({ summary: 'Delete a job' })
   @ApiResponse({ status: 200, description: 'Job deleted successfully' })
   @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
   @ApiResponse({ status: 404, description: 'Job not found' })
