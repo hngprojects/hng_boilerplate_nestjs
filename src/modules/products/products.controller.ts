@@ -23,7 +23,7 @@ export class ProductController {
   @ApiBody({ type: CreateProductDto })
   async createProduct(@Body() createProductDto: CreateProductDto, @Req() req): Promise<any> {
     try {
-      const product = await this.productsService.createProduct(createProductDto); // Updated method call
+      const product = await this.productsService.createProduct(createProductDto);
 
       const category = product.category ? product.category.name : null;
 
