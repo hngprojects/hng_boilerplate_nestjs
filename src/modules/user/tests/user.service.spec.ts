@@ -10,6 +10,7 @@ import { BadRequestException, HttpException, ForbiddenException, NotFoundExcepti
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
+import { AddUserDTO } from '../dto/add-user-dto';
 
 describe('UserService', () => {
   let service: UserService;
@@ -18,6 +19,7 @@ describe('UserService', () => {
   const mockUserRepository = {
     save: jest.fn(),
     findOne: jest.fn(),
+    create: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -279,6 +281,80 @@ describe('UserService', () => {
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
       });
+    });
+  });
+
+  describe('addUserBySuperAdmin', () => {
+    const addUserDto: AddUserDTO = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone_number: '+1234567890',
+    };
+
+    const superAdminPayload: UserPayload = {
+      id: 'super-admin-id',
+      email: 'superadmin@example.com',
+      user_type: UserType.SUPER_ADMIN,
+    };
+
+    const regularUserPayload: UserPayload = {
+      id: 'regular-user-id',
+      email: 'user@example.com',
+      user_type: UserType.USER,
+    };
+
+    it('should add a new user when called by super admin', async () => {
+      mockUserRepository.findOne.mockResolvedValueOnce(null);
+      mockUserRepository.create.mockReturnValueOnce({
+        id: 'new-user-id',
+        ...addUserDto,
+        first_name: 'John',
+        last_name: 'Doe',
+        is_active: true,
+        user_type: UserType.USER,
+      });
+      mockUserRepository.save.mockResolvedValueOnce({
+        id: 'new-user-id',
+        ...addUserDto,
+        first_name: 'John',
+        last_name: 'Doe',
+        is_active: true,
+        user_type: UserType.USER,
+        phone: addUserDto.phone_number,
+      });
+
+      const result = await service.addUserByAdmin(addUserDto, superAdminPayload);
+
+      expect(result).toEqual({
+        status: 'success',
+        status_code: 201,
+        message: 'User Added Successfully',
+        user: {
+          id: 'new-user-id',
+          name: 'John Doe',
+          email: 'john@example.com',
+          phone_number: '+1234567890',
+        },
+      });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { email: addUserDto.email } });
+      expect(mockUserRepository.create).toHaveBeenCalled();
+      expect(mockUserRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when called by non-super admin', async () => {
+      await expect(service.addUserByAdmin(addUserDto, regularUserPayload)).rejects.toThrow(ForbiddenException);
+      expect(mockUserRepository.findOne).not.toHaveBeenCalled();
+      expect(mockUserRepository.create).not.toHaveBeenCalled();
+      expect(mockUserRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when user with email already exists', async () => {
+      mockUserRepository.findOne.mockResolvedValueOnce({ id: 'existing-user-id', ...addUserDto });
+
+      await expect(service.addUserByAdmin(addUserDto, superAdminPayload)).rejects.toThrow(BadRequestException);
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { email: addUserDto.email } });
+      expect(mockUserRepository.create).not.toHaveBeenCalled();
+      expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
   });
 });

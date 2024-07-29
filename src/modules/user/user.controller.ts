@@ -1,9 +1,10 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req, Get } from '@nestjs/common';
+import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req, Get, Post } from '@nestjs/common';
 import UserService from './user.service';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
+import { AddUserDTO } from './dto/add-user-dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -54,5 +55,16 @@ export class UserController {
   @Get(':id')
   async getUserDataById(@Param('id') id: string) {
     return this.userService.getUserDataWithoutPasswordById(id);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Add a new user (Super Admin only)' })
+  @ApiResponse({ status: 201, description: 'User added successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Post()
+  async addUserByAdmin(@Body() addUserDto: AddUserDTO, @Request() req: { user: UserPayload }) {
+    return this.userService.addUserByAdmin(addUserDto, req.user);
   }
 }

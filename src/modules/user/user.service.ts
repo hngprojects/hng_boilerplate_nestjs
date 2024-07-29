@@ -17,6 +17,7 @@ import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
+import { AddUserDTO } from './dto/add-user-dto';
 
 @Injectable()
 export default class UserService {
@@ -175,5 +176,47 @@ export default class UserService {
     await this.userRepository.save(user);
 
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
+  }
+
+  async addUserByAdmin(addUserDto: AddUserDTO, currentUser: UserPayload): Promise<any> {
+    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
+      throw new ForbiddenException({
+        error: 'Forbidden',
+        message: 'Only super admins can add new users',
+        status_code: HttpStatus.FORBIDDEN,
+      });
+    }
+
+    const existingUser = await this.userRepository.findOne({ where: { email: addUserDto.email } });
+    if (existingUser) {
+      throw new BadRequestException({
+        error: 'Bad Request',
+        message: 'User with this email already exists',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const newUser = this.userRepository.create({
+      ...addUserDto,
+      first_name: addUserDto.name.split(' ')[0],
+      last_name: addUserDto.name.split(' ').slice(1).join(' '),
+      is_active: true,
+      user_type: UserType.USER,
+      phone: addUserDto.phone_number,
+    });
+
+    const savedUser = await this.userRepository.save(newUser);
+
+    return {
+      status: 'success',
+      status_code: HttpStatus.CREATED,
+      message: 'User Added Successfully',
+      user: {
+        id: savedUser.id,
+        name: savedUser.first_name + ' ' + savedUser.last_name,
+        email: savedUser.email,
+        phone_number: savedUser.phone,
+      },
+    };
   }
 }
