@@ -144,5 +144,19 @@ describe('NotificationsService', () => {
         notifications.map(notification => ({ ...notification, is_read: true }))
       );
     });
+    it('should handle server error when clearing notifications', async () => {
+      mockNotificationRepository.find.mockRejectedValue(new Error('Server Error'));
+
+      await expect(service.markAllNotificationsAsReadForUser(userId)).rejects.toThrowError(
+        new HttpException(
+          {
+            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: 'Failed to clear notifications.',
+            data: null,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR
+        )
+      );
+    });
   });
 });
