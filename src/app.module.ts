@@ -26,7 +26,6 @@ import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
-import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   providers: [
@@ -113,7 +112,6 @@ import { ProductsModule } from './modules/products/products.module';
     OrganisationsModule,
     NotificationSettingsModule,
     TestimonialsModule,
-    ProductsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
