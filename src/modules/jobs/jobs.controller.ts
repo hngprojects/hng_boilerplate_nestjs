@@ -4,6 +4,7 @@ import { JobDto } from './dto/job.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { skipAuth } from '../../helpers/skipAuth';
+import { JobGuard } from './guards/job.guard';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -36,5 +37,11 @@ export class JobsController {
   @ApiResponse({ status: 404, description: 'Job not found' })
   async getJob(@Param('id') id: string) {
     return this.jobService.getJob(id);
+  }
+
+  @UseGuards(JobGuard)
+  @Delete('/:id')
+  async delete(@Param('id') id: string) {
+    return this.jobService.delete(id);
   }
 }
