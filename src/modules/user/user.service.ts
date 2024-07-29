@@ -177,8 +177,7 @@ export default class UserService {
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
   }
 
-  // This UserService class allows only the super admin to get all users
-  async getAllUsers(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
+  async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
     if (currentUser.user_type !== UserType.SUPER_ADMIN) {
       throw new ForbiddenException({
         error: 'Forbidden',

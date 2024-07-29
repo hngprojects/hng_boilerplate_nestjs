@@ -56,7 +56,6 @@ export class UserController {
     return this.userService.getUserDataWithoutPasswordById(id);
   }
 
-  // This UserController class allows only the usper admin to get all users
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users (Super Admin only)' })
@@ -70,6 +69,6 @@ export class UserController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10
   ) {
-    return this.userService.getAllUsers(page, limit, req.user);
+    return this.userService.getUsersByAdmin(page, limit, req.user);
   }
 }

@@ -322,7 +322,7 @@ describe('UserService', () => {
 
       mockUserRepository.findAndCount.mockResolvedValueOnce([users, total]);
 
-      const result = await service.getAllUsers(page, limit, superAdminPayload);
+      const result = await service.getUsersByAdmin(page, limit, superAdminPayload);
 
       expect(result).toEqual({
         status: 'success',
@@ -352,7 +352,7 @@ describe('UserService', () => {
     });
 
     it('should throw ForbiddenException when called by non-super admin', async () => {
-      await expect(service.getAllUsers(page, limit, regularUserPayload)).rejects.toThrow(ForbiddenException);
+      await expect(service.getUsersByAdmin(page, limit, regularUserPayload)).rejects.toThrow(ForbiddenException);
       expect(mockUserRepository.findAndCount).not.toHaveBeenCalled();
     });
 
@@ -372,7 +372,7 @@ describe('UserService', () => {
 
       mockUserRepository.findAndCount.mockResolvedValueOnce([users.slice(0, 10), total]);
 
-      const result = await service.getAllUsers(page, limit, superAdminPayload);
+      const result = await service.getUsersByAdmin(page, limit, superAdminPayload);
 
       expect(result.data.pagination).toEqual({
         current_page: page,
@@ -393,7 +393,7 @@ describe('UserService', () => {
     it('should handle empty result', async () => {
       mockUserRepository.findAndCount.mockResolvedValueOnce([[], 0]);
 
-      const result = await service.getAllUsers(page, limit, superAdminPayload);
+      const result = await service.getUsersByAdmin(page, limit, superAdminPayload);
 
       expect(result).toEqual({
         status: 'success',
