@@ -286,6 +286,26 @@ export default class AuthenticationService {
       };
       return await this.createUserGoogle(userCreationPayload);
     }
+    const accessToken = await this.jwtService.sign({
+      sub: userExists.id,
+      id: userExists.id,
+      email: userExists.email,
+      first_name: userExists.first_name,
+      last_name: userExists.last_name,
+    });
+    return {
+      status: 'success',
+      message: 'User authenticated successfully',
+      access_token: accessToken,
+      user: {
+        id: userExists.id,
+        email: userExists.email,
+        first_name: userExists.first_name,
+        last_name: userExists.last_name,
+        fullname: userExists.first_name + ' ' + userExists.last_name,
+        role: '',
+      },
+    };
   }
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
@@ -293,6 +313,7 @@ export default class AuthenticationService {
       const newUser = await this.userService.createUser(userPayload);
       const accessToken = await this.jwtService.sign({
         sub: newUser.id,
+        id: newUser.id,
         email: userPayload.email,
         first_name: userPayload.first_name,
         last_name: userPayload.last_name,
@@ -307,6 +328,8 @@ export default class AuthenticationService {
           email: newUser.email,
           first_name: newUser.first_name,
           last_name: newUser.last_name,
+          fullname: newUser.first_name + ' ' + newUser.last_name,
+          role: '',
         },
       };
     } catch (error) {
@@ -364,6 +387,7 @@ export default class AuthenticationService {
       first_name: user.first_name,
       last_name: user.last_name,
       sub: user.id,
+      id: user.id,
     });
 
     return {
