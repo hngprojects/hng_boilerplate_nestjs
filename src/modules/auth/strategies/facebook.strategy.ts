@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpCode, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-facebook';
 import UserService from '../../user/user.service';
@@ -75,7 +75,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 
       return payload;
     } catch (err) {
-      throw new InternalServerErrorException(err);
+      throw new InternalServerErrorException(HttpStatus.BAD_REQUEST, { description: 'Authentication failed' });
     }
   }
 }
