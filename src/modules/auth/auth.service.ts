@@ -134,7 +134,7 @@ export default class AuthenticationService {
       if (!passwordIsCorrect)
         throw new CustomHttpException(
           {
-            status_code: HttpStatus.UNAUTHORIZED,
+            status: HttpStatus.UNAUTHORIZED,
             error: 'Unauthorized',
             message: 'Authentication required',
           },
@@ -144,7 +144,7 @@ export default class AuthenticationService {
       if (!user.is_2fa_enabled) {
         throw new CustomHttpException(
           {
-            status_code: HttpStatus.BAD_REQUEST,
+            status: HttpStatus.BAD_REQUEST,
             error: 'Invalid Request',
             message: '2-Factor Authentication has not been enabled',
           },
@@ -155,7 +155,7 @@ export default class AuthenticationService {
       if (user.totp_code !== totp_code) {
         throw new CustomHttpException(
           {
-            status_code: HttpStatus.BAD_REQUEST,
+            status: HttpStatus.BAD_REQUEST,
             error: 'Invalid Request',
             message: 'TOTP code provided is invalid',
           },
@@ -168,7 +168,7 @@ export default class AuthenticationService {
       await this.userRepository.save(user);
 
       return {
-        status_code: HttpStatus.OK,
+        status: HttpStatus.OK,
         message: 'New backup codes generated',
         data: {
           backup_codes: backupCodes,
@@ -215,7 +215,7 @@ export default class AuthenticationService {
       );
     }
   }
-  
+
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | LoginErrorResponseDto> {
     try {
       const { email, password } = loginDto;

@@ -70,7 +70,7 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
     await expect(authService.generateBackupCodes({ password, totp_code }, userId)).rejects.toThrow(
       new CustomHttpException(
         {
-          status_code: HttpStatus.UNAUTHORIZED,
+          status: HttpStatus.UNAUTHORIZED,
           error: 'Unauthorized',
           message: 'Authentication required',
         },
@@ -94,7 +94,7 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
     await expect(authService.generateBackupCodes({ password, totp_code }, userId)).rejects.toThrow(
       new CustomHttpException(
         {
-          status_code: HttpStatus.BAD_REQUEST,
+          status: HttpStatus.BAD_REQUEST,
           error: 'Invalid Request',
           message: '2-Factor Authentication has not been enabled',
         },
@@ -118,7 +118,7 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
     await expect(authService.generateBackupCodes({ password, totp_code }, userId)).rejects.toThrow(
       new CustomHttpException(
         {
-          status_code: HttpStatus.BAD_REQUEST,
+          status: HttpStatus.BAD_REQUEST,
           error: 'Invalid Request',
           message: 'TOTP code provided is invalid',
         },
@@ -146,7 +146,7 @@ describe('Generate 2-Factor Authentication Backup Codes Test', () => {
 
     const result = await authService.generateBackupCodes({ password, totp_code }, userId);
 
-    expect(result.status_code).toBe(200);
+    expect(result.status).toBe(200);
     expect(result.message).toBe('New backup codes generated');
     expect(result.data.backup_codes.length).toBe(5);
   });
