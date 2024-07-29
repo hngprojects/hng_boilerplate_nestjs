@@ -23,6 +23,7 @@ import {
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
   UNAUTHORISED_TOKEN,
+  INVALID_CREDENTIALS,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
@@ -36,6 +37,7 @@ import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { generateSixDigitToken } from '../../utils/generate-token';
 import { OtpDto } from '../otp/dto/otp.dto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -213,8 +215,8 @@ export default class AuthenticationService {
       );
     }
   }
-
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
+  
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | LoginErrorResponseDto> {
     try {
       const { email, password } = loginDto;
 
@@ -224,10 +226,10 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        return {
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        };
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
@@ -255,9 +257,6 @@ export default class AuthenticationService {
 
       return { message: 'Login successful', ...responsePayload };
     } catch (error) {
-      if (error instanceof CustomHttpException) {
-        throw error;
-      }
       Logger.log('AuthenticationServiceError ~ loginError ~', error);
       throw new HttpException(
         {
@@ -357,7 +356,7 @@ export default class AuthenticationService {
 
   async googleLogin(user: User) {
     const payload = { userId: user.id };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign({ payload, sub: user.id });
 
     return {
       status: 'success',
@@ -371,6 +370,32 @@ export default class AuthenticationService {
       },
     };
   }
+
+  public async createUserGoogle(userPayload) {
+    try {
+      const newUser = await this.userService.createUserGoogle(userPayload);
+      const accessToken = await this.jwtService.sign({
+        sub: userPayload.id,
+        email: userPayload.email,
+        first_name: userPayload.first_name,
+        last_name: userPayload.last_name,
+      });
+      return {
+        status: 'success',
+        message: 'User successfully authenticated',
+        access_token: accessToken,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+        },
+      };
+    } catch (error) {
+      throw new Error('Error occured');
+    }
+  }
+
   async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
     const { email } = requestSignInTokenDto;
 
