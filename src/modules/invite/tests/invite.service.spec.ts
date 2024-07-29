@@ -49,6 +49,7 @@ describe('InviteService', () => {
       totp_code: 28282828,
       encryptBackupCodes: async () => {},
       testimonials: [],
+      products: [],
     };
 
     const mockOrg: Organisation = {

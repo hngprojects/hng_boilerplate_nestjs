@@ -24,6 +24,7 @@ import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { GoogleStrategy } from '../strategies/google.strategy';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -36,6 +37,7 @@ describe('AuthenticationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
+
         {
           provide: UserService,
           useValue: {

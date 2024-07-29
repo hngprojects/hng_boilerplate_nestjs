@@ -30,6 +30,7 @@ export const createMockOrganisation = (): Organisation => {
     testimonials: [],
     user_type: UserType.ADMIN,
     secret: 'secret',
+    products: [],
   };
 
   return {
