@@ -41,7 +41,7 @@ describe('InviteService', () => {
       owned_organisations: [],
       created_organisations: [],
       invites: [],
-      products: [] as Product[],
+      products: [],
       hashPassword: () => null,
       password: 'password123',
       time_left: 5,

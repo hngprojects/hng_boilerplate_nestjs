@@ -3,7 +3,7 @@ import { Organisation } from '../../entities/organisations.entity';
 import { Product } from '../../../products/entities/product.entity';
 
 export enum UserType {
-  SUPER_ADMIN = 'super_admin',
+  SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }
@@ -26,7 +26,7 @@ export const createMockOrganisation = (): Organisation => {
     invites: [],
     testimonials: [],
     user_type: UserType.ADMIN,
-    products: [] as Product[],
+    products: [],
     secret: 'secret',
     is_2fa_enabled: false,
   };

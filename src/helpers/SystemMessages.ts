@@ -9,6 +9,7 @@ export const INVALID_PASSWORD = 'Invalid password';
 export const TWO_FA_INITIATED = '2FA setup initiated';
 export const TWO_FA_ENABLED = '2FA is already enabled';
 export const BAD_REQUEST = 'Bad Request';
+export const UNAUTHORISED_TOKEN = 'Invalid token or email';
 export const TIMEZONE_CREATED_SUCCESSFULLY = 'Timezone created Successfully';
 export const FETCH_TIMEZONE_FAILURE = 'Error Occured while creating Timezone, kindly try again';
 export const SUCCESS = 'Timezone fetched successfully';
