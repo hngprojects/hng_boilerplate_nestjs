@@ -41,6 +41,9 @@ export class JobsController {
 
   @UseGuards(JobGuard)
   @Delete('/:id')
+  @ApiResponse({ status: 200, description: 'Job deleted successfully' })
+  @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
+  @ApiResponse({ status: 404, description: 'Job not found' })
   async delete(@Param('id') id: string) {
     return this.jobService.delete(id);
   }
