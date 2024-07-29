@@ -15,7 +15,6 @@ import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import UserService from '../user/user.service';
-
 @ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
