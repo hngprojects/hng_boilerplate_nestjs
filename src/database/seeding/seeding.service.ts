@@ -1,10 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../../modules/user/entities/user.entity';
+import { User, UserType } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Product } from 'src/modules/products/entities/product.entity';
-import { ProductCategory } from 'src/modules/product-category/entities/product-category.entity';
+import { Profile } from '../../modules/profile/entities/profile.entity';
 
 @Injectable()
 export class SeedingService {
@@ -12,10 +11,9 @@ export class SeedingService {
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
+    const profileRepository = this.dataSource.getRepository(Profile);
     const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
-    const productRepository = this.dataSource.getRepository(Product);
-    const categoryRepository = this.dataSource.getRepository(ProductCategory);
 
     try {
       const existingUsers = await userRepository.count();
@@ -34,12 +32,14 @@ export class SeedingService {
           last_name: 'Smith',
           email: 'john.smith@example.com',
           password: 'password',
+          user_type: UserType.SUPER_ADMIN,
         });
         const u2 = userRepository.create({
           first_name: 'Jane',
           last_name: 'Smith',
           email: 'jane.smith@example.com',
           password: 'password',
+          user_type: UserType.SUPER_ADMIN,
         });
 
         await userRepository.save([u1, u2]);
@@ -47,6 +47,24 @@ export class SeedingService {
         const savedUsers = await userRepository.find();
         if (savedUsers.length !== 2) {
           throw new Error('Failed to create all users');
+        }
+
+        const p1 = profileRepository.create({
+          username: 'Johnsmith',
+          email: 'john.smith@example.com',
+          user: savedUsers[0],
+        });
+        const p2 = profileRepository.create({
+          username: 'Janesmith',
+          email: 'jane.smith@example.com',
+          user: savedUsers[1],
+        });
+
+        await profileRepository.save([p1, p2]);
+
+        const savedProfile = await userRepository.find();
+        if (savedProfile.length !== 2) {
+          throw new Error('Failed to create all profile');
         }
 
         const or1 = organisationRepository.create({
@@ -79,50 +97,8 @@ export class SeedingService {
 
         await organisationRepository.save([or1, or2]);
         const savedOrganisations = await organisationRepository.find();
-
         if (savedOrganisations.length !== 2) {
           throw new Error('Failed to create all organisations');
-        }
-
-        const c1 = categoryRepository.create({
-          name: 'Category 1',
-          description: 'Description for Category 1',
-        });
-        const c2 = categoryRepository.create({
-          name: 'Category 2',
-          description: 'Description for Category 2',
-        });
-        const c3 = categoryRepository.create({
-          name: 'Category 3',
-          description: 'Description for Category 3',
-        });
-
-        // Save categories
-        await categoryRepository.save([c1, c2, c3]);
-
-        // Create products with associated categories
-        const p1 = productRepository.create({
-          product_name: 'Product 1',
-          description: 'Description for Product 1',
-          quantity: 10,
-          price: 100,
-          user: u1,
-          category: c1,
-        });
-        const p2 = productRepository.create({
-          product_name: 'Product 2',
-          description: 'Description for Product 2',
-          quantity: 20,
-          price: 200,
-          user: u2,
-          category: c3, // Attach category c3 to p2
-        });
-
-        await productRepository.save([p1, p2]);
-
-        const savedProducts = await productRepository.find({ relations: ['category'] });
-        if (savedProducts.length !== 2) {
-          throw new Error('Failed to create all products');
         }
 
         const inv1 = inviteRepository.create({
@@ -143,10 +119,6 @@ export class SeedingService {
         const savedInvite = await inviteRepository.find();
         if (savedInvite.length !== 2) {
           throw new Error('Failed to create all organisations');
-        }
-        const savedCategories = await categoryRepository.find({ relations: ['products'] });
-        if (savedCategories.length !== 3) {
-          throw new Error('Failed to create all categories');
         }
 
         await queryRunner.commitTransaction();

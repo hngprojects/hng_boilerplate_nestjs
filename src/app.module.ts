@@ -25,6 +25,8 @@ import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
+import { ProfileModule } from './modules/profile/profile.module';
+import dbConfig from '../config/db.config';
 
 @Module({
   providers: [
@@ -57,7 +59,7 @@ import { ProductsModule } from './modules/products/products.module';
        */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
-      load: [serverConfig, authConfig],
+      load: [serverConfig, authConfig, dbConfig],
       /**
        * See ".env.local" file to list all environment variables needed by the app
        */
@@ -110,6 +112,7 @@ import { ProductsModule } from './modules/products/products.module';
     NotificationSettingsModule,
     TestimonialsModule,
     ProductsModule,
+    ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
 })
