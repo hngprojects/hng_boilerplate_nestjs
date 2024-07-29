@@ -7,10 +7,10 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Notification } from './entities/notifications.entity';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Notification } from './entities/notifications.entity';
 
 @Injectable()
 export class NotificationsService {
@@ -66,6 +66,54 @@ export class NotificationsService {
         throw error;
       } else {
         throw new InternalServerErrorException();
+      }
+    }
+  }
+
+  async markAllNotificationsAsReadForUser(userId: string) {
+    try {
+      if (!userId) {
+        throw new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: 'Invalid Request',
+          data: null,
+        });
+      }
+
+      const notifications = await this.notificationRepository.find({
+        where: {
+          user: {
+            id: userId,
+          },
+          isRead: false,
+        },
+      });
+
+      if (notifications.length > 0) {
+        notifications.forEach(notifications => {
+          notifications.isRead = true;
+        });
+        await this.notificationRepository.save(notifications);
+      }
+
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Notifications cleared successfully.',
+        data: { notifications: [] },
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        console.error('An unexpected error ocurred', error);
+        throw new HttpException(
+          {
+            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: 'Failed to clear notifications',
+            data: null,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
       }
     }
   }

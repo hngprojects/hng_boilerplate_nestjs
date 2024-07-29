@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationsService } from '../notifications.service';
 import { Repository } from 'typeorm';
-import { Notification } from '../entities/notifications.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Notification } from '../entities/notifications.entity';
 import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
 import { BadRequestException, ForbiddenException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
@@ -64,7 +64,7 @@ describe('NotificationsService', () => {
         id: 'valid-id',
         is_read: false,
         message: 'valid notification',
-        user: mockUser as User,
+        user: { id: userId } as User,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -81,12 +81,68 @@ describe('NotificationsService', () => {
         data: {
           notification_id: notification.id,
           message: notification.message,
-          is_read: notification.is_read,
+          is_read: true,
           updated_at: notification.updated_at,
         },
       });
 
       expect(mockNotificationRepository.save).toHaveBeenCalledWith({ ...notification, is_read: true });
+    });
+  });
+
+  describe('markAllUnreadNotificationsAsRead', () => {
+    const userId = 'user-id';
+
+    it('should throw a BadRequest exception if userId is missing', async () => {
+      await expect(service.markAllNotificationsAsReadForUser(null)).rejects.toThrow(
+        new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: 'Invalid Request',
+          data: null,
+        })
+      );
+    });
+
+    it('should return success message if no unread notifications are found for the user', async () => {
+      mockNotificationRepository.find.mockResolvedValue([]);
+
+      const result = await service.markAllNotificationsAsReadForUser(userId);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: 'Notifications cleared successfully.',
+        data: {
+          notifications: [],
+        },
+      });
+    });
+
+    it('should mark all unread notifications as read for the user if they exist', async () => {
+      const notifications = [
+        { id: 'notif1', is_read: false, user: { id: userId } },
+        { id: 'notif2', is_read: false, user: { id: userId } },
+      ];
+      mockNotificationRepository.find.mockResolvedValue(notifications);
+      mockNotificationRepository.save.mockResolvedValue(
+        notifications.map(notification => ({ ...notification, is_read: true }))
+      );
+
+      const result = await service.markAllNotificationsAsReadForUser(userId);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: 'Notifications cleared successfully.',
+        data: {
+          notifications: notifications.map(notification => ({
+            notification_id: notification.id,
+            is_read: true,
+          })),
+        },
+      });
+
+      expect(mockNotificationRepository.save).toHaveBeenCalledWith(
+        notifications.map(notification => ({ ...notification, is_read: true }))
+      );
     });
   });
 });
