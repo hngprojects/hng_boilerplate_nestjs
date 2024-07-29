@@ -70,9 +70,13 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('google')
-  async googleAuth(@Body() body: GoogleAuthPayload, @Res() res: Response) {
-    const response = await this.authService.googleAuth(body);
-    return res.status(HttpStatus.OK).send(response);
+  async googleAuth(
+    @Body() body: GoogleAuthPayload
+    //  @Res() res: Response
+  ) {
+    // const response = await this.authService.googleAuth(body);
+    return this.authService.googleAuth(body);
+    // return res.status(HttpStatus.OK).send(response);
   }
 
   @Post('magic-link')

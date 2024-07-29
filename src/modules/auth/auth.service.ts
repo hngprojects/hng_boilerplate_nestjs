@@ -290,6 +290,7 @@ export default class AuthenticationService {
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
     try {
+      console.log(userPayload);
       const newUser = await this.userService.createUser(userPayload);
       const accessToken = await this.jwtService.sign({
         sub: newUser.id,
@@ -310,7 +311,8 @@ export default class AuthenticationService {
         },
       };
     } catch (error) {
-      throw new Error('Error occured');
+      console.log(error);
+      throw new BadRequestException(HttpStatus.BAD_REQUEST);
     }
   }
 
