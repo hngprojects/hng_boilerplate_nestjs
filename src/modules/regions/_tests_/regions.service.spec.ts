@@ -3,22 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RegionsService } from '../regions.service';
 import { Regions } from '../entities/region.entity';
-
-const mockRegions = [
-  {
-    id: '1',
-    regionCode: 'NA',
-    regionName: 'North America',
-    countryCode: 'US',
-    status: 1,
-    createdOn: new Date(),
-    createdBy: 'admin',
-    modifiedOn: new Date(),
-    modifiedBy: 'admin',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+import { mockRegions } from '../mocks/mockRegions';
 
 describe('RegionsService', () => {
   let service: RegionsService;
