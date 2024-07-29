@@ -124,7 +124,7 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @Get('/facebook')
+  @Get('/facebook-login')
   @UseGuards(AuthGuard('facebook'))
   async facebookLogin(): Promise<any> {
     return HttpStatus.OK;
