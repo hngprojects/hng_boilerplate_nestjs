@@ -73,16 +73,10 @@ export default class AuthenticationService {
         };
       }
 
-      const accessToken = this.jwtService.sign({
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        sub: user.id,
-        user_type: user.user_type,
-      });
+      const token = (await this.otpService.createOtp(user.id)).token;
+      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
-        token: accessToken,
         user: {
           first_name: user.first_name,
           last_name: user.last_name,
@@ -135,7 +129,7 @@ export default class AuthenticationService {
       );
     }
   }
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | LoginErrorResponseDto> {
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
     try {
       const { email, password } = loginDto;
 
@@ -145,19 +139,19 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        return {
+        throw new UnauthorizedException({
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        };
+        });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new UnauthorizedException({
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        });
       }
 
       const access_token = this.jwtService.sign({ id: user.id });
@@ -346,7 +340,7 @@ export default class AuthenticationService {
     };
   }
 
-  async verifySignInToken(verifyOtp: OtpDto) {
+  async verifyToken(verifyOtp: OtpDto) {
     const { token, email } = verifyOtp;
 
     const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
