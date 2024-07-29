@@ -13,11 +13,15 @@ import { AuthGuard } from '@nestjs/passport';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
+import UserService from '../user/user.service';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
-  constructor(private authService: AuthenticationService) {}
+  constructor(
+    private authService: AuthenticationService,
+    private userService: UserService
+  ) {}
 
   @skipAuth()
   @Post('register')
@@ -75,6 +79,51 @@ export default class RegistrationController {
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const user = req['user'];
     if (user) {
+      const jwt = await this.authService.googleLogin(user);
+      const userExists = await this.userService.getUserRecord({ identifierType: 'email', identifier: user.email });
+
+      if (!userExists) {
+        const newUser = await this.authService.createUserGoogle(user);
+        return res.status(HttpStatus.CREATED).json(newUser);
+      }
+
+      const response = {
+        status: 'success',
+        message: 'User successfully authenticated',
+        data: {
+          tokens: {
+            access_token: jwt.access_token,
+          },
+          user: {
+            id: user.id,
+            email: user.email,
+            name: `${user.given_name} ${user.family_name}`,
+            given_name: user.given_name,
+            family_name: user.family_name,
+            picture: user.picture,
+          },
+        },
+      };
+
+      return res.status(HttpStatus.OK).json(response);
+    } else {
+      const response = {
+        status: 'error',
+        message: 'Authentication failed',
+      };
+
+      return res.status(HttpStatus.UNAUTHORIZED).json(response);
+    }
+  }
+
+  @skipAuth()
+  @Get('registration/google')
+  @UseGuards(AuthGuard('google'))
+  async googleRegistrationRedirect(@Req() req: Request, @Res() res: Response) {
+    console.log('Registration auth');
+    const user = req['user'];
+    if (user) {
+      const userRegistered = await this;
       const jwt = await this.authService.googleLogin(user);
 
       const access_token = jwt.access_token;
