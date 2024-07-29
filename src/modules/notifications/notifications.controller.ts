@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Req, Request, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Req, Request, ValidationPipe, Delete } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import {
   ApiBadRequestResponse,
@@ -37,5 +37,13 @@ export class NotificationsController {
 
     const userId = user.id;
     return this.notificationsService.markNotificationAsRead(markNotificationAsRead, notification_id, userId);
+  }
+  @Delete('/clear')
+  async markAllNotificationsAsRead(@Req() request: Request) {
+    const user = request['user'];
+
+    const userId = user.id;
+
+    return this.notificationsService.markAllNotificationsAsReadForUser(userId);
   }
 }

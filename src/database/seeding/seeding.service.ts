@@ -20,7 +20,6 @@ export class SeedingService {
     const productRepository = this.dataSource.getRepository(Product);
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const notificationRepository = this.dataSource.getRepository(Notification);
-
     try {
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
