@@ -26,4 +26,5 @@ export const mockUser: User = {
   secret: 'secret',
   is_2fa_enabled: false,
   notifications: [],
+  products: [],
 };
