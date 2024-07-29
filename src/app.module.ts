@@ -20,10 +20,12 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
+import { ProductsModule } from './modules/products/products.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
+import ProbeController from './probe.controller';
 
 @Module({
   providers: [
@@ -109,7 +111,8 @@ import { UserModule } from './modules/user/user.module';
     NotificationSettingsModule,
     TestimonialsModule,
     NotificationsModule,
+    ProductsModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, ProbeController],
 })
 export class AppModule {}

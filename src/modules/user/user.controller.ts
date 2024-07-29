@@ -11,21 +11,6 @@ import UserService from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiOperation({ summary: 'Update User' })
-  @ApiResponse({
-    status: 200,
-    description: 'User updated seuccessfully',
-    type: UpdateUserDto,
-  })
-  @Patch(':userId')
-  async updateUser(
-    @Request() req: { user: UserPayload },
-    @Param('userId') userId: string,
-    @Body() updatedUserDto: UpdateUserDto
-  ) {
-    return this.userService.updateUser(userId, updatedUserDto, req.user);
-  }
-
   @Patch('/deactivate')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Deactivate a user account' })
@@ -44,6 +29,21 @@ export class UserController {
       status_code: 200,
       message: result.message,
     };
+  }
+
+  @ApiOperation({ summary: 'Update User' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated seuccessfully',
+    type: UpdateUserDto,
+  })
+  @Patch(':userId')
+  async updateUser(
+    @Request() req: { user: UserPayload },
+    @Param('userId') userId: string,
+    @Body() updatedUserDto: UpdateUserDto
+  ) {
+    return this.userService.updateUser(userId, updatedUserDto, req.user);
   }
 
   @ApiBearerAuth()
