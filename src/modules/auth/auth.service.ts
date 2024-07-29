@@ -276,7 +276,7 @@ export default class AuthenticationService {
 
   async googleLogin(user: User) {
     const payload = { userId: user.id };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign({ payload, sub: user.id });
 
     return {
       status: 'success',
@@ -290,6 +290,32 @@ export default class AuthenticationService {
       },
     };
   }
+
+  public async createUserGoogle(userPayload) {
+    try {
+      const newUser = await this.userService.createUserGoogle(userPayload);
+      const accessToken = await this.jwtService.sign({
+        sub: userPayload.id,
+        email: userPayload.email,
+        first_name: userPayload.first_name,
+        last_name: userPayload.last_name,
+      });
+      return {
+        status: 'success',
+        message: 'User successfully authenticated',
+        access_token: accessToken,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+        },
+      };
+    } catch (error) {
+      throw new Error('Error occured');
+    }
+  }
+
   async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
     const { email } = requestSignInTokenDto;
 
