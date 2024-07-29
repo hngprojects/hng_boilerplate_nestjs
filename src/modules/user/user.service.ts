@@ -51,6 +51,19 @@ export default class UserService {
     };
   }
 
+  public async createUserGoogle(userPayload) {
+    const newUser = new User();
+    const userData = {
+      email: userPayload.email,
+      name: `${userPayload.given_name} ${userPayload.family_name}`,
+      first_name: userPayload.given_name,
+      last_name: userPayload.family_name,
+    };
+    Object.assign(newUser, userData);
+    newUser.is_active = true;
+    return this.userRepository.save(newUser);
+  }
+
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
     return user;

@@ -1,5 +1,13 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import {
   ERROR_OCCURED,
@@ -12,6 +20,7 @@ import {
   USER_CREATED_SUCCESSFULLY,
   USER_BANNED,
   USER_NOT_FOUND,
+  UNAUTHORISED_TOKEN,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -22,6 +31,12 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { User } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
+import { generateSixDigitToken } from '../../utils/generate-token';
+import { OtpDto } from '../otp/dto/otp.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -62,6 +77,7 @@ export default class AuthenticationService {
         first_name: user.first_name,
         last_name: user.last_name,
         sub: user.id,
+        user_type: user.user_type,
       });
 
       const responsePayload = {
@@ -288,6 +304,106 @@ export default class AuthenticationService {
         secret: secret.base32,
         qr_code_url: qrCodeUrl,
       },
+    };
+  }
+
+  async googleLogin(user: User) {
+    const payload = { userId: user.id };
+    const accessToken = this.jwtService.sign({ payload, sub: user.id });
+
+    return {
+      status: 'success',
+      message: 'User successfully authenticated',
+      access_token: accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      },
+    };
+  }
+
+  public async createUserGoogle(userPayload) {
+    try {
+      const newUser = await this.userService.createUserGoogle(userPayload);
+      const accessToken = await this.jwtService.sign({
+        sub: userPayload.id,
+        email: userPayload.email,
+        first_name: userPayload.first_name,
+        last_name: userPayload.last_name,
+      });
+      return {
+        status: 'success',
+        message: 'User successfully authenticated',
+        access_token: accessToken,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+        },
+      };
+    } catch (error) {
+      throw new Error('Error occured');
+    }
+  }
+
+  async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
+    const { email } = requestSignInTokenDto;
+
+    const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
+
+    if (!user) {
+      throw new BadRequestException({
+        message: 'Invalid credentials',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const otpExist = await this.otpService.findOtp(user.id);
+
+    if (otpExist) {
+      await this.otpService.deleteOtp(user.id);
+    }
+
+    // Generate a new OTP and save it
+    const newOtp = generateSixDigitToken();
+    await this.otpService.createOtp(user.id);
+
+    // Send the OTP to the user's email
+    await this.emailService.sendLoginOtp(user.email, newOtp);
+
+    return {
+      message: 'Sign-in token sent to email',
+      status_code: HttpStatus.OK,
+    };
+  }
+
+  async verifySignInToken(verifyOtp: OtpDto) {
+    const { token, email } = verifyOtp;
+
+    const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
+    const otp = await this.otpService.verifyOtp(user.id, token);
+
+    if (!user || !otp) {
+      throw new UnauthorizedException({
+        message: UNAUTHORISED_TOKEN,
+        status_code: HttpStatus.UNAUTHORIZED,
+      });
+    }
+
+    const accessToken = this.jwtService.sign({
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      sub: user.id,
+    });
+
+    return {
+      message: 'Sign-in successful',
+      token: accessToken,
+      status_code: HttpStatus.OK,
     };
   }
 }
