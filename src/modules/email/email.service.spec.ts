@@ -123,6 +123,12 @@ describe('EmailService', () => {
       },
     });
   });
+  it('should get all email templates', async () => {
+    jest.spyOn(service, 'getAllTemplates').mockResolvedValue(mockEmailTemplates);
+
+    const templates = await service.getAllTemplates();
+    expect(templates).toEqual(mockEmailTemplates);
+  });
 
   it('should get a single email template by name', async () => {
     const templateName = 'Template1';
@@ -130,6 +136,8 @@ describe('EmailService', () => {
 
     const template = await service.getTemplate(templateName);
     expect(template).toEqual(mockEmailTemplates[0]);
+  });
+
   it('should send otp email', async () => {
     const email = 'test@example.com';
     const token = '123456';

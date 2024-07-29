@@ -3,6 +3,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ArticleInterface } from './article.interface';
 import { join } from 'path';
 import { promises as fs, existsSync } from 'fs';
+import { EmailResponseDTO } from './dto/emailTemplateResponse';
 
 @Injectable()
 export class EmailService {
@@ -78,7 +79,41 @@ export class EmailService {
     return {
       data: { name: templateName, content: template },
     };
+  }
 
+  async getAllTemplates(page: number = 1, limit: number = 10): Promise<EmailResponseDTO> {
+    try {
+      // Define the Template type
+      type Template = {
+        name: string;
+        content: string;
+      };
+
+      // Declare the templates array
+      const files = await fs.readdir(this.templatesPath);
+      const templates: Template[] = [];
+      for (const file of files) {
+        const templateName = file.replace('.hbs', '');
+        const template = await this.getTemp(templateName);
+        templates.push({ name: templateName, content: template });
+      }
+
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedTemplates = templates.slice(startIndex, endIndex);
+
+      return {
+        data: {
+          total: templates.length,
+          page,
+          limit,
+          templates: paginatedTemplates,
+        },
+      };
+    } catch (err) {
+      throw new Error(`Error reading templates: ${err.message}`);
+    }
+  }
   async sendLoginOtp(email: string, token: string) {
     await this.mailerService.sendMail({
       to: email,
