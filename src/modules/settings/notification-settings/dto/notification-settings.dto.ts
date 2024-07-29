@@ -9,8 +9,4 @@ export class NotificationSettingsDto {
   @ApiProperty()
   @IsBoolean()
   push_notifications: boolean;
-
-  @ApiProperty()
-  @IsBoolean()
-  sms_notifications: boolean;
 }
