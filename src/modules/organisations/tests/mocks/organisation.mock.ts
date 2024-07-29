@@ -80,6 +80,7 @@ export const createMockOrganisation = (): Organisation => {
     preferences: [],
     invites: [],
     organisationMembers: [orgMemberMock],
+    products: [],
   };
 };
 

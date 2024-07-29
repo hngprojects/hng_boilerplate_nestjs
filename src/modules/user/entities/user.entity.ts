@@ -56,9 +56,6 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
 
-  @OneToMany(() => Product, product => product.user, { cascade: true })
-  products: Product[];
-
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
