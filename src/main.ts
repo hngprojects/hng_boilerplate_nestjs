@@ -35,8 +35,8 @@ async function bootstrap() {
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()
-    .setTitle('Remote Bingo')
-    .setDescription('<project-description-here>')
+    .setTitle('HNG Boilerplate')
+    .setDescription('API Doc from team starlight')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

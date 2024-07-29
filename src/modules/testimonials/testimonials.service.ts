@@ -44,9 +44,7 @@ export class TestimonialsService {
         throw error;
       } else {
         throw new InternalServerErrorException({
-          status: 'error',
           error: `An internal server error occurred: ${error.message}`,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         });
       }
     }

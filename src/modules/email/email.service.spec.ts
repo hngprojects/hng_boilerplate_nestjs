@@ -1,6 +1,6 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService } from './email.service';
-import { MailerService } from '@nestjs-modules/mailer';
 
 describe('EmailService', () => {
   let service: EmailService;
@@ -107,6 +107,27 @@ describe('EmailService', () => {
       context: {
         email,
         articles,
+      },
+    });
+  });
+
+  it('should send notification email', async () => {
+    const email = 'test@example.com';
+    const message = 'You have a new notification';
+    const support_email = 'support@remotebingo.com';
+    const recipient_name = 'John Doe';
+
+    await service.sendNotificationMail(email, { message, support_email, recipient_name });
+
+    expect(mailerService.sendMail).toHaveBeenCalledWith({
+      to: email,
+      subject: 'Notification',
+      template: 'notification',
+      context: {
+        email,
+        message,
+        support_email,
+        recipient_name,
       },
     });
   });

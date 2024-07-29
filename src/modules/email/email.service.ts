@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { ArticleInterface } from './article.interface';
+import { Injectable } from '@nestjs/common';
+import { ArticleInterface } from './interface/article.interface';
+import { IMessageInterface } from './interface/message.interface';
 
 @Injectable()
 export class EmailService {
@@ -52,6 +53,21 @@ export class EmailService {
       context: {
         email,
         articles,
+      },
+    });
+  }
+
+  async sendNotificationMail(email: string, notificationMail: IMessageInterface) {
+    const { recipient_name, message, support_email } = notificationMail;
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'In-App, Notification',
+      template: 'notification',
+      context: {
+        email,
+        recipient_name,
+        message,
+        support_email,
       },
     });
   }
