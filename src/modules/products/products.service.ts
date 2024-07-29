@@ -2,6 +2,7 @@ import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
+import { UpdateProductDTO } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -35,6 +36,26 @@ export class ProductsService {
           updated_at: productExists.updated_at,
         },
       },
+    };
+  }
+
+  async updateProduct(productId: string, updateProductDto: UpdateProductDTO) {
+    const productExist = await this.productRepository.findOne({ where: { id: productId } });
+
+    if (!productExist) {
+      throw new NotFoundException({
+        error: 'Product not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    await this.productRepository.update(productId, updateProductDto);
+    const product = this.productRepository.findOne({ where: { id: productId } });
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Product updated successfully',
+      data: product,
     };
   }
 }

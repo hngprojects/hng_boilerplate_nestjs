@@ -87,4 +87,12 @@ describe('ProductsService', () => {
       await expect(service.fetchSingleProduct('1')).rejects.toThrow(InternalServerErrorException);
     });
   });
+
+  describe('Update product PATCH: /api/v1/products/:productId', () => {
+    it('should throw an error if product is not found', async () => {
+      (repository.findOne as jest.Mock).mockResolvedValue(null);
+
+      await expect(service.updateProduct('123hsb', { product_name: 'Product One' })).rejects.toThrow(NotFoundException);
+    });
+  });
 });
