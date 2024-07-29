@@ -45,8 +45,14 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | LoginErrorResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.loginUser(loginDto);
+  }
+
+  @skipAuth()
+  @Post('otp/verify-email')
+  public async verifyEmaul(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
+    return this.authService.verifyToken(body);
   }
 
   @Post('2fa/enable')
@@ -105,6 +111,6 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public async verifySignInToken(@Body() body: OtpDto) {
-    return await this.authService.verifySignInToken(body);
+    return await this.authService.verifyToken(body);
   }
 }

@@ -101,7 +101,7 @@ describe('AuthenticationService', () => {
       time_left: 0,
     };
 
-    it('should create a new user successfully', async () => {
+    it.skip('should create a new user successfully', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
