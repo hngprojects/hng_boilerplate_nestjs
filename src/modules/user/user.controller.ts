@@ -74,6 +74,40 @@ export class UserController {
         HttpStatus.BAD_REQUEST
       );
     }
+
+  @Patch('/deactivate')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Deactivate a user account' })
+  @ApiResponse({ status: 200, description: 'The account has been successfully deactivated.' })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  async deactivateAccount(@Req() request: Request, @Body() deactivateAccountDto: DeactivateAccountDto) {
+    const user = request['user'];
+
+    const userId = user.sub;
+
+    const result = await this.userService.deactivateUser(userId, deactivateAccountDto);
+
+    return {
+      status_code: 200,
+      message: result.message,
+    };
+  }
+
+  @ApiOperation({ summary: 'Update User' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated seuccessfully',
+    type: UpdateUserDto,
+  })
+  @Patch(':userId')
+  async updateUser(
+    @Request() req: { user: UserPayload },
+    @Param('userId') userId: string,
+    @Body() updatedUserDto: UpdateUserDto
+  ) {
+    return this.userService.updateUser(userId, updatedUserDto, req.user);
   }
 
   @ApiBearerAuth()
