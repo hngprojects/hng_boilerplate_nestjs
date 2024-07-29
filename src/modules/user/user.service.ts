@@ -39,6 +39,30 @@ export default class UserService {
     await this.userRepository.save(user);
   }
 
+  async getUserDataWithoutPasswordById(id: string) {
+    const user = await this.getUserRecord({ identifier: id, identifierType: 'id' });
+
+    const { password, ...userData } = user;
+
+    return {
+      status_code: 200,
+      user: userData,
+    };
+  }
+
+  public async createUserGoogle(userPayload) {
+    const newUser = new User();
+    const userData = {
+      email: userPayload.email,
+      name: `${userPayload.given_name} ${userPayload.family_name}`,
+      first_name: userPayload.given_name,
+      last_name: userPayload.family_name,
+    };
+    Object.assign(newUser, userData);
+    newUser.is_active = true;
+    return this.userRepository.save(newUser);
+  }
+
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
     return user;
