@@ -68,7 +68,7 @@ export class JobDto {
   })
   @IsEnum(SalaryRange)
   @IsNotEmpty()
-  salary_range: SalaryRange;
+  salary_range: string;
 
   @ApiProperty({
     description: 'The type of job',
@@ -78,7 +78,7 @@ export class JobDto {
   })
   @IsEnum(JobType)
   @IsOptional()
-  job_type: JobType;
+  job_type: string;
 
   @ApiProperty({
     description: 'The mode of the job (e.g., remote, onsite)',
@@ -88,7 +88,7 @@ export class JobDto {
   })
   @IsEnum(JobMode)
   @IsOptional()
-  job_mode: JobMode;
+  job_mode: string;
 
   @ApiProperty({
     description: 'The name of the company offering the job',
@@ -102,5 +102,5 @@ export class JobDto {
   @ApiHideProperty()
   @IsBoolean()
   @IsOptional()
-  is_deleted: boolean;
+  is_deleted?: boolean;
 }
