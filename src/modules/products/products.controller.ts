@@ -1,18 +1,29 @@
-import { Controller, Get, HttpException, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-@ApiBearerAuth()
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { skipAuth } from '../../helpers/skipAuth';
+
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
-  static findAll: any;
   constructor(private readonly productsService: ProductsService) {}
-
+  @skipAuth()
   @Get()
-  @ApiOperation({ summary: 'Getting the list of products' })
-  @ApiResponse({ status: 200, description: 'Product retrieved successfully.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized. You must be authenticated to get list of products.' })
+  @ApiOperation({ summary: 'get the list of products' })
+  @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
+  @ApiResponse({ status: 400, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async findAllProducts(@Query('page') page: number, @Query('limit') limit: number) {
-    return await this.productsService.findAllProducts(page, limit)
+    return this.productsService.findAllProducts(page, limit);
+  }
+  @skipAuth()
+  @Get('/:productId')
+  @ApiOperation({ summary: 'Fetch a single product by id' })
+  @ApiParam({ name: 'productId', type: String, description: 'Product Id' })
+  @ApiResponse({ status: 200, description: 'Product fetched successfully' })
+  @ApiResponse({ status: 400, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async fetchSingleProduct(@Param('productId') productId: string) {
+    return this.productsService.fetchSingleProduct(productId);
   }
 }

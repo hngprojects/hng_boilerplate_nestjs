@@ -5,9 +5,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Product extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-  
+
   @Column({ type: 'text' })
   name: string;
 
@@ -18,10 +16,7 @@ export class Product extends AbstractBaseEntity {
   price: number;
 
   @Column('int')
-  current_stock: number;
-
-  @Column('int')
-  in_stock: number;
+  avail_qty: number;
   
   @ManyToOne(() => User, user => user.products)
   user: User;
@@ -29,3 +24,4 @@ export class Product extends AbstractBaseEntity {
   @ManyToOne(() => ProductCategory, category => category.products)
   category: ProductCategory;
 }
+

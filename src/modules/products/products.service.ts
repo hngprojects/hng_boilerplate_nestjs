@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
@@ -38,7 +38,7 @@ export class ProductsService {
           totalPages,
           currentPage: page,
         },
-        status_code: 200,
+        status_code: HttpStatus.OK,
       };
     } catch (error) {
       throw new InternalServerErrorException({
@@ -46,5 +46,37 @@ export class ProductsService {
         status_code: 500,
       });
     }
+
+  }
+  async fetchSingleProduct(productId: string) {
+    const productExists = await this.productRepository.findOne({
+      where: {
+        id: productId,
+      },
+      relations: ['category'],
+    });
+    if (!productExists) {
+      throw new NotFoundException({
+        error: 'Product not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Product fetched successfully',
+      data: {
+        products: {
+          id: productExists.id,
+          name: productExists.name,
+          description: productExists.description,
+          avail_qty: productExists.avail_qty,
+          price: productExists.price,
+          category: productExists.category.id,
+          created_at: productExists.created_at,
+          updated_at: productExists.updated_at,
+        },
+      },
+    };
   }
 }
+

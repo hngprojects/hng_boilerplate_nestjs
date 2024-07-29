@@ -25,17 +25,12 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsInt()
   @Min(0)
-  current_stock: number;
+  avail_qty: number;
 
   @ApiProperty({
     description: 'In stock of the product',
     example: 10,
   })
-  @IsNotEmpty()
-  @IsInt()
-  @Min(0)
-  in_stock: number;
-
   @ApiProperty({
     description: 'Price of the product',
     example: 100,
@@ -55,7 +50,7 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'User id',
-    example: null,
+    example: '',
   })
   @IsNotEmpty()
   @IsUUID()
