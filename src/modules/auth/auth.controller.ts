@@ -69,9 +69,7 @@ export default class RegistrationController {
   @skipAuth()
   @Get('login/google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req: Request) {
-    // Initiates Google OAuth2 login flow
-  }
+  async googleAuth(@Req() req: Request) {}
 
   @skipAuth()
   @Get('callback/google')
