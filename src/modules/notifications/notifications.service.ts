@@ -109,7 +109,7 @@ export class NotificationsService {
         throw new HttpException(
           {
             status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: 'Failed to clear notifications',
+            message: 'Failed to clear notifications.',
             data: null,
           },
           HttpStatus.INTERNAL_SERVER_ERROR
