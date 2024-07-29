@@ -5,6 +5,8 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { Blog } from 'src/modules/blog/entities/blog.entity';
+import { BlogPostComment } from 'src/modules/blog/entities/blog-comment.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -63,8 +65,8 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Blog, blog => blog.author, { nullable: true })
   blogs?: Blog[];
 
-  @OneToMany(() => BlogComment, comment => comment.author, { nullable: true })
-  comments?: BlogComment[];
+  @OneToMany(() => BlogPostComment, comment => comment.author, { nullable: true })
+  comments?: BlogPostComment[];
 
   @BeforeInsert()
   async hashPassword() {
