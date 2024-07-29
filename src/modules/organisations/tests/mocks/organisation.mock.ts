@@ -28,6 +28,7 @@ export const createMockOrganisation = (): Organisation => {
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
+    products: [],
   };
 
   return {
