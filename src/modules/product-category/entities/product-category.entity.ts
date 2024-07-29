@@ -1,9 +1,7 @@
 import { Product } from '../../../modules/products/entities/product.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { ManyToOne, OneToMany } from 'typeorm';
-
-import { Column, Entity } from 'typeorm';
+import { ManyToOne, OneToMany, Column, Entity } from 'typeorm';
 
 @Entity()
 export class ProductCategory extends AbstractBaseEntity {

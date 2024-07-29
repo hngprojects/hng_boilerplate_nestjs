@@ -3,8 +3,8 @@ import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Product } from 'src/modules/products/entities/product.entity';
-import { ProductCategory } from 'src/modules/product-category/entities/product-category.entity';
+import { Product } from '../../modules/products/entities/product.entity';
+import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 
 @Injectable()
 export class SeedingService {
