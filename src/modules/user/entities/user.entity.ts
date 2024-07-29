@@ -5,7 +5,7 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
-
+import { Notification } from '../../notifications/entities/notification.entity';
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
