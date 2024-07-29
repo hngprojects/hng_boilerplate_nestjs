@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, Request, Delete, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -16,6 +16,14 @@ export class OrganisationsController {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
   }
+  
+  @UseGuards(OwnershipGuard)
+  @Delete(':org_id')
+  async delete(@Param('org_id') id: string, @Res() response: Response) {
+    this.organisationsService;
+    return this.organisationsService.deleteOrganization(id);
+  }
+
   @ApiOperation({ summary: 'Update Organisation' })
   @ApiResponse({
     status: 200,

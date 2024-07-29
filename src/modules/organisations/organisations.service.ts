@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -47,6 +48,22 @@ export class OrganisationsService {
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }
 
+  async deleteOrganization(id: string) {
+    try {
+      const org = await this.organisationRepository.findOneBy({ id });
+      if (!org) {
+        throw new NotFoundException(`Organisation with id: ${id} not found`);
+      }
+      org.isDeleted = true;
+      await this.organisationRepository.save(org);
+      return HttpStatus.NO_CONTENT;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+  }
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
     return emailFound?.length ? true : false;
