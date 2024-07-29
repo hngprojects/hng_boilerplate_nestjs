@@ -1,4 +1,3 @@
-
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -49,7 +48,6 @@ export default class RegistrationController {
   @Post('login')
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> 
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | LoginErrorResponseDto> {
