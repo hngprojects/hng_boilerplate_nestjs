@@ -48,4 +48,25 @@ export class NotificationSettingsService {
       throw new BadRequestException(error?.message || 'Failed to fetch notification settings');
     }
   }
+
+  async updateSettings(
+    user_id: string,
+    notificationSettingsDto: NotificationSettingsDto
+  ): Promise<NotificationSettings> {
+    try {
+      const settings = await this.notificationSettingsRepository.findOne({ where: { user_id } });
+      if (!settings) {
+        throw new NotFoundException('User not found');
+      }
+
+      Object.assign(settings, notificationSettingsDto);
+      return this.notificationSettingsRepository.save(settings);
+    } catch (error) {
+      this.logger.error('Error updating notification settings:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Invalid data in the request body');
+    }
+  }
 }
