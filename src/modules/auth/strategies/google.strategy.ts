@@ -9,14 +9,11 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(
-    @Inject(config.KEY) private configService: ConfigType<typeof config>,
-    @InjectRepository(User) private userRepository: Repository<User>
-  ) {
+  constructor(@InjectRepository(User) private userRepository: Repository<User>) {
     super({
-      clientID: configService.google.clientID,
-      clientSecret: configService.google.clientSecret,
-      callbackURL: configService.google.callbackURL,
+      clientID: config().google.clientID,
+      clientSecret: config().google.clientSecret,
+      callbackURL: config().google.callbackURL,
       scope: ['profile', 'email'],
     });
   }
