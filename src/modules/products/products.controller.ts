@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Put } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { skipAuth } from '../../helpers/skipAuth';
@@ -20,7 +20,7 @@ export class ProductsController {
     return this.productsService.fetchSingleProduct(productId);
   }
 
-  @Patch('/:productId')
+  @Put('/:productId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Update product' })
   @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
