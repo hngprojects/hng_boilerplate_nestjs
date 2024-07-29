@@ -1,11 +1,15 @@
 import {
   BadRequestException,
-  HttpStatus,
+ 
   Injectable,
-  InternalServerErrorException,
+ 
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Product } from './entities/product.entity';
+import { ProductCategory } from '../product-category/entities/product-category.entity';
+import { CreateProductDto } from './dto/create-product.dto';
 import { Repository } from 'typeorm';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { Product, ProductStatusType } from './entities/product.entity';
