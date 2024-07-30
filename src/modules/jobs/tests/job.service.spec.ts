@@ -35,6 +35,8 @@ describe('JobsService', () => {
     jobs: [],
     created_at: new Date(),
     updated_at: new Date(),
+    notification_settings: [],
+    notifications: [],
     hashPassword: () => null,
   };
 
