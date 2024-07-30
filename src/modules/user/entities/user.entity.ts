@@ -71,9 +71,6 @@ export class User extends AbstractBaseEntity {
   @JoinColumn()
   profile: Profile;
 
-  @OneToMany(() => Testimonial, testimonial => testimonial.user)
-  testimonials: Testimonial[];
-
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
 
