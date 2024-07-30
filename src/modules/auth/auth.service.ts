@@ -76,18 +76,11 @@ export default class AuthenticationService {
           message: FAILED_TO_CREATE_USER,
         };
       }
-      const access_token = await this.jwtService.sign({
-        sub: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        id: user.id,
-      });
-      // const token = (await this.otpService.createOtp(user.id)).token;
-      // await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
+
+      const token = (await this.otpService.createOtp(user.id)).token;
+      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
-        access_token,
         user: {
           first_name: user.first_name,
           last_name: user.last_name,
