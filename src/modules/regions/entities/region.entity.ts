@@ -3,16 +3,16 @@ import { AbstractBaseEntity } from './../../../entities/base.entity';
 
 @Entity()
 export class Regions extends AbstractBaseEntity {
-  @Column({ nullable: true })
+  @Column()
   regionCode: string;
 
-  @Column()
+  @Column({ nullable: false })
   regionName: string;
 
-  @Column({ nullable: true })
+  @Column()
   countryCode: string;
 
-  @Column('int', { nullable: true })
+  @Column('int')
   status: number;
 
   @Column({ type: 'timestamp' })
