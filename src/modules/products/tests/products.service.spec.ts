@@ -86,7 +86,7 @@ describe('ProductsService', () => {
         status_code: HttpStatus.OK,
         message: 'Product stock retrieved successfully',
         data: {
-          productId: '123hgdt',
+          product_id: '123hgdt',
           current_stock: 10,
           last_updated: product.updated_at,
         },
