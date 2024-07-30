@@ -44,4 +44,13 @@ export class JobsService {
       ),
     };
   }
+
+  async getJobs() {
+    const jobs = await this.jobRepository.find();
+    return {
+      message: 'Jobs listing fetched successfully',
+      status_code: 200,
+      data: jobs,
+    };
+  }
 }
