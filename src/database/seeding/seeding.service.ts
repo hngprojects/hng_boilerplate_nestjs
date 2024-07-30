@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
@@ -208,10 +208,10 @@ export class SeedingService {
 
   async getUsers(): Promise<User[]> {
     try {
-      return this.dataSource.getRepository(User).find({ relations: ['organisations'] });
+      return this.dataSource.getRepository(User).find();
     } catch (error) {
-      console.error('Error fetching users:', error.message);
-      throw error;
+      console.log('Error fetching users:', error);
+      throw new BadRequestException('Error fetching users');
     }
   }
 }

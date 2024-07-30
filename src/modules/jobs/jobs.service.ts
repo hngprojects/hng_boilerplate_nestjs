@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
 import { JobDto } from './dto/job.dto';
 import { pick } from '../../helpers/pick';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class JobsService {
@@ -42,6 +43,30 @@ export class JobsService {
         newJob,
         Object.keys(newJob).filter(x => !['user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
       ),
+    };
+  }
+
+  async getJobs() {
+    const jobs = await this.jobRepository.find();
+    return {
+      message: 'Jobs listing fetched successfully',
+      status_code: 200,
+      data: jobs,
+    };
+  }
+
+  async getJob(id: string) {
+    const job = await this.jobRepository.findOne({ where: { id } });
+    if (!job)
+      throw new NotFoundException({
+        status_code: 404,
+        status: 'Not found Exception',
+        message: 'Job not found',
+      });
+    return {
+      message: 'Job fetched successfully',
+      status_code: 200,
+      data: job,
     };
   }
 }

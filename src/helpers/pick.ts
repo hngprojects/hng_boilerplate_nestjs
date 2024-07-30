@@ -1,4 +1,4 @@
-export function pick(obj: object, keys: string[]) {
+export function pick(obj: any, keys: string[]) {
   const result: object = {};
   for (const key of keys) {
     if (key in obj) {
