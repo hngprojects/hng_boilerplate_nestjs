@@ -8,9 +8,6 @@
 .idea/**/tasks.xml
 .idea/dictionaries
 
-# VS Code
-.vscode
-
 # Sensitive or high-churn files:
 .idea/**/dataSources/
 .idea/**/dataSources.ids
