@@ -16,9 +16,3 @@ export class CreateNotificationPropsDto {
   @IsBoolean()
   is_read: boolean;
 }
-
-export class Message {
-  @IsNotEmpty()
-  @IsString()
-  message: string;
-}
