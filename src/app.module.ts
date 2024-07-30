@@ -27,6 +27,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { HelpCenterModule } from './modules/help-center/help-center.module';
 
 @Module({
   providers: [
