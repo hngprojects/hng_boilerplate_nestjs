@@ -14,11 +14,13 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { Profile } from '../../profile/entities/profile.entity';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
   let organisationRepository: Repository<Organisation>;
+  let profileRepository: Repository<Profile>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,12 +46,22 @@ describe('OrganisationsService', () => {
             findOne: jest.fn(),
           },
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useValue: {
+            findBy: jest.fn(),
+            find: jest.fn(),
+            findOne: jest.fn(),
+            save: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
   it('should be defined', () => {

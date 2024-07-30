@@ -84,6 +84,7 @@ export default class AuthenticationService {
 
       const responsePayload = {
         user: {
+          id: user.id,
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
@@ -160,7 +161,7 @@ export default class AuthenticationService {
         };
       }
 
-      const access_token = this.jwtService.sign({ id: user.id });
+      const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
 
       const responsePayload = {
         access_token,
@@ -376,10 +377,10 @@ export default class AuthenticationService {
     const otp = await this.otpService.verifyOtp(user.id, token);
 
     if (!user || !otp) {
-      throw new UnauthorizedException({
+      return {
         message: UNAUTHORISED_TOKEN,
         status_code: HttpStatus.UNAUTHORIZED,
-      });
+      };
     }
 
     const accessToken = this.jwtService.sign({

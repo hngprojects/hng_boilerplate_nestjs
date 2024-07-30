@@ -27,6 +27,7 @@ export default class RegistrationController {
   @Post('register')
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
     const createUserResponse = await this.authService.createNewUser(body);
+    // return createUserResponse;
     return response.status(createUserResponse.status_code).send(createUserResponse);
   }
 
@@ -77,6 +78,9 @@ export default class RegistrationController {
   }
 
   @skipAuth()
+  @ApiOperation({ summary: 'Google Authentication' })
+  @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: OtpDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @Post('google')
   async googleAuth(@Body() body: GoogleAuthPayload) {
     return this.authService.googleAuth(body);
