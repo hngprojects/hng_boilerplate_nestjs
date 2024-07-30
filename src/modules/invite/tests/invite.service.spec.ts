@@ -40,7 +40,6 @@ describe('InviteService', () => {
       user_type: UserType.ADMIN,
       owned_organisations: [],
       created_organisations: [],
-      member_organisations: [],
       invites: [],
       hashPassword: () => null,
       password: 'password123',
