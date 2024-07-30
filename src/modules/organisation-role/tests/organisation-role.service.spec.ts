@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrganisationRoleService } from '../organisation-role.service';
 import { Repository } from 'typeorm';
 import { OrganisationRole } from '../entities/organisation-role.entity';
-import { Organisation } from 'src/modules/organisations/entities/organisations.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 

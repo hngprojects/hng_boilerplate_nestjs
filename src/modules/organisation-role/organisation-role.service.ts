@@ -34,19 +34,26 @@ export class OrganisationRoleService {
     return `This action updates a #${id} organisationRole`;
   }
 
-  async deleteRole(organizationId: string, roleId: string, currentUser) {
+  async deleteRole(organisationId: string, roleId: string, currentUser) {
     if (!['superadmin', 'admin', 'owner'].includes(currentUser.role)) {
       throw new UnauthorizedException('You are not authorized to manage roles');
     }
     const role = await this.rolesRepository.findOne({
-      where: { id: roleId, organisation: { id: organizationId }, isDeleted: false },
+      where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
     });
     if (!role) {
       throw new NotFoundException(`The role with ID ${roleId} does not exist`);
     }
     const usersWithRole = await this.organisationRepository.count({
-      where: { roles: { id: roleId }, organisation: { id: organizationId } },
+      where: {
+        id: organisationId,
+        organisationMembers: {
+          role: { id: roleId },
+        },
+      },
+      relations: ['organisationUsers', 'organisationUsers.role'],
     });
+
     if (usersWithRole > 0) {
       throw new BadRequestException('Role is currently assigned to users');
     }
