@@ -44,6 +44,7 @@ export const newUser: User = {
   organisationMembers: [],
   invites: [],
   testimonials: [],
+  jobs: [],
   secret: 'secret',
   is_2fa_enabled: false,
   profile: profileMock,
