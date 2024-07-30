@@ -28,8 +28,7 @@ export class ResponseInterceptor implements NestInterceptor {
     }
 
     response.status(status).json({
-      status: false,
-      status_code: status,
+      status: status,
       error: exceptionResponse.error || exceptionResponse,
       message: errorMessage,
     });
@@ -43,8 +42,7 @@ export class ResponseInterceptor implements NestInterceptor {
     const { message, ...data } = res;
 
     return {
-      status: true,
-      status_code,
+      status: status_code,
       message,
       ...data,
     };
