@@ -26,7 +26,6 @@ import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
-import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProfileModule } from './modules/profile/profile.module';
@@ -117,7 +116,6 @@ import { ProfileModule } from './modules/profile/profile.module';
     TestimonialsModule,
     JobsModule,
     ProductsModule,
-    OrganisationRoleModule,
     OrganisationPermissionsModule,
     JobsModule,
     ProfileModule,
