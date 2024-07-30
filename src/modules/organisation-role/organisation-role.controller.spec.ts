@@ -10,10 +10,14 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  NotFoundException,
+  HttpException,
+  BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { OrganisationRoleService } from './organisation-role.service';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
-import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
+import { UpdateOrganisationDto } from '../organisations/dto/update-organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { skipAuth } from '../../helpers/skipAuth';
@@ -27,24 +31,6 @@ import { skipAuth } from '../../helpers/skipAuth';
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new role in an organization' })
-  @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organization' })
-  @ApiResponse({ status: 201, description: 'The role has been successfully created.' })
-  @ApiResponse({ status: 400, description: 'Bad Request.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @ApiResponse({ status: 409, description: 'Conflict - Role with this name already exists.' })
-  async create(@Body() createRoleDto: CreateOrganisationRoleDto, @Param('organisationId') organisationId: string) {
-    const role = await this.organisationRoleService.createOrgRoles(createRoleDto, organisationId);
-    return {
-      id: role.id,
-      name: role.name,
-      description: role.description,
-      message: 'Role created successfully',
-    };
-  }
   @Get()
   findAll() {
     return this.organisationRoleService.findAll();
@@ -55,11 +41,6 @@ export class OrganisationRoleController {
     return this.organisationRoleService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrganisationRoleDto: UpdateOrganisationRoleDto) {
-    return this.organisationRoleService.update(+id, updateOrganisationRoleDto);
-  }
-
   @Delete(':roleId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a role in an organization' })
@@ -68,13 +49,31 @@ export class OrganisationRoleController {
   @ApiResponse({ status: 400, description: 'Invalid role ID format' })
   @ApiResponse({ status: 404, description: 'Role not found' })
   async remove(@Param('roleId') roleId: string, @Req() req) {
-    const organizationId = req.user.organizationId;
+    const organisationId = req.user.organizationId;
+    const currentUser = req.user;
 
-    await this.organisationRoleService.deleteRole(organizationId, roleId);
-
-    return {
-      status_code: 200,
-      message: 'Role successfully removed',
-    };
+    try {
+      return await this.organisationRoleService.deleteRole(organisationId, roleId, currentUser);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ status_code: 404, error: 'Not Found', message: error.message }, HttpStatus.NOT_FOUND);
+      }
+      if (error instanceof BadRequestException) {
+        throw new HttpException(
+          { status_code: 400, error: 'Bad Request', message: error.message },
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      if (error instanceof UnauthorizedException) {
+        throw new HttpException(
+          { status_code: 401, error: 'Unauthorized', message: error.message },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+      throw new HttpException(
+        { status_code: 500, error: 'Internal Server Error', message: 'An unexpected error occurred' },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }
