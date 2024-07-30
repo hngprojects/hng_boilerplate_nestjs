@@ -20,7 +20,7 @@ export class OrganisationRole extends AbstractBaseEntity {
   permissions: OrganisationPermission[];
 
   @ManyToOne(() => Organisation, organisation => organisation.roles, { nullable: false })
-  organisationId: Organisation;
+  organisation: Organisation;
 
   @DeleteDateColumn()
   deletedAt?: Date;
