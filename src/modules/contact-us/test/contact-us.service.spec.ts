@@ -59,7 +59,7 @@ describe('ContactUsService', () => {
       expect(mockRepository.create).toHaveBeenCalledWith(createContactDto);
       expect(mockRepository.save).toHaveBeenCalledWith(createContactDto);
       expect(mockMailerService.sendMail).toHaveBeenCalled();
-      expect(result).toEqual({ message: 'Inquiry sent successfully', status: 200 });
+      expect(result).toEqual({ message: 'Inquiry sent successfully', status_code: 200 });
     });
 
     it('should throw InternalServerErrorException when email sending fails', async () => {

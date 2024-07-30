@@ -15,7 +15,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 export class ProductsService {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
-    @InjectRepository(Product) private organisationRepository: Repository<Organisation>
+    @InjectRepository(Organisation) private organisationRepository: Repository<Organisation>
   ) {}
 
   async createProduct(orgId: string, dto: CreateProductRequestDto) {
