@@ -25,7 +25,6 @@ import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
-import { JobsModule } from './modules/jobs/jobs.module';
 import { ProductsModule } from './modules/products/products.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProfileModule } from './modules/profile/profile.module';
@@ -116,7 +115,6 @@ import { ProfileModule } from './modules/profile/profile.module';
     TestimonialsModule,
     JobsModule,
     ProductsModule,
-    JobsModule,
     ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
