@@ -46,72 +46,12 @@ export class JobsService {
     };
   }
 
-  /**
-   * Retrieves a paginated list of job listings.
-   *
-   * @param {PaginationDto} paginationDto - The pagination parameters.
-   * @return {Promise<{ message: string, data: Job[], pagination: { current_page: number, total_pages: number, page_size: number, total_items: number } }>} - The paginated list of job listings.
-   */
-  async findAll(paginationDto: PaginationDto) {
-    const { page, size } = paginationDto;
-
-    const [result, total] = await this.jobRepository.findAndCount({
-      skip: (page - 1) * size,
-      take: size,
-      where: { is_deleted: false },
-    });
-
-    const totalPages = Math.ceil(total / size);
-
+  async getJobs() {
+    const jobs = await this.jobRepository.find();
     return {
-      status: 'success',
+      message: 'Jobs listing fetched successfully',
       status_code: 200,
-      message: 'Job listings retrieved successfully.',
-      data: result.map(job =>
-        pick(
-          job,
-          Object.keys(job).filter(x => !['id', 'user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
-        )
-      ),
-      pagination: {
-        current_page: page,
-        total_pages: totalPages,
-        page_size: size,
-        total_items: total,
-      },
-    };
-  }
-
-  async updateJob(id: string, updateJobDto: JobDto, userId: string) {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    // Check if the job exists
-    const job = await this.jobRepository.findOne({
-      where: { id },
-    });
-
-    if (!job) {
-      throw new NotFoundException('Job not found');
-    }
-
-    console.log(job, job.user, user.id);
-
-    if (job.user.id !== user.id) {
-      throw new UnauthorizedException('You are not authorized to update this job.');
-    }
-
-    Object.assign(job, updateJobDto);
-
-    await this.jobRepository.save(job);
-
-    return {
-      message: 'Job details updated successfully',
-      status_code: 200,
-      data: job,
+      data: jobs,
     };
   }
 }
