@@ -94,7 +94,11 @@ export class NotificationsService {
         data: { notifications: [] },
       };
     } catch (error) {
-      if (error instanceof HttpException) {
+      if (
+        error instanceof HttpException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       } else {
         throw new InternalServerErrorException();
