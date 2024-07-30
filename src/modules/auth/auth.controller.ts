@@ -81,6 +81,7 @@ export default class RegistrationController {
     return this.authService.googleAuth(body);
   }
 
+  @skipAuth()
   @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })

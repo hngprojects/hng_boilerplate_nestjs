@@ -4,6 +4,7 @@ import { ObjectId, Repository } from 'typeorm';
 import { Otp } from './entities/otp.entity';
 import { User } from '../user/entities/user.entity';
 import { generateSixDigitToken } from '../../utils/generate-token';
+import { isInstance } from 'class-validator';
 
 @Injectable()
 export class OtpService {
@@ -30,8 +31,10 @@ export class OtpService {
 
       return otp;
     } catch (error) {
-      Logger.error('OtpServiceError ~ createOtpError ~', error);
-      return null;
+      console.log('OtpServiceError ~ createOtpError ~', error);
+      if (isInstance(error, NotFoundException)) {
+        throw new NotFoundException('User not found');
+      }
     }
   }
 

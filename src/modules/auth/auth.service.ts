@@ -41,6 +41,7 @@ import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
+import { isInstance } from 'class-validator';
 
 @Injectable()
 export default class AuthenticationService {
@@ -143,10 +144,10 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        return {
+        throw new UnauthorizedException({
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        };
+        });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
@@ -175,6 +176,13 @@ export default class AuthenticationService {
       return { message: 'Login successful', ...responsePayload };
     } catch (error) {
       console.log('AuthenticationServiceError ~ loginError ~', error);
+      if (isInstance(error, UnauthorizedException)) {
+        throw new UnauthorizedException({
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        });
+      }
+
       throw new HttpException(
         {
           message: 'An error occurred during login',
@@ -356,12 +364,9 @@ export default class AuthenticationService {
       await this.otpService.deleteOtp(user.id);
     }
 
-    // Generate a new OTP and save it
-    const newOtp = generateSixDigitToken();
-    await this.otpService.createOtp(user.id);
+    const otp = await this.otpService.createOtp(user.id);
 
-    // Send the OTP to the user's email
-    await this.emailService.sendLoginOtp(user.email, newOtp);
+    await this.emailService.sendLoginOtp(user.email, otp.token);
 
     return {
       message: 'Sign-in token sent to email',
@@ -390,9 +395,12 @@ export default class AuthenticationService {
       id: user.id,
     });
 
+    const { password, ...data } = user;
+
     return {
       message: 'Sign-in successful',
-      token: accessToken,
+      access_token: accessToken,
+      user: data,
       status_code: HttpStatus.OK,
     };
   }
