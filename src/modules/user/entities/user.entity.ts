@@ -5,6 +5,7 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { Comment } from '../../comments/entities/comment.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -67,4 +68,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Testimonial, testimonial => testimonial.user)
   testimonials: Testimonial[];
+
+  @OneToMany(() => Comment, comment => comment.user)
+  comments: Comment[];
 }
