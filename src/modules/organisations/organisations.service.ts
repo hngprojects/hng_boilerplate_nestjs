@@ -94,7 +94,9 @@ export class OrganisationsService {
     try {
       const org = await this.checkIfOrgExists(orgId);
 
-      this.verifyOwner(org, currentUserId);
+      if (userId !== currentUserId) {
+        this.verifyOwner(org, currentUserId);
+      }
 
       this.checkIfUserIsAMember(org, userId);
 
