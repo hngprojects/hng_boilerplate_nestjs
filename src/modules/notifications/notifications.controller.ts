@@ -1,7 +1,19 @@
 import { Body, Controller, Param, Patch, Req, Request, ValidationPipe } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
+import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
 
 @ApiBearerAuth()
 @ApiTags('Notification')
@@ -9,12 +21,12 @@ import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto'
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @Patch('/:notificationId/read')
+  @Patch('/:notificationId')
   @ApiBody({ type: MarkNotificationAsReadDto, description: 'Read status of the notification' })
-  @ApiResponse({ status: 200, description: 'Notification marked as read successfully' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 400, description: 'Notification not found' })
+  @ApiCreatedResponse({ type: CreateNotificationResponseDto, description: 'Notification created successfully' })
+  @ApiUnauthorizedResponse({ type: MarkNotificationAsReadErrorDto, description: 'Unauthorized' })
+  @ApiBadRequestResponse({ type: MarkNotificationAsReadErrorDto, description: 'Bad Request' })
+  @ApiInternalServerErrorResponse({ type: MarkNotificationAsReadErrorDto, description: 'Internal Server Error' })
   @ApiOperation({ summary: 'Marks a single notification as read' })
   async markNotificationAsRead(
     @Param('notificationId') notification_id: string,

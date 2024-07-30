@@ -82,7 +82,7 @@ describe('NotificationsService', () => {
           notification_id: notification.id,
           message: notification.message,
           is_read: notification.isRead,
-          updatedAt: notification.updated_at,
+          updated_at: notification.updated_at,
         },
       });
 
