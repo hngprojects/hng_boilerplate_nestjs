@@ -20,5 +20,7 @@ export class HelpCenterService {
     return await this.helpCenterRepository.save(helpCenter);
   }
 
- 
+  async getAllHelpCenters(): Promise<HelpCenter[]> {
+    return this.helpCenterRepository.find();
+  }
 }

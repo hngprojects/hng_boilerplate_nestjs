@@ -46,4 +46,24 @@ describe('HelpCenterController', () => {
     });
   });
 
+  describe('GET /help-center', () => {
+    it('should fetch all help center topics', async () => {
+      const response = await request(app.getHttpServer()).get('/help-center').expect(200);
+
+      expect(response.body).toEqual({
+        status_code: 200,
+        success: true,
+        data: expect.arrayContaining([
+          expect.objectContaining({
+            title: expect.any(String),
+            content: expect.any(String),
+            author: expect.any(String),
+            id: expect.any(String),
+            created_at: expect.any(String),
+            updated_at: expect.any(String),
+          }),
+        ]),
+      });
+    });
+  });
 });
