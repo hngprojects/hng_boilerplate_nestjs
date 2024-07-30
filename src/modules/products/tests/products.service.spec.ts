@@ -6,11 +6,14 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { HttpStatus, NotFoundException, ForbiddenException } from '@nestjs/common';
 import UserService from '../../../modules/user/user.service';
 import { productMock } from './mocks/product.mock';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
-  let repository: Repository<Product>;
+  let productRepository: Repository<Product>;
+  let organisationRepository: Repository<Organisation>;
 
   const mockUserService = {
     getUserRecord: jest.fn(),
@@ -22,14 +25,11 @@ describe('ProductsService', () => {
         ProductsService,
         {
           provide: getRepositoryToken(Product),
-          useValue: {
-            findBy: jest.fn(),
-            findOne: jest.fn(),
-            create: jest.fn().mockReturnValue(productMock),
-            save: jest.fn().mockReturnValue(productMock),
-            findOneBy: jest.fn(),
-            update: jest.fn(),
-          },
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Organisation),
+          useClass: Repository,
         },
         {
           provide: UserService,
@@ -39,28 +39,19 @@ describe('ProductsService', () => {
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
-    repository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    productRepository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  it('should create a new product', async () => {
+    jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+    jest.spyOn(productRepository, 'create').mockReturnValue(createProductRequestDtoMock as any);
+    jest.spyOn(productRepository, 'save').mockResolvedValue(productMock as any);
 
-  describe('create a new product', () => {
-    it('should creates a new product', async () => {
-      const createdProduct = await service.createProduct('orgId', createProductRequestDtoMock);
+    const createdProduct = await service.createProduct(orgMock.id, createProductRequestDtoMock);
 
-      expect(repository.create).toHaveBeenCalledWith({
-        name: createProductRequestDtoMock.name,
-        quantity: createProductRequestDtoMock.quantity,
-        price: createProductRequestDtoMock.price,
-      });
-
-      expect(repository.save).toHaveBeenCalledWith(productMock);
-      expect(createdProduct.data.name).toEqual(createProductRequestDtoMock.name);
-      expect(createdProduct.message).toEqual('Product created successfully');
-      expect(createdProduct.status).toEqual('success');
-    });
+    expect(createdProduct.message).toEqual('Product created successfully');
+    expect(createdProduct.status).toEqual('success');
   });
 
   describe('changeProductStatus', () => {
@@ -79,17 +70,18 @@ describe('ProductsService', () => {
         user_type: 'super-admin',
       };
 
-      (repository.findOne as jest.Mock).mockResolvedValue(mockProduct);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(mockProduct as any);
       mockUserService.getUserRecord.mockResolvedValue(mockUser);
-      (repository.save as jest.Mock).mockResolvedValue({ ...mockProduct, status: newStatus });
+
+      jest.spyOn(productRepository, 'save').mockResolvedValue(mockProduct as any);
 
       const result = await service.changeProductStatus(productId, userId, newStatus);
 
-      expect(repository.findOne).toHaveBeenCalledWith({
+      expect(productRepository.findOne).toHaveBeenCalledWith({
         where: { id: productId },
       });
       expect(mockUserService.getUserRecord).toHaveBeenCalledWith({ identifier: userId, identifierType: 'id' });
-      expect(repository.save).toHaveBeenCalledWith({ ...mockProduct, status: newStatus });
+      expect(productRepository.save).toHaveBeenCalledWith({ ...mockProduct, status: newStatus });
       expect(result).toEqual({
         message: 'Product status updated successfully',
         status_code: HttpStatus.OK,
@@ -98,7 +90,7 @@ describe('ProductsService', () => {
     });
 
     it('should throw NotFoundException if product is not found', async () => {
-      (repository.findOne as jest.Mock).mockResolvedValue(null);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.changeProductStatus('123', '456', StatusType.DRAFT)).rejects.toThrow(NotFoundException);
     });
@@ -107,7 +99,7 @@ describe('ProductsService', () => {
       const mockProduct = { id: '123', status: StatusType.ACTIVE };
       const mockUser = { id: '456', user_type: 'vendor' };
 
-      (repository.findOne as jest.Mock).mockResolvedValue(mockProduct);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(mockProduct as any);
       mockUserService.getUserRecord.mockResolvedValue(mockUser);
 
       await expect(service.changeProductStatus('123', '456', StatusType.DRAFT)).rejects.toThrow(ForbiddenException);

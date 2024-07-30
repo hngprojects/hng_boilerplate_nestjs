@@ -1,11 +1,7 @@
 import { Body, Controller, Param, Patch, Request, UseGuards, Post } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
-import { skipAuth } from '../../helpers/skipAuth';
 import { StatusType } from './entities/product.entity';
-// import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-// import { ProductsService } from './products.service';
-// import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 
