@@ -16,8 +16,9 @@ import { OtpService } from './modules/otp/otp.service';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { SqueezeModule } from './modules/squeeze/squeeze.module';
+import { EmailService } from './modules/email/email.service';
 import { InviteModule } from './modules/invite/invite.module';
-import { ProductsModule } from './modules/products/products.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
@@ -25,7 +26,8 @@ import authConfig from 'config/auth.config';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { EmailModule } from './modules/email/email.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
-import { EmailService } from './modules/email/email.service';
+import { ProductsModule } from './modules/products/products.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   providers: [
@@ -111,8 +113,10 @@ import { EmailService } from './modules/email/email.service';
     }),
     OrganisationsModule,
     NotificationSettingsModule,
+    SqueezeModule,
     TestimonialsModule,
     ProductsModule,
+    ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
 })
