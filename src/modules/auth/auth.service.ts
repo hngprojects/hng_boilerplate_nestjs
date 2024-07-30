@@ -95,7 +95,7 @@ export default class AuthenticationService {
         data: responsePayload,
       };
     } catch (createNewUserError) {
-      Logger.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
+      console.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
       throw new HttpException(
         {
           message: ERROR_OCCURED,
@@ -123,7 +123,7 @@ export default class AuthenticationService {
         message: 'Email sent successfully',
       };
     } catch (forgotPasswordError) {
-      Logger.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
+      console.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
       throw new HttpException(
         {
           message: ERROR_OCCURED,
@@ -133,7 +133,7 @@ export default class AuthenticationService {
       );
     }
   }
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     try {
       const { email, password } = loginDto;
 
@@ -143,10 +143,10 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        throw new UnauthorizedException({
+        return {
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        });
+        };
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
@@ -174,7 +174,7 @@ export default class AuthenticationService {
 
       return { message: 'Login successful', ...responsePayload };
     } catch (error) {
-      Logger.log('AuthenticationServiceError ~ loginError ~', error);
+      console.log('AuthenticationServiceError ~ loginError ~', error);
       throw new HttpException(
         {
           message: 'An error occurred during login',
