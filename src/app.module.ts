@@ -28,6 +28,8 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
 import { ProductsModule } from './modules/products/products.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { HelpCenterModule } from './modules/help-center/help-center.module';
+import { FaqModule } from './modules/faq/faq.module';
 
 @Module({
   providers: [
@@ -85,6 +87,8 @@ import { ProfileModule } from './modules/profile/profile.module';
     TestimonialsModule,
     EmailModule,
     InviteModule,
+    FaqModule,
+    HelpCenterModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
