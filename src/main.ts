@@ -7,7 +7,7 @@ import { DataSource } from 'typeorm';
 import { AppModule } from './app.module';
 import { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
-// import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
+import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -31,7 +31,7 @@ async function bootstrap() {
   app.useLogger(logger);
   app.enableCors();
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs', 'probe'] });
-  // app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
   // TODO: set options for swagger docs
   const options = new DocumentBuilder()
