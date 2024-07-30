@@ -20,6 +20,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
@@ -113,6 +114,7 @@ import ProbeController from './probe.controller';
     NotificationSettingsModule,
     SqueezeModule,
     TestimonialsModule,
+    JobsModule,
     NotificationsModule,
     ProductsModule,
     ProfileModule,

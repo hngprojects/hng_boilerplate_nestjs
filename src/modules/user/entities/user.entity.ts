@@ -7,6 +7,7 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { Invite } from '../../invite/entities/invite.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Job } from '../../jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 
 export enum UserType {
@@ -62,6 +63,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
+
+  @OneToMany(() => Job, job => job.user)
+  jobs: Job[];
 
   @OneToOne(() => Profile, profile => profile.user_id)
   @JoinColumn()
