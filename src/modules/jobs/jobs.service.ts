@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -96,6 +96,12 @@ export class JobsService {
 
     if (!job) {
       throw new NotFoundException('Job not found');
+    }
+
+    console.log(job, job.user, user.id);
+
+    if (job.user.id !== user.id) {
+      throw new UnauthorizedException('You are not authorized to update this job.');
     }
 
     Object.assign(job, updateJobDto);
