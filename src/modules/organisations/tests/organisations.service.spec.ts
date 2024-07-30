@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrganisationsService } from '../organisations.service';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -17,11 +17,24 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { newUser } from './mocks/new-user.mock';
+import { OrganisationMember } from '../entities/org-members.entity';
+
+class MockQueryBuilder {
+  getCount = jest.fn().mockResolvedValue(0);
+  where = jest.fn().mockReturnThis();
+  andWhere = jest.fn().mockReturnThis();
+}
+
+class MockFailQueryBuilder extends MockQueryBuilder {
+  getCount = jest.fn().mockResolvedValue(1);
+}
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
   let organisationRepository: Repository<Organisation>;
+  let orgMemberRepository: Repository<OrganisationMember>;
+  let mockQueryBuilder: MockQueryBuilder = new MockQueryBuilder();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,6 +49,18 @@ describe('OrganisationsService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(OrganisationMember),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
           },
         },
         UserService,
@@ -53,6 +78,7 @@ describe('OrganisationsService', () => {
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
+    orgMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
   });
 
   it('should be defined', () => {
@@ -168,7 +194,7 @@ describe('OrganisationsService', () => {
     it('should throw an error if the organisation does not exist', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.addUser(orgMock.owner.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+      await expect(service.addMember(orgMock.owner.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
         new NotFoundException({
           status: 'error',
           message: 'Organisation not found',
@@ -180,7 +206,7 @@ describe('OrganisationsService', () => {
     it("should throw if current user does't own the organisation", async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
 
-      await expect(service.addUser(orgMock.id, newUser.id, newUser.id)).rejects.toThrow(
+      await expect(service.addMember(orgMock.id, newUser.id, newUser.id)).rejects.toThrow(
         new UnauthorizedException({
           status: 'Forbidden',
           message: 'Only admins can add users',
@@ -193,7 +219,7 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.addUser(orgMock.id, orgMock.id, orgMock.owner.id)).rejects.toThrow(
+      await expect(service.addMember(orgMock.id, orgMock.id, orgMock.owner.id)).rejects.toThrow(
         new NotFoundException({
           status: 'error',
           message: 'User not found',
@@ -208,7 +234,7 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
 
-      const result = await service.addUser(orgMock.id, newUser.id, orgMock.owner.id);
+      const result = await service.addMember(orgMock.id, newUser.id, orgMock.owner.id);
 
       expect(result.status).toEqual('Success');
       expect(result.message).toEqual('User added successfully');
@@ -218,11 +244,14 @@ describe('OrganisationsService', () => {
     it('should throw an error if the user is already a member', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
+      jest.spyOn(service, 'checkIfUserIsMember').mockResolvedValue(1);
+      const res = await service.checkIfUserIsMember(newUser.id, orgMock.id);
+      expect(res).toBeGreaterThanOrEqual(1);
 
-      await expect(service.addUser(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+      await expect(service.addMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
         new ConflictException({
           status: 'error',
-          message: 'User already added to organization.',
+          message: 'User is already a member of this organisation',
           status_code: 409,
         })
       );

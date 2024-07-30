@@ -36,7 +36,10 @@ export const createMockOrganisation = (): Organisation => {
     user_id: null,
     role: 'admin',
     organisation_id: null,
-    profile_id: profileMock,
+    profile_id: profileMock.id,
+    profile: profileMock,
+    user: null,
+    organisation: null,
   };
 
   const ownerAndCreator: User = {
@@ -59,7 +62,6 @@ export const createMockOrganisation = (): Organisation => {
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
-    products: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],
   };
@@ -88,7 +90,6 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
-    members: [member],
     invites: [],
     organisationMembers: [orgMemberMock],
     products: [],
