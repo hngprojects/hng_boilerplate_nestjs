@@ -19,13 +19,14 @@ import { OrganisationsModule } from './modules/organisations/organisations.modul
 import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
-import { ProductCategoryModule } from './modules/product-category/product-category.module';
+import { ContactUsModule } from './modules/contact-us/contact-us.module';
 
 @Module({
   providers: [
@@ -109,9 +110,10 @@ import { ProductCategoryModule } from './modules/product-category/product-catego
     }),
     OrganisationsModule,
     NotificationSettingsModule,
+    SqueezeModule,
     TestimonialsModule,
     ProductsModule,
-    ProductCategoryModule,
+    ContactUsModule,
   ],
   controllers: [HealthController, ProbeController],
 })

@@ -28,12 +28,4 @@ export class CreateProductRequestDto {
   @IsNumber()
   @Min(0)
   price: number;
-
-  @ApiPropertyOptional({
-    description: 'ID of the category to which the product belongs',
-    example: 'uuid-of-category',
-  })
-  @IsString()
-  @IsOptional()
-  categoryId: string;
 }

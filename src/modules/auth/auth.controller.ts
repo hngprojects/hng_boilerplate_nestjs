@@ -12,11 +12,16 @@ import { Enable2FADto } from './dto/enable-2fa.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
+import UserService from '../user/user.service';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
-  constructor(private authService: AuthenticationService) {}
+  constructor(
+    private authService: AuthenticationService,
+    private userService: UserService
+  ) {}
 
   @skipAuth()
   @Post('register')
@@ -48,6 +53,12 @@ export default class RegistrationController {
     return this.authService.loginUser(loginDto);
   }
 
+  @skipAuth()
+  @Post('otp/email-verification')
+  public async verifyEmail(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
+    return this.authService.verifyToken(body);
+  }
+
   @Post('2fa/enable')
   @ApiBody({
     description: 'Enable two factor authentication',
@@ -64,9 +75,7 @@ export default class RegistrationController {
   @skipAuth()
   @Get('login/google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req: Request) {
-    // Initiates Google OAuth2 login flow
-  }
+  async googleAuth(@Req() req: Request) {}
 
   @skipAuth()
   @Get('callback/google')
@@ -75,6 +84,12 @@ export default class RegistrationController {
     const user = req['user'];
     if (user) {
       const jwt = await this.authService.googleLogin(user);
+      const userExists = await this.userService.getUserRecord({ identifierType: 'email', identifier: user.email });
+
+      if (!userExists) {
+        const newUser = await this.authService.createUserGoogle(user);
+        return res.status(HttpStatus.CREATED).json(newUser);
+      }
 
       const response = {
         status: 'success',
@@ -105,6 +120,29 @@ export default class RegistrationController {
     }
   }
 
+  @skipAuth()
+  @Get('registration/google')
+  @UseGuards(AuthGuard('google'))
+  async googleRegistrationRedirect(@Req() req: Request, @Res() res: Response) {
+    console.log('Registration auth');
+    const user = req['user'];
+    if (user) {
+      const userRegistered = await this;
+      const jwt = await this.authService.googleLogin(user);
+
+      const access_token = jwt.access_token;
+
+      return res.redirect(`${process.env.GOOGLE_LOGIN_REDIRECT}?access_token=${access_token}`);
+    } else {
+      const response = {
+        status: 'error',
+        message: 'Authentication failed',
+      };
+
+      return res.status(HttpStatus.UNAUTHORIZED).json(response);
+    }
+  }
+
   @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })
@@ -120,6 +158,6 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public async verifySignInToken(@Body() body: OtpDto) {
-    return await this.authService.verifySignInToken(body);
+    return await this.authService.verifyToken(body);
   }
 }

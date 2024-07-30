@@ -10,29 +10,23 @@ import { Repository } from 'typeorm';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { Product, ProductStatusType } from './entities/product.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
-import { ProductCategory } from '../product-category/entities/product-category.entity';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
-    @InjectRepository(Product) private organisationRepository: Repository<Organisation>,
-    @InjectRepository(ProductCategory) private categoryRepository: Repository<ProductCategory>
+    @InjectRepository(Product) private organisationRepository: Repository<Organisation>
   ) {}
 
   async createProduct(orgId: string, dto: CreateProductRequestDto) {
-    const { name, quantity, price, categoryId } = dto;
+    const { name, quantity, price } = dto;
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
-    const category = await this.categoryRepository.findOneBy({ id: categoryId });
-    if (!category) {
-      throw new NotFoundException(`Category with ID ${categoryId} not found`);
-    }
+
     const newProduct: Product = await this.productRepository.create({
       name,
       quantity,
       price,
       org,
-      category,
     });
     if (!newProduct)
       throw new InternalServerErrorException({
@@ -41,7 +35,6 @@ export class ProductsService {
         message: 'An unexpected error occurred. Please try again later.',
       });
     await this.productRepository.save(newProduct);
-
     const status = await this.calculateProductStatus(quantity);
     return {
       status: 'success',
@@ -55,7 +48,6 @@ export class ProductsService {
         quantity,
         created_at: newProduct.created_at,
         updated_at: newProduct.updated_at,
-        category,
       },
     };
   }

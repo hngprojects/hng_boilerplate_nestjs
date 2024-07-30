@@ -1,5 +1,4 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { ProductCategory } from '../../product-category/entities/product-category.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 
@@ -35,7 +34,4 @@ export class Product extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, org => org.products)
   org: Organisation;
-
-  @ManyToOne(() => ProductCategory, category => category.products)
-  category: ProductCategory;
 }
