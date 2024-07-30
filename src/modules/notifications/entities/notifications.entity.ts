@@ -10,6 +10,6 @@ export class Notification extends AbstractBaseEntity {
   @Column({ nullable: false, default: false })
   is_Read: boolean;
 
-  @ManyToOne(() => User, user => user.notifications)
+  @ManyToOne(() => User, user => user.notifications, { nullable: false, onDelete: 'CASCADE' })
   user: User;
 }

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notifications.entity';
@@ -17,7 +17,7 @@ export class NotificationsService {
     try {
       const user = await this.userRepository.findOne({ where: { id: userId } });
       if (!user) {
-        throw new NotFoundException('User not found');
+        throw new BadRequestException('Invalid request: User not found');
       }
 
       const notifications = await this.notificationRepository.find({
@@ -35,7 +35,7 @@ export class NotificationsService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw error;
+        throw new BadRequestException('Invalid request: User not found');
       }
       throw new InternalServerErrorException('Failed to retrieve unread notifications.');
     }
