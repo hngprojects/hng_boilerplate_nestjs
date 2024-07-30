@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { OrganisationRoleService } from './organisation-role.service';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
@@ -48,8 +60,21 @@ export class OrganisationRoleController {
     return this.organisationRoleService.update(+id, updateOrganisationRoleDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organisationRoleService.remove(+id);
+  @Delete(':roleId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete a role in an organization' })
+  @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organization' })
+  @ApiResponse({ status: 200, description: 'Role successfully removed' })
+  @ApiResponse({ status: 400, description: 'Invalid role ID format' })
+  @ApiResponse({ status: 404, description: 'Role not found' })
+  async remove(@Param('roleId') roleId: string, @Req() req) {
+    const organizationId = req.user.organizationId;
+
+    await this.organisationRoleService.deleteRole(organizationId, roleId);
+
+    return {
+      status_code: 200,
+      message: 'Role successfully removed',
+    };
   }
 }

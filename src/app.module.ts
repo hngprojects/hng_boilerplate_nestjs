@@ -25,8 +25,7 @@ import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
-import { OrganisationRoleModule } from './organisation-role/organisation-role.module';
-
+import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.service.spec';
 @Module({
   providers: [
     {
