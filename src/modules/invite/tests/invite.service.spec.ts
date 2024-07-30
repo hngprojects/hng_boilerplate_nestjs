@@ -41,13 +41,15 @@ describe('InviteService', () => {
       owned_organisations: [],
       created_organisations: [],
       invites: [],
+      jobs: [],
       hashPassword: () => null,
       password: 'password123',
       time_left: 5,
       secret: 'secret',
       is_2fa_enabled: true,
       testimonials: [],
-      products: [],
+      profile: null,
+      organisationMembers: [],
     };
 
     const mockOrg: Organisation = {
@@ -67,6 +69,8 @@ describe('InviteService', () => {
       creator: mockUser,
       preferences: [],
       invites: [],
+      organisationMembers: [],
+      products: [],
     };
     const mockInvites: Invite[] = [
       {
