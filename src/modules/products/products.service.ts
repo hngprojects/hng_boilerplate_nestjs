@@ -70,11 +70,13 @@ export class ProductsService {
     }
 
     await this.productRepository.update(productId, updateProductDto);
-    const product = this.productRepository.findOne({ where: { id: productId } });
+    const product = await this.productRepository.findOne({ where: { id: productId } });
 
     const calculateProductStatus = await this.calculateProductStatus((await product).quantity);
 
-    (await product).status = calculateProductStatus;
+    product.status = calculateProductStatus;
+
+    await this.productRepository.save(product);
 
     return {
       status_code: HttpStatus.OK,
