@@ -6,6 +6,7 @@ import { Job } from '../entities/job.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { jobsMock } from './mocks/jobs.mock';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -19,6 +20,7 @@ describe('JobsService', () => {
         {
           provide: getRepositoryToken(Job),
           useValue: {
+            find: jest.fn(),
             findBy: jest.fn(),
             findOne: jest.fn(),
             create: jest.fn(),
@@ -75,6 +77,15 @@ describe('JobsService', () => {
       expect(result.status).toEqual('success');
       expect(result.message).toEqual('Job listing created successfully');
       expect(result.data).toEqual(createJobDto);
+    });
+  });
+
+  describe('lists all jobs', () => {
+    it('should returns all jobs', async () => {
+      jest.spyOn(jobRepository, 'find').mockResolvedValue(jobsMock);
+      const jobs = await service.getJobs();
+      expect(jobs.message).toEqual('Jobs listing fetched successfully');
+      expect(jobs.status_code).toEqual(200);
     });
   });
 });
