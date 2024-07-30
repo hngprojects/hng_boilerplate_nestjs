@@ -13,7 +13,7 @@ export class NotificationSettingsService {
     private notificationSettingsRepository: Repository<NotificationSettings>
   ) {}
 
-  async create(notificationSettingsDto: NotificationSettingsDto, user_id: string): Promise<NotificationSettings> {
+  async create(notificationSettingsDto: any, user_id: string): Promise<any> {
     try {
       const existingSettings = await this.notificationSettingsRepository.findOne({
         where: { user_id },
@@ -32,35 +32,41 @@ export class NotificationSettingsService {
     }
   }
 
-  async findByUserId(user_id: string): Promise<NotificationSettings> {
+  async findNotificationSettingsByUserId(user_id: string): Promise<NotificationSettings> {
     try {
-      const settings = await this.notificationSettingsRepository.findOne({ where: { user_id } });
+      const defaultNotificationSettings = {
+        email_notification_activity_in_workspace: true,
+        email_notification_always_send_email_notifications: false,
+        email_notification_email_digest: true,
+        email_notification_announcement_and_update_emails: true,
+        slack_notifications_activity_on_your_workspace: false,
+        slack_notifications_always_send_email_notifications: true,
+        slack_notifications_announcement_and_update_emails: false,
+      };
+
+      let settings = await this.notificationSettingsRepository.findOne({ where: { user_id } });
       if (!settings) {
-        throw new NotFoundException('Notification settings not found');
+        settings = await this.create(defaultNotificationSettings, user_id);
       }
 
       return settings;
     } catch (error) {
       this.logger.error('Error finding notification settings by user ID:', error);
-      if (error instanceof NotFoundException) {
-        throw error; // Rethrow NotFoundException if it was the original error
-      }
       throw new BadRequestException(error?.message || 'Failed to fetch notification settings');
     }
   }
-
-  async updateSettings(
+  async updateNotificationSettings(
     user_id: string,
-    notificationSettingsDto: NotificationSettingsDto
-  ): Promise<NotificationSettings> {
+    notificationSettingsDto: Partial<NotificationSettingsDto>
+  ): Promise<Partial<NotificationSettingsDto>> {
     try {
       const settings = await this.notificationSettingsRepository.findOne({ where: { user_id } });
       if (!settings) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundException('User settings not found');
       }
-
       Object.assign(settings, notificationSettingsDto);
-      return this.notificationSettingsRepository.save(settings);
+      await this.notificationSettingsRepository.save(settings);
+      return { ...notificationSettingsDto };
     } catch (error) {
       this.logger.error('Error updating notification settings:', error);
       if (error instanceof NotFoundException) {

@@ -1,11 +1,11 @@
 import * as bcrypt from 'bcryptjs';
-import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
-
+import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
@@ -67,4 +67,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Testimonial, testimonial => testimonial.user)
   testimonials: Testimonial[];
+
+  @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
+  notifications_settings: NotificationSettings[];
 }
