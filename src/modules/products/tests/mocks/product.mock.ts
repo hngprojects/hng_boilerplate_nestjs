@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { orgMock } from '../../../../modules/organisations/tests/mocks/organisation.mock';
-import { Product, ProductStatusType } from '../../entities/product.entity';
+import { Product, StatusType, StockStatusType } from '../../entities/product.entity';
 
 export const productMock: Product = {
   id: randomUUID(),
@@ -8,7 +8,8 @@ export const productMock: Product = {
   description: '',
   price: 35,
   quantity: 3,
-  satus: ProductStatusType.LOW_STOCK,
+  stock_status: StockStatusType.LOW_STOCK,
+  status: StatusType.ACTIVE,
   image: '',
   org: orgMock,
   created_at: new Date(),

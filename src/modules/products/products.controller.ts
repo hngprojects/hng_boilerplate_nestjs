@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Request, UseGuards, Post } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
+import { StatusType } from './entities/product.entity';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 
@@ -19,5 +20,25 @@ export class ProductsController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async createProduct(@Param('id') id: string, @Body() createProductDto: CreateProductRequestDto) {
     return this.productsService.createProduct(id, createProductDto);
+  }
+
+  @Patch(':productId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change product status(Super admin)' })
+  @ApiParam({ name: 'productId', type: String, description: 'Product Id' })
+  @ApiResponse({ status: 200, description: 'Product updated successfully' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 403, description: 'forbidden user' })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  @UseGuards(OwnershipGuard)
+  async changeProductStatus(
+    @Param('productId') productId: string,
+    @Body() body: { status: StatusType },
+    @Request() req
+  ) {
+    return await this.productsService.changeProductStatus(productId, req.user.id, body.status);
   }
 }
