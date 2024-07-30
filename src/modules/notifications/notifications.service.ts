@@ -1,4 +1,11 @@
-import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Notification } from './entities/notifications.entity';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
@@ -55,15 +62,7 @@ export class NotificationsService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        console.error('An unexpected error ocurred', error);
-        throw new HttpException(
-          {
-            status: 'error',
-            message: 'An unexpected error ocurred',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
+        throw new InternalServerErrorException();
       }
     }
   }

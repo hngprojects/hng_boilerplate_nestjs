@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Patch, Req, Request, ValidationPipe } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 
 @ApiBearerAuth()
@@ -10,6 +10,12 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Patch('/:notificationId/read')
+  @ApiBody({ type: MarkNotificationAsReadDto, description: 'Read status of the notification' })
+  @ApiResponse({ status: 200, description: 'Notification marked as read successfully' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 400, description: 'Notification not found' })
+  @ApiOperation({ summary: 'Marks a single notification as read' })
   async markNotificationAsRead(
     @Param('notificationId') notification_id: string,
     @Body() markNotificationAsRead: MarkNotificationAsReadDto,
