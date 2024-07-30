@@ -1,10 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Entity, Column } from 'typeorm';
 
 @Entity()
-export class ContactUs {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class ContactUs extends AbstractBaseEntity {
   @Column('varchar', { nullable: false })
   name: string;
 

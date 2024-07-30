@@ -23,7 +23,10 @@ export class ContactUsService {
       throw new InternalServerErrorException('Failed to send email');
     }
 
-    return { message: 'Inquiry sent successfully', status_code: 200 };
+    return {
+      message: 'Inquiry sent successfully',
+      status_code: 200,
+    };
   }
 
   private async sendEmail(contactDto: CreateContactDto) {
