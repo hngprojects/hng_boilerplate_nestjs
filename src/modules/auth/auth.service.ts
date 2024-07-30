@@ -145,19 +145,19 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        throw new UnauthorizedException({
+        return {
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        });
+        };
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        throw new UnauthorizedException({
+        return {
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        });
+        };
       }
 
       const access_token = this.jwtService.sign({ id: user.id });
@@ -177,12 +177,6 @@ export default class AuthenticationService {
       return { message: 'Login successful', ...responsePayload };
     } catch (error) {
       console.log('AuthenticationServiceError ~ loginError ~', error);
-      if (isInstance(error, UnauthorizedException)) {
-        throw new UnauthorizedException({
-          status_code: HttpStatus.UNAUTHORIZED,
-          message: INVALID_CREDENTIALS,
-        });
-      }
 
       throw new HttpException(
         {
