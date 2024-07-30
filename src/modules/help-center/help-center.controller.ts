@@ -1,17 +1,7 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Param,
-  UnprocessableEntityException,
-  Logger,
-  ValidationPipe,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { Controller, Post, Body, UnprocessableEntityException, Logger, ValidationPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { HelpCenterService } from './help-center.service';
 import { CreateHelpCenterDto } from './create-help-center.dto';
-
 
 @ApiTags('Help Center')
 @Controller('help-center')
@@ -37,46 +27,6 @@ export class HelpCenterController {
     } catch (error) {
       this.logger.error('Error creating help center:', error.message);
       throw new UnprocessableEntityException('Invalid input data');
-    }
-  }
-
-  @Get()
-  @ApiOperation({ summary: 'Get all help center topics' })
-  @ApiResponse({ status: 200, description: 'Successfully fetched all help center topics.' })
-  @ApiResponse({ status: 422, description: 'Unable to fetch help centers' })
-  async getAll() {
-    try {
-      const helpCenters = await this.helpCenterService.getAllHelpCenters();
-      return {
-        success: true,
-        data: helpCenters,
-        status_code: 200,
-      };
-    } catch (error) {
-      this.logger.error('Error fetching all help centers:', error.message);
-      throw new UnprocessableEntityException('Unable to fetch help centers');
-    }
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a help center topic by ID' })
-  @ApiParam({ name: 'id', required: true, description: 'ID of the help center topic' })
-  @ApiResponse({ status: 200, description: 'Successfully fetched the help center topic.' })
-  @ApiResponse({ status: 422, description: 'Help center topic not found' })
-  async getById(@Param('id', new ValidationPipe()) id: string) {
-    try {
-      const helpCenter = await this.helpCenterService.getHelpCenterById(id);
-      if (!helpCenter) {
-        throw new UnprocessableEntityException('Help center topic not found');
-      }
-      return {
-        success: true,
-        data: helpCenter,
-        status_code: 200,
-      };
-    } catch (error) {
-      this.logger.error(`Error fetching help center by id (${id}):`, error.message);
-      throw new UnprocessableEntityException('Unable to fetch help center topic');
     }
   }
 }

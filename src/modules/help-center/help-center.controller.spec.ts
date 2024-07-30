@@ -46,47 +46,4 @@ describe('HelpCenterController', () => {
     });
   });
 
-  describe('GET /help-center', () => {
-    it('should fetch all help center topics', async () => {
-      const response = await request(app.getHttpServer()).get('/help-center').expect(200);
-
-      expect(response.body).toEqual({
-        status_code: 200,
-        success: true,
-        data: expect.arrayContaining([
-          expect.objectContaining({
-            title: expect.any(String),
-            content: expect.any(String),
-            author: expect.any(String),
-            id: expect.any(String),
-            created_at: expect.any(String),
-            updated_at: expect.any(String),
-          }),
-        ]),
-      });
-    });
-  });
-
-  describe('GET /help-center/:id', () => {
-    it('should fetch a help center topic by ID', async () => {
-      if (!createdTopicId) {
-        throw new Error('No topic created to fetch by ID');
-      }
-
-      const response = await request(app.getHttpServer()).get(`/help-center/${createdTopicId}`).expect(200);
-
-      expect(response.body).toEqual({
-        status_code: 200,
-        success: true,
-        data: expect.objectContaining({
-          title: expect.any(String),
-          content: expect.any(String),
-          author: expect.any(String),
-          id: expect.any(String),
-          created_at: expect.any(String),
-          updated_at: expect.any(String),
-        }),
-      });
-    });
-  });
 });

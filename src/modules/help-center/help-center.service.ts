@@ -20,11 +20,5 @@ export class HelpCenterService {
     return await this.helpCenterRepository.save(helpCenter);
   }
 
-  async getAllHelpCenters(): Promise<HelpCenter[]> {
-    return this.helpCenterRepository.find();
-  }
-
-  async getHelpCenterById(id: string): Promise<HelpCenter | null> {
-    return this.helpCenterRepository.findOneBy({ id });
-  }
+ 
 }
