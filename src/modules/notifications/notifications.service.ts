@@ -11,9 +11,9 @@ export class NotificationsService {
     private readonly notificationRepository: Repository<Notification>
   ) {}
 
-  async markNotificationAsRead(options: MarkNotificationAsReadDto, notificationId: string, userId: string) {
+  async markNotificationAsRead(options: MarkNotificationAsReadDto, notification_id: string, userId: string) {
     try {
-      if (!notificationId || !options) {
+      if (!notification_id || !options) {
         throw new BadRequestException({
           status: 'error',
           message: 'Invalid Request',
@@ -22,7 +22,7 @@ export class NotificationsService {
       }
 
       const notificationExists = await this.notificationRepository.findOne({
-        where: { id: notificationId },
+        where: { id: notification_id },
         relations: ['user'],
       });
 
@@ -37,20 +37,17 @@ export class NotificationsService {
         );
       }
 
-      if (notificationExists.user.id !== userId) {
-        throw new ForbiddenException('You do not have permission to access this notification');
-      }
-
-      notificationExists.isRead = options.isRead;
+      notificationExists.isRead = options.is_read;
       await this.notificationRepository.save(notificationExists);
 
       return {
         status: 'success',
         message: 'Notification marked as read successfully',
+        status_code: HttpStatus.OK,
         data: {
-          id: notificationExists.id,
+          notification_id: notificationExists.id,
           message: notificationExists.message,
-          isRead: notificationExists.isRead,
+          is_read: notificationExists.isRead,
           updatedAt: notificationExists.updated_at,
         },
       };

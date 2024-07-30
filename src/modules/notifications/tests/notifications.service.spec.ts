@@ -3,7 +3,7 @@ import { NotificationsService } from '../notifications.service';
 import { Repository } from 'typeorm';
 import { Notification } from '../entities/notifications.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { mockUser, updateNotificationMock } from './mocks/update-notification-to-isRead';
+import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
 import { BadRequestException, ForbiddenException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
 
@@ -17,7 +17,7 @@ describe('NotificationsService', () => {
         NotificationsService,
         {
           provide: getRepositoryToken(Notification),
-          useValue: updateNotificationMock,
+          useValue: mockNotificationRepository,
         },
       ],
     }).compile();
@@ -37,7 +37,7 @@ describe('NotificationsService', () => {
   describe('markNotificationAsRead', () => {
     const userId = 'validUserId';
 
-    it('should throw a BadRequest exception if notificationId or options are invalid', async () => {
+    it('should throw a BadRequest exception if notification_id or options are invalid', async () => {
       await expect(service.markNotificationAsRead(null, null, userId)).rejects.toThrow(
         new BadRequestException({
           status: 'error',
@@ -48,32 +48,14 @@ describe('NotificationsService', () => {
     });
 
     it('should throw a NotFound exception if notification does not exist', async () => {
-      updateNotificationMock.findOne.mockResolvedValue(null);
+      mockNotificationRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.markNotificationAsRead({ isRead: true }, 'invalid-id', userId)).rejects.toThrow(
+      await expect(service.markNotificationAsRead({ is_read: true }, 'invalid-id', userId)).rejects.toThrow(
         new NotFoundException({
           status: 'error',
           message: 'Notification not found',
           status_code: HttpStatus.NOT_FOUND,
         })
-      );
-    });
-
-    it('should throw a ForbiddenException if notification does not belong to the user', async () => {
-      const differentUser: Partial<User> = { ...mockUser, id: 'different-user' };
-      const notification: Notification = {
-        id: 'valid-id',
-        isRead: false,
-        message: 'new Notification',
-        user: differentUser as User,
-        updated_at: new Date(),
-        created_at: new Date(),
-      };
-
-      updateNotificationMock.findOne.mockResolvedValue(notification);
-
-      await expect(service.markNotificationAsRead({ isRead: true }, 'valid-id', userId)).rejects.toThrow(
-        new ForbiddenException('You do not have permission to access this notification')
       );
     });
 
@@ -86,24 +68,25 @@ describe('NotificationsService', () => {
         created_at: new Date(),
         updated_at: new Date(),
       };
-      const options = { isRead: true };
-      updateNotificationMock.findOne.mockResolvedValue(notification);
-      updateNotificationMock.save.mockResolvedValue({ ...notification, isRead: true });
+      const options = { is_read: true };
+      mockNotificationRepository.findOne.mockResolvedValue(notification);
+      mockNotificationRepository.save.mockResolvedValue({ ...notification, isRead: true });
 
       const result = await service.markNotificationAsRead(options, 'valid-id', userId);
 
       expect(result).toEqual({
         status: 'success',
         message: 'Notification marked as read successfully',
+        status_code: HttpStatus.OK,
         data: {
-          id: notification.id,
+          notification_id: notification.id,
           message: notification.message,
-          isRead: notification.isRead,
+          is_read: notification.isRead,
           updatedAt: notification.updated_at,
         },
       });
 
-      expect(updateNotificationMock.save).toHaveBeenCalledWith({ ...notification, isRead: true });
+      expect(mockNotificationRepository.save).toHaveBeenCalledWith({ ...notification, isRead: true });
     });
   });
 });

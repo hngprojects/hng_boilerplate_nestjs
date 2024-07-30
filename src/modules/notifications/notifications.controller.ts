@@ -11,13 +11,13 @@ export class NotificationsController {
 
   @Patch('/:notificationId/read')
   async markNotificationAsRead(
-    @Param('notificationId') notificationId: string,
+    @Param('notificationId') notification_id: string,
     @Body() markNotificationAsRead: MarkNotificationAsReadDto,
     @Req() request: Request
   ) {
     const user = request['user'];
 
     const userId = user.id;
-    return this.notificationsService.markNotificationAsRead(markNotificationAsRead, notificationId, userId);
+    return this.notificationsService.markNotificationAsRead(markNotificationAsRead, notification_id, userId);
   }
 }

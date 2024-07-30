@@ -1,9 +1,15 @@
 import { User, UserType } from '../../../user/entities/user.entity';
-import { v4 as uuidv4 } from 'uuid';
 
-export const updateNotificationMock = {
-  findOne: jest.fn(),
-  save: jest.fn(),
+export const mockNotificationRepository = {
+  find: jest.fn().mockResolvedValue([]),
+  findOne: jest.fn().mockResolvedValue(null),
+  save: jest.fn().mockResolvedValue({}),
+  createQueryBuilder: jest.fn(() => ({
+    delete: jest.fn().mockReturnThis(),
+    from: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    execute: jest.fn().mockResolvedValue({}),
+  })),
 };
 
 export const mockUser: User = {
