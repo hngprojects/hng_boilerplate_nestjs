@@ -16,6 +16,7 @@ import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
+import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 
 @Injectable()
 export class OrganisationsService {
@@ -26,22 +27,28 @@ export class OrganisationsService {
     private readonly userRepository: Repository<User>
   ) {}
 
-  async getOrganisationMembers(orgId: string): Promise<OrganisationMembersResponseDto> {
-    const members = await this.organisationRepository.findOne({
+  async getOrganisationMembers(
+    orgId: string,
+    page: number,
+    page_size: number
+  ): Promise<OrganisationMembersResponseDto> {
+    const skip = (page - 1) * page_size;
+    const orgs = await this.organisationRepository.findOne({
       where: { id: orgId },
       relations: ['organisationMembers', 'organisationMembers.user_id'],
     });
 
-    if (!members)
+    if (!orgs)
       throw new NotFoundException({
         message: 'No organisation found',
         status_code: HttpStatus.NOT_FOUND,
       });
 
-    const data = members.organisationMembers.map(member => {
-      const { password, ...user } = member.user_id;
-      return user;
+    let data = orgs.organisationMembers.map(member => {
+      return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
     });
+
+    data = data.splice(skip, skip + page_size);
 
     return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
   }

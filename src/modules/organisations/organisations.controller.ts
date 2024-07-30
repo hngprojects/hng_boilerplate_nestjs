@@ -1,4 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -49,7 +63,11 @@ export class OrganisationsController {
     type: UpdateOrganisationDto,
   })
   @Get(':org_id/users')
-  async getMembers(@Param('org_id') org_id: string): Promise<OrganisationMembersResponseDto> {
-    return this.organisationsService.getOrganisationMembers(org_id);
+  async getMembers(
+    @Param('org_id') org_id: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('page_size', new DefaultValuePipe(1), ParseIntPipe) page_size: number
+  ): Promise<OrganisationMembersResponseDto> {
+    return this.organisationsService.getOrganisationMembers(org_id, page, page_size);
   }
 }
