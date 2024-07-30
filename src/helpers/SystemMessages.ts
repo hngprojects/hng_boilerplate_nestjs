@@ -13,6 +13,7 @@ export const LANGUAGE_CREATED_SUCCESSFULLY = 'Language Created Successfully';
 export const OK = 'Success';
 export const LANGUAGE_ALREADY_EXISTS = 'Language already exits';
 export const FETCH_LANGUAGE_FAILURE = 'Failed to fetch language';
+export const UNAUTHORISED_TOKEN = 'Invalid token or email';
 export const TIMEZONE_CREATED_SUCCESSFULLY = 'Timezone created Successfully';
 export const FETCH_TIMEZONE_FAILURE = 'Error Occured while creating Timezone, kindly try again';
 export const SUCCESS = 'Timezone fetched successfully';

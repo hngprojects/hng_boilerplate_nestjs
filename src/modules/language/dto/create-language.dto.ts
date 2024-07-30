@@ -1,7 +1,8 @@
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { DirectionEnum } from './direction.enum';
-
+import { ApiProperty } from '@nestjs/swagger';
 export class CreateLanguageDto {
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   code: string;

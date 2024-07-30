@@ -7,7 +7,7 @@ import { FETCH_LANGUAGE_FAILURE, LANGUAGE_CREATED_SUCCESSFULLY, OK } from '../..
 import { createLanguageResponseDto } from './dto/createLanguageReponse.dto';
 import { fetchLanguageResponseDto } from './dto/fetchLanguageReponse.dto';
 
-@ApiTags('Language')
+@ApiTags('language')
 @Controller('language')
 export class LanguageController {
   constructor(private readonly languageService: LanguageService) {}
