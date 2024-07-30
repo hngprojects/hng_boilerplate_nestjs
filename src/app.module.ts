@@ -1,3 +1,4 @@
+import { MailerModule } from '@nestjs-modules/mailer';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -17,7 +18,6 @@ import { TimezonesModule } from './modules/timezones/timezones.module';
 import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
-import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { EmailService } from './modules/email/email.service';
@@ -26,6 +26,7 @@ import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
 
 @Module({
@@ -113,6 +114,7 @@ import { ContactUsModule } from './modules/contact-us/contact-us.module';
     SqueezeModule,
     TestimonialsModule,
     ProductsModule,
+    ProfileModule,
     ContactUsModule,
   ],
   controllers: [HealthController, ProbeController],
