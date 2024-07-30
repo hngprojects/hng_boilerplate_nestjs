@@ -6,15 +6,24 @@ import { Profile } from '../../profile/entities/profile.entity';
 
 @Entity()
 export class OrganisationMember extends AbstractBaseEntity {
+  @Column()
+  user_id: string;
+
+  @Column()
+  organisation_id: string;
+
+  @Column()
+  profile_id: string;
+
   @ManyToOne(() => User, user => user.organisationMembers)
-  user_id: User;
+  user: User;
 
   @ManyToOne(() => Organisation, organisation => organisation.organisationMembers)
-  organisation_id: Organisation;
+  organisation: Organisation;
 
   @Column()
   role: string;
 
   @ManyToOne(() => Profile)
-  profile_id: Profile;
+  profile: Profile;
 }
