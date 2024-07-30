@@ -26,6 +26,7 @@ import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
 
@@ -114,6 +115,7 @@ import { ProfileModule } from './modules/profile/profile.module';
     SqueezeModule,
     TestimonialsModule,
     NotificationsModule,
+    JobsModule,
     ProductsModule,
     ProfileModule,
   ],
