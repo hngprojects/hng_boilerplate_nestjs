@@ -21,6 +21,7 @@ import {
   USER_NOT_FOUND,
   INVALID_REFRESH_TOKEN,
   UNAUTHORISED_TOKEN,
+  INVALID_CREDENTIALS,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -38,6 +39,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { generateSixDigitToken } from '../../utils/generate-token';
 import { OtpDto } from '../otp/dto/otp.dto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
+import { GoogleAuthService } from './google-auth.service';
+import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
+import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 
 @Injectable()
 export default class AuthenticationService {
@@ -45,7 +50,8 @@ export default class AuthenticationService {
     private userService: UserService,
     private jwtService: JwtService,
     private otpService: OtpService,
-    private emailService: EmailService
+    private emailService: EmailService,
+    private googleAuthService: GoogleAuthService
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -73,16 +79,10 @@ export default class AuthenticationService {
         };
       }
 
-      const accessToken = this.jwtService.sign({
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        sub: user.id,
-        user_type: user.user_type,
-      });
+      const token = (await this.otpService.createOtp(user.id)).token;
+      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
-        token: accessToken,
         user: {
           first_name: user.first_name,
           last_name: user.last_name,
@@ -135,6 +135,7 @@ export default class AuthenticationService {
       );
     }
   }
+
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
     try {
       const { email, password } = loginDto;
@@ -145,19 +146,19 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new UnauthorizedException({
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        throw new CustomHttpException(
-          { message: 'Invalid password or email', error: 'Bad Request' },
-          HttpStatus.UNAUTHORIZED
-        );
+        throw new UnauthorizedException({
+          status_code: HttpStatus.UNAUTHORIZED,
+          message: INVALID_CREDENTIALS,
+        });
       }
 
       const access_token = this.jwtService.sign({ id: user.id });
@@ -176,9 +177,6 @@ export default class AuthenticationService {
 
       return { message: 'Login successful', ...responsePayload };
     } catch (error) {
-      if (error instanceof CustomHttpException) {
-        throw error;
-      }
       Logger.log('AuthenticationServiceError ~ loginError ~', error);
       throw new HttpException(
         {
@@ -337,18 +335,73 @@ export default class AuthenticationService {
   async googleLogin(user: User) {
     const payload = { userId: user.id };
     const accessToken = this.jwtService.sign(payload);
+  }
 
+  async googleAuth(googleAuthPayload: GoogleAuthPayload) {
+    const idToken = googleAuthPayload.id_token;
+    const verifyTokenResponse: GoogleVerificationPayloadInterface = await this.googleAuthService.verifyToken(idToken);
+    const userEmail = verifyTokenResponse.email;
+    const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
+
+    if (!userExists) {
+      const userCreationPayload = {
+        email: userEmail,
+        first_name: verifyTokenResponse.given_name || '',
+        last_name: verifyTokenResponse?.family_name || '',
+        password: '',
+      };
+      return await this.createUserGoogle(userCreationPayload);
+    }
+    const accessToken = await this.jwtService.sign({
+      sub: userExists.id,
+      id: userExists.id,
+      email: userExists.email,
+      first_name: userExists.first_name,
+      last_name: userExists.last_name,
+    });
     return {
       status: 'success',
-      message: 'User successfully authenticated',
+      message: 'User authenticated successfully',
       access_token: accessToken,
       user: {
-        id: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        id: userExists.id,
+        email: userExists.email,
+        first_name: userExists.first_name,
+        last_name: userExists.last_name,
+        fullname: userExists.first_name + ' ' + userExists.last_name,
+        role: '',
       },
     };
+  }
+
+  public async createUserGoogle(userPayload: CreateUserDTO) {
+    try {
+      const newUser = await this.userService.createUser(userPayload);
+      const accessToken = await this.jwtService.sign({
+        sub: newUser.id,
+        id: newUser.id,
+        email: userPayload.email,
+        first_name: userPayload.first_name,
+        last_name: userPayload.last_name,
+      });
+
+      return {
+        status: 'success',
+        message: 'User successfully created',
+        access_token: accessToken,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+          fullname: newUser.first_name + ' ' + newUser.last_name,
+          role: '',
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(HttpStatus.BAD_REQUEST);
+    }
   }
 
   async requestSignInToken(requestSignInTokenDto: RequestSigninTokenDto) {
@@ -382,7 +435,7 @@ export default class AuthenticationService {
     };
   }
 
-  async verifySignInToken(verifyOtp: OtpDto) {
+  async verifyToken(verifyOtp: OtpDto) {
     const { token, email } = verifyOtp;
 
     const user = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
@@ -400,6 +453,7 @@ export default class AuthenticationService {
       first_name: user.first_name,
       last_name: user.last_name,
       sub: user.id,
+      id: user.id,
     });
 
     return {

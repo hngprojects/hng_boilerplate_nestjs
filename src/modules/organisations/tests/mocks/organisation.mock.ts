@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
+import { Profile } from '../../../profile/entities/profile.entity';
+import { OrganisationMember } from '../../entities/org-members.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -8,6 +10,34 @@ export enum UserType {
 }
 
 export const createMockOrganisation = (): Organisation => {
+  const profileMock: Profile = {
+    id: 'some-uuid',
+    username: 'mockuser',
+    jobTitle: 'Developer',
+    pronouns: 'They/Them',
+    department: 'Engineering',
+    email: 'mockuser@example.com',
+    bio: 'A mock user for testing purposes',
+    social_links: [],
+    language: 'English',
+    region: 'US',
+    timezones: 'America/New_York',
+    profile_pic_url: '',
+    created_at: new Date(),
+    updated_at: new Date(),
+    user_id: null,
+  };
+
+  const orgMemberMock: OrganisationMember = {
+    id: uuidv4(),
+    created_at: new Date(),
+    updated_at: new Date(),
+    user_id: null,
+    role: 'admin',
+    organisation_id: null,
+    profile_id: profileMock,
+  };
+
   const ownerAndCreator = {
     id: uuidv4(),
     created_at: new Date(),
@@ -28,6 +58,8 @@ export const createMockOrganisation = (): Organisation => {
     secret: 'secret',
     is_2fa_enabled: false,
     products: [],
+    profile: profileMock,
+    organisationMembers: [orgMemberMock],
   };
 
   return {
@@ -47,6 +79,8 @@ export const createMockOrganisation = (): Organisation => {
     isDeleted: false,
     preferences: [],
     invites: [],
+    organisationMembers: [orgMemberMock],
+    products: [],
   };
 };
 
