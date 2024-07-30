@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { CreateHelpCenterDto } from './create-help-center.dto';
-import { AppModule } from '../../app.module';
 import { HelpCenterService } from './help-center.service';
+import { HelpCenterController } from './help-center.controller';
 
 describe('HelpCenterController', () => {
   let app: INestApplication;
@@ -11,21 +11,24 @@ describe('HelpCenterController', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(HelpCenterService)
-      .useValue({
-        createHelpCenter: jest.fn().mockImplementation((dto, author) => {
-          return {
-            id: '123',
-            ...dto,
-            author: 'Admin',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-        }),
-      })
-      .compile();
+      controllers: [HelpCenterController],
+      providers: [
+        {
+          provide: HelpCenterService,
+          useValue: {
+            createHelpCenter: jest.fn().mockImplementation((dto, author) => {
+              return {
+                id: '123',
+                ...dto,
+                author,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              };
+            }),
+          },
+        },
+      ],
+    }).compile();
 
     app = module.createNestApplication();
     helpCenterService = module.get<HelpCenterService>(HelpCenterService);
