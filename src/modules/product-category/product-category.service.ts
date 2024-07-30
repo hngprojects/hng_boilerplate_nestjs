@@ -23,7 +23,9 @@ export class ProductCategoryService {
       const category = this.categoryRepository.create(createCategoryDto);
       return await this.categoryRepository.save(category);
     } catch (error) {
-      throw error({ error: error.message });
+      if (error instanceof HttpException) {
+        throw error;
+      }
     }
   }
 

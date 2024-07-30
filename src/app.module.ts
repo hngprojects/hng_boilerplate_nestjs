@@ -18,14 +18,14 @@ import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { ProductCategoryModule } from './modules/product-category/product-category.module';
-import { ProductsModule } from './modules/products/products.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { ProductsModule } from './modules/products/products.module';
+import { ProductCategoryModule } from './modules/product-category/product-category.module';
 
 @Module({
   providers: [
@@ -108,11 +108,10 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
       inject: [ConfigService],
     }),
     OrganisationsModule,
-    ProductsModule,
-    ProductCategoryModule,
     NotificationSettingsModule,
     TestimonialsModule,
     ProductsModule,
+    ProductCategoryModule,
   ],
   controllers: [HealthController, ProbeController],
 })

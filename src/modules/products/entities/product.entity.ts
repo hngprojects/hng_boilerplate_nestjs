@@ -1,12 +1,18 @@
-import { ProductCategory } from '../../../modules/product-category/entities/product-category.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { User } from '../../../modules/user/entities/user.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { ProductCategory } from '../../product-category/entities/product-category.entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { Organisation } from '../../organisations/entities/organisations.entity';
+
+export enum ProductStatusType {
+  IN_STOCK = 'in stock',
+  OUT_STOCK = 'out of stock',
+  LOW_STOCK = 'low on stock',
+}
 
 @Entity()
 export class Product extends AbstractBaseEntity {
   @Column({ type: 'text', nullable: false })
-  product_name: string;
+  name: string;
 
   @Column({ type: 'text', nullable: true })
   description: string;
@@ -17,8 +23,18 @@ export class Product extends AbstractBaseEntity {
   @Column({ type: 'int', nullable: false, default: 0 })
   price: number;
 
-  @ManyToOne(() => User, user => user.products)
-  user: User;
+  @Column({ type: 'text', nullable: true })
+  image: string;
+
+  @Column({
+    type: 'enum',
+    enum: ProductStatusType,
+    default: ProductStatusType.OUT_STOCK,
+  })
+  satus: ProductStatusType;
+
+  @ManyToOne(() => Organisation, org => org.products)
+  org: Organisation;
 
   @ManyToOne(() => ProductCategory, category => category.products)
   category: ProductCategory;

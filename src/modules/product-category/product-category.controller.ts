@@ -19,7 +19,7 @@ export class ProductCategoryController {
     };
   }
 
-  @ApiOperation({ summary: 'reate product categories' })
+  @ApiOperation({ summary: 'create product categories' })
   @Post()
   @ApiBody({ type: CreateProductCategoryDto })
   async createNewCategory(@Body() createCategoryDto: CreateProductCategoryDto) {
