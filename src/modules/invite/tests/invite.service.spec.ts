@@ -32,6 +32,7 @@ describe('InviteService', () => {
       first_name: 'John',
       last_name: 'Doe',
       is_active: true,
+      phone: '+1234567890',
       id: 'some-uuid-value-here',
       attempts_left: 2,
       created_at: new Date(),
@@ -47,7 +48,8 @@ describe('InviteService', () => {
       secret: 'secret',
       is_2fa_enabled: true,
       testimonials: [],
-      products: [],
+      profile: null,
+      organisationMembers: [],
     };
 
     const mockOrg: Organisation = {
@@ -67,6 +69,8 @@ describe('InviteService', () => {
       creator: mockUser,
       preferences: [],
       invites: [],
+      organisationMembers: [],
+      products: [],
     };
     const mockInvites: Invite[] = [
       {
