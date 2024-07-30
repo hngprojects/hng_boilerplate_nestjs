@@ -3,17 +3,16 @@ import { NotificationsService } from './notifications.service';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiBody,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
-import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
-import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
+import {
+  MarkAllNotificationAsReadError,
+  MarkAllNotificationAsReadResponse,
+} from './dtos/mark-all-notifications-as-read.dto';
 
 @ApiBearerAuth()
 @ApiTags('Notification')
@@ -39,8 +38,9 @@ export class NotificationsController {
     return this.notificationsService.markNotificationAsRead(markNotificationAsRead, notification_id, userId);
   }
   @Delete('/clear')
-  @ApiResponse({ status: 200, description: 'Notifications cleared successfully' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiOkResponse({ type: MarkAllNotificationAsReadResponse, description: 'Notifications cleared successfully.' })
+  @ApiUnauthorizedResponse({ type: MarkAllNotificationAsReadError, description: 'Unauthorized' })
+  @ApiInternalServerErrorResponse({ type: MarkAllNotificationAsReadError, description: 'Internal Server Error' })
   @ApiOperation({ summary: 'Marks all notifications a read' })
   async markAllNotificationsAsRead(@Req() request: Request) {
     const user = request['user'];
