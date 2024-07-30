@@ -42,11 +42,4 @@ export class Product extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, org => org.products)
   org: Organisation;
-
-  // @ManyToOne(() => User, user => user.products)
-  // user: User;
-
-  /* To be implemented in another pr */
-  // @ManyToOne(() => ProductCategory, category => category.products)
-  // category: ProductCategory;
 }
