@@ -2,16 +2,33 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { CreateFaqDto } from './create-faq.dto';
 import { FaqService } from './faq.service';
-import { AppModule } from '../../app.module';
+import { FaqController } from './faq.controller';
 
 describe('FaqController (e2e)', () => {
   let app;
   let server;
   let faqService: FaqService;
 
+  const mockFaqService = {
+    create: jest.fn().mockImplementation((createFaqDto: CreateFaqDto, createdBy: string) => {
+      return {
+        id: 'some-uuid',
+        ...createFaqDto,
+        createdBy,
+        createdAt: new Date().toISOString(),
+      };
+    }),
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      controllers: [FaqController],
+      providers: [
+        {
+          provide: FaqService,
+          useValue: mockFaqService,
+        },
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
