@@ -1,6 +1,8 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { SeedingService } from './seeding.service';
+import { skipAuth } from 'src/helpers/skipAuth';
 
+@skipAuth()
 @Controller('seed')
 export class SeedingController {
   constructor(private readonly seedingService: SeedingService) {}

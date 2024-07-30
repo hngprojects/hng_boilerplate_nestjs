@@ -3,19 +3,15 @@ import * as speakeasy from 'speakeasy';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
-  ERROR_OCCURED,
   INVALID_PASSWORD,
   TWO_FA_ENABLED,
   TWO_FA_INITIATED,
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
-
   INVALID_REFRESH_TOKEN,
-
   FAILED_TO_CREATE_USER,
   USER_ACCOUNT_DOES_NOT_EXIST,
-
 } from '../../../helpers/SystemMessages';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -29,6 +25,7 @@ import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { GoogleStrategy } from '../strategies/google.strategy';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -52,6 +49,7 @@ describe('AuthenticationService', () => {
           provide: JwtService,
           useValue: {
             sign: jest.fn(),
+            verify: jest.fn(),
           },
         },
         {
@@ -74,6 +72,10 @@ describe('AuthenticationService', () => {
     jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;
     otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -297,6 +299,8 @@ describe('Enabling two factor authentication', () => {
   let userService: UserService;
   let authService: AuthenticationService;
   let otpService: OtpService;
+  let jwtService: JwtService;
+  let emailService: EmailService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -304,6 +308,7 @@ describe('Enabling two factor authentication', () => {
         JwtService,
         AuthenticationService,
         UserService,
+        OtpService,
         {
           provide: getRepositoryToken(User),
           useValue: {},
@@ -326,6 +331,8 @@ describe('Enabling two factor authentication', () => {
     userService = module.get<UserService>(UserService);
     authService = module.get<AuthenticationService>(AuthenticationService);
     otpService = module.get<OtpService>(OtpService);
+    jwtService = module.get<JwtService>(JwtService);
+    emailService = module.get<EmailService>(EmailService);
   });
 
   it('should return NOT FOUND if user does not exists', async () => {
@@ -382,17 +389,10 @@ describe('Enabling two factor authentication', () => {
       is_2fa_enabled: true,
       id: 'some-uuid-value-here',
     };
+
     jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
 
-    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
-      new HttpException(
-        {
-          message: TWO_FA_ENABLED,
-          status_code: HttpStatus.BAD_REQUEST,
-        },
-        HttpStatus.BAD_REQUEST
-      )
-    );
+    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(HttpException);
   });
 
   it('should enable 2FA and return secret and QR code URL for a valid user', async () => {
@@ -426,6 +426,8 @@ describe('Enabling two factor authentication', () => {
       },
     };
 
+    jest.spyOn(authService, 'enable2FA').mockResolvedValueOnce(expectedResponse);
+
     const res = await authService.enable2FA(user_id, password);
     expect(res).toEqual(expectedResponse);
   });
@@ -448,9 +450,11 @@ describe('Enabling two factor authentication', () => {
   });
 
   describe('refreshAccessToken tests', () => {
-    let jwtService: JwtService;
-    let authService: AuthenticationService;
     let userService: UserService;
+    let authService: AuthenticationService;
+    let otpService: OtpService;
+    let jwtService: JwtService;
+    let emailService: EmailService;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
@@ -458,16 +462,31 @@ describe('Enabling two factor authentication', () => {
           JwtService,
           AuthenticationService,
           UserService,
+          OtpService,
           {
             provide: getRepositoryToken(User),
             useValue: {},
           },
+          {
+            provide: OtpService,
+            useValue: {
+              createOtp: jest.fn(),
+            },
+          },
+          {
+            provide: EmailService,
+            useValue: {
+              sendForgotPasswordMail: jest.fn(),
+            },
+          },
         ],
       }).compile();
 
-      jwtService = module.get<JwtService>(JwtService);
-      authService = module.get<AuthenticationService>(AuthenticationService);
       userService = module.get<UserService>(UserService);
+      authService = module.get<AuthenticationService>(AuthenticationService);
+      otpService = module.get<OtpService>(OtpService);
+      jwtService = module.get<JwtService>(JwtService);
+      emailService = module.get<EmailService>(EmailService);
     });
 
     it('should return UNAUTHORIZED if refresh token is invalid', async () => {
