@@ -104,7 +104,7 @@ export class ProductsService {
       status_code: HttpStatus.OK,
       message: 'Product stock retrieved successfully',
       data: {
-        productId,
+        product_id: productId,
         current_stock: product.quantity,
         last_updated: product.updated_at,
       },
