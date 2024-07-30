@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpCode,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -14,6 +15,7 @@ import { User } from '../user/entities/user.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
+import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 
 @Injectable()
 export class OrganisationsService {
@@ -23,6 +25,26 @@ export class OrganisationsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>
   ) {}
+
+  async getOrganisationMembers(orgId: string): Promise<OrganisationMembersResponseDto> {
+    const members = await this.organisationRepository.findOne({
+      where: { id: orgId },
+      relations: ['organisationMembers', 'organisationMembers.user_id'],
+    });
+
+    if (!members)
+      throw new NotFoundException({
+        message: 'No organisation found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+
+    const data = members.organisationMembers.map(member => {
+      const { password, ...user } = member.user_id;
+      return user;
+    });
+
+    return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
+  }
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
     const emailFound = await this.emailExists(createOrganisationDto.email);

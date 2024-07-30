@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OwnershipGuard } from '../../guards/authorization.guard';
+import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')
@@ -34,5 +35,21 @@ export class OrganisationsController {
   async update(@Param('id') id: string, @Body() updateOrganisationDto: UpdateOrganisationDto) {
     const updatedOrg = await this.organisationsService.updateOrganisation(id, updateOrganisationDto);
     return { message: 'Organisation successfully updated', org: updatedOrg };
+  }
+
+  @ApiOperation({ summary: 'Get members of an Organisation' })
+  @ApiResponse({
+    status: 200,
+    description: 'The found record',
+    type: OrganisationMembersResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found or no user in it',
+    type: UpdateOrganisationDto,
+  })
+  @Get(':org_id/users')
+  async getMembers(@Param('org_id') org_id: string): Promise<OrganisationMembersResponseDto> {
+    return this.organisationsService.getOrganisationMembers(org_id);
   }
 }
