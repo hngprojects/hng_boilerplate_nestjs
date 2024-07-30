@@ -23,7 +23,6 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { skipAuth } from '../../helpers/skipAuth';
 import { AuthGuard } from '../../guards/auth.guard';
 
-@skipAuth()
 @ApiTags('Organisation Settings')
 @Controller('api/v1/organisation/:organisationId/roles')
 @UseGuards(OwnershipGuard)
