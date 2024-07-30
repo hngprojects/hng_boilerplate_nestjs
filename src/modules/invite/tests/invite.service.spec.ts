@@ -49,7 +49,7 @@ describe('InviteService', () => {
       secret: 'secret',
       is_2fa_enabled: true,
       testimonials: [],
-      notifications: [] as Notification[],
+notifications: [] as Notification[]
       profile: null,
       organisationMembers: [],
     };
