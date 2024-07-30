@@ -43,6 +43,7 @@ import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
+import { SendEmailDto } from '../email/dto/email.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -80,7 +81,13 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
+
+      const emailData = new SendEmailDto();
+      emailData.to = user.email;
+      emailData.subject = 'Welcome to My App! confirm your Email';
+      emailData.template = 'register-otp';
+      emailData.context = { email: user.email, otp: token };
+      await this.emailService.sendEmail(emailData);
 
       const responsePayload = {
         user: {
@@ -119,7 +126,13 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+
+      const emailData = new SendEmailDto();
+      emailData.to = dto.email;
+      emailData.subject = 'Reset Password';
+      emailData.template = 'reset-password';
+      emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
+      await this.emailService.sendEmail(emailData);
       return {
         status_code: HttpStatus.OK,
         message: 'Email sent successfully',
@@ -426,8 +439,13 @@ export default class AuthenticationService {
     const newOtp = generateSixDigitToken();
     await this.otpService.createOtp(user.id);
 
-    // Send the OTP to the user's email
-    await this.emailService.sendLoginOtp(user.email, newOtp);
+    // Send the OTP to the user's emailuser.email, newOtp
+    const emailData = new SendEmailDto();
+    emailData.to = user.email;
+    emailData.subject = 'Welcome to My App! Confirm your Email';
+    emailData.template = 'confirmation';
+    emailData.context = { link: `remotebingo.com$?token=${newOtp}`, email: user.email };
+    await this.emailService.sendEmail(emailData);
 
     return {
       message: 'Sign-in token sent to email',

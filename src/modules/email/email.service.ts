@@ -1,82 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
-import { ArticleInterface } from './article.interface';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { SendEmailDto } from './dto/email.dto';
+import { validateOrReject } from 'class-validator';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(@InjectQueue('email') private readonly emailQueue: Queue) {}
 
-  async sendUserConfirmationMail(email: string, url: string, token: string) {
-    const link = `${url}?token=${token}`;
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Welcome to My App! Confirm your Email',
-      template: 'confirmation',
-      context: {
-        link,
-        email,
-      },
-    });
-  }
-
-  async sendUserEmailConfirmationOtp(email: string, otp: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Welcome to My App! Confirm your Email',
-      template: 'register-otp',
-      context: {
-        otp,
-        email,
-      },
-    });
-  }
-
-  async sendForgotPasswordMail(email: string, url: string, token: string) {
-    const link = `${url}?token=${token}`;
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Reset Password',
-      template: 'reset-password',
-      context: {
-        link,
-        email,
-      },
-    });
-  }
-
-  async sendWaitListMail(email: string, url: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Waitlist Confirmation',
-      template: 'waitlist',
-      context: {
-        url,
-        email,
-      },
-    });
-  }
-
-  async sendNewsLetterMail(email: string, articles: ArticleInterface[]) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Monthly Newsletter',
-      template: 'newsletter',
-      context: {
-        email,
-        articles,
-      },
-    });
-  }
-
-  async sendLoginOtp(email: string, token: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Login with OTP',
-      template: 'login-otp',
-      context: {
-        token,
-        email,
-      },
-    });
+  async sendEmail(emailData: SendEmailDto) {
+    await validateOrReject(emailData);
+    await this.emailQueue.add(emailData);
+    return { message: 'Email added to the queue' };
   }
 }

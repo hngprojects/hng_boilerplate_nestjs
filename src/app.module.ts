@@ -1,8 +1,8 @@
-import { MailerModule } from '@nestjs-modules/mailer';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bull';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
 import serverConfig from '../config/server.config';
@@ -13,14 +13,11 @@ import ProbeController from './probe.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { OtpModule } from './modules/otp/otp.module';
-import { OtpService } from './modules/otp/otp.service';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
-import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
@@ -42,27 +39,22 @@ import { ProfileModule } from './modules/profile/profile.module';
           forbidNonWhitelisted: true,
         }),
     },
-    OtpService,
-    EmailService,
     {
       provide: 'APP_GUARD',
       useClass: AuthGuard,
     },
   ],
   imports: [
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     ConfigModule.forRoot({
-      /**
-       * By default, the package looks for a .env file in the root directory of the application.
-       * We don't use ".env" file because it is prioritize as the same level as real environment variables.
-       * To specify multiple .env files, set the envFilePath property.
-       * If a variable is found in multiple files, the first one takes precedence.
-       */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
       load: [serverConfig, authConfig],
-      /**
-       * See ".env.local" file to list all environment variables needed by the app
-       */
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PROFILE: Joi.string().valid('local', 'development', 'production', 'ci', 'testing', 'staging').required(),
@@ -84,34 +76,9 @@ import { ProfileModule } from './modules/profile/profile.module';
     TestimonialsModule,
     EmailModule,
     InviteModule,
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>('SMTP_HOST'),
-          port: configService.get<number>('SMTP_PORT'),
-          auth: {
-            user: configService.get<string>('SMTP_USER'),
-            pass: configService.get<string>('SMTP_PASSWORD'),
-          },
-        },
-        defaults: {
-          from: `"Team Remote Bingo" <${configService.get<string>('SMTP_USER')}>`,
-        },
-        template: {
-          dir: process.cwd() + '/src/modules/email/templates',
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
-      }),
-      inject: [ConfigService],
-    }),
     OrganisationsModule,
     NotificationSettingsModule,
     SqueezeModule,
-    TestimonialsModule,
     ProductsModule,
     ProfileModule,
   ],

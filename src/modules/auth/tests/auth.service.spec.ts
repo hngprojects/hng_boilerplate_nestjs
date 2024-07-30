@@ -27,6 +27,7 @@ import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { GoogleStrategy } from '../strategies/google.strategy';
 import { GoogleAuthService } from '../google-auth.service';
+import { SendEmailDto } from '../../email/dto/email.dto';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -267,15 +268,20 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
-      emailServiceMock.sendForgotPasswordMail.mockResolvedValueOnce(undefined);
+      emailServiceMock.sendEmail.mockResolvedValueOnce(undefined);
 
       const result = await service.forgotPassword({ email });
 
-      expect(emailServiceMock.sendForgotPasswordMail).toHaveBeenCalledWith(
+      const emailData = new SendEmailDto();
+      emailData.to = email;
+      emailData.subject = 'Reset Password';
+      emailData.template = 'reset-password';
+      emailData.context = {
+        link: `http://example.com/auth/reset-password?token=123456`,
         email,
-        'http://example.com/auth/reset-password',
-        '123456'
-      );
+      };
+
+      expect(emailServiceMock.sendEmail).toHaveBeenCalledWith(emailData);
       expect(result).toEqual({
         status_code: HttpStatus.OK,
         message: 'Email sent successfully',
