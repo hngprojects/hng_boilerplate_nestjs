@@ -31,7 +31,6 @@ export class NotificationsService {
 
       const notificationExists = await this.notificationRepository.findOne({
         where: { id: notificationId },
-        relations: ['user'],
       });
 
       if (!notificationExists) {
@@ -42,10 +41,10 @@ export class NotificationsService {
         });
       }
 
-      notificationExists.isRead = options.is_read;
+      notificationExists.is_read = options.is_read;
       await this.notificationRepository.save(notificationExists);
 
-      const { id: notification_id, message, isRead: is_read, updated_at } = notificationExists;
+      const { id: notification_id, message, is_read, updated_at } = notificationExists;
 
       return {
         status: 'success',

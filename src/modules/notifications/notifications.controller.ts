@@ -4,8 +4,8 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
-  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -23,7 +23,7 @@ export class NotificationsController {
 
   @Patch('/:notificationId')
   @ApiBody({ type: MarkNotificationAsReadDto, description: 'Read status of the notification' })
-  @ApiCreatedResponse({ type: CreateNotificationResponseDto, description: 'Notification created successfully' })
+  @ApiOkResponse({ type: CreateNotificationResponseDto, description: 'Notification created successfully' })
   @ApiUnauthorizedResponse({ type: MarkNotificationAsReadErrorDto, description: 'Unauthorized' })
   @ApiBadRequestResponse({ type: MarkNotificationAsReadErrorDto, description: 'Bad Request' })
   @ApiInternalServerErrorResponse({ type: MarkNotificationAsReadErrorDto, description: 'Internal Server Error' })

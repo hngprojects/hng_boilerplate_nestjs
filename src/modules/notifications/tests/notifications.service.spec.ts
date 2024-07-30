@@ -62,7 +62,7 @@ describe('NotificationsService', () => {
     it('should mark notification as read if it exists and belongs to the user', async () => {
       const notification: Notification = {
         id: 'valid-id',
-        isRead: false,
+        is_read: false,
         message: 'valid notification',
         user: mockUser as User,
         created_at: new Date(),
@@ -70,7 +70,7 @@ describe('NotificationsService', () => {
       };
       const options = { is_read: true };
       mockNotificationRepository.findOne.mockResolvedValue(notification);
-      mockNotificationRepository.save.mockResolvedValue({ ...notification, isRead: true });
+      mockNotificationRepository.save.mockResolvedValue({ ...notification, is_read: true });
 
       const result = await service.markNotificationAsRead(options, 'valid-id', userId);
 
@@ -81,12 +81,12 @@ describe('NotificationsService', () => {
         data: {
           notification_id: notification.id,
           message: notification.message,
-          is_read: notification.isRead,
+          is_read: notification.is_read,
           updated_at: notification.updated_at,
         },
       });
 
-      expect(mockNotificationRepository.save).toHaveBeenCalledWith({ ...notification, isRead: true });
+      expect(mockNotificationRepository.save).toHaveBeenCalledWith({ ...notification, is_read: true });
     });
   });
 });
