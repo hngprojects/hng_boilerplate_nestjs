@@ -1,19 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { CreateHelpCenterDto } from './create-help-center.dto';
 import * as request from 'supertest';
+import { CreateHelpCenterDto } from './create-help-center.dto';
 import { AppModule } from '../../app.module';
+import { HelpCenterService } from './help-center.service';
 
 describe('HelpCenterController', () => {
   let app: INestApplication;
-  let createdTopicId: string;
+  let helpCenterService: HelpCenterService;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(HelpCenterService)
+      .useValue({
+        createHelpCenter: jest.fn().mockImplementation((dto, author) => {
+          return {
+            id: '123',
+            ...dto,
+            author: 'Admin',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+        }),
+      })
+      .compile();
 
     app = module.createNestApplication();
+    helpCenterService = module.get<HelpCenterService>(HelpCenterService);
     await app.init();
   });
 
@@ -30,7 +45,7 @@ describe('HelpCenterController', () => {
 
       const response = await request(app.getHttpServer()).post('/help-center').send(createHelpCenterDto).expect(201);
 
-      createdTopicId = response.body.data.id;
+      expect(helpCenterService.createHelpCenter).toHaveBeenCalledWith(createHelpCenterDto, 'Admin');
 
       expect(response.body).toEqual({
         success: true,
@@ -45,5 +60,4 @@ describe('HelpCenterController', () => {
       });
     });
   });
-
 });
