@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
-import { User } from 'src/modules/user/entities/user.entity';
+import { Profile } from '../../../profile/entities/profile.entity';
+import { OrganisationMember } from '../../entities/org-members.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -9,7 +10,38 @@ export enum UserType {
 }
 
 export const createMockOrganisation = (): Organisation => {
-  const ownerAndCreator: User = {
+  const profileMock: Profile = {
+    id: 'some-uuid',
+    username: 'mockuser',
+    jobTitle: 'Developer',
+    pronouns: 'They/Them',
+    department: 'Engineering',
+    email: 'mockuser@example.com',
+    bio: 'A mock user for testing purposes',
+    social_links: [],
+    language: 'English',
+    region: 'US',
+    timezones: 'America/New_York',
+    profile_pic_url: '',
+    created_at: new Date(),
+    updated_at: new Date(),
+    user_id: null,
+  };
+
+  const orgMemberMock: OrganisationMember = {
+    id: uuidv4(),
+    created_at: new Date(),
+    updated_at: new Date(),
+    user_id: null,
+    role: 'admin',
+    organisation_id: null,
+    profile_id: profileMock.id,
+    profile: profileMock,
+    user: null,
+    organisation: null,
+  };
+
+  const ownerAndCreator = {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
@@ -17,53 +49,22 @@ export const createMockOrganisation = (): Organisation => {
     last_name: 'Smith',
     email: 'john.smith@example.com',
     password: 'pass123',
-    async hashPassword() {
-      return;
-    },
+    jobs: [],
+    phone: '+1234567890',
+    hashPassword: async () => {},
     is_active: true,
     attempts_left: 3,
     time_left: 3600,
     owned_organisations: [],
     created_organisations: [],
-    member_organisations: [],
-    user_type: UserType.ADMIN,
-    secret: '',
-    invites: [],
-    is_2fa_enabled: false,
-    testimonials: [],
-  };
-
-  const member: User = {
-    id: uuidv4(),
-    created_at: new Date(),
-    updated_at: new Date(),
-    first_name: 'Marie',
-    last_name: 'James',
-    email: 'marie.james@example.com',
-    password: 'pass123',
-    async hashPassword() {
-      return;
-    },
-    is_active: true,
-    attempts_left: 3,
-    time_left: 3600,
-    owned_organisations: [],
-    created_organisations: [],
-    member_organisations: [],
     invites: [],
     testimonials: [],
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
     products: [],
-  };
-
-  const creator: User = {
-    ...ownerAndCreator,
-    async hashPassword() {
-      return;
-    },
-    user_type: UserType.USER,
+    profile: profileMock,
+    organisationMembers: [orgMemberMock],
   };
 
   return {
@@ -77,13 +78,14 @@ export const createMockOrganisation = (): Organisation => {
     address: 'Street 101 Building 26',
     state: 'Lagos',
     owner: ownerAndCreator,
-    creator: creator,
+    creator: { ...ownerAndCreator, user_type: UserType.ADMIN },
     created_at: new Date(),
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
-    members: [member],
     invites: [],
+    organisationMembers: [orgMemberMock],
+    products: [],
   };
 };
 
