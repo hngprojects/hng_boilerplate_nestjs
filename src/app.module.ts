@@ -27,6 +27,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProductsModule } from './modules/products/products.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   providers: [
@@ -114,6 +115,7 @@ import { ProductsModule } from './modules/products/products.module';
     TestimonialsModule,
     JobsModule,
     ProductsModule,
+    ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
 })
