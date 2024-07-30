@@ -23,8 +23,7 @@ import { User, UserType } from '../../user/entities/user.entity';
 import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import { GoogleStrategy } from '../strategies/google.strategy';
+import { GoogleAuthService } from '../google-auth.service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -32,6 +31,7 @@ describe('AuthenticationService', () => {
   let jwtServiceMock: jest.Mocked<JwtService>;
   let otpServiceMock: jest.Mocked<OtpService>;
   let emailServiceMock: jest.Mocked<EmailService>;
+  let googleAuthServiceMock: jest.Mocked<GoogleAuthService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,6 +43,13 @@ describe('AuthenticationService', () => {
           useValue: {
             getUserRecord: jest.fn(),
             createUser: jest.fn(),
+            updateUserRecord: jest.fn(),
+          },
+        },
+        {
+          provide: GoogleAuthService,
+          useValue: {
+            verifyToken: jest.fn(),
           },
         },
         {
@@ -54,13 +61,14 @@ describe('AuthenticationService', () => {
         {
           provide: OtpService,
           useValue: {
-            createOtp: jest.fn(),
+            createOtp: jest.fn().mockResolvedValue({ token: 999987 }),
           },
         },
         {
           provide: EmailService,
           useValue: {
             sendForgotPasswordMail: jest.fn(),
+            sendUserEmailConfirmationOtp: jest.fn(),
           },
         },
       ],
@@ -71,6 +79,7 @@ describe('AuthenticationService', () => {
     jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;
     otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
+    googleAuthServiceMock = module.get(GoogleAuthService) as jest.Mocked<GoogleAuthService>;
   });
 
   afterEach(() => {
@@ -113,7 +122,6 @@ describe('AuthenticationService', () => {
         status_code: HttpStatus.CREATED,
         message: USER_CREATED_SUCCESSFULLY,
         data: {
-          token: 'mocked_token',
           user: {
             first_name: createUserDto.first_name,
             last_name: createUserDto.last_name,
@@ -288,158 +296,120 @@ describe('AuthenticationService', () => {
       await expect(service.forgotPassword({ email })).rejects.toThrow(HttpException);
     });
   });
-});
 
-describe('Enabling two factor authentication', () => {
-  let userService: UserService;
-  let authService: AuthenticationService;
-  let otpService: OtpService;
-  let jwtService: JwtService;
-  let emailService: EmailService;
+  describe('Enabling two factor authentication', () => {
+    it('should return NOT FOUND if user does not exists', async () => {
+      const user_id = 'another-uuid-value-over-here';
+      const password = 'password';
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        JwtService,
-        AuthenticationService,
-        UserService,
-        {
-          provide: getRepositoryToken(User),
-          useValue: {},
-        },
-        {
-          provide: OtpService,
-          useValue: {
-            createOtp: jest.fn(),
+      const existingRecord = null;
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
+      await expect(service.enable2FA(user_id, password)).rejects.toThrow(
+        new HttpException(
+          {
+            message: USER_NOT_FOUND,
+            status_code: HttpStatus.NOT_FOUND,
           },
-        },
-        {
-          provide: EmailService,
-          useValue: {
-            sendForgotPasswordMail: jest.fn(),
+          HttpStatus.NOT_FOUND
+        )
+      );
+    });
+
+    it('should return INVALID PASSWORD if user enters a wrong password', async () => {
+      const user_id = 'some-uuid-value-here';
+      const password = 'abc';
+
+      const existingRecord = {
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        password: await bcrypt.hash('password', 10),
+        id: 'some-uuid-value-here',
+      };
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
+
+      await expect(service.enable2FA(user_id, password)).rejects.toThrow(
+        new HttpException(
+          {
+            message: INVALID_PASSWORD,
+            status_code: HttpStatus.BAD_REQUEST,
           },
+          HttpStatus.BAD_REQUEST
+        )
+      );
+    });
+
+    it('should return 2FA ALREADY ENABLED if user tries to enable 2fa when enabled', async () => {
+      const user_id = 'some-uuid-value-here';
+      const password = 'password';
+
+      const existingRecord = {
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        password: await bcrypt.hash('password', 10),
+        secret: 'secret',
+        is_2fa_enabled: true,
+        id: 'some-uuid-value-here',
+      };
+
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
+
+      await expect(service.enable2FA(user_id, password)).rejects.toThrow(HttpException);
+    });
+
+    it('should enable 2FA and return secret and QR code URL for a valid user', async () => {
+      const user_id = 'some-uuid-value-here';
+      const password = 'password123';
+
+      const existingRecord = {
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        password: await bcrypt.hash('password123', 10),
+        is_2fa_enabled: false,
+        id: 'some-uuid-value-here',
+      };
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
+
+      const secret = speakeasy.generateSecret({ length: 32 });
+      jest.spyOn(speakeasy, 'generateSecret').mockReturnValue(secret);
+      jest.spyOn(userServiceMock, 'updateUserRecord').mockResolvedValueOnce(undefined);
+
+      const expectedResponse = {
+        status_code: HttpStatus.OK,
+        message: TWO_FA_INITIATED,
+        data: {
+          secret: secret.base32,
+          qr_code_url: speakeasy.otpauthURL({
+            secret: secret.ascii,
+            label: `Hng:${existingRecord.email}`,
+            issuer: 'Hng Boilerplate',
+          }),
         },
-      ],
-    }).compile();
+      };
 
-    userService = module.get<UserService>(UserService);
-    authService = module.get<AuthenticationService>(AuthenticationService);
-    otpService = module.get<OtpService>(OtpService);
-    jwtService = module.get<JwtService>(JwtService);
-    emailService = module.get<EmailService>(EmailService);
-  });
+      jest.spyOn(service, 'enable2FA').mockResolvedValueOnce(expectedResponse);
 
-  it('should return NOT FOUND if user does not exists', async () => {
-    const user_id = 'another-uuid-value-over-here';
-    const password = 'password';
+      const res = await service.enable2FA(user_id, password);
+      expect(res).toEqual(expectedResponse);
+    });
 
-    const existingRecord = null;
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
-      new HttpException(
-        {
-          message: USER_NOT_FOUND,
-          status_code: HttpStatus.NOT_FOUND,
-        },
-        HttpStatus.NOT_FOUND
-      )
-    );
-  });
+    it('should handle errors gracefully', async () => {
+      const user_id = 'some-uuid-value-here';
+      const password = 'password';
 
-  it('should return INVALID PASSWORD if user enters a wrong password', async () => {
-    const user_id = 'some-uuid-value-here';
-    const password = 'abc';
+      jest.spyOn(userServiceMock, 'getUserRecord').mockRejectedValueOnce(new Error('Database connection error'));
 
-    const existingRecord = {
-      email: 'test@example.com',
-      first_name: 'John',
-      last_name: 'Doe',
-      password: await bcrypt.hash('password', 10),
-      id: 'some-uuid-value-here',
-    };
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-
-    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
-      new HttpException(
-        {
-          message: INVALID_PASSWORD,
-          status_code: HttpStatus.BAD_REQUEST,
-        },
-        HttpStatus.BAD_REQUEST
-      )
-    );
-  });
-
-  it('should return 2FA ALREADY ENABLED if user tries to enable 2fa when enabled', async () => {
-    const user_id = 'some-uuid-value-here';
-    const password = 'password';
-
-    const existingRecord = {
-      email: 'test@example.com',
-      first_name: 'John',
-      last_name: 'Doe',
-      password: await bcrypt.hash('password', 10),
-      secret: 'secret',
-      is_2fa_enabled: true,
-      id: 'some-uuid-value-here',
-    };
-
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-
-    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(HttpException);
-  });
-
-  it('should enable 2FA and return secret and QR code URL for a valid user', async () => {
-    const user_id = 'some-uuid-value-here';
-    const password = 'password123';
-
-    const existingRecord = {
-      email: 'test@example.com',
-      first_name: 'John',
-      last_name: 'Doe',
-      password: await bcrypt.hash('password123', 10),
-      is_2fa_enabled: false,
-      id: 'some-uuid-value-here',
-    };
-    jest.spyOn(userService, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-
-    const secret = speakeasy.generateSecret({ length: 32 });
-    jest.spyOn(speakeasy, 'generateSecret').mockReturnValue(secret);
-    jest.spyOn(userService, 'updateUserRecord').mockResolvedValueOnce(undefined);
-
-    const expectedResponse = {
-      status_code: HttpStatus.OK,
-      message: TWO_FA_INITIATED,
-      data: {
-        secret: secret.base32,
-        qr_code_url: speakeasy.otpauthURL({
-          secret: secret.ascii,
-          label: `Hng:${existingRecord.email}`,
-          issuer: 'Hng Boilerplate',
-        }),
-      },
-    };
-
-    jest.spyOn(authService, 'enable2FA').mockResolvedValueOnce(expectedResponse);
-
-    const res = await authService.enable2FA(user_id, password);
-    expect(res).toEqual(expectedResponse);
-  });
-
-  it('should handle errors gracefully', async () => {
-    const user_id = 'some-uuid-value-here';
-    const password = 'password';
-
-    jest.spyOn(userService, 'getUserRecord').mockRejectedValueOnce(new Error('Database connection error'));
-
-    await expect(authService.enable2FA(user_id, password)).rejects.toThrow(
-      new HttpException(
-        {
-          message: 'Database connection error',
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      )
-    );
+      await expect(service.enable2FA(user_id, password)).rejects.toThrow(
+        new HttpException(
+          {
+            message: 'Database connection error',
+            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR
+        )
+      );
+    });
   });
 });
