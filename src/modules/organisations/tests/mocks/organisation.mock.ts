@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
-import { OrganisationMember } from '../../entities/org-member.entity';
+import { OrganisationMember } from '../../entities/org-members.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -15,27 +15,27 @@ export const createMockOrganisation = (): Organisation => {
     username: 'mockuser',
     jobTitle: 'Developer',
     pronouns: 'They/Them',
-    dept: 'Engineering',
+    department: 'Engineering',
     email: 'mockuser@example.com',
     bio: 'A mock user for testing purposes',
-    socialLinks: '',
+    social_links: [],
     language: 'English',
     region: 'US',
     timezones: 'America/New_York',
-    profilePicUrl: '',
+    profile_pic_url: '',
     created_at: new Date(),
     updated_at: new Date(),
-    user: null,
+    user_id: null,
   };
 
   const orgMemberMock: OrganisationMember = {
-    id: 'some-uuid',
+    id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
-    user: null,
+    user_id: null,
     role: 'admin',
-    organisation: null,
-    profile: profileMock,
+    organisation_id: null,
+    profile_id: profileMock,
   };
 
   const ownerAndCreator = {
@@ -58,24 +58,7 @@ export const createMockOrganisation = (): Organisation => {
     secret: 'secret',
     is_2fa_enabled: false,
     products: [],
-    organisationMembers: [orgMemberMock],
     profile: profileMock,
-  };
-
-  const organisationMock = {
-    id: 'org-uuid',
-    name: 'Test Organisation',
-    description: 'An organisation for testing purposes',
-    email: 'test@example.com',
-    industry: 'Tech',
-    type: 'Private',
-    country: 'USA',
-    address: '123 Test St.',
-    state: 'CA',
-    owner: ownerAndCreator,
-    creator: { ...ownerAndCreator, user_type: UserType.USER },
-    created_at: new Date(),
-    updated_at: new Date(),
     organisationMembers: [orgMemberMock],
   };
 
@@ -97,6 +80,7 @@ export const createMockOrganisation = (): Organisation => {
     preferences: [],
     invites: [],
     organisationMembers: [orgMemberMock],
+    products: [],
   };
 };
 

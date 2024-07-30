@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 
@@ -14,7 +14,7 @@ export class Profile extends AbstractBaseEntity {
   pronouns: string;
 
   @Column({ nullable: true })
-  dept: string;
+  department: string;
 
   @Column()
   email: string;
@@ -22,8 +22,8 @@ export class Profile extends AbstractBaseEntity {
   @Column({ type: 'text', nullable: true })
   bio: string;
 
-  @Column({ nullable: true })
-  socialLinks: string;
+  @Column({ type: 'simple-array', nullable: true })
+  social_links: string[];
 
   @Column({ nullable: true })
   language: string;
@@ -35,8 +35,9 @@ export class Profile extends AbstractBaseEntity {
   timezones: string;
 
   @Column({ nullable: true })
-  profilePicUrl: string;
+  profile_pic_url: string;
 
   @OneToOne(() => User, user => user.profile)
-  user: User;
+  @JoinColumn({ name: 'user_id' })
+  user_id: User;
 }
