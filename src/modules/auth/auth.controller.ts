@@ -4,7 +4,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
 import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
@@ -67,6 +67,7 @@ export default class RegistrationController {
     description: 'Enable two factor authentication',
     type: Enable2FADto,
   })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
   @ApiResponse({ status: 400, description: BAD_REQUEST })
   public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
