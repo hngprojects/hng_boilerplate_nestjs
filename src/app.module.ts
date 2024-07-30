@@ -21,7 +21,9 @@ import { OrganisationsModule } from './modules/organisations/organisations.modul
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { ProductsModule } from './modules/products/products.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
@@ -109,9 +111,11 @@ import ProbeController from './probe.controller';
     }),
     OrganisationsModule,
     NotificationSettingsModule,
+    SqueezeModule,
     TestimonialsModule,
     NotificationsModule,
     ProductsModule,
+    ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
 })
