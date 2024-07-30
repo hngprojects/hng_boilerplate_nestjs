@@ -1,19 +1,50 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException,
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { Squeeze } from './entities/squeeze.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Squeeze } from './entities/squeeze.entity';
+import { SqueezeRequestDto } from './dto/squeeze.dto';
+import { CreateSqueezeMapper } from './mapper/create-squeeze.mapper';
+import { SqueezeMapper } from './mapper/squeeze.mapper';
+import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
 
 @Injectable()
 export class SqueezeService {
   constructor(
     @InjectRepository(Squeeze)
-    private readonly squeezeRepository: Repository<Squeeze>
+    private readonly SqueezeRepository: Repository<Squeeze>
   ) {}
+
+  async create(createSqueezeDto: SqueezeRequestDto) {
+    try {
+      const mapNewSqueeze = CreateSqueezeMapper.mapToEntity(createSqueezeDto);
+      const newSqueeze = this.SqueezeRepository.create({
+        ...mapNewSqueeze,
+      });
+      await this.SqueezeRepository.save(newSqueeze);
+      const mappedResponse = SqueezeMapper.mapToResponseFormat(newSqueeze);
+      return {
+        status: 'success',
+        message: 'Your request has been received. You will get a template shortly.',
+        data: mappedResponse,
+      };
+    } catch (error) {
+      throw new BadRequestException({
+        message: 'Failed to submit your request',
+        status_code: 400,
+      });
+    }
+  }
 
   async updateSqueeze(updateDto: UpdateSqueezeDto) {
     try {
-      const squeeze = await this.squeezeRepository.findOneBy({ email: updateDto.email });
+      const squeeze = await this.SqueezeRepository.findOneBy({ email: updateDto.email });
 
       if (!squeeze) {
         throw new NotFoundException({
@@ -30,7 +61,7 @@ export class SqueezeService {
       }
 
       Object.assign(squeeze, updateDto);
-      const updatedSqueeze = await this.squeezeRepository.save(squeeze);
+      const updatedSqueeze = await this.SqueezeRepository.save(squeeze);
       return updatedSqueeze;
     } catch (err) {
       if (this.isInstanceOfAny(err, [ForbiddenException, NotFoundException])) {
