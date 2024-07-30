@@ -1,8 +1,8 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req, Get } from '@nestjs/common';
+import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req, Get, Query } from '@nestjs/common';
 import UserService from './user.service';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 
 @ApiBearerAuth()
@@ -54,6 +54,22 @@ export class UserController {
   @Get(':id')
   async getUserDataById(@Param('id') id: string) {
     return this.userService.getUserDataWithoutPasswordById(id);
+  }
+
+  @Get()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all users (Super Admin only)' })
+  @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getAllUsers(
+    @Request() req: { user: UserPayload },
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
+    return this.userService.getUsersByAdmin(page, limit, req.user);
   }
 
   @ApiBearerAuth()
