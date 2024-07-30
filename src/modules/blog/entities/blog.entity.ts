@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { BlogPostComment } from './blog-comment.entity';
@@ -15,7 +15,8 @@ export class Blog extends AbstractBaseEntity {
   @Column('text')
   content: string;
 
-  @ManyToOne(() => User, user => user.blogs)
+  @ManyToOne(() => User, user => user.blog)
+  @JoinColumn({ name: 'author' })
   author: User;
 
   @Column({ default: true })

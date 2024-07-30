@@ -7,6 +7,7 @@ import { Organisation } from '../../organisations/entities/organisations.entity'
 import { Product } from '../../../modules/products/entities/product.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { Blog } from '../../../modules/blog/entities/blog.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -71,6 +72,10 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
+
+  @OneToMany(() => Blog, blogs => blogs.author)
+  @JoinColumn()
+  blog: Blog[];
 
   @BeforeInsert()
   async hashPassword() {
