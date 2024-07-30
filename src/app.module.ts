@@ -27,6 +27,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.service.spec';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { ProfileModule } from './modules/profile/profile.module';
 @Module({
   providers: [
@@ -112,8 +113,9 @@ import { ProfileModule } from './modules/profile/profile.module';
     NotificationSettingsModule,
     SqueezeModule,
     TestimonialsModule,
+    JobsModule,
     ProductsModule,
-    OrganisationRoleModule,
+    JobsModule,
     ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
