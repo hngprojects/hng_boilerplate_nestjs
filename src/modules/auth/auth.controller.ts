@@ -74,6 +74,7 @@ export default class RegistrationController {
     return this.authService.googleAuth(body);
   }
 
+  @skipAuth()
   @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })
@@ -83,6 +84,7 @@ export default class RegistrationController {
     return await this.authService.requestSignInToken(body);
   }
 
+  @skipAuth()
   @Post('magic-link/verify')
   @HttpCode(200)
   @ApiOperation({ summary: 'Verify Signin Token' })
