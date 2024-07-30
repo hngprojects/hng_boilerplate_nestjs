@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
+import { Notification } from '../../../notifications/entities/notification.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
 
@@ -59,6 +60,7 @@ export const createMockOrganisation = (): Organisation => {
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
+    notifications: [] as Notification[],
     products: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],

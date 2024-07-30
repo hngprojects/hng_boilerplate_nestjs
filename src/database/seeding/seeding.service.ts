@@ -3,8 +3,9 @@ import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Product } from '../../modules/products/entities/product.entity';
-import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
+import { Notification } from '../../modules/notifications/entities/notification.entity';
+import { Product } from 'src/modules/products/entities/product.entity';
+import { ProductCategory } from 'src/modules/product-category/entities/product-category.entity';
 import { Profile } from '../../modules/profile/entities/profile.entity';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class SeedingService {
     const profileRepository = this.dataSource.getRepository(Profile);
     const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
+    const notificationRepository = this.dataSource.getRepository(Notification);
     const productRepository = this.dataSource.getRepository(Product);
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
 
@@ -49,6 +51,31 @@ export class SeedingService {
         const savedUsers = await userRepository.find();
         if (savedUsers.length !== 2) {
           throw new Error('Failed to create all users');
+        }
+
+        const notifications = [
+          notificationRepository.create({
+            message: 'Notification 1 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 1 for Jane',
+            user: savedUsers[1],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for Jane',
+            user: savedUsers[1],
+          }),
+        ];
+        console.log('Created notifications:', notifications);
+        await notificationRepository.save(notifications);
+        const savedNotifications = await notificationRepository.find();
+        if (savedNotifications.length !== 4) {
+          throw new Error('Failed to create all notifications');
         }
 
         const prf1 = profileRepository.create({

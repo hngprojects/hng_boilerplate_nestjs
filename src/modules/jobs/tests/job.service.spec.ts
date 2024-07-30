@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JobDto } from '../dto/job.dto';
 import { PaginationDto } from '../dto/pagination.dto';
+import { Notification } from '../../notifications/entities/notification.entity';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -35,6 +36,7 @@ describe('JobsService', () => {
     jobs: [],
     created_at: new Date(),
     updated_at: new Date(),
+    notifications: [] as Notification[],
     hashPassword: () => null,
   };
 

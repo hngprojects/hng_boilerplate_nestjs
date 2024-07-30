@@ -6,7 +6,8 @@ import { CreateProductRequestDto } from './dto/create-product.dto';
 
 @ApiTags('Products')
 @Controller('products')
-export class ProductsController {
+@ApiTags('Products')
+export class ProductController {
   constructor(private readonly productsService: ProductsService) {}
 
   @UseGuards(OwnershipGuard)

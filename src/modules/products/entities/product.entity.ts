@@ -21,6 +21,20 @@ export class Product extends AbstractBaseEntity {
   quantity: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
+  @ApiProperty()
+  @Column({ type: 'text' })
+  product_name: string;
+
+  @ApiProperty()
+  @Column('text')
+  description: string;
+
+  @ApiProperty()
+  @Column('int')
+  quantity: number;
+
+  @ApiProperty()
+  @Column('int')
   price: number;
 
   @Column({ type: 'text', nullable: true })

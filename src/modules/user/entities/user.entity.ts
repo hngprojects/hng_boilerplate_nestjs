@@ -5,6 +5,7 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
@@ -63,6 +64,9 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
 
@@ -75,7 +79,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
-
+  async validatePassword(password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password);
+  }
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
