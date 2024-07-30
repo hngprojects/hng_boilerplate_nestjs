@@ -45,7 +45,7 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     return this.authService.loginUser(loginDto);
   }
 
@@ -83,6 +83,7 @@ export default class RegistrationController {
     return await this.authService.requestSignInToken(body);
   }
 
+  @skipAuth()
   @Post('magic-link/verify')
   @HttpCode(200)
   @ApiOperation({ summary: 'Verify Signin Token' })
