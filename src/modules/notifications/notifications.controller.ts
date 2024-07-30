@@ -9,10 +9,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import {
-  MarkAllNotificationAsReadError,
-  MarkAllNotificationAsReadResponse,
-} from './dtos/mark-all-notifications-as-read.dto';
+import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
+import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
 
 @ApiBearerAuth()
 @ApiTags('Notification')
