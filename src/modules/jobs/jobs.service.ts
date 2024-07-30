@@ -54,4 +54,19 @@ export class JobsService {
       data: jobs,
     };
   }
+
+  async getJob(id: string) {
+    const job = await this.jobRepository.findOne({ where: { id } });
+    if (!job)
+      throw new NotFoundException({
+        status_code: 404,
+        status: 'Not found Exception',
+        message: 'Job not found',
+      });
+    return {
+      message: 'Job fetched successfully',
+      status_code: 200,
+      data: job,
+    };
+  }
 }

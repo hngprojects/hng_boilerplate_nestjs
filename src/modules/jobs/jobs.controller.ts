@@ -3,6 +3,7 @@ import { JobsService } from './jobs.service';
 import { JobDto } from './dto/job.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -19,23 +20,21 @@ export class JobsController {
     return this.jobService.create(createJobDto, user.sub);
   }
 
+  @skipAuth()
   @Get('/')
-  @ApiOperation({ summary: 'Retrieve all job listings' })
-  @ApiResponse({ status: 200, description: 'Job listings retrieved successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid pagination parameters' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
-  async findAll(@Query() paginationDto: PaginationDto) {
-    return this.jobService.findAll(paginationDto);
+  @ApiOperation({ summary: 'Gets all jobs' })
+  @ApiResponse({ status: 200, description: 'Jobs returned successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async getAllJobs() {
+    return this.jobService.getJobs();
   }
 
-  @Patch('/:id')
-  @ApiOperation({ summary: 'Update a job post' })
-  @ApiResponse({ status: 200, description: 'Job details updated successfully' })
+  @skipAuth()
+  @Get('/:id')
+  @ApiOperation({ summary: 'Gets a job by ID' })
+  @ApiResponse({ status: 200, description: 'Job returned successfully' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  async updateJob(@Param('id') id: string, @Body() updateJobDto: JobDto, @Request() req: any) {
-    const user = req.user;
-    return this.jobService.updateJob(id, updateJobDto, user.sub);
+  async getJob(@Param('id') id: string) {
+    return this.jobService.getJob(id);
   }
 }
