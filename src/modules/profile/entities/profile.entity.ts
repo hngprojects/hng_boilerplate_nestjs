@@ -22,8 +22,8 @@ export class Profile extends AbstractBaseEntity {
   @Column({ type: 'text', nullable: true })
   bio: string;
 
-  @Column({ nullable: true })
-  social_links: [string];
+  @Column({ type: 'simple-array', nullable: true })
+  social_links: string[];
 
   @Column({ nullable: true })
   language: string;
