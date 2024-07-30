@@ -13,6 +13,7 @@ import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
+import { ErrorCreateUserResponse, SuccessCreateUserResponse } from '../user/dto/user-response.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -20,6 +21,9 @@ export default class RegistrationController {
   constructor(private authService: AuthenticationService) {}
 
   @skipAuth()
+  @ApiOperation({ summary: 'User Registration' })
+  @ApiResponse({ status: 201, description: 'Register a new user', type: SuccessCreateUserResponse })
+  @ApiResponse({ status: 400, description: 'Bad request', type: ErrorCreateUserResponse })
   @Post('register')
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
     const createUserResponse = await this.authService.createNewUser(body);
@@ -45,11 +49,14 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     return this.authService.loginUser(loginDto);
   }
 
   @skipAuth()
+  @ApiOperation({ summary: 'Email verification' })
+  @ApiResponse({ status: 200, description: 'Verify token sent to the user mail', type: OtpDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @Post('verify-otp')
   public async verifyEmail(@Body() body: OtpDto): Promise<any> {
     return this.authService.verifyToken(body);
