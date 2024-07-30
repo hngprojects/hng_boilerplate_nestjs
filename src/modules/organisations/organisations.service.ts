@@ -15,6 +15,7 @@ import { User } from '../user/entities/user.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
+import { OrganisationMember } from './entities/org-members.entity';
 
 @Injectable()
 export class OrganisationsService {
@@ -22,7 +23,9 @@ export class OrganisationsService {
     @InjectRepository(Organisation)
     private readonly organisationRepository: Repository<Organisation>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(OrganisationMember)
+    private readonly orgMemberRepository: Repository<OrganisationMember>
   ) {}
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
@@ -96,11 +99,24 @@ export class OrganisationsService {
 
       this.verifyOwner(org, currentUserId);
 
-      this.checkIfUserIsAMember(org, userId);
+      const isMember = await this.checkIfUserIsAMember(org, userId);
 
-      org.members = org.members.filter(member => member.id != userId);
+      if (isMember <= 0) {
+        throw new NotFoundException({
+          status: 'error',
+          message: 'User is not a member of this organization',
+          status_code: 404,
+        });
+      }
 
-      await this.organisationRepository.save(org);
+      const memberEntry = await this.orgMemberRepository.findOne({
+        where: {
+          user_id: userId,
+          organisation_id: orgId,
+        },
+      });
+
+      await this.orgMemberRepository.remove(memberEntry);
 
       return {
         status: 'Success',
@@ -144,15 +160,13 @@ export class OrganisationsService {
     }
   }
 
-  checkIfUserIsAMember(org: Organisation, userId: string) {
-    const findUser = org.members.filter(member => member.id == userId);
+  async checkIfUserIsAMember(org: Organisation, userId: string) {
+    const count = await this.orgMemberRepository
+      .createQueryBuilder('member')
+      .where('member.user_id = :userId', { userId })
+      .andWhere('member.organisation_id = :orgId', { orgId: org.id })
+      .getCount();
 
-    if (findUser.length <= 0) {
-      throw new NotFoundException({
-        status: 'error',
-        message: 'User not found',
-        status_code: 404,
-      });
-    }
+    return count;
   }
 }
