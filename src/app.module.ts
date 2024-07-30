@@ -19,6 +19,7 @@ import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
@@ -109,6 +110,7 @@ import { ProductsModule } from './modules/products/products.module';
     }),
     OrganisationsModule,
     NotificationSettingsModule,
+    SqueezeModule,
     TestimonialsModule,
     JobsModule,
     ProductsModule,
