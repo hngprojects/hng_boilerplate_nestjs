@@ -50,7 +50,7 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @Post('otp/email-verification')
+  @Post('verify-otp')
   public async verifyEmail(@Body() body: OtpDto): Promise<any> {
     return this.authService.verifyToken(body);
   }
