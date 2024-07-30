@@ -32,9 +32,7 @@ export class OtpService {
       return otp;
     } catch (error) {
       console.log('OtpServiceError ~ createOtpError ~', error);
-      if (isInstance(error, NotFoundException)) {
-        throw new NotFoundException('User not found');
-      }
+      return null;
     }
   }
 
