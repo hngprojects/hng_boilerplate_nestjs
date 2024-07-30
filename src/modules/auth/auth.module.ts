@@ -13,10 +13,20 @@ import { EmailModule } from '../email/email.module';
 import { OtpService } from '../otp/otp.service';
 import { EmailService } from '../email/email.service';
 import { Otp } from '../otp/entities/otp.entity';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { GoogleAuthService } from './google-auth.service';
 
 @Module({
   controllers: [RegistrationController],
-  providers: [AuthenticationService, Repository, UserService, OtpService, EmailService],
+  providers: [
+    AuthenticationService,
+    Repository,
+    UserService,
+    OtpService,
+    EmailService,
+    GoogleStrategy,
+    GoogleAuthService,
+  ],
   imports: [
     TypeOrmModule.forFeature([User, Otp]),
     PassportModule,
