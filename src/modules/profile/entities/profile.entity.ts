@@ -14,7 +14,7 @@ export class Profile extends AbstractBaseEntity {
   pronouns: string;
 
   @Column({ nullable: true })
-  dept: string;
+  department: string;
 
   @Column()
   email: string;
@@ -23,7 +23,7 @@ export class Profile extends AbstractBaseEntity {
   bio: string;
 
   @Column({ nullable: true })
-  socialLinks: string;
+  social_links: [string];
 
   @Column({ nullable: true })
   language: string;
@@ -35,7 +35,7 @@ export class Profile extends AbstractBaseEntity {
   timezones: string;
 
   @Column({ nullable: true })
-  profilePicUrl: string;
+  profile_pic_url: string;
 
   @OneToOne(() => User, user => user.profile)
   @JoinColumn({ name: 'user_id' })
