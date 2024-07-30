@@ -1,4 +1,4 @@
-import { User } from '../../../modules/user/entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { OrganisationRequestDto } from '../dto/organisation.dto';
 import { Organisation } from '../entities/organisations.entity';
 

@@ -5,8 +5,8 @@ import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { validate } from 'class-validator';
-import { orgMock } from '../tests/mocks/organisation.mock';
-import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
+import { orgMock } from './mocks/organisation.mock';
+import { createMockOrganisationRequestDto } from './mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
 import {
   BadRequestException,
