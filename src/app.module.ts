@@ -28,8 +28,6 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
-import { HelloModule } from './modules/hello/hello.module';
-import { HelloModule } from './modules/hello/hello.module';
 
 @Module({
   providers: [
@@ -118,7 +116,6 @@ import { HelloModule } from './modules/hello/hello.module';
     JobsModule,
     ProductsModule,
     ProfileModule,
-    HelloModule,
   ],
   controllers: [HealthController, ProbeController],
 })
