@@ -82,9 +82,6 @@ export class User extends AbstractBaseEntity {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
-  @OneToMany(() => Testimonial, testimonial => testimonial.user)
-  testimonials: Testimonial[];
-
   @OneToMany(() => Notification, notification => notification.user)
   notifications: Notification[];
 }

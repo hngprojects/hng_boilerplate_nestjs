@@ -1,3 +1,4 @@
+import { Profile } from '../../../profile/entities/profile.entity';
 import { User, UserType } from '../../../user/entities/user.entity';
 
 export const mockNotificationRepository = {
@@ -10,6 +11,24 @@ export const mockNotificationRepository = {
     where: jest.fn().mockReturnThis(),
     execute: jest.fn().mockResolvedValue({}),
   })),
+};
+
+const profileMock: Profile = {
+  id: 'some-uuid',
+  username: 'mockuser',
+  jobTitle: 'Developer',
+  pronouns: 'They/Them',
+  department: 'Engineering',
+  email: 'mockuser@example.com',
+  bio: 'A mock user for testing purposes',
+  social_links: [],
+  language: 'English',
+  region: 'US',
+  timezones: 'America/New_York',
+  profile_pic_url: '',
+  created_at: new Date(),
+  updated_at: new Date(),
+  user_id: null,
 };
 
 export const mockUser: User = {
@@ -32,5 +51,6 @@ export const mockUser: User = {
   secret: 'secret',
   is_2fa_enabled: false,
   notifications: [],
-  products: [],
+  organisationMembers: [],
+  profile: profileMock,
 };

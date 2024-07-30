@@ -50,7 +50,6 @@ describe('InviteService', () => {
       testimonials: [],
       profile: null,
       organisationMembers: [],
-      products: [],
       notifications: [],
     };
 
