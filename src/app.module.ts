@@ -19,15 +19,18 @@ import authConfig from '../config/auth.config';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { LanguageModule } from './modules/language/language.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   providers: [
@@ -112,10 +115,13 @@ import { OrganisationPermissionsModule } from './modules/organisation-permission
     OrganisationsModule,
     LanguageModule,
     NotificationSettingsModule,
+    SqueezeModule,
     TestimonialsModule,
+    JobsModule,
     ProductsModule,
     OrganisationRoleModule,
     OrganisationPermissionsModule,
+    ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
 })

@@ -4,6 +4,8 @@ import { OrganisationPreference } from './org-preferences.entity';
 import { Role } from '../../organisation-role/entities/role.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Invite } from '../../invite/entities/invite.entity';
+import { OrganisationMember } from './org-members.entity';
+import { Product } from '../../../modules/products/entities/product.entity';
 
 @Entity()
 export class Organisation extends AbstractBaseEntity {
@@ -40,6 +42,9 @@ export class Organisation extends AbstractBaseEntity {
   @Column('boolean', { default: false, nullable: false })
   isDeleted: boolean;
 
+  @OneToMany(() => Product, product => product.org, { cascade: true })
+  products: Product[];
+
   @OneToMany(() => OrganisationPreference, preference => preference.organisation)
   preferences: OrganisationPreference[];
 
@@ -48,4 +53,7 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => Invite, invite => invite.organisation)
   invites: Invite[];
+
+  @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
+  organisationMembers: OrganisationMember[];
 }

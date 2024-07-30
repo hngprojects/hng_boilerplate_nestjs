@@ -8,6 +8,7 @@ import { ProductCategory } from '../../modules/product-category/entities/product
 import { Role } from '../../modules/organisation-role/entities/role.entity';
 import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
+import { Profile } from '../../modules/profile/entities/profile.entity';
 
 @Injectable()
 export class SeedingService {
@@ -15,12 +16,12 @@ export class SeedingService {
 
   async seedDatabase() {
     const userRepository = this.dataSource.getRepository(User);
+    const profileRepository = this.dataSource.getRepository(Profile);
     const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
     const productRepository = this.dataSource.getRepository(Product);
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
-    const orgRoleRepository = this.dataSource.getRepository(Role);
 
     try {
       const existingPermissions = await defaultPermissionRepository.count();
@@ -66,6 +67,24 @@ export class SeedingService {
         const savedUsers = await userRepository.find();
         if (savedUsers.length !== 2) {
           throw new Error('Failed to create all users');
+        }
+
+        const prf1 = profileRepository.create({
+          username: 'Johnsmith',
+          email: 'john.smith@example.com',
+          user_id: savedUsers[0],
+        });
+        const prf2 = profileRepository.create({
+          username: 'Janesmith',
+          email: 'jane.smith@example.com',
+          user_id: savedUsers[1],
+        });
+
+        await profileRepository.save([prf1, prf2]);
+
+        const savedProfile = await userRepository.find();
+        if (savedProfile.length !== 2) {
+          throw new Error('Failed to create all profile');
         }
 
         const or1 = organisationRepository.create({
@@ -121,20 +140,18 @@ export class SeedingService {
 
         // Create products with associated categories
         const p1 = productRepository.create({
-          product_name: 'Product 1',
+          name: 'Product 1',
           description: 'Description for Product 1',
           quantity: 10,
           price: 100,
-          user: u1,
-          category: c1,
+          org: or1,
         });
         const p2 = productRepository.create({
-          product_name: 'Product 2',
+          name: 'Product 2',
           description: 'Description for Product 2',
           quantity: 20,
           price: 200,
-          user: u2,
-          category: c3, // Attach category c3 to p2
+          org: or2,
         });
 
         await productRepository.save([p1, p2]);

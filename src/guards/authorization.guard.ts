@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserType } from '../modules/user/entities/user.entity';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
+import { Job } from '../modules/jobs/entities/job.entity';
 
 @Injectable()
 export class OwnershipGuard implements CanActivate {
