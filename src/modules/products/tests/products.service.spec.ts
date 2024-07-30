@@ -10,6 +10,7 @@ import { orgMock } from '../../../modules/organisations/tests/mocks/organisation
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 import { productMock } from './mocks/product.mock';
 import { NotFoundException } from '@nestjs/common';
+import { UpdateProductDTO } from '../dto/update-product.dto';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -49,9 +50,9 @@ describe('ProductsService', () => {
 
   describe('Update product PUT: /api/v1/products/:productId', () => {
     it('should throw an error if product is not found', async () => {
-      (productRepository.findOne as jest.Mock).mockResolvedValue(null);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateProduct('123hsb', { product_name: 'Product One' })).rejects.toThrow(NotFoundException);
+      await expect(service.updateProduct('123hsb', new UpdateProductDTO())).rejects.toThrow(NotFoundException);
     });
   });
 });
