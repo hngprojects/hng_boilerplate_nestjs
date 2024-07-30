@@ -39,6 +39,9 @@ export class NotificationsController {
     return this.notificationsService.markNotificationAsRead(markNotificationAsRead, notification_id, userId);
   }
   @Delete('/clear')
+  @ApiResponse({ status: 200, description: 'Notifications cleared successfully' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiOperation({ summary: 'Marks all notifications a read' })
   async markAllNotificationsAsRead(@Req() request: Request) {
     const user = request['user'];
 

@@ -140,14 +140,7 @@ describe('NotificationsService', () => {
       mockNotificationRepository.find.mockRejectedValue(new Error('Server Error'));
 
       await expect(service.markAllNotificationsAsReadForUser(userId)).rejects.toThrowError(
-        new HttpException(
-          {
-            status: 'error',
-            message: 'Server error',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
+        new InternalServerErrorException()
       );
     });
   });

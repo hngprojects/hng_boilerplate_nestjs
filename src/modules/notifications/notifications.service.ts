@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -98,15 +97,7 @@ export class NotificationsService {
       if (error instanceof HttpException) {
         throw error;
       } else {
-        console.error('An unexpected error ocurred', error);
-        throw new HttpException(
-          {
-            status: 'error',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: 'Server error',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
+        throw new InternalServerErrorException();
       }
     }
   }
