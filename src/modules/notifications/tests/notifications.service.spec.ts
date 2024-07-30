@@ -93,22 +93,13 @@ describe('NotificationsService', () => {
   describe('markAllUnreadNotificationsAsRead', () => {
     const userId = 'user-id';
 
-    it('should throw a BadRequest exception if userId is missing', async () => {
-      await expect(service.markAllNotificationsAsReadForUser(null)).rejects.toThrow(
-        new BadRequestException({
-          status_code: HttpStatus.BAD_REQUEST,
-          message: 'Invalid Request',
-          data: null,
-        })
-      );
-    });
-
     it('should return success message if no unread notifications are found for the user', async () => {
       mockNotificationRepository.find.mockResolvedValue([]);
 
       const result = await service.markAllNotificationsAsReadForUser(userId);
 
       expect(result).toEqual({
+        status: 'success',
         status_code: HttpStatus.OK,
         message: 'Notifications cleared successfully.',
         data: {
@@ -130,6 +121,7 @@ describe('NotificationsService', () => {
       const result = await service.markAllNotificationsAsReadForUser(userId);
 
       expect(result).toEqual({
+        status: 'success',
         status_code: HttpStatus.OK,
         message: 'Notifications cleared successfully.',
         data: {
@@ -150,9 +142,9 @@ describe('NotificationsService', () => {
       await expect(service.markAllNotificationsAsReadForUser(userId)).rejects.toThrowError(
         new HttpException(
           {
+            status: 'error',
+            message: 'Server error',
             status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: 'Failed to clear notifications.',
-            data: null,
           },
           HttpStatus.INTERNAL_SERVER_ERROR
         )

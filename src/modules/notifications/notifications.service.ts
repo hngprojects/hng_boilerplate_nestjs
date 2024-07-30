@@ -72,14 +72,6 @@ export class NotificationsService {
 
   async markAllNotificationsAsReadForUser(userId: string) {
     try {
-      if (!userId) {
-        throw new BadRequestException({
-          status_code: HttpStatus.BAD_REQUEST,
-          message: 'Invalid Request',
-          data: null,
-        });
-      }
-
       const notifications = await this.notificationRepository.find({
         where: {
           user: {
@@ -97,6 +89,7 @@ export class NotificationsService {
       }
 
       return {
+        status: 'success',
         status_code: HttpStatus.OK,
         message: 'Notifications cleared successfully.',
         data: { notifications: [] },
@@ -108,9 +101,9 @@ export class NotificationsService {
         console.error('An unexpected error ocurred', error);
         throw new HttpException(
           {
+            status: 'error',
             status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: 'Failed to clear notifications.',
-            data: null,
+            message: 'Server error',
           },
           HttpStatus.INTERNAL_SERVER_ERROR
         );
