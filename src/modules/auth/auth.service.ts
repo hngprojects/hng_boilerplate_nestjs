@@ -22,6 +22,9 @@ import {
   USER_NOT_FOUND,
   UNAUTHORISED_TOKEN,
   INVALID_CREDENTIALS,
+  LOGIN_SUCCESSFUL,
+  LOGIN_ERROR,
+  EMAIL_SENT,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -123,7 +126,7 @@ export default class AuthenticationService {
       await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
       return {
         status_code: HttpStatus.OK,
-        message: 'Email sent successfully',
+        message: EMAIL_SENT,
       };
     } catch (forgotPasswordError) {
       console.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
@@ -167,21 +170,21 @@ export default class AuthenticationService {
         access_token,
         data: {
           user: {
+            id: user.id,
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
-            id: user.id,
           },
         },
       };
 
-      return { message: 'Login successful', ...responsePayload };
+      return { message: LOGIN_SUCCESSFUL, ...responsePayload };
     } catch (error) {
       console.log('AuthenticationServiceError ~ loginError ~', error);
 
       throw new HttpException(
         {
-          message: 'An error occurred during login',
+          message: LOGIN_ERROR,
           status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         },
         HttpStatus.INTERNAL_SERVER_ERROR
