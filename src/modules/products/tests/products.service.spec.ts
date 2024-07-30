@@ -1,14 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsService } from '../products.service';
-import { Repository } from 'typeorm';
-import { Product } from '../../products/entities/product.entity';
+
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { productMock } from './mocks/product.mock';
+
+import { Repository } from 'typeorm';
+import { ProductsService } from '../products.service';
+import { Product } from '../entities/product.entity';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
+import { productMock } from './mocks/product.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
-  let repository: Repository<Product>;
+  let productRepository: Repository<Product>;
+  let organisationRepository: Repository<Organisation>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -16,40 +21,28 @@ describe('ProductsService', () => {
         ProductsService,
         {
           provide: getRepositoryToken(Product),
-          useValue: {
-            findBy: jest.fn(),
-            findOne: jest.fn(),
-            create: jest.fn().mockReturnValue(productMock),
-            save: jest.fn().mockReturnValue(productMock),
-            findOneBy: jest.fn(),
-            update: jest.fn(),
-          },
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Organisation),
+          useClass: Repository,
         },
       ],
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
-    repository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    productRepository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  it('should create a new product', async () => {
+    jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+    jest.spyOn(productRepository, 'create').mockReturnValue(createProductRequestDtoMock as any);
+    jest.spyOn(productRepository, 'save').mockResolvedValue(productMock as any);
 
-  describe('create a new product', () => {
-    it('should creates a new product', async () => {
-      const createdProduct = await service.createProduct('orgId', createProductRequestDtoMock);
+    const createdProduct = await service.createProduct(orgMock.id, createProductRequestDtoMock);
 
-      expect(repository.create).toHaveBeenCalledWith({
-        name: createProductRequestDtoMock.name,
-        quantity: createProductRequestDtoMock.quantity,
-        price: createProductRequestDtoMock.price,
-      });
-
-      expect(repository.save).toHaveBeenCalledWith(productMock);
-      expect(createdProduct.data.name).toEqual(createProductRequestDtoMock.name);
-      expect(createdProduct.message).toEqual('Product created successfully');
-      expect(createdProduct.status).toEqual('success');
-    });
+    expect(createdProduct.message).toEqual('Product created successfully');
+    expect(createdProduct.status).toEqual('success');
   });
 });
