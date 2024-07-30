@@ -26,6 +26,7 @@ import authConfig from 'config/auth.config';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { EmailModule } from './modules/email/email.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
 
@@ -115,6 +116,7 @@ import { ProfileModule } from './modules/profile/profile.module';
     NotificationSettingsModule,
     SqueezeModule,
     TestimonialsModule,
+    JobsModule,
     ProductsModule,
     ProfileModule,
   ],
