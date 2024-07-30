@@ -13,6 +13,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { OrganisationMember } from './org-members.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
 
 @Entity()
 export class Organisation extends AbstractBaseEntity {
@@ -60,4 +61,7 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
+
+  @OneToMany(() => OrganisationRole, roles => roles.organisation)
+  roles: OrganisationRole[];
 }

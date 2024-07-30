@@ -78,7 +78,7 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
+      // await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
         user: {
