@@ -6,8 +6,6 @@ import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Notification } from '../../modules/notifications/entities/notification.entity';
 import { Product } from 'src/modules/products/entities/product.entity';
 import { ProductCategory } from 'src/modules/product-category/entities/product-category.entity';
-import { Product } from '../../modules/products/entities/product.entity';
-import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { Profile } from '../../modules/profile/entities/profile.entity';
 
 @Injectable()
@@ -78,22 +76,24 @@ export class SeedingService {
         const savedNotifications = await notificationRepository.find();
         if (savedNotifications.length !== 4) {
           throw new Error('Failed to create all notifications');
+        }
+
         const prf1 = profileRepository.create({
           username: 'Johnsmith',
           email: 'john.smith@example.com',
-          user_id: savedUsers[0],
+          user: savedUsers[0],
         });
         const prf2 = profileRepository.create({
           username: 'Janesmith',
           email: 'jane.smith@example.com',
-          user_id: savedUsers[1],
+          user: savedUsers[1],
         });
 
         await profileRepository.save([prf1, prf2]);
 
-        const savedProfile = await userRepository.find();
+        const savedProfile = await profileRepository.find();
         if (savedProfile.length !== 2) {
-          throw new Error('Failed to create all profile');
+          throw new Error('Failed to create all profiles');
         }
 
         const or1 = organisationRepository.create({
@@ -144,15 +144,14 @@ export class SeedingService {
           description: 'Description for Category 3',
         });
 
-        // Save categories
         await categoryRepository.save([c1, c2, c3]);
 
-        // Create products with associated categories
         const p1 = productRepository.create({
           name: 'Product 1',
           description: 'Description for Product 1',
           quantity: 10,
           price: 100,
+          category: c1,
           org: or1,
         });
         const p2 = productRepository.create({
@@ -160,6 +159,7 @@ export class SeedingService {
           description: 'Description for Product 2',
           quantity: 20,
           price: 200,
+          category: c2,
           org: or2,
         });
 
@@ -171,24 +171,25 @@ export class SeedingService {
         }
 
         const inv1 = inviteRepository.create({
-          email: 'Org 1',
+          email: 'user1@example.com',
           status: 'pending',
           user: savedUsers[0],
           organisation: savedOrganisations[0],
         });
 
         const inv2 = inviteRepository.create({
-          email: 'Org 1',
+          email: 'user2@example.com',
           status: 'pending',
           user: savedUsers[1],
           organisation: savedOrganisations[1],
         });
 
         await inviteRepository.save([inv1, inv2]);
-        const savedInvite = await inviteRepository.find();
-        if (savedInvite.length !== 2) {
-          throw new Error('Failed to create all organisations');
+        const savedInvites = await inviteRepository.find();
+        if (savedInvites.length !== 2) {
+          throw new Error('Failed to create all invites');
         }
+
         const savedCategories = await categoryRepository.find({ relations: ['products'] });
         if (savedCategories.length !== 3) {
           throw new Error('Failed to create all categories');
@@ -198,11 +199,13 @@ export class SeedingService {
       } catch (error) {
         await queryRunner.rollbackTransaction();
         console.error('Seeding failed:', error.message);
+        throw error;
       } finally {
         await queryRunner.release();
       }
     } catch (error) {
       console.error('Error while checking for existing data:', error.message);
+      throw error;
     }
   }
 
