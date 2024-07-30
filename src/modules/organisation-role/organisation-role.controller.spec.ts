@@ -21,6 +21,7 @@ import { UpdateOrganisationDto } from '../organisations/dto/update-organisation.
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { skipAuth } from '../../helpers/skipAuth';
+import { AuthGuard } from '../../guards/auth.guard';
 
 @skipAuth()
 @ApiTags('Organisation Settings')
@@ -42,6 +43,7 @@ export class OrganisationRoleController {
   }
 
   @Delete(':roleId')
+  @UseGuards(AuthGuard, OwnershipGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a role in an organization' })
   @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organization' })
