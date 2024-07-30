@@ -35,7 +35,10 @@ export const createMockOrganisation = (): Organisation => {
     user_id: null,
     role: 'admin',
     organisation_id: null,
-    profile_id: profileMock,
+    profile_id: profileMock.id,
+    profile: profileMock,
+    user: null,
+    organisation: null,
   };
 
   const ownerAndCreator = {
@@ -54,7 +57,6 @@ export const createMockOrganisation = (): Organisation => {
     time_left: 3600,
     owned_organisations: [],
     created_organisations: [],
-    member_organisations: [],
     invites: [],
     testimonials: [],
     user_type: UserType.ADMIN,
@@ -76,12 +78,11 @@ export const createMockOrganisation = (): Organisation => {
     address: 'Street 101 Building 26',
     state: 'Lagos',
     owner: ownerAndCreator,
-    creator: creator,
+    creator: { ...ownerAndCreator, user_type: UserType.ADMIN },
     created_at: new Date(),
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
-    members: [member],
     invites: [],
     organisationMembers: [orgMemberMock],
     products: [],
