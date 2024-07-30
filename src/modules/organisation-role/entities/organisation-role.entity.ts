@@ -5,11 +5,11 @@ import { Column, Entity } from 'typeorm';
 @Entity('roles')
 export class OrganisationRole extends AbstractBaseEntity {
   @ApiProperty({ description: 'The ID of the role' })
-  @Column()
+  @Column({ nullable: false })
   id: string;
 
   @ApiProperty({ description: 'The name of the role', maxLength: 50 })
-  @Column({ length: 50, unique: true })
+  @Column({ length: 50, unique: true, nullable: false })
   name: string;
 
   @ApiProperty({ description: 'The description of the role', maxLength: 200, required: false })
