@@ -15,8 +15,7 @@ export class Blog extends AbstractBaseEntity {
   @Column('text')
   content: string;
 
-  @ManyToOne(() => User, user => user.blog)
-  @JoinColumn({ name: 'author' })
+  @ManyToOne(() => User, user => user.profile)
   author: User;
 
   @Column({ default: true })
