@@ -30,5 +30,5 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["mockuser", "organisation", "organisations"]
+  "cSpell.words": ["mockuser", "nestjs", "organisation", "organisations", "postbuild"]
 }
