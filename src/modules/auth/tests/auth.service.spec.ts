@@ -257,9 +257,7 @@ describe('AuthenticationService', () => {
       password: 'correctpassword',
     };
 
-    jest.spyOn(userServiceMock, 'getUserRecord').mockImplementation(async ({ identifier, identifierType }) => {
-      return identifierType === 'email' && identifier === loginDto.email ? user : null;
-    });
+    userServiceMock.getUserRecord.mockResolvedValue(user);
 
     jest.spyOn(userServiceMock, 'updateUserAttempts').mockImplementation(async (id, attemptsLeft, timeLeft) => {
       if (id === user.id) {

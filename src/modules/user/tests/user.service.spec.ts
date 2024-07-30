@@ -260,37 +260,6 @@ describe('UserService', () => {
     });
   });
 
-  describe('updateUserAttempts', () => {
-    const userId = 'valid-id';
-    const attemptsLeft = 2;
-    const timeLeft = new Date(Date.now() + 60 * 60 * 1000);
-
-    it('should update user attempts and time left successfully', async () => {
-      const existingUser = {
-        id: userId,
-        attempts_left: 3,
-        time_left: null,
-      };
-
-      const updatedUser = {
-        ...existingUser,
-        attempts_left: attemptsLeft,
-        time_left: timeLeft,
-      };
-
-      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(existingUser as User);
-      jest.spyOn(mockUserRepository, 'save').mockResolvedValueOnce(updatedUser as User);
-
-      await service.updateUserAttempts(userId, attemptsLeft, timeLeft);
-
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
-      expect(mockUserRepository.save).toHaveBeenCalledWith({
-        ...existingUser,
-        attempts_left: attemptsLeft,
-      });
-    });
-  });
-
   describe('getUserByDataByIdWithoutPassword', () => {
     const userId = 'valid-id';
     const userWithoutPassword = {
@@ -437,6 +406,37 @@ describe('UserService', () => {
             total_users: 0,
           },
         },
+      });
+    });
+
+    describe('updateUserAttempts', () => {
+      const userId = 'valid-id';
+      const attemptsLeft = 2;
+      const timeLeft = new Date(Date.now() + 60 * 60 * 1000);
+
+      it('should update user attempts and time left successfully', async () => {
+        const existingUser = {
+          id: userId,
+          attempts_left: 3,
+          time_left: null,
+        };
+
+        const updatedUser = {
+          ...existingUser,
+          attempts_left: attemptsLeft,
+          time_left: timeLeft,
+        };
+
+        jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(existingUser as User);
+        jest.spyOn(mockUserRepository, 'save').mockResolvedValueOnce(updatedUser as User);
+
+        await service.updateUserAttempts(userId, attemptsLeft, timeLeft);
+
+        expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+        expect(mockUserRepository.save).toHaveBeenCalledWith({
+          ...existingUser,
+          attempts_left: attemptsLeft,
+        });
       });
     });
   });
