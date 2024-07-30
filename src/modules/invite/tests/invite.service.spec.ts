@@ -33,6 +33,7 @@ describe('InviteService', () => {
       first_name: 'John',
       last_name: 'Doe',
       is_active: true,
+      phone: '+1234567890',
       id: 'some-uuid-value-here',
       attempts_left: 2,
       created_at: new Date(),
