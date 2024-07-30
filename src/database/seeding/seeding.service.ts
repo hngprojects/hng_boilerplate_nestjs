@@ -3,8 +3,8 @@ import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Product } from 'src/modules/products/entities/product.entity';
-import { ProductCategory } from 'src/modules/product-category/entities/product-category.entity';
+import { Product } from '../../modules/products/entities/product.entity';
+import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 
 @Injectable()
 export class SeedingService {
@@ -106,16 +106,14 @@ export class SeedingService {
           description: 'Description for Product 1',
           avail_qty: 10,
           price: 100,
-          user: u1,
-          category: c1,
+          org: or1,
         });
         const p2 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
           avail_qty: 20,
           price: 200,
-          user: u2,
-          category: c3, // Attach category c3 to p2
+          org: or2,
         });
 
         await productRepository.save([p1, p2]);

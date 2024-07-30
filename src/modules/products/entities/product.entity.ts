@@ -1,11 +1,18 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { User } from '../../user/entities/user.entity';
-import { ProductCategory } from '../../product-category/entities/product-category.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+
+export enum ProductStatusType {
+  IN_STOCK = 'in stock',
+  OUT_STOCK = 'out of stock',
+  LOW_STOCK = 'low on stock',
+}
 
 @Entity()
 export class Product extends AbstractBaseEntity {
-
+  @Column({ type: 'text', nullable: false })
+  name: string;
+  
   @Column({ type: 'text' })
   name: string;
 
@@ -14,14 +21,22 @@ export class Product extends AbstractBaseEntity {
 
   @Column('int')
   price: number;
+  
+  @Column({ type: 'text', nullable: true })
+  image: string;
 
-  @Column('int')
-  avail_qty: number;
-  
-  @ManyToOne(() => User, user => user.products)
-  user: User;
-  
-  @ManyToOne(() => ProductCategory, category => category.products)
-  category: ProductCategory;
+  @Column({
+    type: 'enum',
+    enum: ProductStatusType,
+    default: ProductStatusType.OUT_STOCK,
+  })
+  satus: ProductStatusType;
+
+  @ManyToOne(() => Organisation, org => org.products)
+  org: Organisation;
+
+  /* To be implemented in another pr */
+  // @ManyToOne(() => ProductCategory, category => category.products)
+  // category: ProductCategory;
 }
 

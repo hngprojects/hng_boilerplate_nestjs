@@ -1,10 +1,12 @@
-import { AbstractBaseEntity } from "../../../entities/base.entity";
-import { Product } from "../../products/entities/product.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Product } from '../../../modules/products/entities/product.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Column, Entity, OneToMany } from 'typeorm';
 
-@Entity('categories')
-export class ProductCategory extends AbstractBaseEntity{
-  @Column({ length: 500 })
+@Entity()
+export class ProductCategory extends AbstractBaseEntity {
+  @ApiProperty()
+  @Column({ type: 'text', unique: true })
   name: string;
 
   @Column('text')
@@ -15,4 +17,8 @@ export class ProductCategory extends AbstractBaseEntity{
 
   @OneToMany(() => Product, product => product.category)
   products: Product[];
+
+  /* To be implemented in another pr */
+  // @OneToMany(() => Product, product => product.category)
+  // products: Product[];
 }

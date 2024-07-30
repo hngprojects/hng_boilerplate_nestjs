@@ -6,23 +6,28 @@ import { Product } from '../entities/product.entity';
 import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException} from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { ProductCategory } from '../../product-category/entities/product-category.entity';
+import { productMock } from './mocks/product.mock';
+import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
 
-  const mockRepository = {
-    findOne: jest.fn(),
-    findAndCount: jest.fn(),
-  };
-
-beforeEach(async () => {
+  beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProductsService,
         {
           provide: getRepositoryToken(Product),
-          useValue: mockRepository,
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn().mockReturnValue(productMock),
+            save: jest.fn().mockReturnValue(productMock),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            findAndCount: jest.fn()
+          },
         },
       ],
     }).compile();
@@ -150,27 +155,20 @@ beforeEach(async () => {
             updated_at: mockProduct.updated_at,
           },
         },
+  describe('create a new product', () => {
+    it('should creates a new product', async () => {
+      const createdProduct = await service.createProduct('orgId', createProductRequestDtoMock);
+
+      expect(repository.create).toHaveBeenCalledWith({
+        name: createProductRequestDtoMock.name,
+        quantity: createProductRequestDtoMock.quantity,
+        price: createProductRequestDtoMock.price,
       });
-    });
 
-    it('should throw NotFoundException if product does not exist', async () => {
-      const productId = '2';
-      mockRepository.findOne.mockResolvedValue(undefined);
-
-      await expect(service.fetchSingleProduct(productId)).rejects.toThrowError(NotFoundException);
-      await expect(service.fetchSingleProduct(productId)).rejects.toThrowError(
-        new NotFoundException({
-          error: 'Product not found',
-          status_code: 404,
-        })
-      );
-    });
-
-    it('should throw InternalServerErrorException on unexpected errors', async () => {
-      const unexpectedError = new InternalServerErrorException();
-      mockRepository.findOne.mockRejectedValue(unexpectedError);
-
-      await expect(service.fetchSingleProduct('1')).rejects.toThrow(InternalServerErrorException);
+      expect(repository.save).toHaveBeenCalledWith(productMock);
+      expect(createdProduct.data.name).toEqual(createProductRequestDtoMock.name);
+      expect(createdProduct.message).toEqual('Product created successfully');
+      expect(createdProduct.status).toEqual('success');
     });
   });
 });

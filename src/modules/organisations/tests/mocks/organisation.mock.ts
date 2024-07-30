@@ -48,6 +48,7 @@ export const createMockOrganisation = (): Organisation => {
     isDeleted: false,
     preferences: [],
     invites: [],
+    products: [],
   };
 };
 

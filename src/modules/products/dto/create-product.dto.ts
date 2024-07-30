@@ -1,58 +1,39 @@
-import { IsNotEmpty, IsString, IsInt, Min, IsUUID } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
 
-export class CreateProductDto {
+export class CreateProductRequestDto {
   @ApiProperty({
-    description: 'Name of the product',
-    example: 'New Product',
+    description: 'The name of the product',
+    minLength: 3,
+    example: 'Product Name',
   })
-  @IsNotEmpty()
   @IsString()
+  @MinLength(3)
   name: string;
 
   @ApiProperty({
-    description: 'Description of the product',
-    example: 'This is a detailed description of the product.',
-  })
-  @IsNotEmpty()
-  @IsString()
-  description: string;
-
-  @ApiProperty({
-    description: 'Current stock of the product',
+    description: 'The quantity of the product',
+    minimum: 0,
     example: 10,
   })
-  @IsNotEmpty()
-  @IsInt()
+  @IsNumber()
   @Min(0)
-  avail_qty: number;
+  quantity: number;
 
   @ApiProperty({
-    description: 'In stock of the product',
-    example: 10,
+    description: 'The price of the product',
+    minimum: 0,
+    example: 99.99,
   })
-  @ApiProperty({
-    description: 'Price of the product',
-    example: 100,
-  })
-  @IsNotEmpty()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   price: number;
 
-  @ApiProperty({
-    description: 'Product categories',
-    example: 'motor',
+  @ApiPropertyOptional({
+    description: 'The category of the product',
+    example: 'Electronics',
   })
-  @IsNotEmpty()
-  @IsUUID()
-  categoryId: string;
-
-  @ApiProperty({
-    description: 'User id',
-    example: '',
-  })
-  @IsNotEmpty()
-  @IsUUID()
-  user_id: string;
+  @IsString()
+  @IsOptional()
+  category: string;
 }
