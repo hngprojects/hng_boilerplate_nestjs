@@ -26,6 +26,7 @@ import {
   LOGIN_ERROR,
   EMAIL_SENT,
   ENABLE_2FA_ERROR,
+  USER_CREATED,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -316,8 +317,8 @@ export default class AuthenticationService {
       });
 
       return {
-        status: 'success',
-        message: 'User successfully created',
+        status_code: HttpStatus.OK,
+        message: USER_CREATED,
         access_token: accessToken,
         user: {
           id: newUser.id,

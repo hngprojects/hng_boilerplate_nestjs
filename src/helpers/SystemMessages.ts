@@ -1,5 +1,6 @@
 export const USER_CREATED_SUCCESSFULLY =
   'User Created Successfully, Kindly check your mail for your verification token';
+export const USER_CREATED = 'User Created Successfully';
 export const FAILED_TO_CREATE_USER = 'Error Occured while creating user, kindly try again';
 export const ERROR_OCCURED = 'Error Occured Performing this request';
 export const USER_ACCOUNT_EXIST = 'Account with the specified email exists';
