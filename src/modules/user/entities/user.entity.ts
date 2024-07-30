@@ -6,9 +6,10 @@ import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
 import { Notification } from '../../notifications/entities/notification.entity';
+import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
-import { Job } from '../../../modules/jobs/entities/job.entity';
+
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
