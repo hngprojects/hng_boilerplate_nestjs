@@ -30,6 +30,9 @@ export class User extends AbstractBaseEntity {
   password: string;
 
   @Column({ nullable: true })
+  phone: string;
+
+  @Column({ nullable: true })
   is_active: boolean;
 
   @Column({ nullable: true })
