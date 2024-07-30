@@ -15,13 +15,12 @@ import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import UserService from '../user/user.service';
+import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
+
 @ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
-  constructor(
-    private authService: AuthenticationService,
-    private userService: UserService
-  ) {}
+  constructor(private authService: AuthenticationService) {}
 
   @skipAuth()
   @Post('register')
@@ -67,7 +66,7 @@ export default class RegistrationController {
 
   @skipAuth()
   @Post('otp/email-verification')
-  public async verifyEmail(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
+  public async verifyEmail(@Body() body: OtpDto): Promise<any> {
     return this.authService.verifyToken(body);
   }
 
@@ -85,74 +84,9 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @Get('login/google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req: Request) {}
-
-  @skipAuth()
-  @Get('callback/google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const user = req['user'];
-    if (user) {
-      const jwt = await this.authService.googleLogin(user);
-      const userExists = await this.userService.getUserRecord({ identifierType: 'email', identifier: user.email });
-
-      if (!userExists) {
-        const newUser = await this.authService.createUserGoogle(user);
-        return res.status(HttpStatus.CREATED).json(newUser);
-      }
-
-      const response = {
-        status: 'success',
-        message: 'User successfully authenticated',
-        data: {
-          tokens: {
-            access_token: jwt.access_token,
-          },
-          user: {
-            id: user.id,
-            email: user.email,
-            name: `${user.given_name} ${user.family_name}`,
-            given_name: user.given_name,
-            family_name: user.family_name,
-            picture: user.picture,
-          },
-        },
-      };
-
-      return res.status(HttpStatus.OK).json(response);
-    } else {
-      const response = {
-        status: 'error',
-        message: 'Authentication failed',
-      };
-
-      return res.status(HttpStatus.UNAUTHORIZED).json(response);
-    }
-  }
-
-  @skipAuth()
-  @Get('registration/google')
-  @UseGuards(AuthGuard('google'))
-  async googleRegistrationRedirect(@Req() req: Request, @Res() res: Response) {
-    console.log('Registration auth');
-    const user = req['user'];
-    if (user) {
-      const userRegistered = await this;
-      const jwt = await this.authService.googleLogin(user);
-
-      const access_token = jwt.access_token;
-
-      return res.redirect(`${process.env.GOOGLE_LOGIN_REDIRECT}?access_token=${access_token}`);
-    } else {
-      const response = {
-        status: 'error',
-        message: 'Authentication failed',
-      };
-
-      return res.status(HttpStatus.UNAUTHORIZED).json(response);
-    }
+  @Post('google')
+  async googleAuth(@Body() body: GoogleAuthPayload) {
+    return this.authService.googleAuth(body);
   }
 
   @Post('magic-link')

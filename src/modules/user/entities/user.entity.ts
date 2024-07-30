@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import * as crypto from 'crypto';
 import { promisify } from 'util';
 import * as bcrypt from 'bcryptjs'
@@ -7,6 +7,8 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { Profile } from '../../profile/entities/profile.entity';
+import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -62,11 +64,18 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
 
-  @OneToMany(() => Product, product => product.user, { cascade: true })
-  products: Product[];
-
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
+
+  @OneToOne(() => Profile, profile => profile.user_id)
+  @JoinColumn()
+  profile: Profile;
+
+  @OneToMany(() => Testimonial, testimonial => testimonial.user)
+  testimonials: Testimonial[];
+
+  @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
+  organisationMembers: OrganisationMember[];
 
   @BeforeInsert()
   async hashPassword() {
