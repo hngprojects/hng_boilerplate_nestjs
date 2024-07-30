@@ -42,6 +42,6 @@ export class OrganisationsController {
   async addUser(@Param('org_id') orgId: string, @Body() addUserDto: AddUserToOrganisationDto, @Request() req) {
     const userId = addUserDto.userId;
     const currentUser = req['user'];
-    return this.organisationsService.addUser(orgId, userId, currentUser.sub);
+    return this.organisationsService.addMember(orgId, userId, currentUser.sub);
   }
 }

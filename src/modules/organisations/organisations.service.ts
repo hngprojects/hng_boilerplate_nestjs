@@ -16,6 +16,9 @@ import { User } from '../user/entities/user.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
+import { OrganisationMember } from './entities/org-members.entity';
+import { AddMemberToOrganisationDto } from './dto/add-user-dto';
+import { AddMemberToOrganisationMapper } from './mapper/add-member-to-org.mapper';
 
 @Injectable()
 export class OrganisationsService {
@@ -23,7 +26,9 @@ export class OrganisationsService {
     @InjectRepository(Organisation)
     private readonly organisationRepository: Repository<Organisation>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(OrganisationMember)
+    private readonly orgMemberRepository: Repository<OrganisationMember>
   ) {}
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
@@ -91,7 +96,7 @@ export class OrganisationsService {
     }
   }
 
-  async addUser(orgId: string, userId: string, currentUserId: string) {
+  async addMember(orgId: string, userId: string, currentUserId: string) {
     try {
       const org = await this.checkIfOrgExists(orgId);
 
@@ -105,19 +110,31 @@ export class OrganisationsService {
 
       const user = await this.checkIfUserExists(userId);
 
-      const findUser = org.members.filter(member => member.id == userId);
+      const isUserAMember = await this.checkIfUserIsMember(userId, orgId);
 
-      if (findUser.length > 0) {
+      if (isUserAMember > 0) {
         throw new ConflictException({
           status: 'error',
-          message: 'User already added to organization.',
-          status_code: 409,
+          message: 'User is already a member of this organisation',
+          status_code: 404,
         });
       }
 
-      org.members = [user, ...org.members];
+      const addMemberDto: AddMemberToOrganisationDto = {
+        user_id: userId,
+        organisation_id: orgId,
+        role: 'user',
+        profile_id: user.profile.id,
+      };
 
-      await this.organisationRepository.save(org);
+      const newMemberMapped = AddMemberToOrganisationMapper.mapToEntity(addMemberDto);
+      const newMember = await this.orgMemberRepository.create({
+        ...newMemberMapped,
+        user: user,
+        organisation: org,
+      });
+
+      await this.orgMemberRepository.save(newMember);
 
       return {
         status: 'Success',
@@ -132,6 +149,7 @@ export class OrganisationsService {
       ) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
       }
     }
@@ -174,5 +192,15 @@ export class OrganisationsService {
 
   verifyOwner(org: Organisation, ownerId: string) {
     return org.owner.id == ownerId;
+  }
+
+  async checkIfUserIsMember(userId: string, orgId: string) {
+    const count = await this.orgMemberRepository
+      .createQueryBuilder('member')
+      .where('member.user_id = :userId', { userId })
+      .andWhere('member.organisation_id = :orgId', { orgId })
+      .getCount();
+
+    return count;
   }
 }
