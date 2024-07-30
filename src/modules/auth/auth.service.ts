@@ -6,6 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
@@ -246,7 +247,7 @@ export default class AuthenticationService {
     const { user, isValid, ...validationResponse } = await this.validateUserAndPassword(user_id, password);
 
     if (!isValid) {
-      throw validationResponse;
+      throw new InternalServerErrorException('Error occured enabling 2fa');
     }
 
     const secret = speakeasy.generateSecret({ length: 32 });
