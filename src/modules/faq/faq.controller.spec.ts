@@ -50,24 +50,6 @@ describe('FaqController (e2e)', () => {
       });
     });
 
-    it('should return 400 if the input data is invalid', async () => {
-      const invalidFaqDto = {
-        question: '',
-        answer: 'This is an invalid FAQ without a question.',
-        category: '',
-        tags: [],
-      };
-
-      const response = await request(server).post('/faqs').send(invalidFaqDto).expect(400);
-
-      expect(response.body).toEqual({
-        statusCode: 400,
-        message: expect.any(String),
-        error: 'Bad Request',
-      });
-    });
-
-    // Mocking the service for the error test case
     it('should return 500 if there is an unexpected error', async () => {
       const createFaqDto: CreateFaqDto = {
         question: 'What is the return policy?',

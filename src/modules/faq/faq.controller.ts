@@ -5,7 +5,6 @@ import { CreateFaqDto } from './create-faq.dto';
 import { Faq } from './faq.entity';
 
 @ApiTags('faqs')
-@SkipAuth()
 @Controller('faqs')
 export class FaqController {
   constructor(private readonly faqService: FaqService) {}
@@ -26,7 +25,7 @@ export class FaqController {
     description: 'Internal Server Error if an unexpected error occurs.',
   })
   async create(@Body() createFaqDto: CreateFaqDto) {
-    const createdBy = 'ADMIN'; 
+    const createdBy = 'ADMIN';
     const faq = await this.faqService.create(createFaqDto, createdBy);
     return {
       status_code: 201,
@@ -38,4 +37,3 @@ export class FaqController {
 function SkipAuth(): (target: typeof FaqController) => void | typeof FaqController {
   throw new Error('Function not implemented.');
 }
-
