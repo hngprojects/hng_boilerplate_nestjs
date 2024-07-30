@@ -1,5 +1,3 @@
-import { IsString } from 'class-validator';
-
 class ResponseNotification {
   notification_id: string;
   user_id: string;
@@ -13,11 +11,8 @@ class Data {
 }
 
 export class CreateNotificationResponseDto {
-  @IsString() status: string;
-  @IsString()
+  status: string;
   message: string;
-  @IsString()
   status_code: number;
-  @IsString()
   data: Data;
 }
