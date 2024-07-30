@@ -3,28 +3,15 @@ import { ProductsService } from '../products.service';
 import { Repository } from 'typeorm';
 import { Product, StatusType } from '../../products/entities/product.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { HttpStatus, InternalServerErrorException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { HttpStatus, NotFoundException, ForbiddenException } from '@nestjs/common';
 import UserService from '../../../modules/user/user.service';
+import { productMock } from './mocks/product.mock';
+import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
 
-  const mockProduct = {
-    id: '6',
-    created_at: new Date('2024-07-24T14:22:35.443Z'),
-    updated_at: new Date('2024-07-24T14:22:35.443Z'),
-    product_name: 'Product 2',
-    description: 'Description for Product 2',
-    quantity: 20,
-    price: 200,
-    category: { id: '9' },
-  };
-
-  const mockRepository = {
-    findOne: jest.fn(),
-    save: jest.fn(),
-  };
   const mockUserService = {
     getUserRecord: jest.fn(),
   };
@@ -35,7 +22,14 @@ describe('ProductsService', () => {
         ProductsService,
         {
           provide: getRepositoryToken(Product),
-          useValue: mockRepository,
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn().mockReturnValue(productMock),
+            save: jest.fn().mockReturnValue(productMock),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+          },
         },
         {
           provide: UserService,
@@ -52,48 +46,20 @@ describe('ProductsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('fetchSingleProduct', () => {
-    it('should return a product if it exists', async () => {
-      mockRepository.findOne.mockResolvedValue(mockProduct);
+  describe('create a new product', () => {
+    it('should creates a new product', async () => {
+      const createdProduct = await service.createProduct('orgId', createProductRequestDtoMock);
 
-      const result = await service.fetchSingleProduct('6');
-
-      expect(result).toEqual({
-        status_code: HttpStatus.OK,
-        message: 'Product fetched successfully',
-        data: {
-          products: {
-            id: mockProduct.id,
-            product_name: mockProduct.product_name,
-            description: mockProduct.description,
-            quantity: mockProduct.quantity,
-            price: mockProduct.price,
-            category: mockProduct.category.id,
-            created_at: mockProduct.created_at,
-            updated_at: mockProduct.updated_at,
-          },
-        },
+      expect(repository.create).toHaveBeenCalledWith({
+        name: createProductRequestDtoMock.name,
+        quantity: createProductRequestDtoMock.quantity,
+        price: createProductRequestDtoMock.price,
       });
-    });
 
-    it('should throw NotFoundException if product does not exist', async () => {
-      const productId = '2';
-      mockRepository.findOne.mockResolvedValue(undefined);
-
-      await expect(service.fetchSingleProduct(productId)).rejects.toThrowError(NotFoundException);
-      await expect(service.fetchSingleProduct(productId)).rejects.toThrowError(
-        new NotFoundException({
-          error: 'Product not found',
-          status_code: 404,
-        })
-      );
-    });
-
-    it('should throw InternalServerErrorException on unexpected errors', async () => {
-      const unexpectedError = new InternalServerErrorException();
-      mockRepository.findOne.mockRejectedValue(unexpectedError);
-
-      await expect(service.fetchSingleProduct('1')).rejects.toThrow(InternalServerErrorException);
+      expect(repository.save).toHaveBeenCalledWith(productMock);
+      expect(createdProduct.data.name).toEqual(createProductRequestDtoMock.name);
+      expect(createdProduct.message).toEqual('Product created successfully');
+      expect(createdProduct.status).toEqual('success');
     });
   });
 
@@ -113,18 +79,17 @@ describe('ProductsService', () => {
         user_type: 'super-admin',
       };
 
-      mockRepository.findOne.mockResolvedValue(mockProduct);
+      (repository.findOne as jest.Mock).mockResolvedValue(mockProduct);
       mockUserService.getUserRecord.mockResolvedValue(mockUser);
-      mockRepository.save.mockResolvedValue({ ...mockProduct, status: newStatus });
+      (repository.save as jest.Mock).mockResolvedValue({ ...mockProduct, status: newStatus });
 
       const result = await service.changeProductStatus(productId, userId, newStatus);
 
-      expect(mockRepository.findOne).toHaveBeenCalledWith({
+      expect(repository.findOne).toHaveBeenCalledWith({
         where: { id: productId },
-        relations: ['category'],
       });
       expect(mockUserService.getUserRecord).toHaveBeenCalledWith({ identifier: userId, identifierType: 'id' });
-      expect(mockRepository.save).toHaveBeenCalledWith({ ...mockProduct, status: newStatus });
+      expect(repository.save).toHaveBeenCalledWith({ ...mockProduct, status: newStatus });
       expect(result).toEqual({
         message: 'Product status updated successfully',
         status_code: HttpStatus.OK,
@@ -133,7 +98,7 @@ describe('ProductsService', () => {
     });
 
     it('should throw NotFoundException if product is not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+      (repository.findOne as jest.Mock).mockResolvedValue(null);
 
       await expect(service.changeProductStatus('123', '456', StatusType.DRAFT)).rejects.toThrow(NotFoundException);
     });
@@ -142,7 +107,7 @@ describe('ProductsService', () => {
       const mockProduct = { id: '123', status: StatusType.ACTIVE };
       const mockUser = { id: '456', user_type: 'vendor' };
 
-      mockRepository.findOne.mockResolvedValue(mockProduct);
+      (repository.findOne as jest.Mock).mockResolvedValue(mockProduct);
       mockUserService.getUserRecord.mockResolvedValue(mockUser);
 
       await expect(service.changeProductStatus('123', '456', StatusType.DRAFT)).rejects.toThrow(ForbiddenException);

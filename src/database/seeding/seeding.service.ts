@@ -102,20 +102,18 @@ export class SeedingService {
 
         // Create products with associated categories
         const p1 = productRepository.create({
-          product_name: 'Product 1',
+          name: 'Product 1',
           description: 'Description for Product 1',
           quantity: 10,
           price: 100,
-          user: u1,
-          category: c1,
+          org: or1,
         });
         const p2 = productRepository.create({
-          product_name: 'Product 2',
+          name: 'Product 2',
           description: 'Description for Product 2',
           quantity: 20,
           price: 200,
-          user: u2,
-          category: c3, // Attach category c3 to p2
+          org: or2,
         });
 
         await productRepository.save([p1, p2]);

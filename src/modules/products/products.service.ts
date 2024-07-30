@@ -7,8 +7,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Product, StatusType } from './entities/product.entity';
 import { Repository } from 'typeorm';
+import { CreateProductRequestDto } from './dto/create-product.dto';
+import { Product, StockStatusType, StatusType } from './entities/product.entity';
 import UserService from '../user/user.service';
 
 @Injectable()
@@ -18,35 +19,40 @@ export class ProductsService {
     private readonly userService: UserService
   ) {}
 
-  async fetchSingleProduct(productId: string) {
-    const productExists = await this.productRepository.findOne({
-      where: {
-        id: productId,
-      },
-      relations: ['category'],
+  async createProduct(orgId: string, dto: CreateProductRequestDto) {
+    const { name, quantity, price } = dto;
+    const newProduct: Product = await this.productRepository.create({
+      name,
+      quantity,
+      price,
     });
-    if (!productExists) {
-      throw new NotFoundException({
-        error: 'Product not found',
-        status_code: HttpStatus.NOT_FOUND,
+    if (!newProduct)
+      throw new InternalServerErrorException({
+        status_code: 500,
+        status: 'Internal server error',
+        message: 'An unexpected error occurred. Please try again later.',
       });
-    }
+    await this.productRepository.save(newProduct);
+    const status = await this.calculateProductStatus(quantity);
     return {
-      status_code: HttpStatus.OK,
-      message: 'Product fetched successfully',
+      status: 'success',
+      message: 'Product created successfully',
       data: {
-        products: {
-          id: productExists.id,
-          product_name: productExists.product_name,
-          description: productExists.description,
-          quantity: productExists.quantity,
-          price: productExists.price,
-          category: productExists.category.id,
-          created_at: productExists.created_at,
-          updated_at: productExists.updated_at,
-        },
+        id: newProduct.id,
+        name: newProduct.name,
+        description: newProduct.description,
+        price: newProduct.price,
+        status,
+        quantity,
+        created_at: newProduct.created_at,
+        updated_at: newProduct.updated_at,
       },
     };
+  }
+
+  async calculateProductStatus(quantity: number): Promise<StockStatusType> {
+    if (quantity === 0) return StockStatusType.OUT_STOCK;
+    return quantity >= 5 ? StockStatusType.IN_STOCK : StockStatusType.LOW_STOCK;
   }
 
   async changeProductStatus(productId: string, userId: string, newStatus: StatusType) {
@@ -54,8 +60,8 @@ export class ProductsService {
       where: {
         id: productId,
       },
-      relations: ['category'],
     });
+
     const user = await this.userService.getUserRecord({ identifier: userId, identifierType: 'id' });
 
     if (!product) {
