@@ -28,7 +28,8 @@ import authConfig from 'config/auth.config';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { EmailModule } from './modules/email/email.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
-import { EmailService } from './modules/email/email.service';
+import { ProductsModule } from './modules/products/products.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   providers: [
@@ -117,6 +118,7 @@ import { EmailService } from './modules/email/email.service';
     SqueezeModule,
     TestimonialsModule,
     ProductsModule,
+    ProfileModule,
   ],
   controllers: [HealthController, ProbeController],
 })

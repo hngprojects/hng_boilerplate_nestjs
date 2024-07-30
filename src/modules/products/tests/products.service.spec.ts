@@ -4,14 +4,16 @@ import { Repository } from 'typeorm';
 import { ProductsService } from '../products.service';
 import { Product } from '../entities/product.entity';
 import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException} from '@nestjs/common';
-import { User } from '../../user/entities/user.entity';
-import { ProductCategory } from '../../product-category/entities/product-category.entity';
 import { productMock } from './mocks/product.mock';
+import { ProductsService } from '../products.service';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
-  let repository: Repository<Product>;
+  let productRepository: Repository<Product>;
+  let organisationRepository: Repository<Organisation>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,17 +30,23 @@ describe('ProductsService', () => {
             update: jest.fn(),
             findAndCount: jest.fn()
           },
+          useClass: Repository,
         },
       ],
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
-    repository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    productRepository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  it('should create a new product', async () => {
+    jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+    jest.spyOn(productRepository, 'create').mockReturnValue(createProductRequestDtoMock as any);
+    jest.spyOn(productRepository, 'save').mockResolvedValue(productMock as any);
+
+    const createdProduct = await service.createProduct(orgMock.id, createProductRequestDtoMock);
+
 
   describe('findAll', () => {
     it('should return paginated products', async () => {
@@ -170,5 +178,7 @@ describe('ProductsService', () => {
       expect(createdProduct.message).toEqual('Product created successfully');
       expect(createdProduct.status).toEqual('success');
     });
+    expect(createdProduct.message).toEqual('Product created successfully');
+    expect(createdProduct.status).toEqual('success');
   });
 });
