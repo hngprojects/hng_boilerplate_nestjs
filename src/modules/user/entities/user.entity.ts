@@ -4,6 +4,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Job } from '../../jobs/entities/job.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
@@ -62,6 +63,10 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
+
+  @OneToMany(() => Job, job => job.user)
+  jobs: Job[];
+  
   @OneToOne(() => Profile, profile => profile.user_id)
   @JoinColumn()
   profile: Profile;
@@ -71,6 +76,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
+
 
   @BeforeInsert()
   async hashPassword() {
