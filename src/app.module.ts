@@ -28,6 +28,7 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
+import { FaqModule } from './modules/faq/faq.module';
 
 @Module({
   providers: [
@@ -85,6 +86,7 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
     TestimonialsModule,
     EmailModule,
     InviteModule,
+    FaqModule,
     HelpCenterModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
