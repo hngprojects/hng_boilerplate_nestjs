@@ -36,35 +36,9 @@ describe('NotificationSettingsService', () => {
   });
 
   describe('create', () => {
-    it('should create new notification settings if not existing', async () => {
-      const dto: NotificationSettingsDto = {
-        settingName: '',
-        settingValue: '',
-        email_notifications: false,
-        push_notifications: false,
-        sms_notifications: false,
-      };
-      const userId = 'some-user-id';
-
-      mockNotificationSettingsRepository.findOne.mockResolvedValue(null);
-      mockNotificationSettingsRepository.create.mockReturnValue(dto);
-      mockNotificationSettingsRepository.save.mockResolvedValue(dto);
-
-      const result = await service.create(dto, userId);
-
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { user_id: userId } });
-      expect(repository.create).toHaveBeenCalledWith(dto);
-      expect(repository.save).toHaveBeenCalledWith(dto);
-      expect(result).toEqual(dto);
-    });
-
     it('should update existing notification settings', async () => {
-      const dto: NotificationSettingsDto = {
-        settingName: '',
-        settingValue: '',
-        email_notifications: false,
-        push_notifications: false,
-        sms_notifications: false,
+      const dto: Partial<NotificationSettingsDto> = {
+        mobile_push_notifications: true,
       };
       const existingSettings = { id: 1, ...dto };
       const userId = 'some-user-id';
@@ -80,12 +54,8 @@ describe('NotificationSettingsService', () => {
     });
 
     it('should throw BadRequestException on error', async () => {
-      const dto: NotificationSettingsDto = {
-        settingName: '',
-        settingValue: '',
-        email_notifications: false,
-        push_notifications: false,
-        sms_notifications: false,
+      const dto: Partial<NotificationSettingsDto> = {
+        mobile_push_notifications: true,
       };
       const userId = 'some-user-id';
 

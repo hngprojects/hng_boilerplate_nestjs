@@ -13,10 +13,10 @@ export class NotificationSettingsService {
     private notificationSettingsRepository: Repository<NotificationSettings>
   ) {}
 
-  async create(notificationSettingsDto: NotificationSettingsDto, userId: string): Promise<NotificationSettings> {
+  async create(notificationSettingsDto: any, user_id: string): Promise<any> {
     try {
       const existingSettings = await this.notificationSettingsRepository.findOne({
-        where: { user_id: userId },
+        where: { user_id },
       });
 
       if (existingSettings) {
@@ -24,7 +24,7 @@ export class NotificationSettingsService {
         return this.notificationSettingsRepository.save(existingSettings);
       }
 
-      const newSettings = this.notificationSettingsRepository.create(notificationSettingsDto);
+      const newSettings = this.notificationSettingsRepository.create({ ...notificationSettingsDto, user_id });
       return this.notificationSettingsRepository.save(newSettings);
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to create notification settings');

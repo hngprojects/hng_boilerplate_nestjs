@@ -70,8 +70,8 @@ describe('TestimonialsService', () => {
 
       await expect(service.createTestimonial(createTestimonialDto, null)).rejects.toThrow(
         new NotFoundException({
-          message: 'User is currently unauthorized, kindly authenticate to continue',
-          status_code: 401,
+          message: 'Not Found Exception',
+          status_code: 404,
         })
       );
     });

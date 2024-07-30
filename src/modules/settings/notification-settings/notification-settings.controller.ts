@@ -9,11 +9,6 @@ import { NotificationSettingsService } from './notification-settings.service';
 export class NotificationSettingsController {
   constructor(private readonly notificationSettingsService: NotificationSettingsService) {}
 
-  @Post('notification-settings')
-  @ApiOkResponse({
-    description: 'Create or update notification settings',
-    type: NotificationSettings,
-  })
   @Get('notification-settings')
   async findByUserId(@Req() request: Request) {
     const user = request['user'];

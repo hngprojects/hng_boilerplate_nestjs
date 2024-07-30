@@ -137,13 +137,13 @@ describe('EmailService', () => {
 
     expect(mailerService.sendMail).toHaveBeenCalledWith({
       to: email,
-      subject: 'Notification',
+      subject: 'In-App, Notification',
       template: 'notification',
       context: {
         email,
+        recipient_name,
         message,
         support_email,
-        recipient_name,
       },
     });
   });
