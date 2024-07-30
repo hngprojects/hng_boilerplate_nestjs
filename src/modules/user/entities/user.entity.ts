@@ -63,10 +63,9 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
-
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
-  
+
   @OneToOne(() => Profile, profile => profile.user_id)
   @JoinColumn()
   profile: Profile;
@@ -76,7 +75,6 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
-
 
   @BeforeInsert()
   async hashPassword() {
