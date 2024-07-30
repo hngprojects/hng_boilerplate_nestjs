@@ -3,12 +3,12 @@ import { AbstractBaseEntity } from '../../entities/base.entity';
 
 @Entity('help_centers')
 export class HelpCenter extends AbstractBaseEntity {
-  @Column()
+  @Column({ nullable: false })
   title: string;
 
-  @Column()
+  @Column({ nullable: false })
   content: string;
 
-  @Column()
+  @Column({ nullable: false })
   author: string;
 }
