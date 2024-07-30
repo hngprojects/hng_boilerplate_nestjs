@@ -116,7 +116,7 @@ export class OrganisationsService {
         throw new ConflictException({
           status: 'error',
           message: 'User is already a member of this organisation',
-          status_code: 404,
+          status_code: 409,
         });
       }
 
