@@ -8,7 +8,7 @@ export const productMock: Product = {
   description: '',
   price: 35,
   quantity: 3,
-  satus: ProductStatusType.LOW_STOCK,
+  status: ProductStatusType.LOW_STOCK,
   image: '',
   org: orgMock,
   created_at: new Date(),

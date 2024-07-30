@@ -47,7 +47,7 @@ describe('ProductsService', () => {
     expect(createdProduct.status).toEqual('success');
   });
 
-  describe('Update product PATCH: /api/v1/products/:productId', () => {
+  describe('Update product PUT: /api/v1/products/:productId', () => {
     it('should throw an error if product is not found', async () => {
       (productRepository.findOne as jest.Mock).mockResolvedValue(null);
 
