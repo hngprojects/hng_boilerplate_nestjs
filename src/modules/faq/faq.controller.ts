@@ -34,6 +34,3 @@ export class FaqController {
     };
   }
 }
-function SkipAuth(): (target: typeof FaqController) => void | typeof FaqController {
-  throw new Error('Function not implemented.');
-}
