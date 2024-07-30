@@ -76,13 +76,13 @@ export class NotificationsService {
           user: {
             id: userId,
           },
-          isRead: false,
+          is_read: false,
         },
       });
 
       if (notifications.length > 0) {
         notifications.forEach(notifications => {
-          notifications.isRead = true;
+          notifications.is_read = true;
         });
         await this.notificationRepository.save(notifications);
       }
