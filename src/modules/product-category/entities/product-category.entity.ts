@@ -1,6 +1,6 @@
 import { AbstractBaseEntity } from "../../../entities/base.entity";
 import { Product } from "../../products/entities/product.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany,} from "typeorm";
 
 @Entity('categories')
 export class ProductCategory extends AbstractBaseEntity{
