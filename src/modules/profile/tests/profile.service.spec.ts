@@ -4,47 +4,73 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Profile } from '../entities/profile.entity';
 import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
-
-const mockProfileRepository = () => ({
-  findOne: jest.fn(),
-});
+import { User } from '../../user/entities/user.entity';
 
 describe('ProfileService', () => {
   let service: ProfileService;
-  let repository: Repository<Profile>;
+  let userRepository: Repository<User>;
+  let profileRepository: Repository<Profile>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProfileService, { provide: getRepositoryToken(Profile), useFactory: mockProfileRepository }],
+      providers: [
+        ProfileService,
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Profile),
+          useClass: Repository,
+        },
+      ],
     }).compile();
 
     service = module.get<ProfileService>(ProfileService);
-    repository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
   describe('findOneProfile', () => {
-    it('should return profile data if found', async () => {
-      const profile = { id: '1', name: 'John Doe' };
-      (repository.findOne as jest.Mock).mockResolvedValue(profile);
+    it('should return profile data if user and profile are found', async () => {
+      const userId = 'some-uuid';
+      const user = { id: userId } as User;
+      const profile = { user_id: userId } as any;
 
-      const result = await service.findOneProfile('1');
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(profile);
 
+      const result = await service.findOneProfile(userId);
       expect(result).toEqual({
         message: 'Successfully fetched profile',
         data: profile,
       });
     });
 
-    it('should throw NotFoundException if profile not found', async () => {
-      (repository.findOne as jest.Mock).mockResolvedValue(null);
+    it('should throw NotFoundException if user is not found', async () => {
+      const userId = 'some-uuid';
 
-      await expect(service.findOneProfile('1')).rejects.toThrow(NotFoundException);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.findOneProfile(userId)).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw InternalServerErrorException if there is a database error', async () => {
-      (repository.findOne as jest.Mock).mockRejectedValue(new Error('Database error'));
+    it('should throw NotFoundException if profile is not found', async () => {
+      const userId = 'some-uuid';
+      const user = { id: userId } as User;
 
-      await expect(service.findOneProfile('1')).rejects.toThrow(InternalServerErrorException);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.findOneProfile(userId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw InternalServerErrorException on other errors', async () => {
+      const userId = 'some-uuid';
+
+      jest.spyOn(userRepository, 'findOne').mockRejectedValue(new Error('Unexpected error'));
+
+      await expect(service.findOneProfile(userId)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

@@ -59,7 +59,7 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
-  @OneToOne(() => Profile, profile => profile.user)
+  @OneToOne(() => Profile, profile => profile.user_id)
   @JoinColumn()
   profile: Profile;
 

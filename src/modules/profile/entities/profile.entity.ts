@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 
@@ -38,5 +38,6 @@ export class Profile extends AbstractBaseEntity {
   profilePicUrl: string;
 
   @OneToOne(() => User, user => user.profile)
-  user: User;
+  @JoinColumn({ name: 'user_id' })
+  user_id: User;
 }

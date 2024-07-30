@@ -54,12 +54,12 @@ export class SeedingService {
         const prf1 = profileRepository.create({
           username: 'Johnsmith',
           email: 'john.smith@example.com',
-          user: savedUsers[0],
+          user_id: savedUsers[0],
         });
         const prf2 = profileRepository.create({
           username: 'Janesmith',
           email: 'jane.smith@example.com',
-          user: savedUsers[1],
+          user_id: savedUsers[1],
         });
 
         await profileRepository.save([prf1, prf2]);

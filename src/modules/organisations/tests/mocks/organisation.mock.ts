@@ -25,7 +25,7 @@ export const createMockOrganisation = (): Organisation => {
     profilePicUrl: '',
     created_at: new Date(),
     updated_at: new Date(),
-    user: null,
+    user_id: null,
   };
 
   const orgMemberMock: OrganisationMember = {

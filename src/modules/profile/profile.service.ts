@@ -2,14 +2,22 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class ProfileService {
-  constructor(@InjectRepository(Profile) private profileRepository: Repository<Profile>) {}
+  constructor(
+    @InjectRepository(Profile) private profileRepository: Repository<Profile>,
+    @InjectRepository(User) private userRepository: Repository<User>
+  ) {}
 
-  async findOneProfile(id: string) {
+  async findOneProfile(userId: string) {
     try {
-      const profile = await this.profileRepository.findOne({ where: { id } });
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const profile = await this.profileRepository.findOne({ where: { user_id: { id: userId } } });
       if (!profile) {
         throw new NotFoundException('Profile not found');
       }
