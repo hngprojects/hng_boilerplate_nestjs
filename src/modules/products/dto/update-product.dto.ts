@@ -8,7 +8,7 @@ export class UpdateProductDTO {
   })
   @IsNotEmpty()
   @IsString()
-  product_name: string;
+  name: string;
 
   @ApiProperty({
     description: 'The product description',
