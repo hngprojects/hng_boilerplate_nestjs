@@ -89,4 +89,25 @@ export class ProductsService {
     if (quantity === 0) return ProductStatusType.OUT_STOCK;
     return quantity >= 5 ? ProductStatusType.IN_STOCK : ProductStatusType.LOW_STOCK;
   }
+
+  async getProductStock(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+
+    if (!product) {
+      throw new NotFoundException({
+        error: 'Product not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Product stock retrieved successfully',
+      data: {
+        productId,
+        current_stock: product.quantity,
+        last_updated: product.updated_at,
+      },
+    };
+  }
 }

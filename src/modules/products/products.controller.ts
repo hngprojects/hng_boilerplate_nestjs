@@ -34,4 +34,15 @@ export class ProductsController {
   async updateProduct(@Param('productId') productId: string, @Body() updateProductDto: UpdateProductDTO) {
     return this.updateProduct(productId, updateProductDto);
   }
+
+  @Get('/:productId/stock')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get product stock' })
+  @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
+  @ApiResponse({ status: 200, description: 'Product stock retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getProductStock(@Param('productId') productId: string) {
+    return this.productsService.getProductStock(productId);
+  }
 }
