@@ -6,7 +6,9 @@ import { Repository } from 'typeorm';
 import { Role } from '../organisation-role/entities/role.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { HttpStatus, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { mockRole, mockOrganisation, mockUpdatePermissionDto } from './mocks/organisation-permissions.mock';
+import { mockUpdatePermissionDto } from './mocks/organisation-permissions.mock';
+import { mockRole } from './mocks/role.mock';
+import { mockOrganisation } from './mocks/organisation.mock';
 describe('OrganisationPermissionsService', () => {
   let service: OrganisationPermissionsService;
   let permissionRepository: Repository<Permissions>;
