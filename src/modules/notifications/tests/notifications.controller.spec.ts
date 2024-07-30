@@ -35,7 +35,10 @@ describe('NotificationsController', () => {
       const notificationsData = {
         totalNotificationCount: 2,
         totalUnreadNotificationCount: 1,
-        notifications: [],
+        notifications: [
+          { id: '1', message: 'Test 1', is_Read: false, created_at: new Date() } as any,
+          { id: '2', message: 'Test 2', is_Read: true, created_at: new Date() } as any,
+        ],
       };
 
       jest.spyOn(service, 'getNotificationsForUser').mockResolvedValue(notificationsData);
@@ -43,8 +46,17 @@ describe('NotificationsController', () => {
       const result = await controller.getNotifications(req);
 
       expect(result.status_code).toBe(200);
-      expect(result.message).toBe('Notifications retrieved successfully.');
-      expect(result.data).toEqual(notificationsData);
+      expect(result.message).toBe('Notifications retrieved successfully');
+      expect(result.data).toEqual({
+        total_notification_count: notificationsData.totalNotificationCount,
+        total_unread_notification_count: notificationsData.totalUnreadNotificationCount,
+        notifications: notificationsData.notifications.map(notification => ({
+          notification_id: notification.id,
+          is_read: notification.is_Read,
+          message: notification.message,
+          created_at: notification.created_at,
+        })),
+      });
     });
 
     it('should return an error if notifications retrieval fails', async () => {
