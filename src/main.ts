@@ -33,10 +33,9 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs', 'probe'] });
   app.useGlobalInterceptors(new ResponseInterceptor());
 
-  // TODO: set options for swagger docs
   const options = new DocumentBuilder()
     .setTitle('HNG Boilerplate')
-    .setDescription('API Doc from team starlight')
+    .setDescription('API Doc from team Starlight')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

@@ -1,6 +1,7 @@
-import { IsDateString, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator';
+import { NotificationSettingsDto } from './notification-settings.dto';
 
-export class NotificationSettingsResponseDto {
+export class NotificationSettingsResponseDto extends NotificationSettingsDto {
   @IsUUID()
   @IsNotEmpty()
   id: string;
@@ -14,16 +15,4 @@ export class NotificationSettingsResponseDto {
   @IsUUID()
   @IsNotEmpty()
   user_id: string;
-
-  @IsNotEmpty()
-  @IsString()
-  email_notifications: boolean;
-
-  @IsNotEmpty()
-  @IsString()
-  push_notifications: boolean;
-
-  @IsNotEmpty()
-  @IsString()
-  sms_notifications: boolean;
 }

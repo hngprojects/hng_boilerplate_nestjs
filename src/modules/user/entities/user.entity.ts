@@ -3,6 +3,7 @@ import { BeforeInsert, Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Notification } from '../../../modules/notifications/entities/notification.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { NotificationSettings } from '../../../modules/settings/notification-settings/entities/notification-setting.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
@@ -72,6 +73,6 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Notification, notification => notification.user)
   notifications: Notification[];
 
-  @OneToOne(() => Notification, notification => notification.user)
-  notification_settings: Notification;
+  @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
+  notification_settings: NotificationSettings[];
 }

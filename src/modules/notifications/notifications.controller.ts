@@ -8,55 +8,33 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { NotificationSettingsResponseDto } from '../settings/notification-settings/dto/notification-settings-response.dto';
-import { NotificationSettingsService } from '../settings/notification-settings/notification-settings.service';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
-import UserInterface from '../user/interfaces/UserInterface';
-import UserService from '../user/user.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
+import { CreateNotificationError } from './dto/create-notification-error.dto';
+import { CreateNotificationPropsDto, Message } from './dto/create-notification-props.dto';
+import { CreateNotificationResponseDto } from './dto/create-notification-response.dto';
 import { NotificationsService } from './notifications.service';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
 @Controller('notifications')
 export class NotificationsController {
-  constructor(
-    private readonly notificationsService: NotificationsService,
-    private readonly notificationSettingsService: NotificationSettingsService,
-    private readonly userService: UserService
-  ) {}
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
-  @ApiBody({ type: CreateNotificationDto, description: 'Notification message' })
-  @ApiCreatedResponse({ description: 'Notification created successfully' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Bad Request' })
-  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
-  async createNotification(@Body() createNotificationDto: CreateNotificationDto, @Req() req: { user: UserPayload }) {
-    const userId = req?.user.id;
-    const { message } = createNotificationDto;
+  @ApiBody({ type: Message, description: 'Notification message' })
+  @ApiCreatedResponse({ type: CreateNotificationResponseDto, description: 'Notification created successfully' })
+  @ApiUnauthorizedResponse({ type: CreateNotificationError, description: 'Unauthorized' })
+  @ApiBadRequestResponse({ type: CreateNotificationError, description: 'Bad Request' })
+  @ApiInternalServerErrorResponse({ type: CreateNotificationError, description: 'Internal Server Error' })
+  async createNotification(@Body() message: Message, @Req() req: { user: UserPayload }) {
+    const user_id = req?.user.id;
 
-    const user: Partial<UserInterface> = await this.userService.getUserRecord({
-      identifier: userId,
-      identifierType: 'id',
-    });
-
-    const notificationSettingsPreference: NotificationSettingsResponseDto =
-      await this.notificationSettingsService.findByUserId(user.id);
-
-    const { id, created_at, updated_at, user_id, ...notificationSettingsPreferenceRest } =
-      notificationSettingsPreference;
-
-    const createNotificationProps: CreateNotificationDto = {
-      message,
+    const createNotificationProps: CreateNotificationPropsDto = {
+      ...message,
       is_read: false,
       created_at: new Date().toISOString(),
     };
 
-    return this.notificationsService.createNotification(
-      createNotificationProps,
-      notificationSettingsPreferenceRest,
-      user
-    );
+    return this.notificationsService.createNotification(user_id, createNotificationProps);
   }
 }
