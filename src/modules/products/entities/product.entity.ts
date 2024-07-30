@@ -1,8 +1,6 @@
-// import { ProductCategory } from '../../../modules/product-category/entities/product-category.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
-// import { User } from '../../../modules/user/entities/user.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',

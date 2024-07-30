@@ -33,6 +33,7 @@ export class ProductsController {
     status: 500,
     description: 'Internal server error',
   })
+  @UseGuards(OwnershipGuard)
   async changeProductStatus(
     @Param('productId') productId: string,
     @Body() body: { status: StatusType },
