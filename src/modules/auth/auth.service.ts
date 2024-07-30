@@ -25,6 +25,7 @@ import {
   LOGIN_SUCCESSFUL,
   LOGIN_ERROR,
   EMAIL_SENT,
+  ENABLE_2FA_ERROR,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -139,6 +140,7 @@ export default class AuthenticationService {
       );
     }
   }
+
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     try {
       const { email, password } = loginDto;
@@ -225,27 +227,14 @@ export default class AuthenticationService {
       );
     }
 
-    if (user.is_2fa_enabled) {
-      throw new HttpException(
-        {
-          status_code: HttpStatus.BAD_REQUEST,
-          message: TWO_FA_ENABLED,
-        },
-        HttpStatus.BAD_REQUEST,
-        {
-          cause: TWO_FA_ENABLED,
-        }
-      );
-    }
-
     return { user, isValid: true };
   }
 
   async enable2FA(user_id: string, password: string) {
-    const { user, isValid, ...validationResponse } = await this.validateUserAndPassword(user_id, password);
+    const { user, isValid } = await this.validateUserAndPassword(user_id, password);
 
     if (!isValid) {
-      throw new InternalServerErrorException('Error occured enabling 2fa');
+      throw new InternalServerErrorException(ENABLE_2FA_ERROR);
     }
 
     const secret = speakeasy.generateSecret({ length: 32 });

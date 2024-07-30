@@ -19,3 +19,4 @@ export const INVALID_CREDENTIALS = 'Invalid email or password';
 export const LOGIN_SUCCESSFUL = 'Login successful';
 export const LOGIN_ERROR = 'An error occurred during login';
 export const EMAIL_SENT = 'Email sent successfully';
+export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
