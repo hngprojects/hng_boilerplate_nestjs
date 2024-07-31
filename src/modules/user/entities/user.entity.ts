@@ -67,8 +67,8 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
 
-  @OneToOne(() => Profile, profile => profile.user_id)
-  @JoinColumn()
+  @OneToOne(() => Profile, profile => profile.id)
+  @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
   @OneToMany(() => Testimonial, testimonial => testimonial.user)

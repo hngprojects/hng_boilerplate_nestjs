@@ -33,6 +33,11 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
+    if (createUserPayload.admin_secret == process.env.ADMIN_SECRET_KEY) {
+      newUser.user_type = UserType.SUPER_ADMIN;
+    } else {
+      newUser.user_type = UserType.USER;
+    }
     newUser.profile = profile;
     return await this.userRepository.save(newUser);
   }

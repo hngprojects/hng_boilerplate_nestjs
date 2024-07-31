@@ -13,7 +13,6 @@ import { ProductSizeType } from '../../modules/products/entities/product-variant
 
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
 
-
 @Injectable()
 export class SeedingService {
   constructor(private readonly dataSource: DataSource) {}
@@ -79,20 +78,23 @@ export class SeedingService {
         const prf1 = profileRepository.create({
           username: 'Johnsmith',
           email: 'john.smith@example.com',
-          user_id: savedUsers[0],
         });
         const prf2 = profileRepository.create({
           username: 'Janesmith',
           email: 'jane.smith@example.com',
-          user_id: savedUsers[1],
         });
 
         await profileRepository.save([prf1, prf2]);
+        const savedProfiles = await profileRepository.find();
 
-        const savedProfile = await userRepository.find();
-        if (savedProfile.length !== 2) {
-          throw new Error('Failed to create all profile');
+        if (savedProfiles.length !== 2) {
+          throw new Error('Failed to create all profiles');
         }
+
+        savedUsers[0].profile = savedProfiles[0];
+        savedUsers[1].profile = savedProfiles[1];
+
+        await userRepository.save(savedUsers);
 
         const or1 = organisationRepository.create({
           name: 'Org 1',

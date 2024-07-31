@@ -1,3 +1,4 @@
+import { profile } from 'console';
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
@@ -18,7 +19,13 @@ export class ProfileService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      const profile = await this.profileRepository.findOne({ where: { user_id: { id: userId } } });
+
+      const userProfile = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['profile'],
+      });
+
+      const profile = userProfile.profile;
       if (!profile) {
         throw new NotFoundException('Profile not found');
       }
@@ -43,15 +50,17 @@ export class ProfileService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      const profile = await this.profileRepository.findOne({ where: { user_id: { id: userId } } });
-      if (!profile) {
+      const userProfile = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      if (!userProfile) {
         throw new NotFoundException('Profile not found');
       }
 
-      // Update profile data
-      await this.profileRepository.update(profile.id, updateProfileDto);
+      await this.profileRepository.update(userProfile.id, updateProfileDto);
 
-      const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
+      const updatedProfile = await this.profileRepository.findOne({ where: { id: userProfile.id } });
 
       const responseData = {
         message: 'Profile successfully updated',
