@@ -58,7 +58,8 @@ export class OrganisationsController {
   async removeUser(@Param('org_id') orgId: string, @Param('user_id') userId: string, @Request() req) {
     const currentUser = req['user'];
     return this.organisationsService.removeMember(orgId, userId, currentUser.sub);
-    
+  }
+
   @ApiOperation({ summary: 'Get members of an Organisation' })
   @ApiResponse({
     status: 200,

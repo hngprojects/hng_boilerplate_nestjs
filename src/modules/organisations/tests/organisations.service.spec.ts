@@ -244,10 +244,9 @@ describe('OrganisationsService', () => {
       expect(result.status).toEqual('Success');
       expect(result.message).toEqual('User removed successfully');
       expect(result.status_code).toEqual(200);
+    });
+  });
 
-      )};
-    )};
-           
   describe('getOrganisationMembers', () => {
     it('should throw NotFoundException if organisation is not found', async () => {
       organisationRepository.findOne = jest.fn().mockResolvedValue(null);

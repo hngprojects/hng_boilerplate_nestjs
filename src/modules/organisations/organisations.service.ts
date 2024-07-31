@@ -6,7 +6,6 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
   UnprocessableEntityException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -48,7 +47,7 @@ export class OrganisationsService {
     if (!orgs) throw new NotFoundException('No organisation found');
 
     let data = orgs.organisationMembers.map(member => {
-      return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
+      return OrganisationMemberMapper.mapToResponseFormat(member.user);
     });
 
     const isMember = data.find(member => member.id === sub);
