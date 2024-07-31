@@ -28,6 +28,7 @@ describe('UserService', () => {
     findOne: jest.fn(),
     findAndCount: jest.fn(),
     softDelete: jest.fn(),
+    softDelete: jest.fn(),
   };
 
   beforeEach(async () => {
