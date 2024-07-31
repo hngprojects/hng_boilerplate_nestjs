@@ -124,6 +124,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     JobsModule,
     ProfileModule,
     RunTestsModule,
+    NotificationsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
