@@ -20,7 +20,6 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
-import { createOrganisationResponseDtoMock } from './tests/mocks/create-organisation-response.mock';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')
@@ -32,7 +31,6 @@ export class OrganisationsController {
   @ApiResponse({
     status: 201,
     description: 'The created organisation',
-    type: createOrganisationResponseDtoMock,
   })
   @ApiResponse({
     status: 409,
