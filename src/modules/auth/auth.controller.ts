@@ -13,7 +13,11 @@ import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
-import { ErrorCreateUserResponse, SuccessCreateUserResponse } from '../user/dto/user-response.dto';
+import {
+  ErrorCreateUserResponse,
+  RequestVerificationToken,
+  SuccessCreateUserResponse,
+} from '../user/dto/user-response.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -84,6 +88,20 @@ export default class RegistrationController {
   @Post('google')
   async googleAuth(@Body() body: GoogleAuthPayload) {
     return this.authService.googleAuth(body);
+  }
+
+  @skipAuth()
+  @ApiBody({
+    description: 'Request authentication token',
+    type: RequestVerificationToken,
+  })
+  @ApiOperation({ summary: 'Request Verification Token' })
+  @ApiResponse({ status: 200, description: 'Verification Token sent to mail' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @Post('request/token')
+  async requestVerificationToken(@Body() body: { email: string }) {
+    const { email } = body;
+    return this.authService.requestSignInToken({ email });
   }
 
   @skipAuth()

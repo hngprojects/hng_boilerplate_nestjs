@@ -50,7 +50,7 @@ export class OtpService {
 
       return true;
     } catch (error) {
-      Logger.error('OtpServiceError ~ verifyOtpError ~', error);
+      console.log('OtpServiceError ~ verifyOtpError ~', error);
       return false;
     }
   }

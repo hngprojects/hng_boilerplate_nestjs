@@ -27,6 +27,7 @@ import {
   EMAIL_SENT,
   ENABLE_2FA_ERROR,
   USER_CREATED,
+  SIGN_IN_OTP_SENT,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -358,7 +359,7 @@ export default class AuthenticationService {
     await this.emailService.sendLoginOtp(user.email, otp.token);
 
     return {
-      message: 'Sign-in token sent to email',
+      message: SIGN_IN_OTP_SENT,
       status_code: HttpStatus.OK,
     };
   }
