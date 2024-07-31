@@ -12,20 +12,11 @@ export enum MemberRole {
 
 @Entity()
 export class OrganisationMember extends AbstractBaseEntity {
-  @Column({ nullable: false })
-  user_id: string;
-
-  @Column({ nullable: false })
-  organisation_id: string;
-
-  @Column({ nullable: false })
-  profile_id: string;
-
   @ManyToOne(() => User, user => user.organisationMembers)
-  user: User;
+  user_id: User;
 
   @ManyToOne(() => Organisation, organisation => organisation.organisationMembers)
-  organisation: Organisation;
+  organisation_id: Organisation;
 
   @Column({
     type: 'enum',
@@ -35,5 +26,5 @@ export class OrganisationMember extends AbstractBaseEntity {
   role: string;
 
   @ManyToOne(() => Profile)
-  profile: Profile;
+  profile_id: Profile;
 }

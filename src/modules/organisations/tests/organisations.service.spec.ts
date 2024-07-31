@@ -253,22 +253,22 @@ describe('OrganisationsService', () => {
       expect(result.message).toEqual('User added successfully');
       expect(result.status_code).toEqual(200);
     });
-  });
 
-  it('should throw an error if the user is already a member', async () => {
-    jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
-    jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
-    jest.spyOn(service, 'checkIfUserIsMember').mockResolvedValue(1);
-    const res = await service.checkIfUserIsMember(newUser.id, orgMock.id);
-    expect(res).toBeGreaterThanOrEqual(1);
+    it('should throw an error if the user is already a member', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
+      jest.spyOn(service, 'checkIfUserIsMember').mockResolvedValue(1);
+      const res = await service.checkIfUserIsMember(newUser.id, orgMock.id);
+      expect(res).toBeGreaterThanOrEqual(1);
 
-    await expect(service.addMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
-      new ConflictException({
-        status: 'error',
-        message: 'User is already a member of this organisation',
-        status_code: 409,
-      })
-    );
+      await expect(service.addMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+        new ConflictException({
+          status: 'error',
+          message: 'User is already a member of this organisation',
+          status_code: 409,
+        })
+      );
+    });
 
     describe('getOrganisationMembers', () => {
       it('should throw NotFoundException if organisation is not found', async () => {

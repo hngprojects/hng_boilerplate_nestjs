@@ -50,7 +50,7 @@ export class OrganisationsService {
     if (!orgs) throw new NotFoundException('No organisation found');
 
     let data = orgs.organisationMembers.map(member => {
-      return OrganisationMemberMapper.mapToResponseFormat(member.user);
+      return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
     });
 
     const isMember = data.find(member => member.id === sub);
@@ -151,20 +151,16 @@ export class OrganisationsService {
       }
 
       const addMemberDto: AddMemberToOrganisationDto = {
-        user_id: userId,
-        organisation_id: orgId,
+        user_id: user,
+        organisation_id: org,
         role: 'user',
-        profile_id: user.profile.id,
+        profile_id: user.profile,
       };
 
       const newMemberMapped = AddMemberToOrganisationMapper.mapToEntity(addMemberDto);
-      const newMember = await this.orgMemberRepository.create({
-        ...newMemberMapped,
-        user: user,
-        organisation: org,
-      });
+      org.organisationMembers.push(newMemberMapped);
 
-      await this.orgMemberRepository.save(newMember);
+      await this.organisationRepository.save(org);
 
       return {
         status: 'Success',

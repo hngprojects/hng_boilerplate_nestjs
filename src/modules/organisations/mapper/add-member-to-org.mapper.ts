@@ -10,7 +10,7 @@ export class AddMemberToOrganisationMapper {
 
     orgMember.user_id = dto.user_id;
     orgMember.organisation_id = dto.organisation_id;
-    orgMember.profile_id = dto.organisation_id;
+    orgMember.profile_id = dto.profile_id;
     orgMember.role = dto.role;
 
     return orgMember;

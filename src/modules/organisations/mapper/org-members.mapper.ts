@@ -2,6 +2,7 @@ import { User } from '../../user/entities/user.entity';
 
 export class OrganisationMemberMapper {
   static mapToResponseFormat(member: User) {
+    console.log(member);
     if (!member) {
       throw new Error('User entity is required');
     }
