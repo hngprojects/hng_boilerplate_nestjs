@@ -30,7 +30,6 @@ export class OrganisationRoleService {
       if (!organisation) {
         throw new NotFoundException({
           status_code: HttpStatus.NOT_FOUND,
-          error: 'Not Found',
           message: 'Organisation not found',
         });
       }
@@ -41,7 +40,6 @@ export class OrganisationRoleService {
       if (existingRole) {
         throw new ConflictException({
           status_code: HttpStatus.CONFLICT,
-          error: 'Conflict',
           message: 'A role with this name already exists in the organization',
         });
       }
@@ -61,7 +59,6 @@ export class OrganisationRoleService {
       }
       throw new InternalServerErrorException({
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: 'Internal Server Error',
         message: 'Failed to create organization role',
       });
     }
@@ -69,6 +66,38 @@ export class OrganisationRoleService {
 
   findAll() {
     return `This action returns all organisationRole`;
+  }
+
+  async findSingleRole(id: string, organisationId: string): Promise<OrganisationRole> {
+    try {
+      const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+
+      if (!organisation) {
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: `Organisation with ID ${organisationId} not found`,
+        });
+      }
+
+      const role = await this.rolesRepository.findOne({
+        where: { id, organisation: { id: organisationId } },
+        relations: ['permissions'],
+      });
+
+      if (!role) {
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: `The role with ID ${id} does not exist in the organisation`,
+        });
+      }
+
+      return role;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Failed to fetch role: ${error.message}`);
+    }
   }
 
   update(id: number, updateOrganisationRoleDto: UpdateOrganisationRoleDto) {
