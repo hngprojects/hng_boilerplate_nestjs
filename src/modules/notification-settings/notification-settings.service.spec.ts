@@ -46,7 +46,7 @@ describe('NotificationSettingsService', () => {
       jest.spyOn(repository, 'create').mockReturnValue(createdSettings as any);
       jest.spyOn(repository, 'save').mockResolvedValue(createdSettings as any);
 
-      const result = await service.create(createDto, user_id);
+      const result = await service.createNotificationSettings(createDto, user_id);
 
       expect(result).toEqual(createdSettings);
       expect(repository.findOne).toHaveBeenCalledWith({ where: { user_id } });
@@ -73,7 +73,7 @@ describe('NotificationSettingsService', () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(existingSettings as any);
       jest.spyOn(repository, 'save').mockResolvedValue(updatedSettings as any);
 
-      const result = await service.create(updateDto, user_id);
+      const result = await service.createNotificationSettings(updateDto, user_id);
 
       expect(result).toEqual(updatedSettings);
       expect(repository.findOne).toHaveBeenCalledWith({ where: { user_id } });
@@ -86,7 +86,7 @@ describe('NotificationSettingsService', () => {
 
       jest.spyOn(repository, 'findOne').mockRejectedValue(new Error('Database error'));
 
-      await expect(service.create(createDto, user_id)).rejects.toThrow(BadRequestException);
+      await expect(service.createNotificationSettings(createDto, user_id)).rejects.toThrow(BadRequestException);
     });
   });
 });

@@ -1,6 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsNotEmpty } from 'class-validator';
-
 export class NotificationSettingsResponseDto {
   status: string;
   message: string;

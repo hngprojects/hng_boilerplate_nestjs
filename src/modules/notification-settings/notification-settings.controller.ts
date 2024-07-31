@@ -11,7 +11,6 @@ import {
 import { Controller, Post, Body, Get, Request, Req, Patch } from '@nestjs/common';
 import { NotificationSettingsService } from './notification-settings.service';
 import { NotificationSettingsDto } from './dto/notification-settings.dto';
-import { NotificationSettings } from './entities/notification-setting.entity';
 import { NotificationSettingsErrorDto } from './dto/notification-settings-error.dto';
 
 @ApiBearerAuth()

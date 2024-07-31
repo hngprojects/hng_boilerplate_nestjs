@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationSettings } from './entities/notification-setting.entity';
@@ -13,7 +19,7 @@ export class NotificationSettingsService {
     private notificationSettingsRepository: Repository<NotificationSettings>
   ) {}
 
-  async create(notificationSettingsDto: any, user_id: string): Promise<any> {
+  async createNotificationSettings(notificationSettingsDto: NotificationSettingsDto, user_id: string): Promise<any> {
     try {
       const existingSettings = await this.notificationSettingsRepository.findOne({
         where: { user_id },
@@ -46,13 +52,17 @@ export class NotificationSettingsService {
 
       let settings = await this.notificationSettingsRepository.findOne({ where: { user_id } });
       if (!settings) {
-        settings = await this.create(defaultNotificationSettings, user_id);
+        settings = await this.createNotificationSettings(defaultNotificationSettings, user_id);
       }
 
       return settings;
     } catch (error) {
       this.logger.error('Error finding notification settings by user ID:', error);
-      throw new BadRequestException(error?.message || 'Failed to fetch notification settings');
+
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error?.message || 'Failed to fetch notification settings');
+      }
+      throw new InternalServerErrorException('An unexpected error occurred while fetching notification settings');
     }
   }
   async updateNotificationSettings(
@@ -72,7 +82,10 @@ export class NotificationSettingsService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException('Invalid data in the request body');
+      if (error.message.includes('validation') || error.name === 'ValidationError') {
+        throw new BadRequestException('Invalid data in the request body');
+      }
+      throw new InternalServerErrorException('An unexpected error occurred while updating notification settings');
     }
   }
 }
