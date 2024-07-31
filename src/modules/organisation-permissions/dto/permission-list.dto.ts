@@ -3,7 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { PermissionCategory } from '../helpers/PermissionCategory';
 
 export class PermissionListDto {
-  [x: string]: any;
   @ApiProperty({ enum: PermissionCategory, description: 'Permission category' })
   @IsBoolean()
   [PermissionCategory.CanViewTransactions]?: boolean;
