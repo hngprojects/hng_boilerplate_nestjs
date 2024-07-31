@@ -7,6 +7,7 @@ import {
   NotFoundException,
   ForbiddenException,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
@@ -220,6 +221,28 @@ export default class UserService {
         users: formattedUsers,
         pagination,
       },
+    };
+  }
+
+  async softDeleteUser(userId: string, authenticatedUserId: string): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.id !== authenticatedUserId) {
+      throw new UnauthorizedException({
+        status: 'error',
+        message: 'You are not authorized to delete this user',
+        status_code: 401,
+      });
+    }
+
+    await this.userRepository.softDelete(userId);
+
+    return {
+      status: 'success',
+      message: 'Deletion in progress',
     };
   }
 }

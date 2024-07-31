@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcryptjs';
-import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { BeforeInsert, Column, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
@@ -53,6 +53,9 @@ export class User extends AbstractBaseEntity {
     default: UserType.USER,
   })
   user_type: UserType;
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt?: Date;
 
   @OneToMany(() => Organisation, organisation => organisation.owner)
   owned_organisations: Organisation[];

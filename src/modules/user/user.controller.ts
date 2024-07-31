@@ -1,4 +1,16 @@
-import { Controller, Patch, Param, Body, UsePipes, ValidationPipe, Request, Req, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Patch,
+  Param,
+  Body,
+  UsePipes,
+  ValidationPipe,
+  Request,
+  Req,
+  Get,
+  Query,
+  Delete,
+} from '@nestjs/common';
 import UserService from './user.service';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
@@ -64,5 +76,23 @@ export class UserController {
     @Query('limit') limit: number = 10
   ) {
     return this.userService.getUsersByAdmin(page, limit, req.user);
+  }
+
+  @Delete(':userId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Soft delete a user account' })
+  @ApiResponse({ status: 204, description: 'Deletion in progress' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async softDeleteUser(@Param('userId') userId: string, @Req() req) {
+    const authenticatedUserId = req['user'].id;
+
+    await this.userService.softDeleteUser(userId, authenticatedUserId);
+
+    return {
+      status: 'success',
+      message: 'Deletion in progress',
+    };
   }
 }
