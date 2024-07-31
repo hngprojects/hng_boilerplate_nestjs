@@ -33,7 +33,7 @@ describe('SqueezeService', () => {
 
   describe('create', () => {
     it('should create a new squeeze successfully', async () => {
-      const createSqueezeDto: SqueezeRequestDto = {
+      const createSqueezeDto = {
         email: 'user@example.com',
         first_name: 'John',
         last_name: 'Doe',

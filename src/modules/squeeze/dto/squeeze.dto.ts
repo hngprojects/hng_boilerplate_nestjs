@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsEmail, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class SqueezeRequestDto {
   @ApiProperty()
@@ -39,8 +39,8 @@ export class SqueezeRequestDto {
 
   @ApiProperty()
   @IsOptional()
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @IsString({ each: true })
   readonly interests?: string[];
 
