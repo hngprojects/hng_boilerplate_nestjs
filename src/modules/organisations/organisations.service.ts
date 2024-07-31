@@ -26,24 +26,30 @@ export class OrganisationsService {
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
     const emailFound = await this.emailExists(createOrganisationDto.email);
+
     if (emailFound)
       throw new UnprocessableEntityException({
         status: 'Unprocessable entity exception',
         message: 'Invalid organisation credentials',
         status_code: 422,
       });
+
     const owner = await this.userRepository.findOne({
       where: { id: userId },
     });
+
     if (!owner) {
       throw new Error('Owner not found');
     }
+
     const mapNewOrganisation = CreateOrganisationMapper.mapToEntity(createOrganisationDto, owner);
     const newOrganisation = this.organisationRepository.create({
       ...mapNewOrganisation,
     });
+
     await this.organisationRepository.save(newOrganisation);
     const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
+
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }
 

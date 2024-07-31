@@ -1,3 +1,4 @@
+import { DefaultPermissions } from './../../modules/organisation-permissions/entities/default-permissions.entity';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
@@ -6,6 +7,7 @@ import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { Profile } from '../../modules/profile/entities/profile.entity';
+import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 
 @Injectable()
 export class SeedingService {
@@ -18,8 +20,22 @@ export class SeedingService {
     const organisationRepository = this.dataSource.getRepository(Organisation);
     const productRepository = this.dataSource.getRepository(Product);
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
+    const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
 
     try {
+      const existingPermissions = await defaultPermissionRepository.count();
+
+      //Populate the database with default permissions if none exits else stop execution
+      if (existingPermissions <= 0) {
+        const defaultPermissions = Object.values(PermissionCategory).map(category =>
+          defaultPermissionRepository.create({
+            category,
+            permission_list: false,
+          })
+        );
+
+        await defaultPermissionRepository.save(defaultPermissions);
+      }
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
         Logger.log('Database is already populated. Skipping seeding.');

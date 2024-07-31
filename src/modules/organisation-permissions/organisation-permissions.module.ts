@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { OrganisationPermissionsService } from './organisation-permissions.service';
 import { OrganisationPermissionsController } from './organisation-permissions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OrganisationPermission } from './entities/organisation-permission.entity';
+import { DefaultPermissions } from './entities/default-permissions.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OrganisationPermission])],
+  imports: [TypeOrmModule.forFeature([DefaultPermissions])],
   controllers: [OrganisationPermissionsController],
   providers: [OrganisationPermissionsService],
 })

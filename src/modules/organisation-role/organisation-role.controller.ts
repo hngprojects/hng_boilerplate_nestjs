@@ -18,17 +18,15 @@ import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
-import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiTags('Organisation Settings')
 @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@skipAuth()
-@Controller('organisation/roles')
+@Controller('organisation')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
-  @Post()
+  @Post(':id/roles')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new role in an organization' })
   @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organization' })
@@ -37,7 +35,7 @@ export class OrganisationRoleController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiResponse({ status: 409, description: 'Conflict - Role with this name already exists.' })
-  async create(@Body() createRoleDto: CreateOrganisationRoleDto, @Param('organisationId') organisationId: string) {
+  async create(@Body() createRoleDto: CreateOrganisationRoleDto, @Param('id') organisationId: string) {
     try {
       const role = await this.organisationRoleService.createOrgRoles(createRoleDto, organisationId);
       return {
@@ -59,7 +57,7 @@ export class OrganisationRoleController {
     return this.organisationRoleService.findAll();
   }
 
-  @Get(':id')
+  @Get(':id/roles/:roleId')
   @ApiOperation({ summary: 'Fetch a single role within an organization' })
   @ApiParam({ name: 'id', required: true, description: 'ID of the role' })
   @ApiResponse({ status: 200, description: 'The role has been successfully fetched.' })
@@ -67,9 +65,9 @@ export class OrganisationRoleController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiResponse({ status: 404, description: 'Not Found - Role does not exist.' })
-  async findOne(@Param('id') id: string, @Param('organisationId') organisationId: string) {
+  async findOne(@Param('roleId') roleId: string, @Param('id') organisationId: string) {
     try {
-      const role = await this.organisationRoleService.findSingleRole(id, organisationId);
+      const role = await this.organisationRoleService.findSingleRole(roleId, organisationId);
       return {
         status_code: 200,
         data: {

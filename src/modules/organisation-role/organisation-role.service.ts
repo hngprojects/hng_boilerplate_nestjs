@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
-import { OrganisationPermission } from '../organisation-permissions/entities/organisation-permission.entity';
+import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -14,8 +14,8 @@ export class OrganisationRoleService {
     private rolesRepository: Repository<OrganisationRole>,
     @InjectRepository(Organisation)
     private organisationRepository: Repository<Organisation>,
-    @InjectRepository(OrganisationPermission)
-    private permissionRepository: Repository<OrganisationPermission>
+    @InjectRepository(DefaultPermissions)
+    private permissionRepository: Repository<DefaultPermissions>
   ) {}
 
   async createOrgRoles(createOrganisationRoleDto: CreateOrganisationRoleDto, organisationId: string) {
@@ -37,12 +37,16 @@ export class OrganisationRoleService {
         ...createOrganisationRoleDto,
       });
 
+      role.organisation = organisation;
+
       const defaultPermissions = await this.permissionRepository.find();
+
       role.permissions = defaultPermissions;
 
       return await this.rolesRepository.save(role);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
+      const errorType = error.constructor;
+      if (errorType.name == 'NotFoundException' || errorType.name == 'ConflictException') {
         throw error;
       }
       throw new InternalServerErrorException('Failed to create organization role');
@@ -55,13 +59,19 @@ export class OrganisationRoleService {
 
   async findSingleRole(id: string, organisationId: string): Promise<OrganisationRole> {
     try {
+      const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+
+      if (!organisation) {
+        throw new NotFoundException(`Organisation with ID ${organisationId} not found`);
+      }
+
       const role = await this.rolesRepository.findOne({
         where: { id, organisation: { id: organisationId } },
         relations: ['permissions'],
       });
 
       if (!role) {
-        throw new NotFoundException(`The role with ID ${id} does not exist`);
+        throw new NotFoundException(`The role with ID ${id} does not exist in the organisation`);
       }
 
       return role;

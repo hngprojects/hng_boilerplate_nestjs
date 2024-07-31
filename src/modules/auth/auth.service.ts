@@ -158,7 +158,7 @@ export default class AuthenticationService {
         });
       }
 
-      const access_token = this.jwtService.sign({ id: user.id });
+      const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
 
       const responsePayload = {
         access_token,

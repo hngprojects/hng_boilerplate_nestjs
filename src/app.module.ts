@@ -28,6 +28,8 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
 import { ProductsModule } from './modules/products/products.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
+import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 
 @Module({
   providers: [
@@ -117,6 +119,8 @@ import { ProfileModule } from './modules/profile/profile.module';
     ProductsModule,
     JobsModule,
     ProfileModule,
+    OrganisationRoleModule,
+    OrganisationPermissionsModule,
   ],
   controllers: [HealthController, ProbeController],
 })

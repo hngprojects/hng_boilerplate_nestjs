@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { OrganisationsService } from './organisations.service';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -12,7 +12,7 @@ export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
   @Post('/')
-  async create(@Body() createOrganisationDto: OrganisationRequestDto, @Request() req) {
+  async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
   }
