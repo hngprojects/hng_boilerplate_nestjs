@@ -69,6 +69,7 @@ export class ProfileService {
       const userProfile = new Profile();
       Object.assign(userProfile, { ...user.profile });
       userProfile.profile_pic_url = newFileName;
+      userProfile.email = user.email;
       if (!user.profile) userProfile.user_id = user;
 
       const queryRunner = this.dataSource.createQueryRunner();
@@ -158,7 +159,6 @@ export class ProfileService {
         throw error;
       }
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);
-
     }
   }
 }

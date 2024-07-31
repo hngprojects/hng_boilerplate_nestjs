@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn, PrimaryColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 
@@ -15,6 +15,9 @@ export class Profile extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   department: string;
+
+  @Column()
+  email: string;
 
   @Column({ type: 'text', nullable: true })
   bio: string;

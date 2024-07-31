@@ -4,14 +4,15 @@ import {
   Post,
   Param,
   Put,
+  Patch,
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
-  Logger,
   Req,
   Res,
+  Body,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -70,7 +71,7 @@ export class ProfileController {
   async getProfilePic(@Param('picName') picName: string, @Res() res) {
     return await this.profileService.getProfilePic(picName, res, uploadProfilePicFolder);
   }
-  
+
   @ApiOperation({ summary: 'Update User Profile' })
   @ApiResponse({
     status: 200,

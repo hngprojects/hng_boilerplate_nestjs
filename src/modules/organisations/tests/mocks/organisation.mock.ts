@@ -16,6 +16,7 @@ export const createMockOrganisation = (): Organisation => {
     jobTitle: 'Developer',
     pronouns: 'They/Them',
     department: 'Engineering',
+    email: 'mockuser@example.com',
     bio: 'A mock user for testing purposes',
     social_links: [],
     language: 'English',
