@@ -4,7 +4,13 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Notification } from '../entities/notifications.entity';
 import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
-import { BadRequestException, ForbiddenException, HttpStatus, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
 
 describe('NotificationsService', () => {
@@ -125,10 +131,7 @@ describe('NotificationsService', () => {
         status_code: HttpStatus.OK,
         message: 'Notifications cleared successfully.',
         data: {
-          notifications: notifications.map(notification => ({
-            notification_id: notification.id,
-            is_read: true,
-          })),
+          notifications: [],
         },
       });
 
