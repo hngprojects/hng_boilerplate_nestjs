@@ -50,6 +50,7 @@ describe('InviteService', () => {
       testimonials: [],
       profile: null,
       organisationMembers: [],
+      notifications_settings: [],
       notifications: [],
       comments: [],
     };
@@ -71,6 +72,7 @@ describe('InviteService', () => {
       creator: mockUser,
       preferences: [],
       invites: [],
+      role: null,
       organisationMembers: [],
       products: [],
     };

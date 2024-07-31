@@ -8,8 +8,9 @@ import { Product } from '../../../modules/products/entities/product.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
-import { Notification } from '../../notifications/entities/notifications.entity';
 import { Comment } from '../../comments/entities/comment.entity';
+import { Notification } from '../../notifications/entities/notifications.entity';
+import { NotificationSettings } from '../../notification-settings/entities/notification-setting.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -81,11 +82,14 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Comment, comment => comment.user)
   comments: Comment[];
 
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
+  @OneToMany(() => NotificationSettings, notifications_settings => notifications_settings.user)
+  notifications_settings: NotificationSettings[];
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
-
-  @OneToMany(() => Notification, notification => notification.user)
-  notifications: Notification[];
 }
