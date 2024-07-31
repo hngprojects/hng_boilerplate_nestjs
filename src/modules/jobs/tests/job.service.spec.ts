@@ -29,6 +29,7 @@ describe('JobsService', () => {
     owned_organisations: [],
     created_organisations: [],
     invites: [],
+    comments: [],
     profile: null,
     testimonials: [],
     organisationMembers: [],
