@@ -5,6 +5,6 @@ export class GetWaitlistResponseDto {
   status_code: number;
   message: string;
   data: {
-    waitlists: Waitlist[];
+    waitlist: Waitlist[];
   };
 }
