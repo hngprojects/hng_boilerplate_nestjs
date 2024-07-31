@@ -80,7 +80,7 @@ export class ProfileService {
         if (user.profile && user.profile.profile_pic_url)
           await fs.promises.rmdir(path.join(uploadProfilePicFolder, user.profile.profile_pic_url));
 
-        await queryRunner.manager.update(Profile, { user_id: user.id }, userProfile);
+        await queryRunner.manager.update(Profile, { user_id: user.id, email: user.email }, userProfile);
 
         fs.rename(file.path, path.join(uploadProfilePicFolder, newFileName), err => {
           if (err) throw err;
@@ -89,7 +89,6 @@ export class ProfileService {
 
         await queryRunner.commitTransaction();
       } catch (error) {
-        Logger.log(`UpdateUserProfilePitureError: ${error}`);
         await queryRunner.rollbackTransaction();
         throw error;
       } finally {
