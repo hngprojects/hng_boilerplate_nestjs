@@ -1,7 +1,7 @@
 name: CI/CD--Dev
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - dev
   push:
@@ -27,12 +27,12 @@ env:
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
-    # environment: pr_environment
+    environment: pr_environment
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
+        # with:
+        #   ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
