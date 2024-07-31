@@ -1,3 +1,4 @@
+import { Profile } from 'src/modules/profile/entities/profile.entity';
 import { UserType } from '../entities/user.entity';
 
 interface UserInterface {
@@ -10,6 +11,8 @@ interface UserInterface {
   last_name: string;
 
   password: string;
+
+  backup_codes: string[];
 
   secret: string;
 
@@ -28,6 +31,8 @@ interface UserInterface {
   updated_at: Date;
 
   phone_number?: string;
+
+  profile?: Profile;
 }
 
 export default UserInterface;

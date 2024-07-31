@@ -46,6 +46,10 @@ export const createMockOrganisation = (): Organisation => {
     last_name: 'Smith',
     email: 'john.smith@example.com',
     password: 'pass123',
+    is_two_factor_enabled: false,
+    two_factor_secret: 'some-secret',
+    backup_codes: [],
+    jobs: [],
     phone: '+1234567890',
     hashPassword: async () => {},
     is_active: true,
@@ -61,6 +65,8 @@ export const createMockOrganisation = (): Organisation => {
     products: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],
+    notifications: [],
+    notifications_settings: [],
   };
 
   return {
@@ -80,6 +86,7 @@ export const createMockOrganisation = (): Organisation => {
     isDeleted: false,
     preferences: [],
     invites: [],
+    role: null,
     organisationMembers: [orgMemberMock],
     products: [],
   };
