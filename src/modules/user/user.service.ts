@@ -69,12 +69,18 @@ export default class UserService {
   }
 
   private async getUserByEmail(email: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
+    const user: UserResponseDTO = await this.userRepository.findOne({
+      where: { email: email },
+      relations: ['profile'],
+    });
     return user;
   }
 
   private async getUserById(identifier: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({ where: { id: identifier } });
+    const user: UserResponseDTO = await this.userRepository.findOne({
+      where: { id: identifier },
+      relations: ['profile'],
+    });
     return user;
   }
 
