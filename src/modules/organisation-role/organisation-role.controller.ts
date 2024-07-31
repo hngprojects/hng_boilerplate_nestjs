@@ -1,19 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { OrganisationRoleService } from './organisation-role.service';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
-import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 
@@ -44,18 +31,16 @@ export class OrganisationRoleController {
     };
   }
 
-  @Get()
-  findAll() {
-    return this.organisationRoleService.findAll();
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrganisationRoleDto: UpdateOrganisationRoleDto) {
-    return this.organisationRoleService.update(+id, updateOrganisationRoleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organisationRoleService.remove(+id);
+  @Get(':org_id/roles')
+  @UseGuards(OwnershipGuard)
+  @ApiOperation({ summary: 'Get all organisation roles' })
+  @ApiResponse({ status: 200, description: 'Success', type: [Object] })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
+  async getRoles(@Param('organisationId') organisationID: string) {
+    const roles = await this.organisationRoleService.getAllRolesInOrg(organisationID);
+    return {
+      status_code: 200,
+      data: roles,
+    };
   }
 }

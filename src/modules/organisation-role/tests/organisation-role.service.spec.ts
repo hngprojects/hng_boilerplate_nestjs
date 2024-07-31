@@ -70,4 +70,43 @@ describe('OrganisationRoleService', () => {
       await expect(service.createOrgRoles({ name: 'ExistingRole' }, 'org123')).rejects.toThrow(ConflictException);
     });
   });
+  describe('getAllRolesInOrganisation', () => {
+    it('should return an array of roles for an existing organization', async () => {
+      const organisationId = '1';
+      const mockRoles = [
+        { id: '1', name: 'Admin', description: 'Administrator role' },
+        { id: '2', name: 'User', description: 'Regular user role' },
+      ];
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: organisationId } as Organisation);
+      jest.spyOn(rolesRepository, 'find').mockResolvedValue(mockRoles as OrganisationRole[]);
+
+      const roles = await service.getAllRolesInOrg(organisationId);
+      expect(roles).toEqual(mockRoles);
+    });
+
+    it('should throw NotFoundException if the organisation is not found', async () => {
+      const organisationId = '1';
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.getAllRolesInOrg(organisationId)).rejects.toThrow(NotFoundException);
+    });
+    it('should handle cases where roles are not available', async () => {
+      const organisationId = '1';
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: organisationId } as Organisation);
+      jest.spyOn(rolesRepository, 'find').mockResolvedValue([]);
+
+      const roles = await service.getAllRolesInOrg(organisationId);
+      expect(roles).toEqual([]);
+    });
+
+    it('should handle database errors gracefully', async () => {
+      const organisationId = '1';
+
+      jest.spyOn(organisationRepository, 'findOne').mockRejectedValue(new Error('Database error'));
+
+      await expect(service.getAllRolesInOrg(organisationId)).rejects.toThrowError('Database error');
+    });
+  });
 });
