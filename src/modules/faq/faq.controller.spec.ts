@@ -73,6 +73,33 @@ describe('FaqController (e2e)', () => {
       expect(response.body).toEqual(expectedResponse);
     });
 
+    it('should return 400 if question is missing', async () => {
+      const createFaqDto = {
+        answer: 'Our return policy allows returns within 30 days of purchase.',
+        category: 'Policies',
+      };
+
+      const response = await request(server)
+        .post('/faqs')
+        .send(createFaqDto)
+        .expect(400);
+
+      expect(response.body.message).toContain('Question is required');
+    });
+
+    it('should return 400 if answer is missing', async () => {
+      const createFaqDto = {
+        question: 'What is the return policy?',
+        category: 'Policies',
+      };
+
+      const response = await request(server)
+        .post('/faqs')
+        .send(createFaqDto)
+        .expect(400);
+
+      expect(response.body.message).toContain('Answer is required');
+    });
 
     it('should return 500 if there is an unexpected error', async () => {
       const createFaqDto: CreateFaqDto = {
