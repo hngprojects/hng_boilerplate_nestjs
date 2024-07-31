@@ -5,6 +5,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { PermissionCategory } from './PermissionCategory';
+import { WRONG_PARAMETERS } from '../../../helpers/SystemMessages';
 
 @ValidatorConstraint({ async: false })
 class IsPermissionListValidConstraint implements ValidatorConstraintInterface {
@@ -28,7 +29,7 @@ class IsPermissionListValidConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return 'permission_list must be an object with keys from PermissionCategory and boolean values';
+    return WRONG_PARAMETERS;
   }
 }
 
