@@ -36,4 +36,5 @@ export const newUser: User = {
   testimonials: [],
   notifications: [],
   notifications_settings: [],
+  backup_codes: [],
 };
