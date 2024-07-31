@@ -30,6 +30,7 @@ import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   providers: [
@@ -121,6 +122,7 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     JobsModule,
     ProfileModule,
     RunTestsModule,
+    NotificationsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
