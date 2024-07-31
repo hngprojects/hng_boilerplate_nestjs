@@ -39,6 +39,30 @@ export default class UserService {
     await this.userRepository.save(user);
   }
 
+  async getUserDataWithoutPasswordById(id: string) {
+    const user = await this.getUserRecord({ identifier: id, identifierType: 'id' });
+
+    const { password, ...userData } = user;
+
+    return {
+      status_code: 200,
+      user: userData,
+    };
+  }
+
+  public async createUserGoogle(userPayload) {
+    const newUser = new User();
+    const userData = {
+      email: userPayload.email,
+      name: `${userPayload.given_name} ${userPayload.family_name}`,
+      first_name: userPayload.given_name,
+      last_name: userPayload.family_name,
+    };
+    Object.assign(newUser, userData);
+    newUser.is_active = true;
+    return this.userRepository.save(newUser);
+  }
+
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
     return user;
@@ -151,5 +175,46 @@ export default class UserService {
     await this.userRepository.save(user);
 
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
+  }
+
+  async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
+    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
+      throw new ForbiddenException({
+        error: 'Forbidden',
+        message: 'Only super admins can access this endpoint',
+        status_code: HttpStatus.FORBIDDEN,
+      });
+    }
+
+    const [users, total] = await this.userRepository.findAndCount({
+      select: ['id', 'first_name', 'last_name', 'email', 'phone', 'is_active', 'created_at'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { created_at: 'DESC' },
+    });
+
+    const pagination = {
+      current_page: page,
+      total_pages: Math.ceil(total / limit),
+      total_users: total,
+    };
+
+    const formattedUsers = users.map(user => ({
+      id: user.id,
+      name: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      phone_number: user.phone,
+      is_active: user.is_active,
+      created_at: user.created_at,
+    }));
+
+    return {
+      status: 'success',
+      message: 'Users retrieved successfully',
+      data: {
+        users: formattedUsers,
+        pagination,
+      },
+    };
   }
 }
