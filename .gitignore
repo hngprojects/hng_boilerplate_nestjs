@@ -395,3 +395,6 @@ dist
 # Migrations
 /db/migrations/*-migration.ts
 /db
+
+# Public directory
+/public

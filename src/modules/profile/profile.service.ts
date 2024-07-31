@@ -1,14 +1,27 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
+import { Express, Response } from 'express';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class ProfileService {
   constructor(
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
-    @InjectRepository(User) private userRepository: Repository<User>
+    @InjectRepository(User) private userRepository: Repository<User>,
+    private dataSource: DataSource
   ) {}
 
   async findOneProfile(userId: string) {
@@ -33,6 +46,88 @@ export class ProfileService {
         throw error;
       }
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);
+    }
+  }
+
+  async updateUserProfilePicture(
+    file: Express.Multer.File,
+    userId: string,
+    reqUrl: string,
+    uploadProfilePicFolder: string
+  ) {
+    try {
+      const newFileName = `profile-pic__${userId}--${Date.now()}${path.extname(file.originalname)}`;
+
+      const user: User = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
+      if (!user)
+        throw new UnauthorizedException({
+          status: HttpStatus.UNAUTHORIZED,
+          message: 'The logged in user provided is invalid',
+        });
+
+      const userProfile = new Profile();
+      Object.assign(userProfile, { ...user.profile });
+      userProfile.profile_pic_url = newFileName;
+      if (!user.profile) userProfile.user_id = user;
+
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        if (user.profile && user.profile.profile_pic_url)
+          await fs.promises.rmdir(path.join(uploadProfilePicFolder, user.profile.profile_pic_url));
+
+        if (user.profile) await queryRunner.manager.update(Profile, { user_id: user.id }, userProfile);
+        else await queryRunner.manager.save(userProfile);
+
+        fs.rename(file.path, path.join(uploadProfilePicFolder, newFileName), err => {
+          if (err) throw err;
+          return;
+        });
+
+        await queryRunner.commitTransaction();
+      } catch (error) {
+        Logger.log(`UpdateUserProfilePitureError: ${error}`);
+        await queryRunner.rollbackTransaction();
+        throw error;
+      } finally {
+        await queryRunner.release();
+      }
+
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Profile picture updated successfully',
+        data: { profile_picture_url: `${reqUrl}/${userProfile.profile_pic_url}` },
+      };
+    } catch (error) {
+      Logger.log(error);
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'An unexpected error ocured while processing your request',
+        error: error.message,
+      });
+    }
+  }
+
+  async getProfilePic(picName: string, res: Response, uploadProfilePicFolder: string) {
+    try {
+      const picPath = path.join(uploadProfilePicFolder, picName);
+      const picture = await fs.promises.readFile(picPath);
+
+      res.setHeader('Content-Type', 'image/*');
+      return res.send(picture);
+    } catch (error) {
+      Logger.log(error);
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'An unexpected error ocured while processing your request',
+        error: error.message,
+      });
     }
   }
 }

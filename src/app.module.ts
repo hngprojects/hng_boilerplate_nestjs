@@ -27,6 +27,8 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import * as path from 'path';
 
 @Module({
   providers: [
@@ -114,6 +116,10 @@ import { ProfileModule } from './modules/profile/profile.module';
     TestimonialsModule,
     ProductsModule,
     ProfileModule,
+    ServeStaticModule.forRoot({
+      rootPath: path.join(process.cwd(), '/public/upload/user-profile-img/'),
+      serveRoot: '/profile/pic/',
+    }),
   ],
   controllers: [HealthController, ProbeController],
 })
