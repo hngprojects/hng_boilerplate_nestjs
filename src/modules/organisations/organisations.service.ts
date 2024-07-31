@@ -17,7 +17,6 @@ import { User } from '../user/entities/user.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { OrganisationMember } from './entities/org-members.entity';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 
@@ -27,9 +26,7 @@ export class OrganisationsService {
     @InjectRepository(Organisation)
     private readonly organisationRepository: Repository<Organisation>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(OrganisationMember)
-    private readonly orgMemberRepository: Repository<OrganisationMember>
+    private readonly userRepository: Repository<User>
   ) {}
 
   async getOrganisationMembers(
@@ -47,7 +44,7 @@ export class OrganisationsService {
     if (!orgs) throw new NotFoundException('No organisation found');
 
     let data = orgs.organisationMembers.map(member => {
-      return OrganisationMemberMapper.mapToResponseFormat(member.user);
+      return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
     });
 
     const isMember = data.find(member => member.id === sub);
@@ -131,7 +128,9 @@ export class OrganisationsService {
         this.verifyOwner(org, currentUserId);
       }
 
-      const isMember = await this.checkIfUserIsAMember(org, userId);
+      const user = await this.checkIfUserExists(userId);
+
+      const isMember = this.checkIfUserIsAMember(org, user);
 
       if (isMember <= 0) {
         throw new NotFoundException({
@@ -141,14 +140,9 @@ export class OrganisationsService {
         });
       }
 
-      const memberEntry = await this.orgMemberRepository.findOne({
-        where: {
-          user_id: userId,
-          organisation_id: orgId,
-        },
-      });
+      const newMembersList = org.organisationMembers.filter(member => member.user_id !== user);
 
-      await this.orgMemberRepository.remove(memberEntry);
+      await this.organisationRepository.save(newMembersList);
 
       return {
         status: 'Success',
@@ -159,6 +153,7 @@ export class OrganisationsService {
       if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
         throw err;
       }
+      console.error(err);
       throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
     }
   }
@@ -180,6 +175,23 @@ export class OrganisationsService {
     return org;
   }
 
+  async checkIfUserExists(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'User not found',
+        status_code: 404,
+      });
+    }
+
+    return user;
+  }
+
   verifyOwner(org: Organisation, ownerId: string) {
     const isOwner = org.owner.id == ownerId;
 
@@ -192,12 +204,8 @@ export class OrganisationsService {
     }
   }
 
-  async checkIfUserIsAMember(org: Organisation, userId: string) {
-    const count = await this.orgMemberRepository
-      .createQueryBuilder('member')
-      .where('member.user_id = :userId', { userId })
-      .andWhere('member.organisation_id = :orgId', { orgId: org.id })
-      .getCount();
+  checkIfUserIsAMember(org: Organisation, member: User) {
+    const count = org.organisationMembers.filter(user => user.user_id === member).length;
 
     return count;
   }

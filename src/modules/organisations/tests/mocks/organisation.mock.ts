@@ -35,10 +35,7 @@ export const createMockOrganisation = (): Organisation => {
     user_id: null,
     role: 'admin',
     organisation_id: null,
-    profile_id: profileMock.id,
-    profile: profileMock,
-    user: null,
-    organisation: null,
+    profile_id: profileMock,
   };
 
   const ownerAndCreator = {
