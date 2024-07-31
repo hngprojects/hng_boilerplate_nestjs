@@ -78,8 +78,7 @@ export class ProfileService {
         if (user.profile && user.profile.profile_pic_url)
           await fs.promises.rmdir(path.join(uploadProfilePicFolder, user.profile.profile_pic_url));
 
-        if (user.profile) await queryRunner.manager.update(Profile, { user_id: user.id }, userProfile);
-        else await queryRunner.manager.save(userProfile);
+        await queryRunner.manager.update(Profile, { user_id: user.id }, userProfile);
 
         fs.rename(file.path, path.join(uploadProfilePicFolder, newFileName), err => {
           if (err) throw err;
