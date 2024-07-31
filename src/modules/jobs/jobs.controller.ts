@@ -5,7 +5,6 @@ import { PaginationDto } from './dto/pagination.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JobGuard } from './guards/job.guard';
 import { skipAuth } from '../../helpers/skipAuth';
-import { UpdateJobByIdRequestDto } from './dto/update-job-by-id-request.dto';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -40,7 +39,6 @@ export class JobsController {
     return this.jobService.getJob(id);
   }
 
-<<<<<<< HEAD
   @UseGuards(JobGuard)
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete a job' })
@@ -49,15 +47,5 @@ export class JobsController {
   @ApiResponse({ status: 404, description: 'Job not found' })
   async delete(@Param('id') id: string) {
     return this.jobService.delete(id);
-=======
-  @skipAuth()
-  @Patch('/:id')
-  @ApiOperation({ summary: 'Update a job' })
-  @ApiResponse({ status: 200, description: 'Job updated successfully' })
-  @ApiResponse({ status: 404, description: 'Job not found' })
-  updateJob(@Param('id') id: string, @Body() updateJobByIdRequestDto: UpdateJobByIdRequestDto) {
-    console.log(id, updateJobByIdRequestDto);
-    return true;
->>>>>>> ebcf5f9 (chore: remove add waitlist service, controller and dto, and update waitlist entity)
   }
 }
