@@ -106,7 +106,7 @@ export class ProductsService {
       if (!product) {
         throw new NotFoundException({
           status_code: 404,
-          status: 'Not Found',
+          status: 'error',
           message: 'Product not found',
         });
       }
@@ -115,7 +115,7 @@ export class ProductsService {
       if (!user) {
         throw new NotFoundException({
           status_code: 404,
-          status: 'Not Found',
+          status: 'error',
           message: 'User not found',
         });
       }
@@ -140,14 +140,12 @@ export class ProductsService {
           comment: newComment.comment,
           user_id: newComment.user.id,
           created_at: newComment.created_at,
-          updated_at: newComment.updated_at,
         },
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       } else {
-        console.error('Error adding comment:', error);
         throw new InternalServerErrorException({
           status_code: 500,
           status: 'Server Error',
