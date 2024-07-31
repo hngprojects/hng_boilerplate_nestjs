@@ -5,6 +5,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -30,7 +31,8 @@ export class OrganisationsService {
   async getOrganisationMembers(
     orgId: string,
     page: number,
-    page_size: number
+    page_size: number,
+    sub: string
   ): Promise<OrganisationMembersResponseDto> {
     const skip = (page - 1) * page_size;
     const orgs = await this.organisationRepository.findOne({
@@ -47,6 +49,14 @@ export class OrganisationsService {
     let data = orgs.organisationMembers.map(member => {
       return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
     });
+
+    const isMember = data.find(member => member.id === sub);
+
+    if (!isMember)
+      throw new UnauthorizedException({
+        message: 'User does not have access to the organization',
+        status_code: HttpStatus.FORBIDDEN,
+      });
 
     data = data.splice(skip, skip + page_size);
 

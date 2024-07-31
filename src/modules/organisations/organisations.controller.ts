@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Request,
   Res,
   UseGuards,
@@ -64,10 +65,12 @@ export class OrganisationsController {
   })
   @Get(':org_id/users')
   async getMembers(
+    @Req() req,
     @Param('org_id') org_id: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('page_size', new DefaultValuePipe(1), ParseIntPipe) page_size: number
   ): Promise<OrganisationMembersResponseDto> {
-    return this.organisationsService.getOrganisationMembers(org_id, page, page_size);
+    const { sub } = req.user;
+    return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
 }
