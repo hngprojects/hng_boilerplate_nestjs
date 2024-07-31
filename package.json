@@ -32,6 +32,7 @@
     "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
+    "@css-inline/css-inline": "^0.14.1",
     "@faker-js/faker": "^8.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
@@ -45,7 +46,6 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "css-inline": "^0.11.2",
     "google-auth-library": "^9.12.0",
     "joi": "^17.6.0",
     "nestjs-pino": "^4.1.0",
