@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
 import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
 import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
+import { Profile } from '../profile/entities/profile.entity';
 import { User } from '../user/entities/user.entity';
 import UserService from '../user/user.service';
 import { Notification } from './entities/notification.entity';
@@ -11,7 +12,7 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification, User, NotificationSettings])],
+  imports: [TypeOrmModule.forFeature([Notification, User, Profile, NotificationSettings])],
   controllers: [NotificationsController],
   providers: [NotificationsService, Repository, UserService, NotificationSettingsService, EmailService],
 })

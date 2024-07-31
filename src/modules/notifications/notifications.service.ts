@@ -6,27 +6,27 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Notification } from './entities/notifications.entity';
-import { CreateNotificationPropsDto } from './dto/create-notification-props.dto';
-import { IMessageInterface } from '../email/interface/message.interface';
-import { NotificationSettingsResponseDto } from '../notification-settings/dto/notification-settings-response.dto';
-import UserInterface from '../user/interfaces/UserInterface';
-import { CreateNotificationError } from './dto/create-notification-error.dto';
-import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
-import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
-import UserService from '../user/user.service';
+import { IMessageInterface } from '../email/interface/message.interface';
 import { NotificationSettingsDto } from '../notification-settings/dto/notification-settings.dto';
 import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
+import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
+import UserInterface from '../user/interfaces/UserInterface';
+import UserService from '../user/user.service';
+import { CreateNotificationError } from './dto/create-notification-error.dto';
+import { CreateNotificationPropsDto } from './dto/create-notification-props.dto';
+import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
+import { Notification } from './entities/notifications.entity';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
+
     private readonly emailService: EmailService,
     private readonly userService: UserService,
     private readonly notificationSettingsService: NotificationSettingsService
