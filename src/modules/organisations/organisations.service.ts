@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpCode,
   HttpStatus,
   Injectable,
@@ -40,23 +41,14 @@ export class OrganisationsService {
       relations: ['organisationMembers', 'organisationMembers.user_id'],
     });
 
-    if (!orgs)
-      throw new NotFoundException({
-        message: 'No organisation found',
-        status_code: HttpStatus.NOT_FOUND,
-      });
+    if (!orgs) throw new NotFoundException('No organisation found');
 
     let data = orgs.organisationMembers.map(member => {
       return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
     });
 
     const isMember = data.find(member => member.id === sub);
-
-    if (!isMember)
-      throw new UnauthorizedException({
-        message: 'User does not have access to the organization',
-        status_code: HttpStatus.FORBIDDEN,
-      });
+    if (!isMember) throw new ForbiddenException('User does not have access to the organization');
 
     data = data.splice(skip, skip + page_size);
 
