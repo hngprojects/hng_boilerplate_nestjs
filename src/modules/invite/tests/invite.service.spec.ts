@@ -50,6 +50,7 @@ describe('InviteService', () => {
       testimonials: [],
       profile: null,
       organisationMembers: [],
+      comments: [],
     };
 
     const mockOrg: Organisation = {

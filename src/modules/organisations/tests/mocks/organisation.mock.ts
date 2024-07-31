@@ -60,6 +60,7 @@ export const createMockOrganisation = (): Organisation => {
     secret: 'secret',
     is_2fa_enabled: false,
     products: [],
+    comments: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],
   };
