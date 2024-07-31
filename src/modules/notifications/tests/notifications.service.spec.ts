@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { NotificationsService } from '../notifications.service';
+import { Repository } from 'typeorm';
 import { Notification } from '../entities/notifications.entity';
-import { User } from '../../user/entities/user.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
+import { BadRequestException, ForbiddenException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { User } from '../../../modules/user/entities/user.entity';
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
   let notificationRepository: Repository<Notification>;
-  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,60 +17,76 @@ describe('NotificationsService', () => {
         NotificationsService,
         {
           provide: getRepositoryToken(Notification),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(User),
-          useClass: Repository,
+          useValue: mockNotificationRepository,
         },
       ],
     }).compile();
 
     service = module.get<NotificationsService>(NotificationsService);
     notificationRepository = module.get<Repository<Notification>>(getRepositoryToken(Notification));
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getNotificationsForUser', () => {
-    it('should throw an exception if user is not found', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+  describe('markNotificationAsRead', () => {
+    const userId = 'validUserId';
 
-      await expect(service.getNotificationsForUser('non-existent-id')).rejects.toThrow(
-        new InternalServerErrorException('User not found')
+    it('should throw a BadRequest exception if notification_id or options are invalid', async () => {
+      await expect(service.markNotificationAsRead(null, null, userId)).rejects.toThrow(
+        new BadRequestException({
+          status: 'error',
+          message: 'Invalid Request',
+          status_code: HttpStatus.BAD_REQUEST,
+        })
       );
     });
 
-    it('should return notifications for a valid user', async () => {
-      const user = new User();
-      user.id = 'valid-user-id';
-      user.notifications = [];
+    it('should throw a NotFound exception if notification does not exist', async () => {
+      mockNotificationRepository.findOne.mockResolvedValue(null);
 
-      const notifications = [
-        { id: '1', message: 'Test 1', is_Read: false, user } as Notification,
-        { id: '2', message: 'Test 2', is_Read: true, user } as Notification,
-      ];
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-      jest.spyOn(notificationRepository, 'find').mockResolvedValue(notifications);
-
-      const result = await service.getNotificationsForUser('valid-user-id');
-
-      expect(result.totalNotificationCount).toBe(2);
-      expect(result.totalUnreadNotificationCount).toBe(1);
-      expect(result.notifications).toEqual(notifications);
+      await expect(service.markNotificationAsRead({ is_read: true }, 'invalid-id', userId)).rejects.toThrow(
+        new NotFoundException({
+          status: 'error',
+          message: 'Notification not found',
+          status_code: HttpStatus.NOT_FOUND,
+        })
+      );
     });
 
-    it('should throw an exception if there is an error retrieving notifications', async () => {
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(new User());
-      jest.spyOn(notificationRepository, 'find').mockRejectedValue(new Error('Some error'));
+    it('should mark notification as read if it exists and belongs to the user', async () => {
+      const notification: Notification = {
+        id: 'valid-id',
+        is_read: false,
+        message: 'valid notification',
+        user: mockUser as User,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      const options = { is_read: true };
+      mockNotificationRepository.findOne.mockResolvedValue(notification);
+      mockNotificationRepository.save.mockResolvedValue({ ...notification, is_read: true });
 
-      await expect(service.getNotificationsForUser('valid-user-id')).rejects.toThrow(
-        new InternalServerErrorException('Failed to retrieve notifications.')
-      );
+      const result = await service.markNotificationAsRead(options, 'valid-id', userId);
+
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Notification marked as read successfully',
+        status_code: HttpStatus.OK,
+        data: {
+          notification_id: notification.id,
+          message: notification.message,
+          is_read: notification.is_read,
+          updated_at: notification.updated_at,
+        },
+      });
+
+      expect(mockNotificationRepository.save).toHaveBeenCalledWith({ ...notification, is_read: true });
     });
   });
 });
