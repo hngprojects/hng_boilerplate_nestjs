@@ -10,6 +10,6 @@ export class GetWaitlistResponseDto {
       url_slug?: string;
       createdAt: Date;
       updatedAt: Date;
-    };
+    }[];
   };
 }
