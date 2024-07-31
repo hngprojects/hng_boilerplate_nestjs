@@ -4,6 +4,7 @@ import { ObjectId, Repository } from 'typeorm';
 import { Otp } from './entities/otp.entity';
 import { User } from '../user/entities/user.entity';
 import { generateSixDigitToken } from '../../utils/generate-token';
+import { isInstance } from 'class-validator';
 
 @Injectable()
 export class OtpService {
@@ -30,7 +31,7 @@ export class OtpService {
 
       return otp;
     } catch (error) {
-      Logger.error('OtpServiceError ~ createOtpError ~', error);
+      console.log('OtpServiceError ~ createOtpError ~', error);
       return null;
     }
   }
@@ -49,8 +50,21 @@ export class OtpService {
 
       return true;
     } catch (error) {
-      Logger.error('OtpServiceError ~ verifyOtpError ~', error);
+      console.log('OtpServiceError ~ verifyOtpError ~', error);
       return false;
     }
+  }
+
+  async findOtp(userId: string): Promise<Otp | null> {
+    const otp = await this.otpRepository.findOne({ where: { user_id: userId } });
+
+    if (!otp) {
+      throw new NotFoundException('OTP is invalid');
+    }
+    return otp;
+  }
+
+  async deleteOtp(userId: string) {
+    return await this.otpRepository.delete({ user_id: userId });
   }
 }

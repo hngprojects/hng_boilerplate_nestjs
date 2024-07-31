@@ -1,12 +1,17 @@
-import * as bcrypt from 'bcrypt';
-import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
+import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
-
+import { Product } from '../../../modules/products/entities/product.entity';
+import { Job } from '../../../modules/jobs/entities/job.entity';
+import { Profile } from '../../profile/entities/profile.entity';
+import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { Notification } from '../../notifications/entities/notifications.entity';
+import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 export enum UserType {
-  SUPER_ADMIN = 'super_admin',
+  SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
   USER = 'vendor',
 }
@@ -26,13 +31,10 @@ export class User extends AbstractBaseEntity {
   password: string;
 
   @Column({ nullable: true })
-  is_active: boolean;
+  phone: string;
 
   @Column({ nullable: true })
-  two_factor_secret?: string;
-
-  @Column({ default: false })
-  is_two_factor_enabled: boolean;
+  is_active: boolean;
 
   @Column('simple-array', { nullable: true })
   backup_codes: string[];
@@ -65,11 +67,27 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
 
+  @OneToMany(() => Job, job => job.user)
+  jobs: Job[];
+
+  @OneToOne(() => Profile, profile => profile.user_id)
+  @JoinColumn()
+  profile: Profile;
+
+  @OneToMany(() => Testimonial, testimonial => testimonial.user)
+  testimonials: Testimonial[];
+
+  @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
+  organisationMembers: OrganisationMember[];
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
-  @OneToMany(() => Testimonial, testimonial => testimonial.user)
-  testimonials: Testimonial[];
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
+  @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
+  notifications_settings: NotificationSettings[];
 }
