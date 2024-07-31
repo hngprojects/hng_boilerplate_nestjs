@@ -46,21 +46,19 @@ export class ProfileService {
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     try {
-      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      const userProfile = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-      if (!userProfile) {
+
+      const profile = user.profile;
+      if (!profile) {
         throw new NotFoundException('Profile not found');
       }
 
-      await this.profileRepository.update(userProfile.id, updateProfileDto);
+      await this.profileRepository.update(profile.id, updateProfileDto);
 
-      const updatedProfile = await this.profileRepository.findOne({ where: { id: userProfile.id } });
+      const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
 
       const responseData = {
         message: 'Profile successfully updated',
