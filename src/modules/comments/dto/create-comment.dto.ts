@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateCommentDto {
   @IsString()
@@ -7,7 +7,6 @@ export class CreateCommentDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsIn(['post', 'blog', 'content'])
   model_type: string;
 
   @IsString()
