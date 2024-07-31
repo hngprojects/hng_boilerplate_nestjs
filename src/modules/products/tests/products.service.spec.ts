@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { getRepositoryToken } from '@nestjs/typeorm';
-
 import { Repository } from 'typeorm';
 import { ProductsService } from '../products.service';
 import { Product } from '../entities/product.entity';
@@ -9,6 +7,7 @@ import { Organisation } from '../../../modules/organisations/entities/organisati
 import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 import { productMock } from './mocks/product.mock';
+import { NotFoundException } from '@nestjs/common';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -44,5 +43,73 @@ describe('ProductsService', () => {
 
     expect(createdProduct.message).toEqual('Product created successfully');
     expect(createdProduct.status).toEqual('success');
+  });
+
+  describe('searchProducts', () => {
+    it('should return products based on name search', async () => {
+      const searchCriteria = { name: 'Product 1' };
+      const queryBuilderMock = {
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+      };
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const products = await service.searchProducts(searchCriteria);
+
+      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
+    });
+
+    // it('should return products based on category search', async () => {
+    //   const searchCriteria = { category: 'kids' };
+    //   const queryBuilderMock = {
+    //     andWhere: jest.fn().mockReturnThis(),
+    //     getMany: jest.fn().mockResolvedValue([productMock]),  // Return array of products
+    //   };
+    //   jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+    //   const products = await service.searchProducts(searchCriteria);
+
+    //   expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
+    // });
+
+    it('should return products based on price range search', async () => {
+      const searchCriteria = { minPrice: 100, maxPrice: 200 };
+      const queryBuilderMock = {
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+      };
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const products = await service.searchProducts(searchCriteria);
+
+      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
+    });
+
+    it('should return products based on combined search criteria', async () => {
+      // const searchCriteria = { name: 'TV', category: 'kids', minPrice: 100, maxPrice: 200 };
+      const searchCriteria = { name: 'Product 1', minPrice: 100, maxPrice: 200 };
+      const queryBuilderMock = {
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+      };
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const products = await service.searchProducts(searchCriteria);
+
+      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
+    });
+
+    it('should throw NotFoundException if no products match search criteria', async () => {
+      const searchCriteria = { name: 'nonexistent' };
+      const queryBuilderMock = {
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]), // Return empty array
+      };
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      await expect(service.searchProducts(searchCriteria)).rejects.toThrow(
+        new NotFoundException({ status: 'No Content', status_code: 204, message: 'No products found' })
+      );
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
@@ -19,5 +19,20 @@ export class ProductsController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async createProduct(@Param('id') id: string, @Body() createProductDto: CreateProductRequestDto) {
     return this.productsService.createProduct(id, createProductDto);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search for products' })
+  @ApiResponse({ status: 200, description: 'Products found successfully' })
+  @ApiResponse({ status: 204, description: 'No products found' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async searchProducts(
+    @Query('name') name?: string,
+    @Query('category') category?: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number
+  ) {
+    return this.productsService.searchProducts({ name, category, minPrice, maxPrice });
   }
 }

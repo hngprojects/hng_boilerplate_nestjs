@@ -1,15 +1,16 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateProductRequestDto } from './dto/create-product.dto';
 import { Product, ProductStatusType } from './entities/product.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
+import { CreateProductRequestDto } from './dto/create-product.dto';
+
+interface SearchCriteria {
+  name?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
 
 @Injectable()
 export class ProductsService {
@@ -55,6 +56,40 @@ export class ProductsService {
         created_at: newProduct.created_at,
         updated_at: newProduct.updated_at,
       },
+    };
+  }
+
+  async searchProducts(criteria: SearchCriteria) {
+    const { name, category, minPrice, maxPrice } = criteria;
+    const query = this.productRepository.createQueryBuilder('product');
+
+    if (name) {
+      query.andWhere('product.name ILIKE :name', { name: `%${name}%` });
+    }
+    // if (category) {
+    //   query.andWhere('product.category ILIKE :category', { category: `%${category}%` });
+    // }
+    if (minPrice) {
+      query.andWhere('product.price >= :minPrice', { minPrice });
+    }
+    if (maxPrice) {
+      query.andWhere('product.price <= :maxPrice', { maxPrice });
+    }
+
+    const products = await query.getMany();
+
+    if (!products.length) {
+      throw new NotFoundException({
+        status: 'No Content',
+        status_code: 204,
+        message: 'No products found',
+      });
+    }
+
+    return {
+      success: true,
+      statusCode: 200,
+      products,
     };
   }
 
