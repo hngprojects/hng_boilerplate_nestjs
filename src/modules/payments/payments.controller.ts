@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, Query, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Request, Query, Res } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { skipAuth } from 'src/helpers/skipAuth';
@@ -24,8 +24,7 @@ export class PaymentsController {
   ) {
     const verificationResult = await this.paymentsService.verifyPayStackPayment(trxref, subscriptionId);
 
-    console.log({ trxref, subscriptionId });
-    const redirectUrl = `https://example.com?success=${verificationResult.data.status}`;
+    const redirectUrl = `${process.env.CLIENT_BASE_URL}/settings?success=${verificationResult.data.status}`;
 
     return res.redirect(redirectUrl);
   }

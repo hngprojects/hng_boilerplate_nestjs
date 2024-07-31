@@ -31,6 +31,7 @@ import ProbeController from './probe.controller';
 import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   providers: [
@@ -123,6 +124,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     ProfileModule,
     RunTestsModule,
     NotificationsModule,
+    PaymentsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
