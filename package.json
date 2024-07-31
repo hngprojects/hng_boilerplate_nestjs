@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@css-inline/css-inline": "^0.14.1",
+    "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
     "@faker-js/faker": "^8.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
