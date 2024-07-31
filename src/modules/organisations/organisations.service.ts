@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  ForbiddenException,
+  HttpCode,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -16,6 +18,8 @@ import { OrganisationMapper } from './mapper/organisation.mapper';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationMember } from './entities/org-members.entity';
+import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
+import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 
 @Injectable()
 export class OrganisationsService {
@@ -27,6 +31,32 @@ export class OrganisationsService {
     @InjectRepository(OrganisationMember)
     private readonly orgMemberRepository: Repository<OrganisationMember>
   ) {}
+
+  async getOrganisationMembers(
+    orgId: string,
+    page: number,
+    page_size: number,
+    sub: string
+  ): Promise<OrganisationMembersResponseDto> {
+    const skip = (page - 1) * page_size;
+    const orgs = await this.organisationRepository.findOne({
+      where: { id: orgId },
+      relations: ['organisationMembers', 'organisationMembers.user_id'],
+    });
+
+    if (!orgs) throw new NotFoundException('No organisation found');
+
+    let data = orgs.organisationMembers.map(member => {
+      return OrganisationMemberMapper.mapToResponseFormat(member.user);
+    });
+
+    const isMember = data.find(member => member.id === sub);
+    if (!isMember) throw new ForbiddenException('User does not have access to the organization');
+
+    data = data.splice(skip, skip + page_size);
+
+    return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
+  }
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
     const emailFound = await this.emailExists(createOrganisationDto.email);
@@ -97,7 +127,9 @@ export class OrganisationsService {
     try {
       const org = await this.checkIfOrgExists(orgId);
 
-      this.verifyOwner(org, currentUserId);
+      if (userId !== currentUserId) {
+        this.verifyOwner(org, currentUserId);
+      }
 
       const isMember = await this.checkIfUserIsAMember(org, userId);
 
