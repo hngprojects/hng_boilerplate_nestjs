@@ -9,7 +9,6 @@ import { BillingPlanDto } from './dto/billing-plan.dto';
 export class BillingPlanController {
   constructor(private readonly billingPlanService: BillingPlanService) {}
 
-  @skipAuth()
   @Post('/')
   @ApiOperation({ summary: 'Create billing plans' })
   @ApiResponse({ status: 201, description: 'Billing plans created successfully.', type: [BillingPlanDto] })
