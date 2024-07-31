@@ -5,7 +5,7 @@ import { Response } from 'express';
 @Injectable()
 export class RunTestsService {
   runTests(res: Response) {
-    const process = spawn('python', ['src/tests/python.py']);
+    const process = spawn('python3', ['src/run-tests/python.py']);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');

@@ -29,6 +29,7 @@ import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   providers: [
@@ -44,8 +45,6 @@ import { RunTestsModule } from './run-tests/run-tests.module';
           forbidNonWhitelisted: true,
         }),
     },
-    OtpService,
-    EmailService,
     {
       provide: 'APP_GUARD',
       useClass: AuthGuard,
@@ -109,6 +108,14 @@ import { RunTestsModule } from './run-tests/run-tests.module';
         },
       }),
       inject: [ConfigService],
+    }),
+    BullModule.forRootAsync({
+      useFactory: () => ({
+        redis: {
+          host: authConfig().redis.host,
+          port: +authConfig().redis.port,
+        },
+      }),
     }),
     OrganisationsModule,
     NotificationSettingsModule,

@@ -1,82 +1,83 @@
 import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
 import { ArticleInterface } from './article.interface';
+import { MailInterface } from './interfaces/MailInterface';
+import QueueService from './queue.service';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: QueueService) {}
 
   async sendUserConfirmationMail(email: string, url: string, token: string) {
     const link = `${url}?token=${token}`;
-    await this.mailerService.sendMail({
+    const mailPayload: MailInterface = {
       to: email,
-      subject: 'Welcome to My App! Confirm your Email',
-      template: 'confirmation',
       context: {
         link,
         email,
       },
-    });
+    };
+
+    this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
   }
 
   async sendUserEmailConfirmationOtp(email: string, otp: string) {
-    await this.mailerService.sendMail({
+    const mailPayload: MailInterface = {
       to: email,
-      subject: 'Welcome to My App! Confirm your Email',
-      template: 'register-otp',
       context: {
         otp,
         email,
       },
-    });
+    };
+
+    this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
   }
 
   async sendForgotPasswordMail(email: string, url: string, token: string) {
     const link = `${url}?token=${token}`;
-    await this.mailerService.sendMail({
+    const mailPayload: MailInterface = {
       to: email,
-      subject: 'Reset Password',
-      template: 'reset-password',
       context: {
         link,
         email,
       },
-    });
+    };
+
+    await this.mailerService.sendMail({ variant: 'reset-password', mail: mailPayload });
   }
 
   async sendWaitListMail(email: string, url: string) {
-    await this.mailerService.sendMail({
+    const mailPayload: MailInterface = {
       to: email,
-      subject: 'Waitlist Confirmation',
-      template: 'waitlist',
       context: {
         url,
         email,
       },
-    });
+    };
+
+    await this.mailerService.sendMail({ variant: 'waitlist', mail: mailPayload });
   }
 
   async sendNewsLetterMail(email: string, articles: ArticleInterface[]) {
-    await this.mailerService.sendMail({
+    const mailPayload: MailInterface = {
       to: email,
-      subject: 'Monthly Newsletter',
-      template: 'newsletter',
       context: {
         email,
         articles,
       },
-    });
+    };
+
+    await this.mailerService.sendMail({ variant: 'newsletter', mail: mailPayload });
   }
 
   async sendLoginOtp(email: string, token: string) {
-    await this.mailerService.sendMail({
+    const mailPayload: MailInterface = {
       to: email,
-      subject: 'Login with OTP',
-      template: 'login-otp',
       context: {
-        token,
         email,
+        token,
       },
-    });
+    };
+
+    await this.mailerService.sendMail({ variant: 'newsletter', mail: mailPayload });
   }
 }
