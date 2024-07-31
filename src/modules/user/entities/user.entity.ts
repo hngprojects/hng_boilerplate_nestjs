@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcryptjs';
-import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne, OneToOne } from 'typeorm';
+import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
