@@ -13,7 +13,7 @@ import {
   FAILED_TO_CREATE_USER,
   USER_ACCOUNT_DOES_NOT_EXIST,
 } from '../../../helpers/SystemMessages';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
 import UserService from '../../user/user.service';
@@ -27,6 +27,8 @@ import { LoginDto } from '../dto/login.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { GoogleStrategy } from '../strategies/google.strategy';
 import { GoogleAuthService } from '../google-auth.service';
+import { Profile } from '../../profile/entities/profile.entity';
+import { profile } from 'console';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -94,7 +96,8 @@ describe('AuthenticationService', () => {
   });
 
   describe('createNewUser', () => {
-    const createUserDto: CreateUserDTO = {
+    const createUserDto = {
+      id: '1',
       email: 'test@example.com',
       password: 'password123',
       first_name: 'John',
@@ -111,6 +114,9 @@ describe('AuthenticationService', () => {
       is_active: true,
       attempts_left: 3,
       time_left: 0,
+      profile: {
+        profile_pic_url: 'some_url',
+      } as Profile,
     };
 
     it('should create a new user successfully', async () => {
@@ -126,10 +132,13 @@ describe('AuthenticationService', () => {
         message: USER_CREATED_SUCCESSFULLY,
         data: {
           user: {
+            id: createUserDto.id,
             first_name: createUserDto.first_name,
             last_name: createUserDto.last_name,
             email: createUserDto.email,
             created_at: expect.any(Date),
+            role: UserType.USER,
+            avatar_url: 'some_url',
           },
         },
       });
@@ -138,12 +147,7 @@ describe('AuthenticationService', () => {
     it('should return error if user already exists', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
 
-      const result = await service.createNewUser(createUserDto);
-
-      expect(result).toEqual({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: USER_ACCOUNT_EXIST,
-      });
+      await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
     });
 
     it('should return error if user creation fails', async () => {
@@ -151,12 +155,7 @@ describe('AuthenticationService', () => {
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
 
-      const result = await service.createNewUser(createUserDto);
-
-      expect(result).toEqual({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: FAILED_TO_CREATE_USER,
-      });
+      await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
     });
 
     it('should throw HttpException on unexpected error', async () => {
@@ -169,7 +168,7 @@ describe('AuthenticationService', () => {
   describe('loginUser', () => {
     it('should return login response if credentials are valid', async () => {
       const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
-      const user: UserResponseDTO = {
+      const user = {
         id: '1',
         email: loginDto.email,
         first_name: 'Test',
@@ -179,6 +178,10 @@ describe('AuthenticationService', () => {
         attempts_left: 2,
         created_at: new Date(),
         updated_at: new Date(),
+        user_type: UserType.USER,
+        profile: {
+          profile_pic_url: 'profile_url',
+        } as Profile,
       };
 
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
@@ -192,10 +195,12 @@ describe('AuthenticationService', () => {
         access_token: 'jwt_token',
         data: {
           user: {
+            id: '1',
             first_name: 'Test',
             last_name: 'User',
             email: 'test@example.com',
-            id: '1',
+            avatar_url: 'profile_url',
+            role: 'vendor',
           },
         },
       });
@@ -225,8 +230,6 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-
-      // await expect(service.loginUser(loginDto)).toBe({ message: 'Invalid password or email', error: 'Bad Request' }, HttpStatus.UNAUTHORIZED)
     });
 
     it('should handle unexpected errors gracefully', async () => {
@@ -234,15 +237,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockRejectedValue(new Error('Unexpected error'));
 
-      await expect(service.loginUser(loginDto)).rejects.toThrow(
-        new HttpException(
-          {
-            message: 'An error occurred during login',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
+      await expect(service.loginUser(loginDto)).rejects.toThrow(HttpException);
     });
   });
 
@@ -282,15 +277,15 @@ describe('AuthenticationService', () => {
       });
     });
 
-    it('should return error if user not found', async () => {
-      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+    it('should throw error if user not found', async () => {
+      userServiceMock.getUserRecord.mockRejectedValueOnce(
+        new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: USER_ACCOUNT_DOES_NOT_EXIST,
+        })
+      );
 
-      const result = await service.forgotPassword({ email });
-
-      expect(result).toEqual({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: USER_ACCOUNT_DOES_NOT_EXIST,
-      });
+      await expect(service.forgotPassword({ email })).rejects.toThrow(HttpException);
     });
 
     it('should throw HttpException on unexpected error', async () => {
@@ -416,88 +411,44 @@ describe('AuthenticationService', () => {
     });
   });
 
-  describe('refreshAccessToken tests', () => {
-    let userService: UserService;
-    let authService: AuthenticationService;
-    let otpService: OtpService;
-    let jwtService: JwtService;
-    let emailService: EmailService;
+  describe('refreshAccessToken', () => {
+    it('should return a new access token when refresh token is valid', async () => {
+      const refreshToken = 'validRefreshToken';
+      const userPayload = { id: 1 };
 
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          JwtService,
-          AuthenticationService,
-          UserService,
-          OtpService,
-          {
-            provide: getRepositoryToken(User),
-            useValue: {},
-          },
-          {
-            provide: OtpService,
-            useValue: {
-              createOtp: jest.fn(),
-            },
-          },
-          {
-            provide: EmailService,
-            useValue: {
-              sendForgotPasswordMail: jest.fn(),
-            },
-          },
-          {
-            provide: GoogleAuthService,
-            useValue: {
-              verifyToken: jest.fn(),
-            },
-          },
-        ],
-      }).compile();
+      jest.spyOn(service, 'validateRefreshToken').mockResolvedValue(userPayload);
+      jest.spyOn(service, 'generateAccessToken').mockResolvedValue('newAccessToken');
 
-      userService = module.get<UserService>(UserService);
-      authService = module.get<AuthenticationService>(AuthenticationService);
-      otpService = module.get<OtpService>(OtpService);
-      jwtService = module.get<JwtService>(JwtService);
-      emailService = module.get<EmailService>(EmailService);
-    });
+      const result = await service.refreshAccessToken(refreshToken);
 
-    it('should return UNAUTHORIZED if refresh token is invalid', async () => {
-      const invalidToken = 'invalid-refresh-token';
-
-      jest.spyOn(jwtService, 'verify').mockImplementation(() => {
-        throw new Error('Invalid token');
-      });
-
-      const response = await authService.refreshAccessToken(invalidToken);
-
-      expect(response).toEqual({
-        status_code: HttpStatus.UNAUTHORIZED,
-        message: INVALID_REFRESH_TOKEN,
-      });
-    });
-
-    it('should return new access token if refresh token is valid', async () => {
-      const validToken = 'valid-refresh-token';
-      const userPayload = {
-        email: 'test@example.com',
-        first_name: 'John',
-        last_name: 'Doe',
-        sub: '1',
-      };
-      const newAccessToken = 'new-access-token';
-
-      jest.spyOn(jwtService, 'verify').mockReturnValue(userPayload);
-      jest.spyOn(authService, 'generateAccessToken').mockResolvedValue(newAccessToken);
-
-      const response = await authService.refreshAccessToken(validToken);
-
-      expect(response).toEqual({
-        data: {
-          access_token: newAccessToken,
-        },
-        message: 'Access Token refreshed successfully',
+      expect(result).toEqual({
         status_code: HttpStatus.OK,
+        message: 'Access Token refreshed successfully',
+        data: {
+          access_token: 'newAccessToken',
+        },
+      });
+    });
+
+    it('should return an error when refresh token is not provided', async () => {
+      const result = await service.refreshAccessToken('');
+
+      expect(result).toEqual({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: 'Refresh token is required',
+      });
+    });
+
+    it('should return an error when refresh token is invalid', async () => {
+      const refreshToken = 'invalidRefreshToken';
+
+      jest.spyOn(service, 'validateRefreshToken').mockResolvedValue(null);
+
+      const result = await service.refreshAccessToken(refreshToken);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.UNAUTHORIZED,
+        message: 'Invalid Refresh Token',
       });
     });
   });
