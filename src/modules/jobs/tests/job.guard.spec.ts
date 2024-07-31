@@ -4,7 +4,6 @@ import { JobGuard } from '../guards/job.guard';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Job } from '../entities/job.entity';
-import { createMock } from '@golevelup/ts-jest';
 
 describe('JobGuard', () => {
   let guard: JobGuard;
@@ -31,12 +30,16 @@ describe('JobGuard', () => {
   it('should allow access if the job belongs to the user', async () => {
     const mockJob = { id: '1', user: { id: 'user123' }, is_deleted: false } as Job;
     mockJobRepository.findOne.mockResolvedValue(mockJob);
-    const mockContext = createMock<ExecutionContext>();
 
-    mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { id: 'user123' },
-      params: { id: 1 },
-    });
+    const mockContext = {
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue({
+          user: { id: 'user123' },
+          params: { id: 1 },
+        }),
+      }),
+    } as unknown as ExecutionContext;
+
     const result = await guard.canActivate(mockContext);
 
     expect(result).toBe(true);
@@ -46,12 +49,14 @@ describe('JobGuard', () => {
     const mockJob = { id: '1', user: { id: 'user123' }, is_deleted: true } as Job;
     mockJobRepository.findOne.mockResolvedValue(mockJob);
 
-    const mockContext = createMock<ExecutionContext>();
-
-    mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { id: 'user123' },
-      params: { id: 1 },
-    });
+    const mockContext = {
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue({
+          user: { id: 'user123' },
+          params: { id: 1 },
+        }),
+      }),
+    } as unknown as ExecutionContext;
 
     await expect(guard.canActivate(mockContext)).rejects.toThrow(NotFoundException);
   });
@@ -60,12 +65,14 @@ describe('JobGuard', () => {
     const mockJob = { id: '1', user: { id: 'user456' }, is_deleted: false } as Job;
     mockJobRepository.findOne.mockResolvedValue(mockJob);
 
-    const mockContext = createMock<ExecutionContext>();
-
-    mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { id: 'user123' },
-      params: { id: 1 },
-    });
+    const mockContext = {
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue({
+          user: { id: 'user123' },
+          params: { id: 1 },
+        }),
+      }),
+    } as unknown as ExecutionContext;
 
     await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
   });
@@ -74,12 +81,14 @@ describe('JobGuard', () => {
     const mockJob = { id: '1', user: { id: 'user456' }, is_deleted: true } as Job;
     mockJobRepository.findOne.mockResolvedValue(mockJob);
 
-    const mockContext = createMock<ExecutionContext>();
-
-    mockContext.switchToHttp().getRequest.mockReturnValue({
-      user: { id: 'user456' },
-      params: { id: 1 },
-    });
+    const mockContext = {
+      switchToHttp: jest.fn().mockReturnValue({
+        getRequest: jest.fn().mockReturnValue({
+          user: { id: 'user456' },
+          params: { id: 1 },
+        }),
+      }),
+    } as unknown as ExecutionContext;
 
     await expect(guard.canActivate(mockContext)).rejects.toThrow(NotFoundException);
   });
