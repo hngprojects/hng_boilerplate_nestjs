@@ -38,9 +38,11 @@ describe('InviteService', () => {
       created_at: new Date(),
       updated_at: new Date(),
       user_type: UserType.ADMIN,
+      backup_codes: [],
       owned_organisations: [],
       created_organisations: [],
       invites: [],
+      jobs: [],
       hashPassword: () => null,
       password: 'password123',
       time_left: 5,
@@ -49,6 +51,8 @@ describe('InviteService', () => {
       testimonials: [],
       profile: null,
       organisationMembers: [],
+      notifications_settings: [],
+      notifications: [],
     };
 
     const mockOrg: Organisation = {
@@ -68,6 +72,7 @@ describe('InviteService', () => {
       creator: mockUser,
       preferences: [],
       invites: [],
+      role: null,
       organisationMembers: [],
       products: [],
     };
