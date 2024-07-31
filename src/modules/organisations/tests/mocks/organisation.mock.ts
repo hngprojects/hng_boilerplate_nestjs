@@ -62,6 +62,7 @@ export const createMockOrganisation = (): Organisation => {
     products: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],
+    notifications: [],
   };
 
   return {
