@@ -71,6 +71,7 @@ describe('InviteService', () => {
       creator: mockUser,
       preferences: [],
       invites: [],
+      role: null,
       organisationMembers: [],
       products: [],
     };

@@ -115,7 +115,7 @@ describe('OrganisationsService', () => {
 
       expect(organisationRepository.findOneBy).toHaveBeenCalledWith({ id });
       expect(organisationRepository.save).toHaveBeenCalledWith(expect.objectContaining({ isDeleted: true }));
-      expect(result).toEqual(204); // HttpStatus.NO_CONTENT
+      expect(result).toEqual(204);
     });
 
     it('should throw NotFoundException if organisation not found', async () => {
@@ -134,7 +134,7 @@ describe('OrganisationsService', () => {
       await expect(service.deleteOrganisation(id)).rejects.toThrow(InternalServerErrorException);
     });
   });
-
+  
   describe('update organisation', () => {
     it('should update an organisation successfully', async () => {
       const id = '1';

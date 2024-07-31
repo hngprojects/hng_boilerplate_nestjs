@@ -1,14 +1,7 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
+import { Role } from '../../organisation-role/entities/role.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
@@ -55,6 +48,9 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationPreference, preference => preference.organisation)
   preferences: OrganisationPreference[];
+
+  @OneToMany(() => Role, role => role.organisation, { eager: false })
+  role: Role[];
 
   @OneToMany(() => Invite, invite => invite.organisation)
   invites: Invite[];
