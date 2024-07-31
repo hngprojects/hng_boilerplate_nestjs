@@ -7,12 +7,14 @@ import UserService from '../../user/user.service';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { Testimonial } from '../entities/testimonials.entity';
 import { TestimonialsService } from '../testimonials.service';
+import { Profile } from '../../profile/entities/profile.entity';
 
 describe('TestimonialsService', () => {
   let service: TestimonialsService;
   let userService: UserService;
   let testimonialRepository: Repository<Testimonial>;
   let userRepository: Repository<User>;
+  let profileRepository: Repository<Profile>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,6 +29,10 @@ describe('TestimonialsService', () => {
           provide: getRepositoryToken(User),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
@@ -34,6 +40,7 @@ describe('TestimonialsService', () => {
     userService = module.get<UserService>(UserService);
     testimonialRepository = module.get<Repository<Testimonial>>(getRepositoryToken(Testimonial));
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
   it('should be defined', () => {
