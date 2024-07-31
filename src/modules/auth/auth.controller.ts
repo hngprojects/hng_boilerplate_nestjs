@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
@@ -11,7 +11,6 @@ import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
-import { LoginErrorResponseDto } from './dto/login-error-dto';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import {
   ErrorCreateUserResponse,
@@ -29,10 +28,9 @@ export default class RegistrationController {
   @ApiResponse({ status: 201, description: 'Register a new user', type: SuccessCreateUserResponse })
   @ApiResponse({ status: 400, description: 'Bad request', type: ErrorCreateUserResponse })
   @Post('register')
-  public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
-    const createUserResponse = await this.authService.createNewUser(body);
-    // return createUserResponse;
-    return response.status(createUserResponse.status_code).send(createUserResponse);
+  @HttpCode(201)
+  public async register(@Body() body: CreateUserDTO): Promise<any> {
+    return this.authService.createNewUser(body);
   }
 
   @ApiOperation({ summary: 'Generate forgot password reset token' })
@@ -44,8 +42,8 @@ export default class RegistrationController {
   @skipAuth()
   @HttpCode(200)
   @Post('forgot-password')
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Res() response: Response): Promise<any> {
-    return await this.authService.forgotPassword(forgotPasswordDto);
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<any> {
+    return this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @skipAuth()
@@ -62,6 +60,7 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'Email verification' })
   @ApiResponse({ status: 200, description: 'Verify token sent to the user mail', type: OtpDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @HttpCode(200)
   @Post('verify-otp')
   public async verifyEmail(@Body() body: OtpDto): Promise<any> {
     return this.authService.verifyToken(body);
@@ -75,6 +74,7 @@ export default class RegistrationController {
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
   @ApiResponse({ status: 400, description: BAD_REQUEST })
+  @HttpCode(200)
   public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
     const { password } = body;
     const { id: user_id } = request['user'];
@@ -86,6 +86,7 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: OtpDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post('google')
+  @HttpCode(200)
   async googleAuth(@Body() body: GoogleAuthPayload) {
     return this.authService.googleAuth(body);
   }
@@ -98,6 +99,7 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'Request Verification Token' })
   @ApiResponse({ status: 200, description: 'Verification Token sent to mail' })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @HttpCode(200)
   @Post('request/token')
   async requestVerificationToken(@Body() body: { email: string }) {
     const { email } = body;
