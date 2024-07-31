@@ -1,4 +1,4 @@
-export class AddToWaitlistResponseDto {
+export class GetWaitlistResponseDto {
   status: number;
   message: string;
   data: {
@@ -6,6 +6,8 @@ export class AddToWaitlistResponseDto {
       id: string;
       name: string;
       email: string;
+      status: boolean;
+      url_slug?: string;
       createdAt: Date;
       updatedAt: Date;
     };

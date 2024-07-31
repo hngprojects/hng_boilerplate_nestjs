@@ -8,4 +8,10 @@ export class Waitlist extends AbstractBaseEntity {
 
   @Column({ nullable: false, unique: true })
   email: string;
+
+  @Column({ nullable: false, default: false })
+  status: boolean;
+
+  @Column({ nullable: true })
+  url_slug: string;
 }
