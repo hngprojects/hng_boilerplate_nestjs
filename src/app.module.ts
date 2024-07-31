@@ -1,4 +1,5 @@
 import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -9,22 +10,29 @@ import authConfig from '../config/auth.config';
 import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
+import { AuthGuard } from './guards/auth.guard';
 import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
-import { OtpModule } from './modules/otp/otp.module';
-import { OtpService } from './modules/otp/otp.service';
-import { OrganisationsModule } from './modules/organisations/organisations.module';
-import { AuthGuard } from './guards/auth.guard';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { EmailService } from './modules/email/email.service';
 import { EmailModule } from './modules/email/email.module';
+import { EmailService } from './modules/email/email.service';
 import { InviteModule } from './modules/invite/invite.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
+import { JobsModule } from './modules/jobs/jobs.module';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
+import { OtpModule } from './modules/otp/otp.module';
+import { OtpService } from './modules/otp/otp.service';
+import { ProductsModule } from './modules/products/products.module';
+import { ProfileModule } from './modules/profile/profile.module';
+import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
+import { TimezonesModule } from './modules/timezones/timezones.module';
+import { UserModule } from './modules/user/user.module';
+import ProbeController from './probe.controller';
+import { RunTestsModule } from './run-tests/run-tests.module';
 
 @Module({
   providers: [
@@ -76,8 +84,10 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     }),
     SeedingModule,
     AuthModule,
+    TimezonesModule,
     UserModule,
     OtpModule,
+    TestimonialsModule,
     EmailModule,
     InviteModule,
     MailerModule.forRootAsync({
@@ -106,8 +116,15 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
     }),
     OrganisationsModule,
     WaitlistModule,
+    NotificationSettingsModule,
+    SqueezeModule,
     TestimonialsModule,
+    JobsModule,
+    ProductsModule,
+    JobsModule,
+    ProfileModule,
+    RunTestsModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, ProbeController],
 })
 export class AppModule {}

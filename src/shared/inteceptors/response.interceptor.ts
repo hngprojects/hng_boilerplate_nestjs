@@ -1,4 +1,4 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpException, HttpStatus } from '@nestjs/common';
+import { CallHandler, ExecutionContext, HttpException, HttpStatus, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -28,9 +28,7 @@ export class ResponseInterceptor implements NestInterceptor {
     }
 
     response.status(status).json({
-      status: false,
       status_code: status,
-      error: exceptionResponse.error || exceptionResponse,
       message: errorMessage,
     });
   }
@@ -40,13 +38,17 @@ export class ResponseInterceptor implements NestInterceptor {
     const response = ctx.getResponse();
     const status_code = response.statusCode;
 
-    const { message, ...data } = res;
+    response.setHeader('Content-Type', 'application/json');
+    if (typeof res === 'object') {
+      const { message, ...data } = res;
 
-    return {
-      status: true,
-      status_code,
-      message,
-      ...data,
-    };
+      return {
+        status: status_code,
+        message,
+        ...data,
+      };
+    } else {
+      return res;
+    }
   }
 }

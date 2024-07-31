@@ -1,3 +1,6 @@
+import { Profile } from 'src/modules/profile/entities/profile.entity';
+import { UserType } from '../entities/user.entity';
+
 interface UserInterface {
   id: string;
 
@@ -13,6 +16,8 @@ interface UserInterface {
 
   is_2fa_enabled: boolean;
 
+  user_type: UserType;
+
   is_active: boolean;
 
   attempts_left: number;
@@ -24,6 +29,8 @@ interface UserInterface {
   updated_at: Date;
 
   phone_number?: string;
+
+  profile?: Profile;
 }
 
 export default UserInterface;
