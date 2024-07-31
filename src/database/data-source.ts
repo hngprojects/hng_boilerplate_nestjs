@@ -17,7 +17,6 @@ const dataSource = new DataSource({
   migrationsTableName: 'migrations',
   ssl: process.env.DB_SSL === 'true',
 });
-
 export async function initializeDataSource() {
   if (!dataSource.isInitialized) {
     await dataSource.initialize();

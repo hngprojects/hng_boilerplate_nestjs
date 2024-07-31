@@ -30,6 +30,7 @@ import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 
@@ -120,6 +121,7 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
     TestimonialsModule,
     JobsModule,
     ProductsModule,
+    OrganisationPermissionsModule,
     BillingPlanModule,
     JobsModule,
     ProfileModule,
