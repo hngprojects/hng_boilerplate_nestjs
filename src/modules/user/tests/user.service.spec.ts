@@ -6,7 +6,13 @@ import { User, UserType } from '../entities/user.entity';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserResponseDTO from '../dto/user-response.dto';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
-import { BadRequestException, HttpException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  ForbiddenException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
@@ -21,6 +27,7 @@ describe('UserService', () => {
     save: jest.fn(),
     findOne: jest.fn(),
     findAndCount: jest.fn(),
+    softDelete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -414,6 +421,73 @@ describe('UserService', () => {
           },
         },
       });
+    });
+  });
+
+  describe('softDeleteUser', () => {
+    it('should soft delete a user', async () => {
+      const userId = '1';
+      const authenticatedUserId = '1';
+      const userToDelete = {
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        password: 'hashedpassword',
+        is_active: true,
+        attempts_left: 3,
+        time_left: 60,
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(userToDelete);
+      mockUserRepository.softDelete.mockResolvedValueOnce({ affected: 1 }); // Mock the softDelete response
+
+      const result = await service.softDeleteUser(userId, authenticatedUserId);
+
+      expect(result.status).toBe('success');
+      expect(result.message).toBe('Deletion in progress');
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.softDelete).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error if user is not found', async () => {
+      const userId = '1';
+      const authenticatedUserId = '1';
+
+      mockUserRepository.findOne.mockResolvedValueOnce(null);
+
+      await expect(service.softDeleteUser(userId, authenticatedUserId)).rejects.toHaveProperty('response', {
+        error: 'Not Found',
+        message: 'User not found',
+        statusCode: 404,
+      });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
+    });
+
+    it('should throw an error if the user is not authorized to delete the user', async () => {
+      const userId = '1';
+      const authenticatedUserId = '2';
+      const userToDelete = {
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        password: 'hashedpassword',
+        is_active: true,
+        attempts_left: 3,
+        time_left: 60,
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(userToDelete);
+
+      await expect(service.softDeleteUser(userId, authenticatedUserId)).rejects.toHaveProperty('response', {
+        status: 'error',
+        message: 'You are not authorized to delete this user',
+        status_code: 401,
+      });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
     });
   });
 });
