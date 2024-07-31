@@ -168,7 +168,7 @@ export default class AuthenticationService {
             last_name: user.last_name,
             email: user.email,
             role: user.user_type,
-            avatar_url: user.profile.profile_pic_url,
+            avatar_url: user.profile ? user.profile.profile_pic_url : null,
           },
         },
       };

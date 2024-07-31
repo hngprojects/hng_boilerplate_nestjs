@@ -1,10 +1,16 @@
-import { Waitlist } from '../entities/waitlist.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { WaitlistResponseData } from './waitlist-response-data';
 
 export class GetWaitlistResponseDto {
+  @ApiProperty()
   status: number;
+
+  @ApiProperty()
   status_code: number;
+
+  @ApiProperty()
   message: string;
-  data: {
-    waitlist: Waitlist[];
-  };
+
+  @ApiProperty({ type: WaitlistResponseData })
+  data: WaitlistResponseData;
 }
