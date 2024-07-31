@@ -29,7 +29,6 @@ import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
-import { LanguagesModule } from './modules/languages/languages.module';
 
 @Module({
   providers: [
@@ -120,7 +119,6 @@ import { LanguagesModule } from './modules/languages/languages.module';
     JobsModule,
     ProfileModule,
     RunTestsModule,
-    LanguagesModule,
   ],
   controllers: [HealthController, ProbeController],
 })
