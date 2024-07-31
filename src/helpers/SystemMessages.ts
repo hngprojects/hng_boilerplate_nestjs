@@ -11,6 +11,10 @@ export const INVALID_PASSWORD = 'Invalid password';
 export const TWO_FA_INITIATED = '2FA setup initiated';
 export const TWO_FA_ENABLED = '2FA is already enabled';
 export const BAD_REQUEST = 'Bad Request';
+export const LANGUAGE_CREATED_SUCCESSFULLY = 'Language Created Successfully';
+export const OK = 'Success';
+export const LANGUAGE_ALREADY_EXISTS = 'Language already exits';
+export const FETCH_LANGUAGE_FAILURE = 'Failed to fetch language';
 export const UNAUTHORISED_TOKEN = 'Invalid token or email';
 export const TIMEZONE_CREATED_SUCCESSFULLY = 'Timezone created Successfully';
 export const FETCH_TIMEZONE_FAILURE = 'Error Occured while creating Timezone, kindly try again';
@@ -22,3 +26,5 @@ export const LOGIN_ERROR = 'An error occurred during login';
 export const EMAIL_SENT = 'Email sent successfully';
 export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
 export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
+export const WRONG_PARAMETERS =
+  'permission_list must be an object with keys from PermissionCategory and boolean values';

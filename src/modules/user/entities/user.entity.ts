@@ -2,7 +2,7 @@ import * as bcrypt from 'bcryptjs';
 import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Notification } from '../../../modules/notifications/entities/notification.entity';
-import { NotificationSettings } from '../../../modules/settings/notification-settings/entities/notification-setting.entity';
+import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';

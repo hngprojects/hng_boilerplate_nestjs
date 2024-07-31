@@ -3,7 +3,7 @@ import { NotificationsService } from '../notifications.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Notification } from '../entities/notifications.entity';
-import { NotificationSettings } from '../../settings/notification-settings/entities/notification-setting.entity';
+import { NotificationSettings } from '../../notification-settings/entities/notification-setting.entity';
 import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
 import {
   BadRequestException,
@@ -13,8 +13,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
-import { NotificationSettingsDto } from 'src/modules/settings/notification-settings/dto/notification-settings.dto';
-import { NotificationSettingsService } from '../../../modules/settings/notification-settings/notification-settings.service';
+import { NotificationSettingsDto } from 'src/modules/notification-settings/dto/notification-settings.dto';
+import { NotificationSettingsService } from '../../../modules/notification-settings/notification-settings.service';
 import { EmailService } from '../../../modules/email/email.service';
 import UserService from '../../../modules/user/user.service';
 
@@ -31,7 +31,7 @@ const mockUserService = {
 };
 
 const mockNotificationSettingsService = {
-  findByUserId: jest.fn(),
+  findNotificationSettingsByUserId: jest.fn(),
 };
 
 describe('NotificationsService', () => {
@@ -185,10 +185,14 @@ describe('NotificationsService', () => {
         first_name: 'John',
         last_name: 'Doe',
       });
-      mockNotificationSettingsService.findByUserId.mockResolvedValue({
+      mockNotificationSettingsService.findNotificationSettingsByUserId.mockResolvedValue({
         email_notification_always_send_email_notifications: true,
       });
-      mockRepository.save.mockResolvedValue({ ...notification_content, id: '12345', user: { id: user_id } });
+      mockNotificationRepository.save.mockResolvedValue({
+        ...notification_content,
+        id: '12345',
+        user: { id: user_id },
+      });
 
       await expect(service.createNotification(user_id, notification_content)).resolves.toMatchObject({
         status: 'success',

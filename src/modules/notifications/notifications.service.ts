@@ -12,13 +12,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Notification } from './entities/notifications.entity';
 import { CreateNotificationPropsDto } from './dto/create-notification-props.dto';
 import { IMessageInterface } from '../email/interface/message.interface';
-import { NotificationSettingsResponseDto } from '../settings/notification-settings/dto/notification-settings-response.dto';
+import { NotificationSettingsResponseDto } from '../notification-settings/dto/notification-settings-response.dto';
 import UserInterface from '../user/interfaces/UserInterface';
 import { CreateNotificationError } from './dto/create-notification-error.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
 import { EmailService } from '../email/email.service';
-import { NotificationSettingsService } from '../settings/notification-settings/notification-settings.service';
+import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
 import UserService from '../user/user.service';
+import { NotificationSettingsDto } from '../notification-settings/dto/notification-settings.dto';
+import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
 
 @Injectable()
 export class NotificationsService {
@@ -124,7 +126,7 @@ export class NotificationsService {
   ): Promise<CreateNotificationResponseDto | CreateNotificationError> {
     const user = await this.getUser(user_id);
 
-    const notification_settings: NotificationSettingsResponseDto = await this.getNotificationSettingsById(user_id);
+    const notification_settings = await this.getNotificationSettingsById(user_id);
 
     await this.sendNotificationEmail(user, notification_content.message, notification_settings);
     const notification = await this.saveNotification(user, notification_content);
@@ -166,9 +168,9 @@ export class NotificationsService {
     return user;
   }
 
-  private async getNotificationSettingsById(user_id: string): Promise<NotificationSettingsResponseDto> {
+  private async getNotificationSettingsById(user_id: string): Promise<NotificationSettings> {
     try {
-      return await this.notificationSettingsService.findByUserId(user_id);
+      return await this.notificationSettingsService.findNotificationSettingsByUserId(user_id);
     } catch (err) {
       throw new InternalServerErrorException();
     }
@@ -177,7 +179,7 @@ export class NotificationsService {
   private async sendNotificationEmail(
     user: Partial<UserInterface>,
     message: string,
-    notificationSettings: NotificationSettingsResponseDto
+    notificationSettings: NotificationSettingsDto
   ): Promise<void> {
     const { email, first_name, last_name } = user; // TODO: Implement mobile_push_notification using firebase
     const {
