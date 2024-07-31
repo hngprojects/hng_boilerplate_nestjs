@@ -49,6 +49,7 @@ import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import { isInstance } from 'class-validator';
+import CustomExceptionHandler from 'src/helpers/exceptionHandler';
 
 @Injectable()
 export default class AuthenticationService {
@@ -68,10 +69,10 @@ export default class AuthenticationService {
       });
 
       if (userExists) {
-        return {
+        throw new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,
           message: USER_ACCOUNT_EXIST,
-        };
+        });
       }
 
       await this.userService.createUser(creatUserDto);
@@ -79,10 +80,10 @@ export default class AuthenticationService {
       const user = await this.userService.getUserRecord({ identifier: creatUserDto.email, identifierType: 'email' });
 
       if (!user) {
-        return {
+        throw new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,
           message: FAILED_TO_CREATE_USER,
-        };
+        });
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
@@ -95,6 +96,8 @@ export default class AuthenticationService {
           last_name: user.last_name,
           email: user.email,
           created_at: user.created_at,
+          avatar_url: user.profile.profile_pic_url,
+          role: user.user_type,
         },
       };
 
@@ -105,13 +108,8 @@ export default class AuthenticationService {
       };
     } catch (createNewUserError) {
       console.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
-      throw new HttpException(
-        {
-          message: ERROR_OCCURED,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      CustomExceptionHandler(createNewUserError);
+      throw new InternalServerErrorException('Error occured creating user');
     }
   }
 
@@ -119,10 +117,10 @@ export default class AuthenticationService {
     try {
       const user = await this.userService.getUserRecord({ identifier: dto.email, identifierType: 'email' });
       if (!user) {
-        return {
+        throw new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,
           message: USER_ACCOUNT_DOES_NOT_EXIST,
-        };
+        });
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
@@ -133,13 +131,9 @@ export default class AuthenticationService {
       };
     } catch (forgotPasswordError) {
       console.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
-      throw new HttpException(
-        {
-          message: ERROR_OCCURED,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      CustomExceptionHandler(forgotPasswordError);
+
+      throw new InternalServerErrorException('Error occured creating user');
     }
   }
 
@@ -153,19 +147,19 @@ export default class AuthenticationService {
       });
 
       if (!user) {
-        return {
+        throw new UnauthorizedException({
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        };
+        });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return {
+        throw new UnauthorizedException({
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        };
+        });
       }
 
       const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
@@ -178,6 +172,8 @@ export default class AuthenticationService {
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
+            role: user.user_type,
+            avatar_url: user.profile.profile_pic_url,
           },
         },
       };
@@ -185,14 +181,11 @@ export default class AuthenticationService {
       return { message: LOGIN_SUCCESSFUL, ...responsePayload };
     } catch (error) {
       console.log('AuthenticationServiceError ~ loginError ~', error);
-
-      throw new HttpException(
-        {
-          message: LOGIN_ERROR,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      CustomExceptionHandler(error);
+      throw new InternalServerErrorException({
+        message: LOGIN_ERROR,
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
@@ -203,30 +196,18 @@ export default class AuthenticationService {
     });
 
     if (!user) {
-      throw new HttpException(
-        {
-          status_code: HttpStatus.NOT_FOUND,
-          message: USER_NOT_FOUND,
-        },
-        HttpStatus.NOT_FOUND,
-        {
-          cause: USER_NOT_FOUND,
-        }
-      );
+      throw new NotFoundException({
+        status_code: HttpStatus.NOT_FOUND,
+        message: USER_NOT_FOUND,
+      });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new HttpException(
-        {
-          status_code: HttpStatus.BAD_REQUEST,
-          message: INVALID_PASSWORD,
-        },
-        HttpStatus.BAD_REQUEST,
-        {
-          cause: INVALID_PASSWORD,
-        }
-      );
+      throw new BadRequestException({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: INVALID_PASSWORD,
+      });
     }
 
     return { user, isValid: true };
@@ -270,40 +251,45 @@ export default class AuthenticationService {
   }
 
   async googleAuth(googleAuthPayload: GoogleAuthPayload) {
-    const idToken = googleAuthPayload.id_token;
-    const verifyTokenResponse: GoogleVerificationPayloadInterface = await this.googleAuthService.verifyToken(idToken);
-    const userEmail = verifyTokenResponse.email;
-    const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
+    try {
+      const idToken = googleAuthPayload.id_token;
+      const verifyTokenResponse: GoogleVerificationPayloadInterface = await this.googleAuthService.verifyToken(idToken);
+      const userEmail = verifyTokenResponse.email;
+      const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
 
-    if (!userExists) {
-      const userCreationPayload = {
-        email: userEmail,
-        first_name: verifyTokenResponse.given_name || '',
-        last_name: verifyTokenResponse?.family_name || '',
-        password: '',
-      };
-      return await this.createUserGoogle(userCreationPayload);
-    }
-    const accessToken = await this.jwtService.sign({
-      sub: userExists.id,
-      id: userExists.id,
-      email: userExists.email,
-      first_name: userExists.first_name,
-      last_name: userExists.last_name,
-    });
-    return {
-      status: 'success',
-      message: 'User authenticated successfully',
-      access_token: accessToken,
-      user: {
+      if (!userExists) {
+        const userCreationPayload = {
+          email: userEmail,
+          first_name: verifyTokenResponse.given_name || '',
+          last_name: verifyTokenResponse?.family_name || '',
+          password: '',
+        };
+        return await this.createUserGoogle(userCreationPayload);
+      }
+      const accessToken = await this.jwtService.sign({
+        sub: userExists.id,
         id: userExists.id,
         email: userExists.email,
         first_name: userExists.first_name,
         last_name: userExists.last_name,
-        fullname: userExists.first_name + ' ' + userExists.last_name,
-        role: '',
-      },
-    };
+      });
+      return {
+        status: 'success',
+        message: 'User authenticated successfully',
+        access_token: accessToken,
+        user: {
+          id: userExists.id,
+          email: userExists.email,
+          first_name: userExists.first_name,
+          last_name: userExists.last_name,
+          fullname: userExists.first_name + ' ' + userExists.last_name,
+          role: '',
+        },
+      };
+    } catch (googleAuthenticationError) {
+      console.log('AuthenticationServiceError ~ googleAuthenticationError ~', googleAuthenticationError);
+      throw new InternalServerErrorException('Error occured authenticating User');
+    }
   }
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
@@ -371,10 +357,10 @@ export default class AuthenticationService {
     const otp = await this.otpService.verifyOtp(user.id, token);
 
     if (!user || !otp) {
-      return {
+      throw new UnauthorizedException({
         message: UNAUTHORISED_TOKEN,
         status_code: HttpStatus.UNAUTHORIZED,
-      };
+      });
     }
 
     const accessToken = this.jwtService.sign({
@@ -385,12 +371,16 @@ export default class AuthenticationService {
       id: user.id,
     });
 
-    const { password, ...data } = user;
+    const { password, profile, ...data } = user;
+    const responsePayload = {
+      ...data,
+      avatar_url: profile.profile_pic_url,
+    };
 
     return {
       message: 'Sign-in successful',
       access_token: accessToken,
-      user: data,
+      user: responsePayload,
       status_code: HttpStatus.OK,
     };
   }

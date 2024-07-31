@@ -24,6 +24,8 @@ import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { GoogleAuthService } from '../google-auth.service';
+import { Profile } from '../../profile/entities/profile.entity';
+import { profile } from 'console';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -109,6 +111,9 @@ describe('AuthenticationService', () => {
       is_active: true,
       attempts_left: 3,
       time_left: 0,
+      profile: {
+        profile_pic_url: 'some_url',
+      } as Profile,
     };
 
     it('should create a new user successfully', async () => {
@@ -118,7 +123,7 @@ describe('AuthenticationService', () => {
       jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
 
       const result = await service.createNewUser(createUserDto);
-
+      console.log(result);
       expect(result).toEqual({
         status_code: HttpStatus.CREATED,
         message: USER_CREATED_SUCCESSFULLY,
@@ -129,6 +134,8 @@ describe('AuthenticationService', () => {
             last_name: createUserDto.last_name,
             email: createUserDto.email,
             created_at: expect.any(Date),
+            role: UserType.USER,
+            avatar_url: 'some_url',
           },
         },
       });
@@ -168,7 +175,7 @@ describe('AuthenticationService', () => {
   describe('loginUser', () => {
     it('should return login response if credentials are valid', async () => {
       const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
-      const user: UserResponseDTO = {
+      const user = {
         id: '1',
         email: loginDto.email,
         first_name: 'Test',
@@ -178,6 +185,10 @@ describe('AuthenticationService', () => {
         attempts_left: 2,
         created_at: new Date(),
         updated_at: new Date(),
+        user_type: UserType.USER,
+        profile: {
+          profile_pic_url: 'profile_url',
+        } as Profile,
       };
 
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
@@ -191,10 +202,12 @@ describe('AuthenticationService', () => {
         access_token: 'jwt_token',
         data: {
           user: {
+            id: '1',
             first_name: 'Test',
             last_name: 'User',
             email: 'test@example.com',
-            id: '1',
+            avatar_url: 'profile_url',
+            role: 'vendor',
           },
         },
       });
