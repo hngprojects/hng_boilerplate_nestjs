@@ -3,8 +3,8 @@ import { JobsService } from './jobs.service';
 import { JobDto } from './dto/job.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { skipAuth } from '../../helpers/skipAuth';
 import { JobGuard } from './guards/job.guard';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
