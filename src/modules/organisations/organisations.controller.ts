@@ -60,8 +60,11 @@ export class OrganisationsController {
   })
   @ApiResponse({
     status: 404,
-    description: 'Organisation not found or no user in it',
-    type: UpdateOrganisationDto,
+    description: 'Organisation not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User not a member of the organisation',
   })
   @Get(':org_id/users')
   async getMembers(
