@@ -76,15 +76,6 @@ export class Job extends AbstractBaseEntity {
   key_responsibilities: string[];
 
   @ApiProperty({
-    description: 'Detailed job description',
-    example:
-      'We are looking for a skilled software engineer to join our team. The ideal candidate will have experience in developing web applications and a strong understanding of modern web technologies.',
-    nullable: true,
-  })
-  @Column('text', { nullable: true })
-  job_description: string;
-
-  @ApiProperty({
     description: 'List of benefits associated with the job',
     example: ['Health insurance', '401(k) matching', 'Paid time off'],
     type: [String],
