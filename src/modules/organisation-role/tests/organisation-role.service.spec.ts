@@ -5,7 +5,7 @@ import { OrganisationRole } from '../entities/organisation-role.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { createMockOrganisation, organisationRoleMock } from 'src/modules/organisations/tests/mocks/organisation.mock';
+import { organisationRoleMock } from '../../organisations/tests/mocks/organisation.mock';
 
 describe('OrganisationRoleService', () => {
   let service: OrganisationRoleService;
