@@ -178,40 +178,74 @@ describe('NotificationsService', () => {
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
-  describe('getUnreadNotificationsForUser', () => {
-    it('should return unread notifications for the user', async () => {
-      const userId = '1';
-      const user = new User();
-      user.id = userId;
-      const notifications = [new Notification()];
+  describe('NotificationsService', () => {
+    let service: NotificationsService;
+    let notificationRepository: Repository<Notification>;
+    let userRepository: Repository<User>;
 
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-      jest.spyOn(notificationRepository, 'find').mockResolvedValue(notifications);
-      jest.spyOn(notificationRepository, 'count').mockResolvedValue(1);
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          NotificationsService,
+          {
+            provide: getRepositoryToken(Notification),
+            useClass: Repository,
+          },
+          {
+            provide: getRepositoryToken(User),
+            useClass: Repository,
+          },
+        ],
+      }).compile();
 
-      const result = await service.getUnreadNotificationsForUser(userId);
+      service = module.get<NotificationsService>(NotificationsService);
+      notificationRepository = module.get<Repository<Notification>>(getRepositoryToken(Notification));
+      userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    });
 
-      expect(result).toEqual({
-        totalNotificationCount: 1,
-        totalUnreadNotificationCount: notifications.length,
-        notifications,
+    describe('getUnreadNotificationsForUser', () => {
+      it('should return unread notifications for the user when is_read is false', async () => {
+        const userId = '1';
+        const user = new User();
+        user.id = userId;
+        const notifications = [new Notification()];
+
+        jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+        jest.spyOn(notificationRepository, 'find').mockResolvedValue(notifications);
+        jest.spyOn(notificationRepository, 'count').mockResolvedValue(1);
+
+        const result = await service.getUnreadNotificationsForUser(userId, 'false');
+
+        expect(result).toEqual({
+          totalNotificationCount: 1,
+          totalUnreadNotificationCount: notifications.length,
+          notifications,
+        });
       });
-    });
 
-    it('should throw NotFoundException if user not found', async () => {
-      const userId = '1';
+      it('should throw NotFoundException if user not found', async () => {
+        const userId = '1';
 
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+        jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.getUnreadNotificationsForUser(userId)).rejects.toThrow(NotFoundException);
-    });
+        await expect(service.getUnreadNotificationsForUser(userId, 'false')).rejects.toThrow(NotFoundException);
+      });
 
-    it('should handle internal server errors', async () => {
-      const userId = '1';
+      it('should handle internal server errors', async () => {
+        const userId = '1';
 
-      jest.spyOn(userRepository, 'findOne').mockRejectedValue(new Error('Failed to retrieve'));
+        jest.spyOn(userRepository, 'findOne').mockRejectedValue(new Error('Failed to retrieve'));
 
-      await expect(service.getUnreadNotificationsForUser(userId)).rejects.toThrow(InternalServerErrorException);
+        await expect(service.getUnreadNotificationsForUser(userId, 'false')).rejects.toThrow(
+          InternalServerErrorException
+        );
+      });
+
+      it('should throw BadRequestException if is_read is not false', async () => {
+        const userId = '1';
+
+        await expect(service.getUnreadNotificationsForUser(userId, 'true')).rejects.toThrow(BadRequestException);
+      });
     });
   });
 });

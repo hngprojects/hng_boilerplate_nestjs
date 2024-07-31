@@ -21,7 +21,11 @@ export class NotificationsService {
     private userRepository: Repository<User>
   ) {}
 
-  async getUnreadNotificationsForUser(userId: string) {
+  async getUnreadNotificationsForUser(userId: string, is_read: string) {
+    if (is_read !== 'false') {
+      throw new BadRequestException('Invalid value for is_read');
+    }
+
     try {
       const user = await this.userRepository.findOne({ where: { id: userId } });
       if (!user) {
