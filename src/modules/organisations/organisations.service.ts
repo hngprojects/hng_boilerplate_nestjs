@@ -142,7 +142,7 @@ export class OrganisationsService {
 
       const newMembersList = org.organisationMembers.filter(member => member.user_id !== user);
 
-      await this.organisationRepository.save(newMembersList);
+      await this.organisationRepository.save(org);
 
       return {
         status: 'Success',
