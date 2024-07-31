@@ -123,16 +123,6 @@ export class JobDto {
   key_responsibilities?: string[];
 
   @ApiProperty({
-    description: 'Detailed job description',
-    example:
-      'We are looking for a skilled Senior Developer to join our team. The ideal candidate will have a strong background in JavaScript and experience with modern web technologies.',
-    nullable: true,
-  })
-  @IsString()
-  @IsOptional()
-  job_description?: string;
-
-  @ApiProperty({
     description: 'List of benefits associated with the job',
     example: ['Health insurance', '401(k) matching', 'Paid time off'],
     type: [String],
