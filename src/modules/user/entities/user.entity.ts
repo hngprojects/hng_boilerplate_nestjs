@@ -10,6 +10,7 @@ import { Product } from '../../../modules/products/entities/product.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { Notification } from '../../notifications/entities/notifications.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -89,6 +90,7 @@ export class User extends AbstractBaseEntity {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
+
   @BeforeInsert()
   @BeforeUpdate()
   async encryptBackupCodes(): Promise<void> {
@@ -104,4 +106,8 @@ export class User extends AbstractBaseEntity {
 
     this.backup_codes_2fa = iv.toString('hex') + ':' + encryptedBackupCodes.toString('hex');
   }
+
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
 }
