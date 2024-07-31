@@ -22,6 +22,7 @@ export class SeedingService {
     const productRepository = this.dataSource.getRepository(Product);
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
+    const notificationRepository = this.dataSource.getRepository(Notification);
 
     try {
       const existingPermissions = await defaultPermissionRepository.count();
