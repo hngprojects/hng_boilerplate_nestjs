@@ -441,13 +441,16 @@ describe('UserService', () => {
       };
 
       mockUserRepository.findOne.mockResolvedValueOnce(userToDelete);
-      mockUserRepository.softDelete.mockResolvedValueOnce({ affected: 1 }); // Mock the softDelete response
+      mockUserRepository.softDelete.mockResolvedValueOnce({ affected: 1 });
 
       const result = await service.softDeleteUser(userId, authenticatedUserId);
 
       expect(result.status).toBe('success');
       expect(result.message).toBe('Deletion in progress');
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+        relations: ['profile'],
+      });
       expect(mockUserRepository.softDelete).toHaveBeenCalledWith(userId);
     });
 
@@ -462,7 +465,10 @@ describe('UserService', () => {
         message: 'User not found',
         statusCode: 404,
       });
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+        relations: ['profile'],
+      });
       expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
     });
 
@@ -487,7 +493,10 @@ describe('UserService', () => {
         message: 'You are not authorized to delete this user',
         status_code: 401,
       });
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+        relations: ['profile'],
+      });
       expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
     });
   });
