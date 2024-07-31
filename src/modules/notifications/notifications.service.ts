@@ -5,7 +5,6 @@ import { User } from '../user/entities/user.entity';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import {
   BadRequestException,
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -92,6 +91,43 @@ export class NotificationsService {
           is_read,
           updated_at,
         },
+      };
+    } catch (error) {
+      if (
+        error instanceof HttpException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
+  }
+
+  async markAllNotificationsAsReadForUser(userId: string) {
+    try {
+      const notifications = await this.notificationRepository.find({
+        where: {
+          user: {
+            id: userId,
+          },
+          is_read: false,
+        },
+      });
+
+      if (notifications.length > 0) {
+        notifications.forEach(notifications => {
+          notifications.is_read = true;
+        });
+        await this.notificationRepository.save(notifications);
+      }
+
+      return {
+        status: 'success',
+        status_code: HttpStatus.OK,
+        message: 'Notifications cleared successfully.',
+        data: { notifications: [] },
       };
     } catch (error) {
       if (

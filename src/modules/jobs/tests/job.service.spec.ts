@@ -37,6 +37,7 @@ describe('JobsService', () => {
     updated_at: new Date(),
     hashPassword: () => null,
     notifications: [],
+    notifications_settings: [],
   };
 
   const mockJob: Job = {
