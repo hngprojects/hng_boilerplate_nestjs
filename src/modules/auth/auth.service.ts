@@ -41,6 +41,8 @@ import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
+import { ProfileService } from '../profile/profile.service';
+import { CreateProfileDto } from '../profile/dto/create-profile.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -49,7 +51,8 @@ export default class AuthenticationService {
     private jwtService: JwtService,
     private otpService: OtpService,
     private emailService: EmailService,
-    private googleAuthService: GoogleAuthService
+    private googleAuthService: GoogleAuthService,
+    private profileService: ProfileService
   ) {}
 
   async createNewUser(creatUserDto: CreateUserDTO) {
@@ -76,6 +79,13 @@ export default class AuthenticationService {
           message: FAILED_TO_CREATE_USER,
         };
       }
+
+      // Create a profile with the user's email
+      const createProfileDto: CreateProfileDto = {
+        email: user.email,
+      };
+
+      await this.profileService.createProfile(createProfileDto, user.id);
 
       const token = (await this.otpService.createOtp(user.id)).token;
       await this.emailService.sendUserEmailConfirmationOtp(user.email, token);

@@ -24,6 +24,7 @@ import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { GoogleAuthService } from '../google-auth.service';
+import { ProfileService } from '../../profile/profile.service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -32,6 +33,7 @@ describe('AuthenticationService', () => {
   let otpServiceMock: jest.Mocked<OtpService>;
   let emailServiceMock: jest.Mocked<EmailService>;
   let googleAuthServiceMock: jest.Mocked<GoogleAuthService>;
+  let profileServiceMock: jest.Mocked<ProfileService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -71,6 +73,7 @@ describe('AuthenticationService', () => {
             sendUserEmailConfirmationOtp: jest.fn(),
           },
         },
+        { provide: ProfileService, useValue: { createProfile: jest.fn() } },
       ],
     }).compile();
 
@@ -80,6 +83,7 @@ describe('AuthenticationService', () => {
     otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
     googleAuthServiceMock = module.get(GoogleAuthService) as jest.Mocked<GoogleAuthService>;
+    profileServiceMock = module.get(ProfileService) as jest.Mocked<ProfileService>;
   });
 
   afterEach(() => {

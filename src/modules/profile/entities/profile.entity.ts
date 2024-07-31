@@ -4,7 +4,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 
 @Entity()
 export class Profile extends AbstractBaseEntity {
-  @Column()
+  @Column({ nullable: true })
   username: string;
 
   @Column({ nullable: true })
@@ -16,7 +16,7 @@ export class Profile extends AbstractBaseEntity {
   @Column({ nullable: true })
   department: string;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
   @Column({ type: 'text', nullable: true })
@@ -37,7 +37,7 @@ export class Profile extends AbstractBaseEntity {
   @Column({ nullable: true })
   profile_pic_url: string;
 
-  @OneToOne(() => User, user => user.profile)
+  @OneToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user_id: User;
 }

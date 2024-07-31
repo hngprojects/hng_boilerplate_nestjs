@@ -29,7 +29,6 @@ import { ProductsModule } from './modules/products/products.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import dbConfig from '../config/db.config';
-import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   providers: [
