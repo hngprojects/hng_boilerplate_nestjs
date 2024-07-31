@@ -29,18 +29,6 @@ export const createMockOrganisation = (): Organisation => {
     user_id: null,
   };
 
-  const organisationRoleMock: OrganisationRole = {
-    id: uuidv4(),
-    created_at: new Date(),
-    updated_at: new Date(),
-    name: 'Mock Role',
-    description: 'This is a mock role description',
-    organisation: null as unknown as Organisation,
-    organisationMember: [],
-    isDeleted: false,
-    deletedAt: null,
-  };
-
   const orgMemberMock: OrganisationMember = {
     id: uuidv4(),
     created_at: new Date(),
@@ -98,6 +86,18 @@ export const createMockOrganisation = (): Organisation => {
     organisationMembers: [orgMemberMock],
     products: [],
   };
+};
+
+export const organisationRoleMock: OrganisationRole = {
+  id: uuidv4(),
+  created_at: new Date(),
+  updated_at: new Date(),
+  name: 'Mock Role',
+  description: 'This is a mock role description',
+  organisation: null as unknown as Organisation,
+  organisationMember: [] as OrganisationMember[],
+  isDeleted: false,
+  deletedAt: null,
 };
 
 export const orgMock = createMockOrganisation();
