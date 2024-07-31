@@ -8,6 +8,7 @@ import { Product } from '../../../modules/products/entities/product.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { ProductComment } from '../../../modules/product-comment/entities/product-comment.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -75,6 +76,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
+
+  @OneToMany(() => ProductComment, comment => comment.user, { cascade: true })
+  productComments: ProductComment[];
 
   @BeforeInsert()
   async hashPassword() {

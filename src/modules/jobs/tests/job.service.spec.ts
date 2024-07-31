@@ -36,6 +36,7 @@ describe('JobsService', () => {
     created_at: new Date(),
     updated_at: new Date(),
     hashPassword: () => null,
+    productComments: [],
   };
 
   const mockJob: Job = {

@@ -2,6 +2,7 @@ import { ProductCategory } from '../../../modules/product-category/entities/prod
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { ProductComment } from '../../../modules/product-comment/entities/product-comment.entity';
 
 export enum ProductStatusType {
   IN_STOCK = 'in stock',
@@ -39,4 +40,7 @@ export class Product extends AbstractBaseEntity {
   /* To be implemented in another pr */
   // @ManyToOne(() => ProductCategory, category => category.products)
   // category: ProductCategory;
+
+  @OneToMany(() => ProductComment, comment => comment.product)
+  comments: ProductComment[];
 }

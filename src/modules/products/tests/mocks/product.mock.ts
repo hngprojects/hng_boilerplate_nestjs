@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { orgMock } from '../../../../modules/organisations/tests/mocks/organisation.mock';
 import { Product, ProductStatusType } from '../../entities/product.entity';
+import { productCommentMock } from '../../../../modules/product-comment/mocks/product-comment.mock';
 
 export const productMock: Product = {
   id: randomUUID(),
@@ -13,4 +14,5 @@ export const productMock: Product = {
   org: orgMock,
   created_at: new Date(),
   updated_at: new Date(),
+  comments: productCommentMock[0],
 };

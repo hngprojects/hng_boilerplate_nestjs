@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
+import { CreateCommentDto } from './dto/create-commemt.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -34,5 +35,16 @@ export class ProductsController {
     @Query('maxPrice') maxPrice?: number
   ) {
     return this.productsService.searchProducts({ name, category, minPrice, maxPrice });
+  }
+
+  @Post(':id/comments')
+  @ApiOperation({ summary: 'Add a comment to a product' })
+  @ApiParam({ name: 'id', description: 'Product ID', example: '12345' })
+  @ApiBody({ type: CreateCommentDto, description: 'Comment details' })
+  @ApiResponse({ status: 201, description: 'Comment added successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async addComment(@Param('id') id: string, @Body() createCommentDto: CreateCommentDto) {
+    return this.productsService.addComment(id, createCommentDto);
   }
 }

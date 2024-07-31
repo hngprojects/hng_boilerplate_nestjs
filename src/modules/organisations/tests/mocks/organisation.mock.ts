@@ -62,6 +62,7 @@ export const createMockOrganisation = (): Organisation => {
     products: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],
+    productComments: [],
   };
 
   return {
@@ -75,7 +76,11 @@ export const createMockOrganisation = (): Organisation => {
     address: 'Street 101 Building 26',
     state: 'Lagos',
     owner: ownerAndCreator,
-    creator: { ...ownerAndCreator, user_type: UserType.USER },
+    creator: {
+      ...ownerAndCreator,
+      user_type: UserType.USER,
+      productComments: [],
+    },
     created_at: new Date(),
     updated_at: new Date(),
     isDeleted: false,
