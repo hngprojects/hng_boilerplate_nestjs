@@ -34,4 +34,6 @@ export const newUser: User = {
   invites: [],
   profile: profile,
   testimonials: [],
+  notifications: [],
+  notifications_settings: [],
 };
