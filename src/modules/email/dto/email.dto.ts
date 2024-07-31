@@ -16,3 +16,16 @@ export class SendEmailDto {
   @IsObject()
   context: object;
 }
+
+export class createTemplateDto {
+  @IsString()
+  filename: string;
+
+  @IsString()
+  template: string;
+}
+
+export class getTemplateDto {
+  @IsString()
+  templateName: string;
+}

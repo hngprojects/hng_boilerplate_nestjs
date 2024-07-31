@@ -6,43 +6,45 @@ import {
   NotFoundException,
   UnauthorizedException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import {
-  ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
+  INCORRECT_TOTP_CODE,
+  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+  USER_ACCOUNT_EXIST,
+  USER_NOT_ENABLED_2FA,
   USER_ACCOUNT_DOES_NOT_EXIST,
   INVALID_PASSWORD,
-  TWO_FA_ENABLED,
   TWO_FA_INITIATED,
-  USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
-  INVALID_REFRESH_TOKEN,
   UNAUTHORISED_TOKEN,
   INVALID_CREDENTIALS,
+  LOGIN_SUCCESSFUL,
+  LOGIN_ERROR,
+  EMAIL_SENT,
+  ENABLE_2FA_ERROR,
+  USER_CREATED,
+  SIGN_IN_OTP_SENT,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
+import { Verify2FADto } from './dto/verify-2fa.dto';
 import { OtpService } from '../otp/otp.service';
 import { EmailService } from '../email/email.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import appConfig from '../../../config/auth.config';
-import { User } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
-import { generateSixDigitToken } from '../../utils/generate-token';
 import { OtpDto } from '../otp/dto/otp.dto';
-import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 import { SendEmailDto } from '../email/dto/email.dto';
 
 @Injectable()
@@ -63,10 +65,10 @@ export default class AuthenticationService {
       });
 
       if (userExists) {
-        return {
+        throw new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,
           message: USER_ACCOUNT_EXIST,
-        };
+        });
       }
 
       await this.userService.createUser(creatUserDto);
@@ -74,14 +76,13 @@ export default class AuthenticationService {
       const user = await this.userService.getUserRecord({ identifier: creatUserDto.email, identifierType: 'email' });
 
       if (!user) {
-        return {
+        throw new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,
           message: FAILED_TO_CREATE_USER,
-        };
+        });
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-
       const emailData = new SendEmailDto();
       emailData.to = user.email;
       emailData.subject = 'Welcome to My App! confirm your Email';
@@ -91,10 +92,13 @@ export default class AuthenticationService {
 
       const responsePayload = {
         user: {
+          id: user.id,
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
           created_at: user.created_at,
+          avatar_url: user.profile.profile_pic_url,
+          role: user.user_type,
         },
       };
 
@@ -104,14 +108,9 @@ export default class AuthenticationService {
         data: responsePayload,
       };
     } catch (createNewUserError) {
-      Logger.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
-      throw new HttpException(
-        {
-          message: ERROR_OCCURED,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      console.log('AuthenticationServiceError ~ createNewUserError ~', createNewUserError);
+      CustomExceptionHandler(createNewUserError);
+      throw new InternalServerErrorException('Error occured creating user');
     }
   }
 
@@ -119,37 +118,33 @@ export default class AuthenticationService {
     try {
       const user = await this.userService.getUserRecord({ identifier: dto.email, identifierType: 'email' });
       if (!user) {
-        return {
+        throw new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,
           message: USER_ACCOUNT_DOES_NOT_EXIST,
-        };
+        });
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-
       const emailData = new SendEmailDto();
       emailData.to = dto.email;
       emailData.subject = 'Reset Password';
       emailData.template = 'reset-password';
       emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
       await this.emailService.sendEmail(emailData);
+
       return {
         status_code: HttpStatus.OK,
-        message: 'Email sent successfully',
+        message: EMAIL_SENT,
       };
     } catch (forgotPasswordError) {
-      Logger.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
-      throw new HttpException(
-        {
-          message: ERROR_OCCURED,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      console.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
+      CustomExceptionHandler(forgotPasswordError);
+
+      throw new InternalServerErrorException('Error occured creating user');
     }
   }
 
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto> {
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     try {
       const { email, password } = loginDto;
 
@@ -174,30 +169,30 @@ export default class AuthenticationService {
         });
       }
 
-      const access_token = this.jwtService.sign({ id: user.id });
+      const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
 
       const responsePayload = {
         access_token,
         data: {
           user: {
+            id: user.id,
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
-            id: user.id,
+            role: user.user_type,
+            avatar_url: user.profile.profile_pic_url,
           },
         },
       };
 
-      return { message: 'Login successful', ...responsePayload };
+      return { message: LOGIN_SUCCESSFUL, ...responsePayload };
     } catch (error) {
-      Logger.log('AuthenticationServiceError ~ loginError ~', error);
-      throw new HttpException(
-        {
-          message: 'An error occurred during login',
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      console.log('AuthenticationServiceError ~ loginError ~', error);
+      CustomExceptionHandler(error);
+      throw new InternalServerErrorException({
+        message: LOGIN_ERROR,
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
@@ -208,53 +203,28 @@ export default class AuthenticationService {
     });
 
     if (!user) {
-      throw new HttpException(
-        {
-          status_code: HttpStatus.NOT_FOUND,
-          message: USER_NOT_FOUND,
-        },
-        HttpStatus.NOT_FOUND,
-        {
-          cause: USER_NOT_FOUND,
-        }
-      );
+      throw new NotFoundException({
+        status_code: HttpStatus.NOT_FOUND,
+        message: USER_NOT_FOUND,
+      });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new HttpException(
-        {
-          status_code: HttpStatus.BAD_REQUEST,
-          message: INVALID_PASSWORD,
-        },
-        HttpStatus.BAD_REQUEST,
-        {
-          cause: INVALID_PASSWORD,
-        }
-      );
-    }
-
-    if (user.is_2fa_enabled) {
-      throw new HttpException(
-        {
-          status_code: HttpStatus.BAD_REQUEST,
-          message: TWO_FA_ENABLED,
-        },
-        HttpStatus.BAD_REQUEST,
-        {
-          cause: TWO_FA_ENABLED,
-        }
-      );
+      throw new BadRequestException({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: INVALID_PASSWORD,
+      });
     }
 
     return { user, isValid: true };
   }
 
   async enable2FA(user_id: string, password: string) {
-    const { user, isValid, ...validationResponse } = await this.validateUserAndPassword(user_id, password);
+    const { user, isValid } = await this.validateUserAndPassword(user_id, password);
 
     if (!isValid) {
-      throw validationResponse;
+      throw new InternalServerErrorException(ENABLE_2FA_ERROR);
     }
 
     const secret = speakeasy.generateSecret({ length: 32 });
@@ -286,105 +256,92 @@ export default class AuthenticationService {
       },
     };
   }
-
-  async generateRefreshToken(user: any) {
-    return this.jwtService.sign(
-      {
-        id: user.id,
-      },
-      {
-        secret: appConfig().jwtRefreshSecret,
-        expiresIn: appConfig().jwtRefreshExpiry,
-      }
-    );
-  }
-
-  async generateAccessToken(user: any) {
-    return this.jwtService.sign(
-      {
-        id: user.id,
-      },
-      {
-        secret: appConfig().jwtSecret,
-        expiresIn: appConfig().jwtExpiry,
-      }
-    );
-  }
-
-  async validateRefreshToken(token: string) {
-    try {
-      const payload = this.jwtService.verify(token, { secret: appConfig().jwtRefreshSecret });
-      return payload;
-    } catch (e) {
-      return null;
+  generateBackupCodes(): string[] {
+    const codes = [];
+    for (let i = 0; i < 5; i++) {
+      codes.push(Math.floor(10000000 + Math.random() * 90000000).toString());
     }
+    return codes;
   }
 
-  async refreshAccessToken(refresh_token: string) {
-    if (!refresh_token) {
-      return {
-        status_code: HttpStatus.BAD_REQUEST,
-        message: 'Refresh token is required',
-      };
-    }
-
-    const user = await this.validateRefreshToken(refresh_token);
+  async verify2fa(verify2faDto: Verify2FADto, user_id: string) {
+    const user = await this.userService.getUserRecord({ identifier: user_id, identifierType: 'id' });
     if (!user) {
-      return {
-        status_code: HttpStatus.UNAUTHORIZED,
-        message: INVALID_REFRESH_TOKEN,
-      };
+      return { status_code: 404, message: USER_NOT_FOUND };
     }
-    const accessToken = await this.generateAccessToken(user);
+    if (!user.secret) {
+      throw new BadRequestException({ status_code: 400, message: USER_NOT_ENABLED_2FA });
+    }
+
+    const verify = speakeasy.totp.verify({
+      secret: user.secret,
+      encoding: 'base32',
+      token: verify2faDto.totp_code,
+    });
+    if (!verify) {
+      throw new BadRequestException({ status_code: 400, message: INCORRECT_TOTP_CODE });
+    }
+
+    const backup_codes = this.generateBackupCodes();
+    const payload = {
+      backup_codes,
+      is_2fa_enabled: true,
+    };
+    await this.userService.updateUserRecord({
+      updatePayload: payload,
+      identifierOptions: {
+        identifierType: 'id',
+        identifier: user.id,
+      },
+    });
+
     return {
       status_code: HttpStatus.OK,
-      message: 'Access Token refreshed successfully',
-      data: {
-        access_token: accessToken,
-      },
+      message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+      data: { backup_codes: backup_codes },
     };
   }
 
-  async googleLogin(user: User) {
-    const payload = { userId: user.id };
-    const accessToken = this.jwtService.sign(payload);
-  }
-
   async googleAuth(googleAuthPayload: GoogleAuthPayload) {
-    const idToken = googleAuthPayload.id_token;
-    const verifyTokenResponse: GoogleVerificationPayloadInterface = await this.googleAuthService.verifyToken(idToken);
-    const userEmail = verifyTokenResponse.email;
-    const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
+    try {
+      const idToken = googleAuthPayload.id_token;
+      const verifyTokenResponse: GoogleVerificationPayloadInterface = await this.googleAuthService.verifyToken(idToken);
+      const userEmail = verifyTokenResponse.email;
+      const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
 
-    if (!userExists) {
-      const userCreationPayload = {
-        email: userEmail,
-        first_name: verifyTokenResponse.given_name || '',
-        last_name: verifyTokenResponse?.family_name || '',
-        password: '',
-      };
-      return await this.createUserGoogle(userCreationPayload);
-    }
-    const accessToken = await this.jwtService.sign({
-      sub: userExists.id,
-      id: userExists.id,
-      email: userExists.email,
-      first_name: userExists.first_name,
-      last_name: userExists.last_name,
-    });
-    return {
-      status: 'success',
-      message: 'User authenticated successfully',
-      access_token: accessToken,
-      user: {
+      if (!userExists) {
+        const userCreationPayload = {
+          email: userEmail,
+          first_name: verifyTokenResponse.given_name || '',
+          last_name: verifyTokenResponse?.family_name || '',
+          password: '',
+        };
+        return await this.createUserGoogle(userCreationPayload);
+      }
+      const accessToken = await this.jwtService.sign({
+        sub: userExists.id,
         id: userExists.id,
         email: userExists.email,
         first_name: userExists.first_name,
         last_name: userExists.last_name,
-        fullname: userExists.first_name + ' ' + userExists.last_name,
-        role: '',
-      },
-    };
+      });
+      return {
+        status: 'success',
+        message: 'User authenticated successfully',
+        access_token: accessToken,
+        user: {
+          id: userExists.id,
+          email: userExists.email,
+          first_name: userExists.first_name,
+          last_name: userExists.last_name,
+          fullname: userExists.first_name + ' ' + userExists.last_name,
+          role: '',
+        },
+      };
+    } catch (googleAuthenticationError) {
+      console.log('AuthenticationServiceError ~ googleAuthenticationError ~', googleAuthenticationError);
+      throw new InternalServerErrorException('Error occured authenticating User');
+    }
   }
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
@@ -399,8 +356,8 @@ export default class AuthenticationService {
       });
 
       return {
-        status: 'success',
-        message: 'User successfully created',
+        status_code: HttpStatus.OK,
+        message: USER_CREATED,
         access_token: accessToken,
         user: {
           id: newUser.id,
@@ -435,20 +392,17 @@ export default class AuthenticationService {
       await this.otpService.deleteOtp(user.id);
     }
 
-    // Generate a new OTP and save it
-    const newOtp = generateSixDigitToken();
-    await this.otpService.createOtp(user.id);
+    const otp = await this.otpService.createOtp(user.id);
 
-    // Send the OTP to the user's emailuser.email, newOtp
     const emailData = new SendEmailDto();
     emailData.to = user.email;
-    emailData.subject = 'Welcome to My App! Confirm your Email';
-    emailData.template = 'confirmation';
-    emailData.context = { link: `remotebingo.com$?token=${newOtp}`, email: user.email };
+    emailData.subject = 'Login with OTP';
+    emailData.template = 'login-otp';
+    emailData.context = { token: otp.token, email: user.email };
     await this.emailService.sendEmail(emailData);
 
     return {
-      message: 'Sign-in token sent to email',
+      message: SIGN_IN_OTP_SENT,
       status_code: HttpStatus.OK,
     };
   }
@@ -474,9 +428,16 @@ export default class AuthenticationService {
       id: user.id,
     });
 
+    const { password, profile, ...data } = user;
+    const responsePayload = {
+      ...data,
+      avatar_url: profile.profile_pic_url,
+    };
+
     return {
       message: 'Sign-in successful',
-      token: accessToken,
+      access_token: accessToken,
+      user: responsePayload,
       status_code: HttpStatus.OK,
     };
   }
