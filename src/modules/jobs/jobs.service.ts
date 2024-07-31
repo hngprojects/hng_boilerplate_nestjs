@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
 import { JobDto } from './dto/job.dto';
 import { pick } from '../../helpers/pick';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class JobsService {
@@ -51,6 +52,40 @@ export class JobsService {
       message: 'Jobs listing fetched successfully',
       status_code: 200,
       data: jobs,
+    };
+  }
+
+  async getJob(id: string) {
+    const job = await this.jobRepository.findOne({ where: { id } });
+    if (!job)
+      throw new NotFoundException({
+        status_code: 404,
+        status: 'Not found Exception',
+        message: 'Job not found',
+      });
+    return {
+      message: 'Job fetched successfully',
+      status_code: 200,
+      data: job,
+    };
+  }
+  async delete(jobId: string) {
+    // Check if listing exists
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+    });
+
+    job.is_deleted = true;
+    const deleteJobEntityInstance = this.jobRepository.create(job);
+
+    // Save the new Job entity to the database
+    await this.jobRepository.save(deleteJobEntityInstance);
+
+    // Return a success response
+    return {
+      status: 'success',
+      message: 'Job details deleted successfully',
+      status_code: 200,
     };
   }
 }

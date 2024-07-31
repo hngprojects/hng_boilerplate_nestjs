@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserType } from '../modules/user/entities/user.entity';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
-import { Job } from '../modules/jobs/entities/job.entity';
 
 @Injectable()
 export class OwnershipGuard implements CanActivate {
@@ -28,7 +27,12 @@ export class OwnershipGuard implements CanActivate {
     if (!organisation) {
       throw new NotFoundException('Organisation not found');
     }
-    if (organisation.owner.id === user.sub || organisation.creator.id === user.sub) {
+    if (
+      organisation.owner.id === user.sub ||
+      organisation.creator.id === user.sub ||
+      organisation.owner.id === user.id ||
+      organisation.creator.id === user.id
+    ) {
       return true;
     }
     throw new ForbiddenException('You do not have permission to update this organisation');
