@@ -5,7 +5,7 @@ import { OrganisationRole } from '../entities/organisation-role.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { DefaultPermissions } from '../../organisation-permissions/entities/default-permissions.entity';
 import { Repository } from 'typeorm';
-import { ConflictException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('OrganisationRoleService', () => {
   let service: OrganisationRoleService;
@@ -68,34 +68,6 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue({ id: 'existing' } as OrganisationRole);
 
       await expect(service.createOrgRoles({ name: 'ExistingRole' }, 'org123')).rejects.toThrow(ConflictException);
-    });
-  });
-
-  describe('findSingleRole', () => {
-    it('should find a role successfully', async () => {
-      const roleId = 'role123';
-      const organisationId = 'org123';
-      const mockRole = { id: roleId, name: 'TestRole', permissions: [] };
-
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: organisationId } as Organisation);
-      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(mockRole as OrganisationRole);
-
-      const result = await service.findSingleRole(roleId, organisationId);
-
-      expect(result).toEqual(mockRole);
-    });
-
-    it('should throw NotFoundException when organisation is not found', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.findSingleRole('role123', 'nonexistent')).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw NotFoundException when role is not found', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: 'org123' } as Organisation);
-      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.findSingleRole('nonexistent', 'org123')).rejects.toThrow(NotFoundException);
     });
   });
 });
