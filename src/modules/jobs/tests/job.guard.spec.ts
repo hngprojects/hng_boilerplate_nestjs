@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { JobGuard } from '../../../guards/authorization.guard'; // Adjust the import path as necessary
+import { JobGuard } from '../guards/job.guard';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Job } from '../entities/job.entity';
