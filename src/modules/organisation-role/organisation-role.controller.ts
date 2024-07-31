@@ -7,14 +7,15 @@ import { AuthGuard } from '../../guards/auth.guard';
 
 @ApiTags('Organisation Settings')
 @ApiBearerAuth()
-@Controller('organisation/roles')
+@Controller('organisation/')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
-  @Get(':organisationId')
+  @Get(':org_id/roles')
   @UseGuards(AuthGuard, OwnershipGuard)
   @ApiOperation({ summary: 'Get all organisation roles' })
   @ApiResponse({ status: 200, description: 'Success', type: [Object] })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
   async getRoles(@Param('organisationId') organisationID: string) {
     const roles = await this.organisationRoleService.getAllRolesInOrg(organisationID);
     return {
