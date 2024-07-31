@@ -28,6 +28,7 @@ import { NotificationSettingsModule } from './modules/settings/notification-sett
 import { ProductsModule } from './modules/products/products.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 
 @Module({
   providers: [
@@ -85,6 +86,7 @@ import { ProfileModule } from './modules/profile/profile.module';
     TestimonialsModule,
     EmailModule,
     InviteModule,
+    FlutterwaveModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -117,6 +119,7 @@ import { ProfileModule } from './modules/profile/profile.module';
     ProductsModule,
     JobsModule,
     ProfileModule,
+    FlutterwaveModule,
   ],
   controllers: [HealthController, ProbeController],
 })
