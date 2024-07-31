@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,34 +28,42 @@ export class OrganisationRoleService {
     try {
       const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
       if (!organisation) {
-        throw new NotFoundException('Organisation not found');
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          error: 'Not Found',
+          message: 'Organisation not found',
+        });
       }
 
       const existingRole = await this.rolesRepository.findOne({
         where: { name: createOrganisationRoleDto.name, organisation: { id: organisationId } },
       });
-
       if (existingRole) {
-        throw new ConflictException('A role with this name already exists in the organization');
+        throw new ConflictException({
+          status_code: HttpStatus.CONFLICT,
+          error: 'Conflict',
+          message: 'A role with this name already exists in the organization',
+        });
       }
 
       const role = this.rolesRepository.create({
         ...createOrganisationRoleDto,
+        organisation,
       });
 
-      role.organisation = organisation;
-
       const defaultPermissions = await this.permissionRepository.find();
-
       role.permissions = defaultPermissions;
 
       return await this.rolesRepository.save(role);
     } catch (error) {
-      const errorType = error.constructor;
-      if (errorType.name == 'NotFoundException' || errorType.name == 'ConflictException') {
+      if (error instanceof NotFoundException || error instanceof ConflictException) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to create organization role');
+      throw new InternalServerErrorException({
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Internal Server Error',
+        message: 'Failed to create organization role',
+      });
     }
   }
 

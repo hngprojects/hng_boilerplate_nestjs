@@ -20,7 +20,7 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 @ApiTags('Organisation Settings')
 @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@Controller('organisation')
+@Controller('organisations')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
@@ -34,20 +34,14 @@ export class OrganisationRoleController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiResponse({ status: 409, description: 'Conflict - Role with this name already exists.' })
   async create(@Body() createRoleDto: CreateOrganisationRoleDto, @Param('id') organisationId: string) {
-    try {
-      const role = await this.organisationRoleService.createOrgRoles(createRoleDto, organisationId);
-      return {
-        id: role.id,
-        name: role.name,
-        description: role.description,
-        message: 'Role created successfully',
-      };
-    } catch (error) {
-      if (error instanceof InternalServerErrorException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Failed to create organization role');
-    }
+    const savedRole = await this.organisationRoleService.createOrgRoles(createRoleDto, organisationId);
+
+    return {
+      status_code: HttpStatus.CREATED,
+      name: savedRole.name,
+      description: savedRole.description,
+      message: 'Role created successfully',
+    };
   }
 
   @Get()
