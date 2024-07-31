@@ -1,7 +1,7 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import * as crypto from 'crypto';
 import { promisify } from 'util';
-import * as bcrypt from 'bcryptjs'
+import * as bcrypt from 'bcryptjs';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
@@ -85,7 +85,6 @@ export class User extends AbstractBaseEntity {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
-        
   @BeforeInsert()
   @BeforeUpdate()
   async encryptBackupCodes(): Promise<void> {
@@ -101,7 +100,4 @@ export class User extends AbstractBaseEntity {
 
     this.backup_codes_2fa = iv.toString('hex') + ':' + encryptedBackupCodes.toString('hex');
   }
-  
-  @OneToMany(() => Testimonial, testimonial => testimonial.user)
-  testimonials: Testimonial[];
 }
