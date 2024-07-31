@@ -2,10 +2,10 @@ import {
   BadRequestException,
   ForbiddenException,
   HttpException,
-  HttpStatus,
   UnauthorizedException,
   Injectable,
   NotFoundException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
