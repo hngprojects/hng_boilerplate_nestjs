@@ -25,7 +25,7 @@ describe('ProductsService', () => {
     first_name: 'John',
     last_name: 'Doe',
     email: 'john.doe@example.com',
-    password: 'hashed-password', // Use a placeholder value as this is not used in your test
+    password: 'hashed-password',
     phone: '1234567890',
     is_active: true,
     attempts_left: 3,
@@ -104,7 +104,7 @@ describe('ProductsService', () => {
       const searchCriteria = { name: 'Product 1' };
       const queryBuilderMock = {
         andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+        getMany: jest.fn().mockResolvedValue([productMock]),
       };
       jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
 
@@ -144,7 +144,7 @@ describe('ProductsService', () => {
       const searchCriteria = { name: 'Product 1', minPrice: 100, maxPrice: 200 };
       const queryBuilderMock = {
         andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+        getMany: jest.fn().mockResolvedValue([productMock]),
       };
       jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
 

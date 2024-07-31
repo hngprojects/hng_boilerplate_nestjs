@@ -43,6 +43,8 @@ export class ProductsController {
   @ApiBody({ type: CreateCommentDto, description: 'Comment details' })
   @ApiResponse({ status: 201, description: 'Comment added successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Product Not Found' })
+  @ApiResponse({ status: 404, description: 'User Not Found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async addComment(@Param('id') id: string, @Body() createCommentDto: CreateCommentDto) {
     return this.productsService.addComment(id, createCommentDto);

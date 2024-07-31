@@ -101,48 +101,60 @@ export class ProductsService {
   async addComment(productId: string, dto: CreateCommentDto) {
     const { userId, comment } = dto;
 
-    // Find the product by ID
-    const product = await this.productRepository.findOne({ where: { id: productId } });
-    if (!product) {
-      throw new NotFoundException({
-        status: 'Not Found',
-        message: 'Product not found',
+    try {
+      const product = await this.productRepository.findOne({ where: { id: productId } });
+      if (!product) {
+        throw new NotFoundException({
+          status_code: 404,
+          status: 'Not Found',
+          message: 'Product not found',
+        });
+      }
+
+      const user = await this.userRepository.findOne({ where: { id: String(userId) } });
+      if (!user) {
+        throw new NotFoundException({
+          status_code: 404,
+          status: 'Not Found',
+          message: 'User not found',
+        });
+      }
+
+      const newComment = this.productCommentRepository.create({
+        product,
+        user,
+        comment,
       });
+
+      await this.productCommentRepository.save(newComment);
+
+      console.log('newComment:', newComment);
+
+      return {
+        status: 'success',
+        message: 'Comment added successfully',
+        status_code: 201,
+        data: {
+          id: newComment.id,
+          product_id: newComment.product.id,
+          comment: newComment.comment,
+          user_id: newComment.user.id,
+          created_at: newComment.created_at,
+          updated_at: newComment.updated_at,
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        console.error('Error adding comment:', error);
+        throw new InternalServerErrorException({
+          status_code: 500,
+          status: 'Server Error',
+          message: 'An error occurred while adding the comment',
+        });
+      }
     }
-
-    // Find the user by ID
-    const user = await this.userRepository.findOne({ where: { id: String(userId) } });
-    if (!user) {
-      throw new NotFoundException({
-        status: 'Not Found',
-        message: 'User not found',
-      });
-    }
-
-    // Create a new comment
-    const newComment = this.productCommentRepository.create({
-      product,
-      user,
-      comment,
-    });
-
-    await this.productCommentRepository.save(newComment);
-
-    console.log('newComment:', newComment);
-
-    return {
-      status: 'success',
-      message: 'Comment added successfully',
-      status_code: 201,
-      data: {
-        id: newComment.id,
-        product_id: newComment.product.id,
-        comment: newComment.comment,
-        user_id: newComment.user.id,
-        created_at: newComment.created_at,
-        updated_at: newComment.updated_at,
-      },
-    };
   }
 
   async calculateProductStatus(quantity: number): Promise<ProductStatusType> {
