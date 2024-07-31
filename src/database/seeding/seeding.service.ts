@@ -8,6 +8,7 @@ import { Product } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { Profile } from '../../modules/profile/entities/profile.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
+import { Notification } from '../../modules/notifications/entities/notifications.entity';
 
 @Injectable()
 export class SeedingService {
@@ -21,6 +22,7 @@ export class SeedingService {
     const productRepository = this.dataSource.getRepository(Product);
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
+    const notificationRepository = this.dataSource.getRepository(Notification);
 
     try {
       const existingPermissions = await defaultPermissionRepository.count();
@@ -181,6 +183,31 @@ export class SeedingService {
         const savedCategories = await categoryRepository.find({ relations: ['products'] });
         if (savedCategories.length !== 3) {
           throw new Error('Failed to create all categories');
+        }
+
+        const notifications = [
+          notificationRepository.create({
+            message: 'Notification 1 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 1 for Jane',
+            user: savedUsers[1],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for Jane',
+            user: savedUsers[1],
+          }),
+        ];
+
+        await notificationRepository.save(notifications);
+        const savedNotifications = await notificationRepository.find();
+        if (savedNotifications.length !== 4) {
+          throw new Error('Failed to create all notifications');
         }
 
         await queryRunner.commitTransaction();
