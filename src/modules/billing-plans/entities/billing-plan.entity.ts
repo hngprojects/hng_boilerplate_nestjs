@@ -1,10 +1,10 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity()
 export class BillingPlan extends AbstractBaseEntity {
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: false })
   name: string;
 
   @Column({ type: 'int', nullable: false, default: 0 })
