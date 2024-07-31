@@ -36,7 +36,7 @@ export class OrganisationsController {
   @Delete(':org_id')
   async delete(@Param('org_id') id: string, @Res() response: Response) {
     this.organisationsService;
-    return this.organisationsService.deleteOrganization(id);
+    return this.organisationsService.deleteOrganisation(id);
   }
 
   @ApiOperation({ summary: 'Update Organisation' })

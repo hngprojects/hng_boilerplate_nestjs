@@ -102,7 +102,7 @@ describe('OrganisationsService', () => {
     });
   });
 
-  describe('delete organization', () => {
+  describe('delete organisation', () => {
     it('should delete an organisation successfully', async () => {
       const id = '1';
       const organisation = new Organisation();
@@ -111,7 +111,7 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
       jest.spyOn(organisationRepository, 'save').mockResolvedValueOnce(organisation);
 
-      const result = await service.deleteOrganization(id);
+      const result = await service.deleteOrganisation(id);
 
       expect(organisationRepository.findOneBy).toHaveBeenCalledWith({ id });
       expect(organisationRepository.save).toHaveBeenCalledWith(expect.objectContaining({ isDeleted: true }));
@@ -123,7 +123,7 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
 
-      await expect(service.deleteOrganization(id)).rejects.toThrow(NotFoundException);
+      await expect(service.deleteOrganisation(id)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
@@ -131,7 +131,7 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
 
-      await expect(service.deleteOrganization(id)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.deleteOrganisation(id)).rejects.toThrow(InternalServerErrorException);
     });
   });
 

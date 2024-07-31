@@ -48,7 +48,7 @@ export class OrganisationsService {
     });
 
     const isMember = data.find(member => member.id === sub);
-    if (!isMember) throw new ForbiddenException('User does not have access to the organization');
+    if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
 
     data = data.splice(skip, skip + page_size);
 
@@ -78,7 +78,7 @@ export class OrganisationsService {
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }
 
-  async deleteOrganization(id: string) {
+  async deleteOrganisation(id: string) {
     try {
       const org = await this.organisationRepository.findOneBy({ id });
       if (!org) {
@@ -106,7 +106,7 @@ export class OrganisationsService {
     try {
       const org = await this.organisationRepository.findOneBy({ id });
       if (!org) {
-        throw new NotFoundException('Organization not found');
+        throw new NotFoundException('Organisation not found');
       }
       await this.organisationRepository.update(id, updateOrganisationDto);
       const updatedOrg = await this.organisationRepository.findOneBy({ id });
