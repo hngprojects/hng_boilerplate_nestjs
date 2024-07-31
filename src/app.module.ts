@@ -30,6 +30,7 @@ import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { FaqsModule } from './modules/faqs/faqs.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
@@ -81,6 +82,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
       dataSourceFactory: async () => dataSource,
     }),
     SeedingModule,
+    FaqsModule,
     AuthModule,
     TimezonesModule,
     UserModule,
