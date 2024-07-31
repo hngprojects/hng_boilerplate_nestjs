@@ -49,4 +49,6 @@ export const newUser: User = {
   is_2fa_enabled: false,
   profile: profileMock,
   user_type: UserType.ADMIN,
+  notifications: [],
+  notifications_settings: [],
 };
