@@ -30,7 +30,7 @@ export class OwnershipGuard implements CanActivate {
     if (!organisation) {
       throw new NotFoundException({
         status_code: 404,
-        status: 'Not found Exception',
+        status: 'Not found',
         message: 'Organisation member not found',
       });
     }
@@ -41,7 +41,7 @@ export class OwnershipGuard implements CanActivate {
 
     throw new ForbiddenException({
       status_code: 403,
-      status: 'Forbidden Exception',
+      status: 'Forbidden',
       message: 'You do not have permission to perform this action',
     });
   }
