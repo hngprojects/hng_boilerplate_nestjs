@@ -26,8 +26,6 @@ export const jobsMock: Job[] = [
       'Collaborate with cross-functional teams',
       'Write clean, scalable code',
     ],
-    job_description:
-      'We are looking for a skilled Senior Developer to join our team. The ideal candidate will have a strong background in JavaScript and experience with modern web technologies.',
     benefits: ['Health insurance', '401(k) matching', 'Paid time off'],
     experience_level: 'Senior',
   },
