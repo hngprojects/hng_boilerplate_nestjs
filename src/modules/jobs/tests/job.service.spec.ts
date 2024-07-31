@@ -36,6 +36,9 @@ describe('JobsService', () => {
     created_at: new Date(),
     updated_at: new Date(),
     hashPassword: () => null,
+    totp_code: 28282828,
+    encryptBackupCodes: async () => {},
+    backup_codes_2fa: null,
   };
 
   const mockJob: Job = {
