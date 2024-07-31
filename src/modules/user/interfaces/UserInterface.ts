@@ -1,3 +1,4 @@
+import { Profile } from 'src/modules/profile/entities/profile.entity';
 import { UserType } from '../entities/user.entity';
 
 interface UserInterface {
@@ -28,6 +29,8 @@ interface UserInterface {
   updated_at: Date;
 
   phone_number?: string;
+
+  profile?: Profile;
 }
 
 export default UserInterface;
