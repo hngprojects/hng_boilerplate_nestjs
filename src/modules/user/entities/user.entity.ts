@@ -8,6 +8,7 @@ import { Product } from '../../../modules/products/entities/product.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { Notification } from '../../notifications/entities/notifications.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -80,4 +81,7 @@ export class User extends AbstractBaseEntity {
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
+
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
 }
