@@ -48,7 +48,6 @@ describe('InviteService', () => {
       secret: 'secret',
       is_2fa_enabled: true,
       testimonials: [],
-      profile: null,
       organisationMembers: [],
     };
 
