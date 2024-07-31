@@ -25,16 +25,16 @@ import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
 import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
-import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
-import { ProductsModule } from './modules/products/products.module';
-import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WaitlistModule } from './modules/waitlist/waitlist.module';
+import { HelpCenterModule } from './modules/help-center/help-center.module';
 
 @Module({
   providers: [
@@ -122,13 +122,15 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     TestimonialsModule,
     JobsModule,
     ProductsModule,
-    HelpCenterModule,
     OrganisationPermissionsModule,
     BillingPlanModule,
     JobsModule,
     ProfileModule,
     RunTestsModule,
+    ContactUsModule,
     NotificationsModule,
+    WaitlistModule,
+    HelpCenterModule,
   ],
   controllers: [HealthController, ProbeController],
 })
