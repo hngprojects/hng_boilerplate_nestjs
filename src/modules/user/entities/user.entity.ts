@@ -77,11 +77,11 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
 
-  @OneToMany(() => Notification, notification => notification.user)
-  notifications: Notification[];
-
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
+
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
 }

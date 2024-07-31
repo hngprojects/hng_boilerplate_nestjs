@@ -121,6 +121,7 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     ProfileModule,
     NotificationsModule,
     RunTestsModule,
+    NotificationsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
