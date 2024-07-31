@@ -98,7 +98,8 @@ describe('AuthenticationService', () => {
   });
 
   describe('createNewUser', () => {
-    const createUserDto: CreateUserDTO = {
+    const createUserDto = {
+      id: '1',
       email: 'test@example.com',
       password: 'password123',
       first_name: 'John',
@@ -130,6 +131,7 @@ describe('AuthenticationService', () => {
         message: USER_CREATED_SUCCESSFULLY,
         data: {
           user: {
+            id: createUserDto.id,
             first_name: createUserDto.first_name,
             last_name: createUserDto.last_name,
             email: createUserDto.email,

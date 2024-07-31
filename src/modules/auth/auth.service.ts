@@ -9,6 +9,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
@@ -24,6 +25,12 @@ import {
   USER_NOT_FOUND,
   UNAUTHORISED_TOKEN,
   INVALID_CREDENTIALS,
+  LOGIN_SUCCESSFUL,
+  LOGIN_ERROR,
+  EMAIL_SENT,
+  ENABLE_2FA_ERROR,
+  USER_CREATED,
+  SIGN_IN_OTP_SENT,
 } from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
@@ -41,6 +48,7 @@ import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
+import { isInstance } from 'class-validator';
 
 @Injectable()
 export default class AuthenticationService {
@@ -84,6 +92,7 @@ export default class AuthenticationService {
 
       const responsePayload = {
         user: {
+          id: user.id,
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
@@ -200,7 +209,7 @@ export default class AuthenticationService {
       await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
       return {
         status_code: HttpStatus.OK,
-        message: 'Email sent successfully',
+        message: EMAIL_SENT,
       };
     } catch (forgotPasswordError) {
       console.log('AuthenticationServiceError ~ forgotPasswordError ~', forgotPasswordError);
@@ -213,6 +222,7 @@ export default class AuthenticationService {
       );
     }
   }
+
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     try {
       const { email, password } = loginDto;
@@ -232,32 +242,33 @@ export default class AuthenticationService {
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        throw new UnauthorizedException({
+        return {
           status_code: HttpStatus.UNAUTHORIZED,
           message: INVALID_CREDENTIALS,
-        });
+        };
       }
 
-      const access_token = this.jwtService.sign({ id: user.id });
+      const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
 
       const responsePayload = {
         access_token,
         data: {
           user: {
+            id: user.id,
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
-            id: user.id,
           },
         },
       };
 
-      return { message: 'Login successful', ...responsePayload };
+      return { message: LOGIN_SUCCESSFUL, ...responsePayload };
     } catch (error) {
       console.log('AuthenticationServiceError ~ loginError ~', error);
+
       throw new HttpException(
         {
-          message: 'An error occurred during login',
+          message: LOGIN_ERROR,
           status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         },
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -298,27 +309,14 @@ export default class AuthenticationService {
       );
     }
 
-    if (user.is_2fa_enabled) {
-      throw new HttpException(
-        {
-          status_code: HttpStatus.BAD_REQUEST,
-          message: TWO_FA_ENABLED,
-        },
-        HttpStatus.BAD_REQUEST,
-        {
-          cause: TWO_FA_ENABLED,
-        }
-      );
-    }
-
     return { user, isValid: true };
   }
 
   async enable2FA(user_id: string, password: string) {
-    const { user, isValid, ...validationResponse } = await this.validateUserAndPassword(user_id, password);
+    const { user, isValid } = await this.validateUserAndPassword(user_id, password);
 
     if (!isValid) {
-      throw validationResponse;
+      throw new InternalServerErrorException(ENABLE_2FA_ERROR);
     }
 
     const secret = speakeasy.generateSecret({ length: 32 });
@@ -400,8 +398,8 @@ export default class AuthenticationService {
       });
 
       return {
-        status: 'success',
-        message: 'User successfully created',
+        status_code: HttpStatus.OK,
+        message: USER_CREATED,
         access_token: accessToken,
         user: {
           id: newUser.id,
@@ -436,15 +434,12 @@ export default class AuthenticationService {
       await this.otpService.deleteOtp(user.id);
     }
 
-    // Generate a new OTP and save it
-    const newOtp = generateSixDigitToken();
-    await this.otpService.createOtp(user.id);
+    const otp = await this.otpService.createOtp(user.id);
 
-    // Send the OTP to the user's email
-    await this.emailService.sendLoginOtp(user.email, newOtp);
+    await this.emailService.sendLoginOtp(user.email, otp.token);
 
     return {
-      message: 'Sign-in token sent to email',
+      message: SIGN_IN_OTP_SENT,
       status_code: HttpStatus.OK,
     };
   }
@@ -456,10 +451,10 @@ export default class AuthenticationService {
     const otp = await this.otpService.verifyOtp(user.id, token);
 
     if (!user || !otp) {
-      throw new UnauthorizedException({
+      return {
         message: UNAUTHORISED_TOKEN,
         status_code: HttpStatus.UNAUTHORIZED,
-      });
+      };
     }
 
     const accessToken = this.jwtService.sign({
@@ -470,9 +465,12 @@ export default class AuthenticationService {
       id: user.id,
     });
 
+    const { password, ...data } = user;
+
     return {
       message: 'Sign-in successful',
-      token: accessToken,
+      access_token: accessToken,
+      user: data,
       status_code: HttpStatus.OK,
     };
   }
