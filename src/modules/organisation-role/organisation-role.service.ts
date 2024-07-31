@@ -5,13 +5,11 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
-import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class OrganisationRoleService {

@@ -16,11 +16,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { OrganisationRoleService } from './organisation-role.service';
-import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
-import { UpdateOrganisationDto } from '../organisations/dto/update-organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
-import { skipAuth } from '../../helpers/skipAuth';
 import { AuthGuard } from '../../guards/auth.guard';
 
 @ApiTags('Organisation Settings')
