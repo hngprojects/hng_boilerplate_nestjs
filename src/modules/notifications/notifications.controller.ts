@@ -3,6 +3,7 @@ import { NotificationsService } from './notifications.service';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
@@ -11,6 +12,9 @@ import {
 } from '@nestjs/swagger';
 import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
 import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
+import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
+import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
 
 @ApiBearerAuth()
 @ApiTags('Notification')
