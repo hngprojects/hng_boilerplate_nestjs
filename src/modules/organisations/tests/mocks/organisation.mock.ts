@@ -62,6 +62,8 @@ export const createMockOrganisation = (): Organisation => {
     is_2fa_enabled: false,
     profile: profileMock,
     organisationMembers: [orgMemberMock],
+    notifications: [],
+    notifications_settings: [],
   };
 
   const creator: User = {
@@ -89,6 +91,7 @@ export const createMockOrganisation = (): Organisation => {
     isDeleted: false,
     preferences: [],
     invites: [],
+    role: null,
     organisationMembers: [orgMemberMock],
     products: [],
   };
