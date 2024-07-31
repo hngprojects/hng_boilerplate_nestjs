@@ -1,5 +1,5 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
-import { CreateFaqDto } from './dto/createFaqsDto';
+import { Body, Controller, Post, Req, Patch, Param } from '@nestjs/common';
+import { CreateFaqDto, UpdateFaqDto } from './dto/createFaqsDto';
 import { FaqsService } from './faqs.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -14,5 +14,10 @@ export class FaqsController {
     const user = req['user'];
 
     return this.faqService.createFaqs(createFaqs, user.id);
+  }
+  @Patch('/:id')
+  async handleUpdateFaqs(@Req() req, @Param('id') id: string, @Body() updateFaqs: UpdateFaqDto) {
+    const user = req['user'];
+    return this.faqService.updateFaqs(updateFaqs, id, user.id);
   }
 }
