@@ -126,7 +126,7 @@ export class NotificationsService {
   ): Promise<CreateNotificationResponseDto | CreateNotificationError> {
     const user = await this.getUser(user_id);
 
-    const notification_settings = await this.getNotificationSettingsById(user_id);
+    const notification_settings = await this.getNotificationSettingsByUserId(user_id);
 
     await this.sendNotificationEmail(user, notification_content.message, notification_settings);
     const notification = await this.saveNotification(user, notification_content);
@@ -168,9 +168,9 @@ export class NotificationsService {
     return user;
   }
 
-  private async getNotificationSettingsById(user_id: string): Promise<NotificationSettings> {
+  private async getNotificationSettingsByUserId(user_id: string): Promise<NotificationSettings> {
     try {
-      return await this.notificationSettingsService.findNotificationSettingsByUserId(user_id);
+      return this.notificationSettingsService.findNotificationSettingsByUserId(user_id);
     } catch (err) {
       throw new InternalServerErrorException();
     }
