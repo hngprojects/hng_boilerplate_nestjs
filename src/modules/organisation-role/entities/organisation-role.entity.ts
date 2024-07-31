@@ -4,7 +4,6 @@ import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 
-@Entity('roles')
 export class OrganisationRole extends AbstractBaseEntity {
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty({ description: 'The unique identifier of the role' })
