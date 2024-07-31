@@ -28,7 +28,6 @@ describe('JobsService', () => {
     user_type: UserType.USER,
     owned_organisations: [],
     created_organisations: [],
-    invites: [],
     profile: null,
     testimonials: [],
     organisationMembers: [],

@@ -14,7 +14,6 @@ export class InviteService {
 
       const invites: InviteDto[] = allInvites.map(invite => ({
         id: invite.id,
-        email: invite.email,
         status: invite.status,
       }));
 

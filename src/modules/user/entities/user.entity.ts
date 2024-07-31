@@ -60,8 +60,8 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
 
-  @OneToMany(() => Invite, invite => invite.user)
-  invites: Invite[];
+  // @OneToMany(() => Invite, invite => invite.user)
+  // invites: Invite[];
 
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];

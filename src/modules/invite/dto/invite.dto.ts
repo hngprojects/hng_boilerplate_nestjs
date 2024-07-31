@@ -4,8 +4,8 @@ export class InviteDto {
   @IsUUID()
   id: string;
 
-  @IsString()
-  email: string;
+  // @IsString()
+  // email: string;
 
   @IsEnum(['pending', 'approved', 'rejected'])
   status: string;

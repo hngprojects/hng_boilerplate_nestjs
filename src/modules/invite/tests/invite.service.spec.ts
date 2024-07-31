@@ -40,7 +40,6 @@ describe('InviteService', () => {
       user_type: UserType.ADMIN,
       owned_organisations: [],
       created_organisations: [],
-      invites: [],
       jobs: [],
       hashPassword: () => null,
       password: 'password123',
@@ -75,21 +74,17 @@ describe('InviteService', () => {
     const mockInvites: Invite[] = [
       {
         id: '1',
-        email: 'user1@example.com',
         status: 'pending',
         created_at: new Date(),
         updated_at: new Date(),
         organisation: mockOrg,
-        user: mockUser,
       },
       {
         id: '2',
-        email: 'user2@example.com',
         status: 'approved',
         created_at: new Date(),
         updated_at: new Date(),
         organisation: mockOrg,
-        user: mockUser,
       },
     ];
 
@@ -102,7 +97,6 @@ describe('InviteService', () => {
       message: 'Successfully fetched invites',
       data: mockInvites.map(invite => ({
         id: invite.id,
-        email: invite.email,
         status: invite.status,
       })),
     });
