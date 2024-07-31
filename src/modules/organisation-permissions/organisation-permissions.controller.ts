@@ -4,7 +4,6 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -17,9 +16,8 @@ import { OrganisationPermissionsService } from './organisation-permissions.servi
 
 @ApiBearerAuth()
 @ApiTags('Organisation Permissions')
-@Controller('organisations')
+@Controller('organizations')
 export class OrganisationPermissionsController {
-  private readonly logger = new Logger(OrganisationPermissionsController.name);
   constructor(private readonly permissionService: OrganisationPermissionsService) {}
 
   @ApiOperation({ summary: 'Update Permission' })
