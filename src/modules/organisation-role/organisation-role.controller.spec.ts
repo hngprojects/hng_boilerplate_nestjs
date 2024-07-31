@@ -41,7 +41,7 @@ export class OrganisationRoleController {
     return this.organisationRoleService.findOne(+id);
   }
 
-  @Delete(':roleId')
+  @Delete(':id/:roleId')
   @UseGuards(AuthGuard, OwnershipGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a role in an organization' })
@@ -49,8 +49,7 @@ export class OrganisationRoleController {
   @ApiResponse({ status: 200, description: 'Role successfully removed' })
   @ApiResponse({ status: 400, description: 'Invalid role ID format' })
   @ApiResponse({ status: 404, description: 'Role not found' })
-  async remove(@Param('roleId') roleId: string, @Req() req) {
-    const organisationId = req.user.organizationId;
+  async remove(@Param('id') organisationId: string, @Param('roleId') roleId: string, @Req() req) {
     const currentUser = req.user;
 
     try {
