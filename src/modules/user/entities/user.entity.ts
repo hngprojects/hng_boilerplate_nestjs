@@ -9,7 +9,11 @@ import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Notification } from '../../notifications/entities/notifications.entity';
+=======
+import { Comment } from '../../comments/entities/comment.entity';
+>>>>>>> feat: comment functionality
 =======
 import { Comment } from '../../comments/entities/comment.entity';
 >>>>>>> feat: comment functionality

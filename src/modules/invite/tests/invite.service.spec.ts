@@ -51,7 +51,11 @@ describe('InviteService', () => {
       profile: null,
       organisationMembers: [],
 <<<<<<< HEAD
+<<<<<<< HEAD
       notifications: [],
+=======
+      comments: [],
+>>>>>>> feat: comment functionality
 =======
       comments: [],
 >>>>>>> feat: comment functionality
