@@ -19,6 +19,18 @@ export class EmailService {
     });
   }
 
+  async sendUserEmailConfirmationOtp(email: string, otp: string) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Welcome to My App! Confirm your Email',
+      template: 'register-otp',
+      context: {
+        otp,
+        email,
+      },
+    });
+  }
+
   async sendForgotPasswordMail(email: string, url: string, token: string) {
     const link = `${url}?token=${token}`;
     await this.mailerService.sendMail({
@@ -52,6 +64,18 @@ export class EmailService {
       context: {
         email,
         articles,
+      },
+    });
+  }
+
+  async sendLoginOtp(email: string, token: string) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Login with OTP',
+      template: 'login-otp',
+      context: {
+        token,
+        email,
       },
     });
   }

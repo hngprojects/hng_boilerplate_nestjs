@@ -3,7 +3,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 
 @Entity()
 export class Faqs extends AbstractBaseEntity {
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   question: string;
 
   @Column({ nullable: false })
