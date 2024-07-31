@@ -12,6 +12,8 @@ interface UserInterface {
 
   password: string;
 
+  backup_codes: string[];
+
   secret: string;
 
   is_2fa_enabled: boolean;

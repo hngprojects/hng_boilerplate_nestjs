@@ -1,12 +1,14 @@
-import { Body, Controller, HttpCode, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { INCORRECT_TOTP_CODE, TWO_FACTOR_VERIFIED_SUCCESSFULLY } from '../../helpers/SystemMessages';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
 import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
+import { Verify2FADto } from './dto/verify-2fa.dto';
 import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { OtpDto } from '../otp/dto/otp.dto';
@@ -31,6 +33,25 @@ export default class RegistrationController {
   @HttpCode(201)
   public async register(@Body() body: CreateUserDTO): Promise<any> {
     return this.authService.createNewUser(body);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Verify two factor authentication code' })
+  @ApiBody({
+    description: 'Enable two factor authentication',
+    type: Verify2FADto,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: INCORRECT_TOTP_CODE,
+  })
+  @Post('2fa/verify')
+  verify2fa(@Body() verify2faDto: Verify2FADto, @Req() req) {
+    return this.authService.verify2fa(verify2faDto, req.user.sub);
   }
 
   @ApiOperation({ summary: 'Generate forgot password reset token' })
