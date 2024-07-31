@@ -10,10 +10,12 @@ import { BadRequestException, HttpException, ForbiddenException, NotFoundExcepti
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
+import { Profile } from '../../profile/entities/profile.entity';
 
 describe('UserService', () => {
   let service: UserService;
   let repository: Repository<User>;
+  let profileRepository: Repository<Profile>;
 
   const mockUserRepository = {
     save: jest.fn(),
@@ -29,11 +31,16 @@ describe('UserService', () => {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useValue: mockUserRepository,
+        },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
     repository = module.get<Repository<User>>(getRepositoryToken(User));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
   afterEach(() => {
