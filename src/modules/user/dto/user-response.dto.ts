@@ -17,8 +17,11 @@ class SuccessCreateUserResponse {
     };
   };
 }
+class RequestVerificationToken {
+  email: string;
+}
 
-export { ErrorCreateUserResponse, SuccessCreateUserResponse };
+export { ErrorCreateUserResponse, SuccessCreateUserResponse, RequestVerificationToken };
 
 type UserResponseDTO = Partial<UserInterface>;
 export default UserResponseDTO;
