@@ -28,8 +28,7 @@ export class ResponseInterceptor implements NestInterceptor {
     }
 
     response.status(status).json({
-      status: status,
-      error: exceptionResponse.error || exceptionResponse,
+      status_code: status,
       message: errorMessage,
     });
   }
@@ -39,12 +38,17 @@ export class ResponseInterceptor implements NestInterceptor {
     const response = ctx.getResponse();
     const status_code = response.statusCode;
 
-    const { message, ...data } = res;
+    response.setHeader('Content-Type', 'application/json');
+    if (typeof res === 'object') {
+      const { message, ...data } = res;
 
-    return {
-      status: status_code,
-      message,
-      ...data,
-    };
+      return {
+        status: status_code,
+        message,
+        ...data,
+      };
+    } else {
+      return res;
+    }
   }
 }

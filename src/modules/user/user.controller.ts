@@ -20,15 +20,9 @@ export class UserController {
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   async deactivateAccount(@Req() request: Request, @Body() deactivateAccountDto: DeactivateAccountDto) {
     const user = request['user'];
-
     const userId = user.sub;
 
-    const result = await this.userService.deactivateUser(userId, deactivateAccountDto);
-
-    return {
-      status_code: 200,
-      message: result.message,
-    };
+    return this.userService.deactivateUser(userId, deactivateAccountDto);
   }
 
   @ApiOperation({ summary: 'Update User' })

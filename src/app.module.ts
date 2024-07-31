@@ -29,6 +29,7 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
+import { RunTestsModule } from './run-tests/run-tests.module';
 
 @Module({
   providers: [
@@ -119,6 +120,7 @@ import ProbeController from './probe.controller';
     ProductsModule,
     JobsModule,
     ProfileModule,
+    RunTestsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
