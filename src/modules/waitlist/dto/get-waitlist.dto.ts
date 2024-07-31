@@ -1,8 +1,9 @@
 export class GetWaitlistResponseDto {
   status: number;
+  status_code: number;
   message: string;
   data: {
-    user: {
+    waitlist: {
       id: string;
       name: string;
       email: string;
