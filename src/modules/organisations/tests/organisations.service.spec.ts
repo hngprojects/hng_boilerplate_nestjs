@@ -19,6 +19,7 @@ import {
 } from '@nestjs/common';
 import { newUser } from './mocks/new-user.mock';
 import { OrganisationMember } from '../entities/org-members.entity';
+import { Profile } from '../../profile/entities/profile.entity';
 
 class MockQueryBuilder {
   getCount = jest.fn().mockResolvedValue(0);
@@ -29,7 +30,6 @@ class MockQueryBuilder {
 class MockFailQueryBuilder extends MockQueryBuilder {
   getCount = jest.fn().mockResolvedValue(1);
 }
-import { Profile } from '../../profile/entities/profile.entity';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -202,7 +202,7 @@ describe('OrganisationsService', () => {
       await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
     });
   });
-  
+
   describe('it should validate before adding a user', () => {
     it('should throw an error if the organisation does not exist', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
@@ -253,94 +253,96 @@ describe('OrganisationsService', () => {
       expect(result.message).toEqual('User added successfully');
       expect(result.status_code).toEqual(200);
     });
+  });
 
-    it('should throw an error if the user is already a member', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
-      jest.spyOn(service, 'checkIfUserIsMember').mockResolvedValue(1);
-      const res = await service.checkIfUserIsMember(newUser.id, orgMock.id);
-      expect(res).toBeGreaterThanOrEqual(1);
+  it('should throw an error if the user is already a member', async () => {
+    jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+    jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
+    jest.spyOn(service, 'checkIfUserIsMember').mockResolvedValue(1);
+    const res = await service.checkIfUserIsMember(newUser.id, orgMock.id);
+    expect(res).toBeGreaterThanOrEqual(1);
 
-      await expect(service.addMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
-        new ConflictException({
-          status: 'error',
-          message: 'User is already a member of this organisation',
-          status_code: 409,
-        })
-      );
+    await expect(service.addMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+      new ConflictException({
+        status: 'error',
+        message: 'User is already a member of this organisation',
+        status_code: 409,
+      })
+    );
 
-  describe('getOrganisationMembers', () => {
-    it('should throw NotFoundException if organisation is not found', async () => {
-      organisationRepository.findOne = jest.fn().mockResolvedValue(null);
+    describe('getOrganisationMembers', () => {
+      it('should throw NotFoundException if organisation is not found', async () => {
+        organisationRepository.findOne = jest.fn().mockResolvedValue(null);
 
-      await expect(service.getOrganisationMembers('orgId', 1, 2, 'testUserId')).rejects.toThrow(NotFoundException);
-    });
+        await expect(service.getOrganisationMembers('orgId', 1, 2, 'testUserId')).rejects.toThrow(NotFoundException);
+      });
 
-    it('should throw ForbiddenException if the user is not a member', async () => {
-      const mockOrganisation = {
-        id: 'orgId',
-        organisationMembers: [
-          {
-            user_id: { id: 'anotherUserId' },
-          },
-        ],
-      } as unknown as Organisation;
-
-      organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
-
-      await expect(service.getOrganisationMembers('orgId', 1, 10, 'sub')).rejects.toThrow(ForbiddenException);
-    });
-
-    it('should return paginated members if the user is a member', async () => {
-      const mockOrganisation = {
-        id: 'orgId',
-        organisationMembers: [
-          { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
-          {
-            user_id: {
-              id: 'anotherUserId',
-              first_name: 'Jane',
-              last_name: 'Doe',
-              email: 'jane@email.com',
-              phone: '1111',
+      it('should throw ForbiddenException if the user is not a member', async () => {
+        const mockOrganisation = {
+          id: 'orgId',
+          organisationMembers: [
+            {
+              user_id: { id: 'anotherUserId' },
             },
-          },
-        ],
-      } as unknown as Organisation;
+          ],
+        } as unknown as Organisation;
 
-      organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+        organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
 
-      const result = await service.getOrganisationMembers('orgId', 1, 1, 'sub');
+        await expect(service.getOrganisationMembers('orgId', 1, 10, 'sub')).rejects.toThrow(ForbiddenException);
+      });
 
-      expect(result.status_code).toBe(200);
-      expect(result.data).toEqual([{ id: 'sub', name: 'John Doe', email: 'john@email.com', phone_number: '0000' }]);
-    });
-
-    it('should paginate members correctly', async () => {
-      const mockOrganisation = {
-        id: 'orgId',
-        organisationMembers: [
-          { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
-          {
-            user_id: {
-              id: 'anotherUserId',
-              first_name: 'Jane',
-              last_name: 'Doe',
-              email: 'jane@email.com',
-              phone: '1111',
+      it('should return paginated members if the user is a member', async () => {
+        const mockOrganisation = {
+          id: 'orgId',
+          organisationMembers: [
+            { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
+            {
+              user_id: {
+                id: 'anotherUserId',
+                first_name: 'Jane',
+                last_name: 'Doe',
+                email: 'jane@email.com',
+                phone: '1111',
+              },
             },
-          },
-        ],
-      } as unknown as Organisation;
+          ],
+        } as unknown as Organisation;
 
-      organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+        organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
 
-      const result = await service.getOrganisationMembers('orgId', 2, 1, 'sub');
+        const result = await service.getOrganisationMembers('orgId', 1, 1, 'sub');
 
-      expect(result.status_code).toBe(200);
-      expect(result.data).toEqual([
-        { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
-      ]);
+        expect(result.status_code).toBe(200);
+        expect(result.data).toEqual([{ id: 'sub', name: 'John Doe', email: 'john@email.com', phone_number: '0000' }]);
+      });
+
+      it('should paginate members correctly', async () => {
+        const mockOrganisation = {
+          id: 'orgId',
+          organisationMembers: [
+            { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
+            {
+              user_id: {
+                id: 'anotherUserId',
+                first_name: 'Jane',
+                last_name: 'Doe',
+                email: 'jane@email.com',
+                phone: '1111',
+              },
+            },
+          ],
+        } as unknown as Organisation;
+
+        organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+
+        const result = await service.getOrganisationMembers('orgId', 2, 1, 'sub');
+
+        expect(result.status_code).toBe(200);
+        expect(result.data).toEqual([
+          { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
+        ]);
+      });
     });
   });
 });

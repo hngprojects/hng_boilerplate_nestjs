@@ -59,6 +59,7 @@ export class OrganisationsController {
     const userId = addUserDto.userId;
     const currentUser = req['user'];
     return this.organisationsService.addMember(orgId, userId, currentUser.sub);
+  }
 
   @ApiOperation({ summary: 'Get members of an Organisation' })
   @ApiResponse({
@@ -83,6 +84,5 @@ export class OrganisationsController {
   ): Promise<OrganisationMembersResponseDto> {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
-
   }
 }
