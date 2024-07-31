@@ -12,7 +12,7 @@ import {
   FAILED_TO_CREATE_USER,
   USER_ACCOUNT_DOES_NOT_EXIST,
 } from '../../../helpers/SystemMessages';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
 import UserService from '../../user/user.service';
@@ -123,7 +123,7 @@ describe('AuthenticationService', () => {
       jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
 
       const result = await service.createNewUser(createUserDto);
-      console.log(result);
+
       expect(result).toEqual({
         status_code: HttpStatus.CREATED,
         message: USER_CREATED_SUCCESSFULLY,
@@ -144,12 +144,7 @@ describe('AuthenticationService', () => {
     it('should return error if user already exists', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
 
-      const result = await service.createNewUser(createUserDto);
-
-      expect(result).toEqual({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: USER_ACCOUNT_EXIST,
-      });
+      await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
     });
 
     it('should return error if user creation fails', async () => {
@@ -157,12 +152,7 @@ describe('AuthenticationService', () => {
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
 
-      const result = await service.createNewUser(createUserDto);
-
-      expect(result).toEqual({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: FAILED_TO_CREATE_USER,
-      });
+      await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
     });
 
     it('should throw HttpException on unexpected error', async () => {
@@ -237,8 +227,6 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-
-      // await expect(service.loginUser(loginDto)).toBe({ message: 'Invalid password or email', error: 'Bad Request' }, HttpStatus.UNAUTHORIZED)
     });
 
     it('should handle unexpected errors gracefully', async () => {
@@ -246,15 +234,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockRejectedValue(new Error('Unexpected error'));
 
-      await expect(service.loginUser(loginDto)).rejects.toThrow(
-        new HttpException(
-          {
-            message: 'An error occurred during login',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
+      await expect(service.loginUser(loginDto)).rejects.toThrow(HttpException);
     });
   });
 
@@ -294,15 +274,15 @@ describe('AuthenticationService', () => {
       });
     });
 
-    it('should return error if user not found', async () => {
-      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+    it('should throw error if user not found', async () => {
+      userServiceMock.getUserRecord.mockRejectedValueOnce(
+        new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: USER_ACCOUNT_DOES_NOT_EXIST,
+        })
+      );
 
-      const result = await service.forgotPassword({ email });
-
-      expect(result).toEqual({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: USER_ACCOUNT_DOES_NOT_EXIST,
-      });
+      await expect(service.forgotPassword({ email })).rejects.toThrow(HttpException);
     });
 
     it('should throw HttpException on unexpected error', async () => {

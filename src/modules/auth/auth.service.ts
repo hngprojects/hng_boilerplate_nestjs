@@ -11,11 +11,9 @@ import {
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import {
-  ERROR_OCCURED,
   FAILED_TO_CREATE_USER,
   USER_ACCOUNT_DOES_NOT_EXIST,
   INVALID_PASSWORD,
-  TWO_FA_ENABLED,
   TWO_FA_INITIATED,
   USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
@@ -37,19 +35,12 @@ import { OtpService } from '../otp/otp.service';
 import { EmailService } from '../email/email.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { User } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
-import { generateSixDigitToken } from '../../utils/generate-token';
 import { OtpDto } from '../otp/dto/otp.dto';
-import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
-import { isInstance } from 'class-validator';
-import CustomExceptionHandler from 'src/helpers/exceptionHandler';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 
 @Injectable()
 export default class AuthenticationService {
