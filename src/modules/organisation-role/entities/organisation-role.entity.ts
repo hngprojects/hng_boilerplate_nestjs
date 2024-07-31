@@ -1,22 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Column, Entity } from 'typeorm';
 
 @Entity('roles')
 export class OrganisationRole extends AbstractBaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  @ApiProperty({ description: 'The unique identifier of the role' })
+  @ApiProperty({ description: 'The ID of the role' })
+  @Column({ nullable: false })
   id: string;
 
   @ApiProperty({ description: 'The name of the role', maxLength: 50 })
-  @Column({ type: 'varchar', length: 50, unique: true })
+  @Column({ length: 50, unique: true, nullable: false })
   name: string;
 
   @ApiProperty({ description: 'The description of the role', maxLength: 200, required: false })
-  @Column({ type: 'varchar', length: 200, nullable: true })
+  @Column({ length: 200, nullable: true })
   description: string;
-
-  @ManyToOne(() => Organisation, organisation => organisation.roles, { nullable: true }) // Set nullable to true
-  organisation: Organisation;
 }
