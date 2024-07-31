@@ -9,7 +9,7 @@ import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Notification } from '../../notifications/entities/notifications.entity';
-
+import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
@@ -84,4 +84,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Notification, notification => notification.user)
   notifications: Notification[];
+
+  @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
+  notifications_settings: NotificationSettings[];
 }
