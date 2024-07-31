@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Waitlist } from './waitlist.entity';
 import { Repository } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { EMAIL_EXISTS, WAITLIST_USER_CREATED_SUCCESSFULLY } from '../../helpers/SystemMessages';
 import { EmailService } from '../email/email.service';
 dotenv.config();
 
@@ -19,7 +18,7 @@ export class WaitlistService {
     if (emailExist) {
       return {
         status_code: HttpStatus.CONFLICT,
-        message: EMAIL_EXISTS,
+        message: 'Duplicate email',
       };
     }
     const waitlistUser = await this.waitlistRepo.create(createWaitlistUserDto);
@@ -27,7 +26,7 @@ export class WaitlistService {
     await this.emailService.sendWaitListMail(createWaitlistUserDto.email, process.env.CLIENT_URL);
     return {
       status_code: HttpStatus.CREATED,
-      message: WAITLIST_USER_CREATED_SUCCESSFULLY,
+      message: 'User added to waitlist successfully',
       user: waitlistUser,
     };
   }

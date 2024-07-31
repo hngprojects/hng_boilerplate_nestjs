@@ -16,17 +16,13 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EmailModule } from './modules/email/email.module';
 import { EmailService } from './modules/email/email.service';
 import { InviteModule } from './modules/invite/invite.module';
-import { OrganisationsModule } from './modules/organisations/organisations.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { ProductsModule } from './modules/products/products.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
-import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
@@ -35,6 +31,7 @@ import ProbeController from './probe.controller';
 import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WaitlistModule } from './modules/waitlist/waitlist.module';
 
 @Module({
   providers: [
@@ -92,6 +89,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     TestimonialsModule,
     EmailModule,
     InviteModule,
+    WaitlistModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -117,7 +115,6 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
       inject: [ConfigService],
     }),
     OrganisationsModule,
-    WaitlistModule,
     NotificationSettingsModule,
     SqueezeModule,
     TestimonialsModule,

@@ -63,6 +63,7 @@ export const createMockOrganisation = (): Organisation => {
     profile: profileMock,
     organisationMembers: [orgMemberMock],
     notifications: [],
+    notifications_settings: [],
   };
 
   return {

@@ -4,7 +4,6 @@ import { AbstractBaseEntity } from '../../entities/base.entity';
 
 @Entity()
 export class Faq extends AbstractBaseEntity implements IFaq {
-
   @Column({ nullable: false })
   question: string;
 
