@@ -52,7 +52,6 @@ describe('InviteService', () => {
       notifications: [],
       profile: null,
       organisationMembers: [],
-      notifications: [],
     };
 
     const mockOrg: Organisation = {
