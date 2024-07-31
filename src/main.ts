@@ -30,7 +30,7 @@ async function bootstrap() {
   app.enable('trust proxy');
   app.useLogger(logger);
   app.enableCors();
-  app.setGlobalPrefix('api/v1', { exclude: ['/', 'run-tests', 'health', 'api', 'api/v1', 'api/docs', 'probe'] });
+  app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs', 'probe'] });
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   const options = new DocumentBuilder()
