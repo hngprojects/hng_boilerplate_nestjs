@@ -69,4 +69,23 @@ export class JobsService {
       data: job,
     };
   }
+  async delete(jobId: string) {
+    // Check if listing exists
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+    });
+
+    job.is_deleted = true;
+    const deleteJobEntityInstance = this.jobRepository.create(job);
+
+    // Save the new Job entity to the database
+    await this.jobRepository.save(deleteJobEntityInstance);
+
+    // Return a success response
+    return {
+      status: 'success',
+      message: 'Job details deleted successfully',
+      status_code: 200,
+    };
+  }
 }
