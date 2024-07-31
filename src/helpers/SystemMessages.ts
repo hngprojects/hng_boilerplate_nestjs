@@ -1,5 +1,6 @@
 export const USER_CREATED_SUCCESSFULLY =
   'User Created Successfully, Kindly check your mail for your verification token';
+export const USER_CREATED = 'User Created Successfully';
 export const FAILED_TO_CREATE_USER = 'Error Occured while creating user, kindly try again';
 export const ERROR_OCCURED = 'Error Occured Performing this request';
 export const USER_ACCOUNT_EXIST = 'Account with the specified email exists';
@@ -20,5 +21,10 @@ export const FETCH_TIMEZONE_FAILURE = 'Error Occured while creating Timezone, ki
 export const SUCCESS = 'Timezone fetched successfully';
 export const TIMEZONE_ALREADY_EXISTS = 'Timezone already exists';
 export const INVALID_CREDENTIALS = 'Invalid email or password';
+export const LOGIN_SUCCESSFUL = 'Login successful';
+export const LOGIN_ERROR = 'An error occurred during login';
+export const EMAIL_SENT = 'Email sent successfully';
+export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
+export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
 export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
