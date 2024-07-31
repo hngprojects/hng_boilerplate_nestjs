@@ -4,10 +4,10 @@ import { OrganisationRoleController } from './organisation-role.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
-import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
+import { Permissions } from '../organisation-permissions/entities/permissions.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OrganisationRole, DefaultPermissions, Organisation])],
+  imports: [TypeOrmModule.forFeature([OrganisationRole, Permissions, Organisation])],
   controllers: [OrganisationRoleController],
   providers: [OrganisationRoleService],
 })

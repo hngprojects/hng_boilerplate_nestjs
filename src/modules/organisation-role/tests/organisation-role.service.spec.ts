@@ -3,7 +3,7 @@ import { OrganisationRoleService } from '../organisation-role.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { OrganisationRole } from '../entities/organisation-role.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
-import { DefaultPermissions } from '../../organisation-permissions/entities/default-permissions.entity';
+import { Permissions } from '../../organisation-permissions/entities/permissions.entity';
 import { Repository } from 'typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
@@ -11,7 +11,7 @@ describe('OrganisationRoleService', () => {
   let service: OrganisationRoleService;
   let rolesRepository: Repository<OrganisationRole>;
   let organisationRepository: Repository<Organisation>;
-  let permissionRepository: Repository<DefaultPermissions>;
+  let permissionRepository: Repository<Permissions>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,7 +26,7 @@ describe('OrganisationRoleService', () => {
           useClass: Repository,
         },
         {
-          provide: getRepositoryToken(DefaultPermissions),
+          provide: getRepositoryToken(Permissions),
           useClass: Repository,
         },
       ],
@@ -35,7 +35,7 @@ describe('OrganisationRoleService', () => {
     service = module.get<OrganisationRoleService>(OrganisationRoleService);
     rolesRepository = module.get<Repository<OrganisationRole>>(getRepositoryToken(OrganisationRole));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
-    permissionRepository = module.get<Repository<DefaultPermissions>>(getRepositoryToken(DefaultPermissions));
+    permissionRepository = module.get<Repository<Permissions>>(getRepositoryToken(Permissions));
   });
 
   describe('createOrgRoles', () => {
@@ -47,7 +47,7 @@ describe('OrganisationRoleService', () => {
 
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(mockOrganisation as Organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
-      jest.spyOn(permissionRepository, 'find').mockResolvedValue(mockDefaultPermissions as DefaultPermissions[]);
+      jest.spyOn(permissionRepository, 'find').mockResolvedValue(mockDefaultPermissions as Permissions[]);
       jest.spyOn(rolesRepository, 'create').mockReturnValue({ ...createRoleDto } as OrganisationRole);
       jest.spyOn(rolesRepository, 'save').mockResolvedValue({ id: 'role123', ...createRoleDto } as OrganisationRole);
 

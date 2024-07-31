@@ -8,7 +8,7 @@ import { ICreateFaqResponse, IFaq } from './faq.interface';
 @ApiTags('faqs')
 @Controller('faqs')
 export class FaqController {
-  constructor(private readonly faqService: FaqService) { }
+  constructor(private readonly faqService: FaqService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new FAQ' })

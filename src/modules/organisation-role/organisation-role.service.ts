@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
-import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
+import { Permissions } from '../organisation-permissions/entities/permissions.entity';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -19,8 +19,8 @@ export class OrganisationRoleService {
     private rolesRepository: Repository<OrganisationRole>,
     @InjectRepository(Organisation)
     private organisationRepository: Repository<Organisation>,
-    @InjectRepository(DefaultPermissions)
-    private permissionRepository: Repository<DefaultPermissions>
+    @InjectRepository(Permissions)
+    private permissionRepository: Repository<Permissions>
   ) {}
 
   async createOrgRoles(createOrganisationRoleDto: CreateOrganisationRoleDto, organisationId: string) {
@@ -47,7 +47,6 @@ export class OrganisationRoleService {
 
       const role = this.rolesRepository.create({
         ...createOrganisationRoleDto,
-        organisation,
       });
 
       const defaultPermissions = await this.permissionRepository.find();

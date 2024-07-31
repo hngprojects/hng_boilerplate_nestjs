@@ -7,7 +7,7 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 @ApiTags('Organisation Settings')
 @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@Controller('organisations')
+@Controller('organizations')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
@@ -24,6 +24,7 @@ export class OrganisationRoleController {
     const savedRole = await this.organisationRoleService.createOrgRoles(createRoleDto, organisationId);
 
     return {
+      id: savedRole.id,
       status_code: HttpStatus.CREATED,
       name: savedRole.name,
       description: savedRole.description,
