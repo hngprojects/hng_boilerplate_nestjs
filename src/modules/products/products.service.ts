@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { CreateProductRequestDto } from './dto/create-product.dto';
-import { Product, ProductStatusType } from './entities/product.entity';
+import { Product, StockStatusType } from './entities/product.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 
@@ -39,7 +39,7 @@ export class ProductsService {
       });
 
     const statusCal = await this.calculateProductStatus(dto.quantity);
-    newProduct.status = statusCal;
+    newProduct.stock_status = statusCal;
 
     const product = await this.productRepository.save(newProduct);
 
@@ -51,7 +51,7 @@ export class ProductsService {
         name: product.name,
         description: product.description,
         price: product.variants[0].price,
-        status: product.status,
+        status: product.stock_status,
         quantity: product.variants[0].quantity,
         created_at: product.created_at,
         updated_at: product.updated_at,
@@ -76,7 +76,7 @@ export class ProductsService {
       product.variants.reduce((acc, variant) => acc + variant.quantity, 0)
     );
 
-    product.status = calculateProductStatus;
+    product.stock_status = calculateProductStatus;
 
     const currentProduct = await this.productRepository.save(product);
 
@@ -87,8 +87,8 @@ export class ProductsService {
     };
   }
 
-  async calculateProductStatus(quantity: number): Promise<ProductStatusType> {
-    if (quantity === 0) return ProductStatusType.OUT_STOCK;
-    return quantity >= 5 ? ProductStatusType.IN_STOCK : ProductStatusType.LOW_STOCK;
+  async calculateProductStatus(quantity: number): Promise<StockStatusType> {
+    if (quantity === 0) return StockStatusType.OUT_STOCK;
+    return quantity >= 5 ? StockStatusType.IN_STOCK : StockStatusType.LOW_STOCK;
   }
 }

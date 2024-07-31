@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsInt, MaxLength, IsOptional, IsEnum, IsArray, ValidateNested } from 'class-validator';
-import { ProductStatusType } from '../entities/product.entity';
+import { StockStatusType } from '../entities/product.entity';
 import { Type } from 'class-transformer';
 import { ProductVariantDto } from './product-variant.dto';
 
@@ -32,10 +32,10 @@ export class UpdateProductDTO {
 
   @ApiProperty({
     description: 'Product status',
-    enum: ProductStatusType,
+    enum: StockStatusType,
   })
-  @IsEnum(ProductStatusType, { each: true })
-  status?: ProductStatusType;
+  @IsEnum(StockStatusType, { each: true })
+  stock_status?: StockStatusType;
 
   @ApiProperty({
     description: 'Product variants',
