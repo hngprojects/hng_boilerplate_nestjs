@@ -10,6 +10,7 @@ import { InviteService } from '../invite.service';
 describe('InviteService', () => {
   let service: InviteService;
   let repository: Repository<Invite>;
+  let organisationRepo: Repository<Organisation>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -19,11 +20,16 @@ describe('InviteService', () => {
           provide: getRepositoryToken(Invite),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(Organisation),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
     service = module.get<InviteService>(InviteService);
     repository = module.get<Repository<Invite>>(getRepositoryToken(Invite));
+    organisationRepo = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
   });
 
   it('should fetch all invites', async () => {
@@ -74,17 +80,23 @@ describe('InviteService', () => {
     const mockInvites: Invite[] = [
       {
         id: '1',
-        status: 'pending',
         created_at: new Date(),
         updated_at: new Date(),
+        token: 'url',
         organisation: mockOrg,
+        email: 'string',
+        isGeneric: true,
+        isAccepted: true,
       },
       {
         id: '2',
-        status: 'approved',
         created_at: new Date(),
         updated_at: new Date(),
+        token: 'url',
         organisation: mockOrg,
+        email: 'string',
+        isGeneric: true,
+        isAccepted: true,
       },
     ];
 
@@ -95,10 +107,7 @@ describe('InviteService', () => {
     expect(result).toEqual({
       status_code: 200,
       message: 'Successfully fetched invites',
-      data: mockInvites.map(invite => ({
-        id: invite.id,
-        status: invite.status,
-      })),
+      data: mockInvites,
     });
   });
 

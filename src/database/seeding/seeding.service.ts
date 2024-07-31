@@ -144,16 +144,12 @@ export class SeedingService {
         }
 
         const inv1 = inviteRepository.create({
-          email: 'Org 1',
           status: 'pending',
-          user: savedUsers[0],
           organisation: savedOrganisations[0],
         });
 
         const inv2 = inviteRepository.create({
-          email: 'Org 1',
           status: 'pending',
-          user: savedUsers[1],
           organisation: savedOrganisations[1],
         });
 
