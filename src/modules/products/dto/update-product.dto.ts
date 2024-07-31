@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsInt, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, MaxLength, IsOptional, IsEnum, IsArray, ValidateNested } from 'class-validator';
+import { ProductStatusType } from '../entities/product.entity';
+import { Type } from 'class-transformer';
+import { ProductVariantDto } from './product-variant.dto';
 
 export class UpdateProductDTO {
   @ApiProperty({
@@ -8,7 +11,7 @@ export class UpdateProductDTO {
   })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name?: string;
 
   @ApiProperty({
     description: 'The product description',
@@ -21,9 +24,25 @@ export class UpdateProductDTO {
   description?: string;
 
   @ApiProperty({
-    description: 'The price of the product',
-    example: 'NGN 10000',
+    description: 'Image URL',
   })
-  @IsInt()
-  price?: number;
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @ApiProperty({
+    description: 'Product status',
+    enum: ProductStatusType,
+  })
+  @IsEnum(ProductStatusType, { each: true })
+  status?: ProductStatusType;
+
+  @ApiProperty({
+    description: 'Product variants',
+    isArray: true,
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
 }

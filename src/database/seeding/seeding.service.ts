@@ -6,6 +6,7 @@ import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { Profile } from '../../modules/profile/entities/profile.entity';
+import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
 
 @Injectable()
 export class SeedingService {
@@ -124,15 +125,25 @@ export class SeedingService {
         const p1 = productRepository.create({
           name: 'Product 1',
           description: 'Description for Product 1',
-          quantity: 10,
-          price: 100,
+          variants: [
+            {
+              size: ProductSizeType.STANDARD,
+              quantity: 1,
+              price: 500,
+            },
+          ],
           org: or1,
         });
         const p2 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          quantity: 20,
-          price: 200,
+          variants: [
+            {
+              size: ProductSizeType.SMALL,
+              quantity: 2,
+              price: 50,
+            },
+          ],
           org: or2,
         });
 
