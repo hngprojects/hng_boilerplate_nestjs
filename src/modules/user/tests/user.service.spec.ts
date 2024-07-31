@@ -469,6 +469,7 @@ describe('UserService', () => {
 
       mockUserRepository.findOne.mockResolvedValueOnce(userToDelete);
       mockUserRepository.softDelete.mockResolvedValueOnce({ affected: 1 });
+      mockUserRepository.softDelete.mockResolvedValueOnce({ affected: 1 });
 
       const result = await service.softDeleteUser(userId, authenticatedUserId);
 
