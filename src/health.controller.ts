@@ -24,6 +24,7 @@ export default class HealthController {
   @skipAuth()
   @Get('health')
   public health() {
+    console.log('safe ...');
     return { status_code: 200, message: 'This is a healthy endpoint ...' };
   }
 }
