@@ -19,6 +19,7 @@ import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
 import { skipAuth } from '../../helpers/skipAuth';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 const uploadProfilePicFolder = path.join(process.cwd(), '/public/uploads/user-profile-img');
 
@@ -68,5 +69,16 @@ export class ProfileController {
   @Get('pic/:picName')
   async getProfilePic(@Param('picName') picName: string, @Res() res) {
     return await this.profileService.getProfilePic(picName, res, uploadProfilePicFolder);
+  }
+  
+  @ApiOperation({ summary: 'Update User Profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'The updated record',
+  })
+  @Patch(':userId')
+  updateProfile(@Param('userId') userId: string, @Body() body: UpdateProfileDto) {
+    const updatedProfile = this.profileService.updateProfile(userId, body);
+    return updatedProfile;
   }
 }

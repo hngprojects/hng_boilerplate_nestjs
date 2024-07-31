@@ -45,6 +45,8 @@ export const createMockOrganisation = (): Organisation => {
     last_name: 'Smith',
     email: 'john.smith@example.com',
     password: 'pass123',
+    jobs: [],
+    phone: '+1234567890',
     hashPassword: async () => {},
     is_active: true,
     attempts_left: 3,
@@ -59,6 +61,8 @@ export const createMockOrganisation = (): Organisation => {
     products: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],
+    notifications: [],
+    notifications_settings: [],
   };
 
   return {
@@ -78,6 +82,7 @@ export const createMockOrganisation = (): Organisation => {
     isDeleted: false,
     preferences: [],
     invites: [],
+    role: null,
     organisationMembers: [orgMemberMock],
     products: [],
   };
