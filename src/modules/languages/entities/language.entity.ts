@@ -9,7 +9,7 @@ export class Language extends AbstractBaseEntity {
   @Column({ unique: true })
   language: string;
 
-  @Column()
+  @Column({ unique: true })
   code: string;
 
   @Column({ nullable: true })
