@@ -2,6 +2,7 @@ import { AbstractBaseEntity } from './../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ApiHideProperty } from '@nestjs/swagger';
+import { JobMode, JobType, SalaryRange } from '../dto/job.dto';
 
 @Entity()
 export class Job extends AbstractBaseEntity {
@@ -19,20 +20,20 @@ export class Job extends AbstractBaseEntity {
 
   @Column({
     type: 'enum',
-    enum: ['below_30k', '30k_to_50k', '50k_to_70k', '70k_to_100k', '100k_to_150k', 'Above_150k'],
+    enum: SalaryRange,
     nullable: false,
   })
   salary_range: string;
 
   @Column({
     type: 'enum',
-    enum: ['full-time', 'part-time', 'internship', 'contract'],
+    enum: JobType,
     default: 'full-time',
     nullable: false,
   })
   job_type: string;
 
-  @Column({ type: 'enum', enum: ['remote', 'onsite'], default: 'remote', nullable: false })
+  @Column({ type: 'enum', enum: JobMode, default: 'remote', nullable: false })
   job_mode: string;
 
   @Column('text', { nullable: false })
