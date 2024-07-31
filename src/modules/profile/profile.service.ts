@@ -3,6 +3,7 @@ import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -25,6 +26,36 @@ export class ProfileService {
       const responseData = {
         message: 'Successfully fetched profile',
         data: profile,
+      };
+
+      return responseData;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Internal server error: ${error.message}`);
+    }
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const profile = await this.profileRepository.findOne({ where: { user_id: { id: userId } } });
+      if (!profile) {
+        throw new NotFoundException('Profile not found');
+      }
+
+      // Update profile data
+      await this.profileRepository.update(profile.id, updateProfileDto);
+
+      const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
+
+      const responseData = {
+        message: 'Profile successfully updated',
+        data: updatedProfile,
       };
 
       return responseData;
