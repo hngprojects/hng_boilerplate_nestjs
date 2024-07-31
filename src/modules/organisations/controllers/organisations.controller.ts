@@ -14,12 +14,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { OrganisationsService } from './organisations.service';
-import { OrganisationRequestDto } from './dto/organisation.dto';
+import { OrganisationsService } from '../services/organisations.service';
+import { OrganisationRequestDto } from '../dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { OwnershipGuard } from '../../guards/authorization.guard';
-import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
+import { UpdateOrganisationDto } from '../dto/update-organisation.dto';
+import { OwnershipGuard } from '../../../guards/authorization.guard';
+import { OrganisationMembersResponseDto } from '../dto/org-members-response.dto';
+import { OrganisationMemberMapper } from '../mapper/org-members.mapper';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')

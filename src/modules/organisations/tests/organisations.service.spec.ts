@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrganisationsService } from '../organisations.service';
+import { OrganisationsService } from '../services/organisations.service';
 import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';

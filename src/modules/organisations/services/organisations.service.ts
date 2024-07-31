@@ -1,25 +1,22 @@
 import {
   BadRequestException,
   ForbiddenException,
-  HttpCode,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { Organisation } from './entities/organisations.entity';
-import { OrganisationRequestDto } from './dto/organisation.dto';
+import { Organisation } from '../entities/organisations.entity';
+import { OrganisationRequestDto } from '../dto/organisation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { OrganisationMapper } from './mapper/organisation.mapper';
-import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
-import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
-import { OrganisationMemberMapper } from './mapper/org-members.mapper';
-
+import { User } from '../../user/entities/user.entity';
+import { OrganisationMapper } from '../mapper/organisation.mapper';
+import { CreateOrganisationMapper } from '../mapper/create-organisation.mapper';
+import { UpdateOrganisationDto } from '../dto/update-organisation.dto';
+import { OrganisationMembersResponseDto } from '../dto/org-members-response.dto';
+import { OrganisationMemberMapper } from '../mapper/org-members.mapper';
 @Injectable()
 export class OrganisationsService {
   constructor(
