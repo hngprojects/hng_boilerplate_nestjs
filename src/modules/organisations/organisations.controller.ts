@@ -20,6 +20,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
+import { createOrganisationResponseDtoMock } from './tests/mocks/create-organisation-response.mock';
 
 @ApiBearerAuth()
 @ApiTags('Organisation')
@@ -27,6 +28,16 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
+  @ApiOperation({ summary: 'Create new Organisation' })
+  @ApiResponse({
+    status: 201,
+    description: 'The created organisation',
+    type: createOrganisationResponseDtoMock,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Organisation email already exists',
+  })
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Request() req) {
     const user = req['user'];
