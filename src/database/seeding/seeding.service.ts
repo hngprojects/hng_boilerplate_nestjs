@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User, UserType } from '../../modules/user/entities/user.entity';
+import { User } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product } from '../../modules/products/entities/product.entity';
@@ -16,6 +16,8 @@ export class SeedingService {
     const profileRepository = this.dataSource.getRepository(Profile);
     const inviteRepository = this.dataSource.getRepository(Invite);
     const organisationRepository = this.dataSource.getRepository(Organisation);
+    const productRepository = this.dataSource.getRepository(Product);
+    const categoryRepository = this.dataSource.getRepository(ProductCategory);
 
     try {
       const existingUsers = await userRepository.count();
@@ -34,14 +36,12 @@ export class SeedingService {
           last_name: 'Smith',
           email: 'john.smith@example.com',
           password: 'password',
-          user_type: UserType.SUPER_ADMIN,
         });
         const u2 = userRepository.create({
           first_name: 'Jane',
           last_name: 'Smith',
           email: 'jane.smith@example.com',
           password: 'password',
-          user_type: UserType.SUPER_ADMIN,
         });
 
         await userRepository.save([u1, u2]);
@@ -99,6 +99,7 @@ export class SeedingService {
 
         await organisationRepository.save([or1, or2]);
         const savedOrganisations = await organisationRepository.find();
+
         if (savedOrganisations.length !== 2) {
           throw new Error('Failed to create all organisations');
         }
@@ -160,6 +161,10 @@ export class SeedingService {
         const savedInvite = await inviteRepository.find();
         if (savedInvite.length !== 2) {
           throw new Error('Failed to create all organisations');
+        }
+        const savedCategories = await categoryRepository.find({ relations: ['products'] });
+        if (savedCategories.length !== 3) {
+          throw new Error('Failed to create all categories');
         }
 
         await queryRunner.commitTransaction();
