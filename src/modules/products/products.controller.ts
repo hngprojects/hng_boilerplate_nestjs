@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ProductsService } from './products.service';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { skipAuth } from '../../helpers/skipAuth';
+import { UpdateProductDTO } from './dto/update-product.dto';
+import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
+import { ProductsService } from './products.service';
 
 @ApiTags('Products')
 @Controller('products')
@@ -34,5 +36,17 @@ export class ProductsController {
     @Query('maxPrice') maxPrice?: number
   ) {
     return this.productsService.searchProducts({ name, category, minPrice, maxPrice });
+  }
+
+  @Put('/:productId')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Update product' })
+  @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
+  @ApiResponse({ status: 200, description: 'Product updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async updateProduct(@Param('productId') productId: string, @Body() updateProductDto: UpdateProductDTO) {
+    return this.updateProduct(productId, updateProductDto);
   }
 }

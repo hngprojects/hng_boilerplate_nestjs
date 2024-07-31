@@ -12,24 +12,31 @@ import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
+import { ERROR_OCCURED } from '../../helpers/SystemMessages';
+import UserInterface from './interfaces/UserInterface';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
+import { Profile } from '../profile/entities/profile.entity';
 
 @Injectable()
 export default class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>
+    private userRepository: Repository<User>,
+    @InjectRepository(Profile)
+    private profileRepository: Repository<Profile>
   ) {}
 
-  async createUser(user: CreateNewUserOptions): Promise<any> {
+  async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
+    const profile = await this.profileRepository.save({ email: createUserPayload.email, username: '' });
     const newUser = new User();
-    Object.assign(newUser, user);
+    Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
-    return this.userRepository.save(newUser);
+    newUser.profile = profile;
+    return await this.userRepository.save(newUser);
   }
 
   async updateUserRecord(userUpdateOptions: UpdateUserRecordOption) {
@@ -64,12 +71,18 @@ export default class UserService {
   }
 
   private async getUserByEmail(email: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
+    const user: UserResponseDTO = await this.userRepository.findOne({
+      where: { email: email },
+      relations: ['profile'],
+    });
     return user;
   }
 
   private async getUserById(identifier: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({ where: { id: identifier } });
+    const user: UserResponseDTO = await this.userRepository.findOne({
+      where: { id: identifier },
+      relations: ['profile'],
+    });
     return user;
   }
 
