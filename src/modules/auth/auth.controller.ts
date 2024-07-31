@@ -4,29 +4,34 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
 import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
-import UserService from '../user/user.service';
+import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
+import {
+  ErrorCreateUserResponse,
+  RequestVerificationToken,
+  SuccessCreateUserResponse,
+} from '../user/dto/user-response.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export default class RegistrationController {
-  constructor(
-    private authService: AuthenticationService,
-    private userService: UserService
-  ) {}
+  constructor(private authService: AuthenticationService) {}
 
   @skipAuth()
+  @ApiOperation({ summary: 'User Registration' })
+  @ApiResponse({ status: 201, description: 'Register a new user', type: SuccessCreateUserResponse })
+  @ApiResponse({ status: 400, description: 'Bad request', type: ErrorCreateUserResponse })
   @Post('register')
   public async register(@Body() body: CreateUserDTO, @Res() response: Response): Promise<any> {
     const createUserResponse = await this.authService.createNewUser(body);
+    // return createUserResponse;
     return response.status(createUserResponse.status_code).send(createUserResponse);
   }
 
@@ -49,13 +54,16 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     return this.authService.loginUser(loginDto);
   }
 
   @skipAuth()
-  @Post('otp/email-verification')
-  public async verifyEmail(@Body() body: OtpDto, @Res() response: Response): Promise<any> {
+  @ApiOperation({ summary: 'Email verification' })
+  @ApiResponse({ status: 200, description: 'Verify token sent to the user mail', type: OtpDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @Post('verify-otp')
+  public async verifyEmail(@Body() body: OtpDto): Promise<any> {
     return this.authService.verifyToken(body);
   }
 
@@ -64,6 +72,7 @@ export default class RegistrationController {
     description: 'Enable two factor authentication',
     type: Enable2FADto,
   })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
   @ApiResponse({ status: 400, description: BAD_REQUEST })
   public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
@@ -73,76 +82,29 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @Get('login/google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req: Request) {}
-
-  @skipAuth()
-  @Get('callback/google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const user = req['user'];
-    if (user) {
-      const jwt = await this.authService.googleLogin(user);
-      const userExists = await this.userService.getUserRecord({ identifierType: 'email', identifier: user.email });
-
-      if (!userExists) {
-        const newUser = await this.authService.createUserGoogle(user);
-        return res.status(HttpStatus.CREATED).json(newUser);
-      }
-
-      const response = {
-        status: 'success',
-        message: 'User successfully authenticated',
-        data: {
-          tokens: {
-            access_token: jwt.access_token,
-          },
-          user: {
-            id: user.id,
-            email: user.email,
-            name: `${user.given_name} ${user.family_name}`,
-            given_name: user.given_name,
-            family_name: user.family_name,
-            picture: user.picture,
-          },
-        },
-      };
-
-      return res.status(HttpStatus.OK).json(response);
-    } else {
-      const response = {
-        status: 'error',
-        message: 'Authentication failed',
-      };
-
-      return res.status(HttpStatus.UNAUTHORIZED).json(response);
-    }
+  @ApiOperation({ summary: 'Google Authentication' })
+  @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: OtpDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @Post('google')
+  async googleAuth(@Body() body: GoogleAuthPayload) {
+    return this.authService.googleAuth(body);
   }
 
   @skipAuth()
-  @Get('registration/google')
-  @UseGuards(AuthGuard('google'))
-  async googleRegistrationRedirect(@Req() req: Request, @Res() res: Response) {
-    console.log('Registration auth');
-    const user = req['user'];
-    if (user) {
-      const userRegistered = await this;
-      const jwt = await this.authService.googleLogin(user);
-
-      const access_token = jwt.access_token;
-
-      return res.redirect(`${process.env.GOOGLE_LOGIN_REDIRECT}?access_token=${access_token}`);
-    } else {
-      const response = {
-        status: 'error',
-        message: 'Authentication failed',
-      };
-
-      return res.status(HttpStatus.UNAUTHORIZED).json(response);
-    }
+  @ApiBody({
+    description: 'Request authentication token',
+    type: RequestVerificationToken,
+  })
+  @ApiOperation({ summary: 'Request Verification Token' })
+  @ApiResponse({ status: 200, description: 'Verification Token sent to mail' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @Post('request/token')
+  async requestVerificationToken(@Body() body: { email: string }) {
+    const { email } = body;
+    return this.authService.requestSignInToken({ email });
   }
 
+  @skipAuth()
   @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })
@@ -152,6 +114,7 @@ export default class RegistrationController {
     return await this.authService.requestSignInToken(body);
   }
 
+  @skipAuth()
   @Post('magic-link/verify')
   @HttpCode(200)
   @ApiOperation({ summary: 'Verify Signin Token' })

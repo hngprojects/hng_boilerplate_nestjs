@@ -10,14 +10,17 @@ import { BadRequestException, HttpException, ForbiddenException, NotFoundExcepti
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
+import { Profile } from '../../profile/entities/profile.entity';
 
 describe('UserService', () => {
   let service: UserService;
   let repository: Repository<User>;
+  let profileRepository: Repository<Profile>;
 
   const mockUserRepository = {
     save: jest.fn(),
     findOne: jest.fn(),
+    findAndCount: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -28,11 +31,16 @@ describe('UserService', () => {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useValue: mockUserRepository,
+        },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
     repository = module.get<Repository<User>>(getRepositoryToken(User));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
   afterEach(() => {
@@ -278,6 +286,133 @@ describe('UserService', () => {
       expect(result.user).not.toHaveProperty('password');
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
+      });
+    });
+  });
+
+  describe('getAllUsers', () => {
+    const page = 1;
+    const limit = 10;
+    const superAdminPayload: UserPayload = {
+      id: 'super-admin-id',
+      email: 'superadmin@example.com',
+      user_type: UserType.SUPER_ADMIN,
+    };
+    const regularUserPayload: UserPayload = {
+      id: 'regular-user-id',
+      email: 'user@example.com',
+      user_type: UserType.USER,
+    };
+
+    it('should return users when called by super admin', async () => {
+      const users = [
+        {
+          id: '1',
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john@example.com',
+          phone: '1234567890',
+          is_active: true,
+          created_at: new Date('2023-01-01T00:00:00Z'),
+        },
+        {
+          id: '2',
+          first_name: 'Jane',
+          last_name: 'Doe',
+          email: 'jane@example.com',
+          phone: '0987654321',
+          is_active: false,
+          created_at: new Date('2023-01-02T00:00:00Z'),
+        },
+      ];
+      const total = 2;
+
+      mockUserRepository.findAndCount.mockResolvedValueOnce([users, total]);
+
+      const result = await service.getUsersByAdmin(page, limit, superAdminPayload);
+
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Users retrieved successfully',
+        data: {
+          users: users.map(user => ({
+            id: user.id,
+            name: `${user.first_name} ${user.last_name}`,
+            email: user.email,
+            phone_number: user.phone,
+            is_active: user.is_active,
+            created_at: user.created_at,
+          })),
+          pagination: {
+            current_page: page,
+            total_pages: 1,
+            total_users: total,
+          },
+        },
+      });
+      expect(mockUserRepository.findAndCount).toHaveBeenCalledWith({
+        select: ['id', 'first_name', 'last_name', 'email', 'phone', 'is_active', 'created_at'],
+        skip: 0,
+        take: limit,
+        order: { created_at: 'DESC' },
+      });
+    });
+
+    it('should throw ForbiddenException when called by non-super admin', async () => {
+      await expect(service.getUsersByAdmin(page, limit, regularUserPayload)).rejects.toThrow(ForbiddenException);
+      expect(mockUserRepository.findAndCount).not.toHaveBeenCalled();
+    });
+
+    it('should handle pagination correctly', async () => {
+      const users = Array(15)
+        .fill(null)
+        .map((_, index) => ({
+          id: `${index + 1}`,
+          first_name: `User${index + 1}`,
+          last_name: 'Test',
+          email: `user${index + 1}@example.com`,
+          phone: `123456789${index}`,
+          is_active: true,
+          created_at: new Date(2023, 0, index + 1),
+        }));
+      const total = 15;
+
+      mockUserRepository.findAndCount.mockResolvedValueOnce([users.slice(0, 10), total]);
+
+      const result = await service.getUsersByAdmin(page, limit, superAdminPayload);
+
+      expect(result.data.pagination).toEqual({
+        current_page: page,
+        total_pages: 2,
+        total_users: total,
+      });
+      expect(result.data.users.length).toBe(10);
+      expect(result.data.users[0]).toEqual({
+        id: '1',
+        name: 'User1 Test',
+        email: 'user1@example.com',
+        phone_number: '1234567890',
+        is_active: true,
+        created_at: expect.any(Date),
+      });
+    });
+
+    it('should handle empty result', async () => {
+      mockUserRepository.findAndCount.mockResolvedValueOnce([[], 0]);
+
+      const result = await service.getUsersByAdmin(page, limit, superAdminPayload);
+
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Users retrieved successfully',
+        data: {
+          users: [],
+          pagination: {
+            current_page: page,
+            total_pages: 0,
+            total_users: 0,
+          },
+        },
       });
     });
   });

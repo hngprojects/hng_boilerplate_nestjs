@@ -22,9 +22,12 @@ export class EmailService {
   async sendUserEmailConfirmationOtp(email: string, otp: string) {
     await this.mailerService.sendMail({
       to: email,
-      subject: 'Your Email Confirmation OTP',
-      text: `Your OTP is: ${otp}`,
-      html: `<p>Your OTP is: <strong>${otp}</strong></p>`,
+      subject: 'Welcome to My App! Confirm your Email',
+      template: 'register-otp',
+      context: {
+        otp,
+        email,
+      },
     });
   }
 
