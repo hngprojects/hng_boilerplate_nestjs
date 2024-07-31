@@ -31,6 +31,7 @@ describe('JobsService', () => {
     invites: [],
     profile: null,
     testimonials: [],
+    backup_codes: [],
     organisationMembers: [],
     jobs: [],
     created_at: new Date(),
