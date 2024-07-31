@@ -24,6 +24,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
+import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
 import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
@@ -119,6 +120,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     TestimonialsModule,
     JobsModule,
     ProductsModule,
+    BillingPlanModule,
     JobsModule,
     ProfileModule,
     OrganisationRoleModule,
