@@ -1,16 +1,4 @@
-import {
-  Body,
-  Controller,
-  Param,
-  Patch,
-  Req,
-  Request,
-  ValidationPipe,
-  Get,
-  Query,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Body, Controller, Param, Patch, Req, Request, Get, Query } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import {
   ApiBadRequestResponse,

@@ -1,10 +1,10 @@
 import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
   BadRequestException,
   HttpException,
   HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -91,6 +91,43 @@ export class NotificationsService {
           is_read,
           updated_at,
         },
+      };
+    } catch (error) {
+      if (
+        error instanceof HttpException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
+  }
+
+  async markAllNotificationsAsReadForUser(userId: string) {
+    try {
+      const notifications = await this.notificationRepository.find({
+        where: {
+          user: {
+            id: userId,
+          },
+          is_read: false,
+        },
+      });
+
+      if (notifications.length > 0) {
+        notifications.forEach(notifications => {
+          notifications.is_read = true;
+        });
+        await this.notificationRepository.save(notifications);
+      }
+
+      return {
+        status: 'success',
+        status_code: HttpStatus.OK,
+        message: 'Notifications cleared successfully.',
+        data: { notifications: [] },
       };
     } catch (error) {
       if (
