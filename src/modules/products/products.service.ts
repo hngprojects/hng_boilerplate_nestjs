@@ -78,12 +78,12 @@ export class ProductsService {
 
     product.status = calculateProductStatus;
 
-    await this.productRepository.save(product);
+    const currentProduct = await this.productRepository.save(product);
 
     return {
       status_code: HttpStatus.OK,
       message: 'Product updated successfully',
-      data: product,
+      data: currentProduct,
     };
   }
 
