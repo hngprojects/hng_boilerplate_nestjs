@@ -29,6 +29,8 @@ import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { BlogModule } from './modules/blog/blog.module';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   providers: [
@@ -119,6 +121,8 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     JobsModule,
     ProfileModule,
     RunTestsModule,
+    BlogModule,
+    CategoryModule,
   ],
   controllers: [HealthController, ProbeController],
 })

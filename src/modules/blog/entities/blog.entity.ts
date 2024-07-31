@@ -1,16 +1,8 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  OneToMany,
-  UpdateDateColumn,
-  CreateDateColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Column, CreateDateColumn, Entity, ManyToOne, UpdateDateColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { BlogPostComment } from './blog-comment.entity';
-import { BlogPostCategory } from './blog-category.entity';
+import { AbstractBaseEntity } from 'src/entities/base.entity';
+import { ApiProperty } from '@nestjs/swagger';
+
 @Entity()
 export class Blog extends AbstractBaseEntity {
   @Column()
@@ -26,11 +18,13 @@ export class Blog extends AbstractBaseEntity {
   author: User;
 
   @Column({ default: true })
-  isPublished: boolean;
+  is_Published: boolean;
 
-  @OneToMany(() => BlogPostComment, comment => comment.blog)
-  comments: BlogPostComment[];
+  @ApiProperty({ type: Date, description: 'created_on of blog' })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  created_on: Date;
 
-  @ManyToOne(() => BlogPostCategory, category => category.blogs)
-  category_id: BlogPostCategory;
+  @ApiProperty({ type: Date, description: 'modify_on of blog' })
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
+  modify_on: Date;
 }

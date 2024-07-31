@@ -1,6 +1,8 @@
-import { IsString, IsOptional, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { CreateBlogPost } from './create-blog.dto';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class EditBlogPost {
+export class UpdateBlogDto extends PartialType(CreateBlogPost) {
   @IsString()
   @IsOptional()
   @IsNotEmpty()
