@@ -11,7 +11,7 @@ import { AuthGuard } from '../../guards/auth.guard';
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
-  @Get()
+  @Get(':organisationId')
   @UseGuards(AuthGuard, OwnershipGuard)
   @ApiOperation({ summary: 'Get all organisation roles' })
   @ApiResponse({ status: 200, description: 'Success', type: [Object] })

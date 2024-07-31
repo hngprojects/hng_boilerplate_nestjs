@@ -1,5 +1,4 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,14 +22,12 @@ export class OrganisationRoleService {
     if (!organisation) {
       throw new NotFoundException('Organisation not found');
     }
-
-    return this.rolesRepository.find().then(roles =>
-      roles.map(role => ({
-        id: role.id,
-        name: role.name,
-        description: role.description,
-      }))
-    );
+    const roles = await this.rolesRepository.find({ where: { organisation: { id: organisationID } } });
+    return roles.map(role => ({
+      id: role.id,
+      name: role.name,
+      description: role.description,
+    }));
   }
 
   findAll() {
