@@ -47,7 +47,7 @@ export class TimezonesService {
         timezone: newTimezone,
       };
     } catch (error) {
-      Logger.error('TimezonesServiceError ~ createTimezone ~', error);
+      console.log('TimezonesServiceError ~ createTimezone ~', error);
       throw new InternalServerErrorException({
         message: ERROR_OCCURED,
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
