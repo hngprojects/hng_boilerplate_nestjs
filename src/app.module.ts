@@ -22,7 +22,7 @@ import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { ProductsModule } from './modules/products/products.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
-import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
