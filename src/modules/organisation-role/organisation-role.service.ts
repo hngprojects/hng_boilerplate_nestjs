@@ -5,7 +5,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -82,4 +81,5 @@ export class OrganisationRoleService {
       status_code: 200,
       message: 'Role successfully removed',
     };
+  }
 }
