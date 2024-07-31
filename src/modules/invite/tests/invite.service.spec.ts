@@ -38,6 +38,7 @@ describe('InviteService', () => {
       created_at: new Date(),
       updated_at: new Date(),
       user_type: UserType.ADMIN,
+      backup_codes: [],
       owned_organisations: [],
       created_organisations: [],
       invites: [],
