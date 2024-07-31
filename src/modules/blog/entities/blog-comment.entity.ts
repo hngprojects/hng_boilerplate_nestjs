@@ -10,7 +10,4 @@ export class BlogPostComment extends AbstractBaseEntity {
 
   @ManyToOne(() => Blog, blog => blog.comments)
   blog: Blog;
-
-  @ManyToOne(() => User, user => user.comments)
-  author: User;
 }

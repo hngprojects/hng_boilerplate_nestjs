@@ -13,9 +13,9 @@ export class EditBlogPost {
 
   @IsOptional()
   @IsString()
-  categoryId?: string;
+  category_Id?: string;
 
   @IsNotEmpty()
   @IsString()
-  authorId: string;
+  author: string;
 }

@@ -7,6 +7,6 @@ export class BlogPostCategory extends AbstractBaseEntity {
   @Column()
   name: string;
 
-  @OneToMany(() => Blog, blog => blog.category)
+  @OneToMany(() => Blog, blog => blog.category_id)
   blogs: Blog[];
 }
