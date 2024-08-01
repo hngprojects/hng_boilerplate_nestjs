@@ -16,9 +16,6 @@ import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
-import { UpdateUserDto } from './dto/update-user-dto';
-import { UserPayload } from './interfaces/user-payload.interface';
-import UserService from './user.service';
 
 @ApiBearerAuth()
 @ApiTags('Users')
