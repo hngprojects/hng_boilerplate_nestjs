@@ -12,10 +12,13 @@ import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import {
   FAILED_TO_CREATE_USER,
+  INCORRECT_TOTP_CODE,
+  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+  USER_ACCOUNT_EXIST,
+  USER_NOT_ENABLED_2FA,
   USER_ACCOUNT_DOES_NOT_EXIST,
   INVALID_PASSWORD,
   TWO_FA_INITIATED,
-  USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
   UNAUTHORISED_TOKEN,
@@ -31,6 +34,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import UserService from '../user/user.service';
+import { Verify2FADto } from './dto/verify-2fa.dto';
 import { OtpService } from '../otp/otp.service';
 import { EmailService } from '../email/email.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -78,7 +82,7 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
+      // await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
         user: {
@@ -238,6 +242,51 @@ export default class AuthenticationService {
         secret: secret.base32,
         qr_code_url: qrCodeUrl,
       },
+    };
+  }
+  generateBackupCodes(): string[] {
+    const codes = [];
+    for (let i = 0; i < 5; i++) {
+      codes.push(Math.floor(10000000 + Math.random() * 90000000).toString());
+    }
+    return codes;
+  }
+
+  async verify2fa(verify2faDto: Verify2FADto, user_id: string) {
+    const user = await this.userService.getUserRecord({ identifier: user_id, identifierType: 'id' });
+    if (!user) {
+      return { status_code: 404, message: USER_NOT_FOUND };
+    }
+    if (!user.secret) {
+      throw new BadRequestException({ status_code: 400, message: USER_NOT_ENABLED_2FA });
+    }
+
+    const verify = speakeasy.totp.verify({
+      secret: user.secret,
+      encoding: 'base32',
+      token: verify2faDto.totp_code,
+    });
+    if (!verify) {
+      throw new BadRequestException({ status_code: 400, message: INCORRECT_TOTP_CODE });
+    }
+
+    const backup_codes = this.generateBackupCodes();
+    const payload = {
+      backup_codes,
+      is_2fa_enabled: true,
+    };
+    await this.userService.updateUserRecord({
+      updatePayload: payload,
+      identifierOptions: {
+        identifierType: 'id',
+        identifier: user.id,
+      },
+    });
+
+    return {
+      status_code: HttpStatus.OK,
+      message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+      data: { backup_codes: backup_codes },
     };
   }
 

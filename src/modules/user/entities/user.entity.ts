@@ -36,6 +36,9 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true })
   is_active: boolean;
 
+  @Column('simple-array', { nullable: true })
+  backup_codes: string[];
+
   @Column({ nullable: true })
   attempts_left: number;
 

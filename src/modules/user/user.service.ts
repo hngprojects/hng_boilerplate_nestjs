@@ -13,6 +13,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import UserResponseDTO from './dto/user-response.dto';
+import { ERROR_OCCURED } from '../../helpers/SystemMessages';
+import UserInterface from './interfaces/UserInterface';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
