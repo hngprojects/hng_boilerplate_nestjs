@@ -23,6 +23,7 @@ export class OrganisationMember extends AbstractBaseEntity {
     enum: MemberRole,
     default: MemberRole.MEMBER,
   })
+  @Column({ nullable: true })
   role: string;
 
   @ManyToOne(() => Profile)
