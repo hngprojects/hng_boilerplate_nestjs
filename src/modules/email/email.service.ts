@@ -1,6 +1,4 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
 import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { validateOrReject } from 'class-validator';
 import * as Handlebars from 'handlebars';
@@ -9,20 +7,30 @@ import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
 import { promisify } from 'util';
 import * as path from 'path';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class EmailService {
-  constructor(@InjectQueue('email') private readonly emailQueue: Queue) {}
+  constructor(private readonly mailerService: MailerService) {}
 
   async sendEmail(emailData: SendEmailDto) {
     await validateOrReject(emailData);
-    await this.emailQueue.add(emailData);
-    return { message: 'Email added to the queue' };
+    try {
+      await this.mailerService.sendMail(emailData);
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Email sent successfully',
+      };
+    } catch (error) {
+      return {
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'There was an error sending the email, please try again',
+      };
+    }
   }
 
   async createTemplate(templateInfo: createTemplateDto) {
     try {
-      // Check if the compiled template is valid HTML
       const html = Handlebars.compile(templateInfo.template)({});
 
       const validationResult = await htmlValidator({ data: html });
@@ -53,7 +61,6 @@ export class EmailService {
 
       return response;
     } catch (error) {
-      // General error handling
       return {
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Something went wrong, please try again',

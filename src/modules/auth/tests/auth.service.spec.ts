@@ -336,7 +336,10 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
-      emailServiceMock.sendEmail.mockResolvedValueOnce({ message: 'Email sent successfully' });
+      emailServiceMock.sendEmail.mockResolvedValueOnce({
+        status_code: HttpStatus.OK,
+        message: 'Email sent successfully',
+      });
 
       const result = await service.forgotPassword({ email });
 

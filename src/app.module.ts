@@ -56,12 +56,6 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
     },
   ],
   imports: [
-    BullModule.forRoot({
-      redis: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
     ConfigModule.forRoot({
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,

@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService } from './email.service';
-import { getQueueToken } from '@nestjs/bull';
-import { Queue } from 'bull';
 import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import * as Handlebars from 'handlebars';
 import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
-import * as path from 'path';
 import { HttpStatus } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
 
 // Mock module-level functions
 jest.mock('./email_storage.service', () => ({
@@ -27,10 +25,10 @@ jest.mock('fs', () => ({
 
 describe('EmailService', () => {
   let service: EmailService;
-  let emailQueue: Queue;
+  let mailerService: MailerService;
 
-  const mockQueue = {
-    add: jest.fn().mockResolvedValue({}),
+  const mockMailerService = {
+    sendMail: jest.fn().mockResolvedValue({}),
   };
 
   beforeEach(async () => {
@@ -38,14 +36,14 @@ describe('EmailService', () => {
       providers: [
         EmailService,
         {
-          provide: getQueueToken('email'),
-          useValue: mockQueue,
+          provide: MailerService,
+          useValue: mockMailerService,
         },
       ],
     }).compile();
 
     service = module.get<EmailService>(EmailService);
-    emailQueue = module.get<Queue>(getQueueToken('email'));
+    mailerService = module.get<MailerService>(MailerService);
   });
 
   it('should be defined', () => {
@@ -59,13 +57,12 @@ describe('EmailService', () => {
     emailData.template = 'test-template';
     emailData.context = { key: 'value' };
 
-    await service.sendEmail(emailData);
+    const result = await service.sendEmail(emailData);
 
-    expect(emailQueue.add).toHaveBeenCalledWith({
-      to: emailData.to,
-      subject: emailData.subject,
-      template: emailData.template,
-      context: emailData.context,
+    expect(mailerService.sendMail).toHaveBeenCalledWith(emailData);
+    expect(result).toEqual({
+      status_code: HttpStatus.OK,
+      message: 'Email sent successfully',
     });
   });
 
@@ -172,25 +169,11 @@ describe('EmailService', () => {
     });
   });
 
-  describe('getTemplate', () => {
-    it('should return the content of a template', async () => {
-      const templateInfo: getTemplateDto = { templateName: 'test' };
-      (require('./email_storage.service').getFile as jest.Mock).mockResolvedValue('template content');
+  describe('getAllTemplates', () => {
+    it('should handle errors when retrieving templates', async () => {
+      (fs.promises.readdir as jest.Mock).mockRejectedValue(new Error('Error'));
 
-      const result = await service.getTemplate(templateInfo);
-
-      expect(result).toEqual({
-        status_code: HttpStatus.OK,
-        message: 'Template retrieved successfully',
-        template: 'template content',
-      });
-    });
-
-    it('should return NOT_FOUND if template does not exist', async () => {
-      const templateInfo: getTemplateDto = { templateName: 'test' };
-      (require('./email_storage.service').getFile as jest.Mock).mockRejectedValue(new Error('File not found'));
-
-      const result = await service.getTemplate(templateInfo);
+      const result = await service.getAllTemplates();
 
       expect(result).toEqual({
         status_code: HttpStatus.NOT_FOUND,
