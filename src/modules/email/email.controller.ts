@@ -27,7 +27,6 @@ export class EmailController {
     res.status(response.status_code).send(response);
   }
 
-  @skipAuth()
   @Get('get-all-templates')
   async getAllTemplates(@Res() res: Response): Promise<any> {
     const response = await this.emailService.getAllTemplates();
