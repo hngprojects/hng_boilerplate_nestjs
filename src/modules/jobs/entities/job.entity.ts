@@ -55,8 +55,6 @@ export class Job extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.jobs, { nullable: false })
   user: User;
 
-  // New properties with API docs
-
   @ApiProperty({
     description: 'List of qualifications required for the job',
     example: ["Bachelor's Degree in Computer Science", '5 years of experience in software development'],
