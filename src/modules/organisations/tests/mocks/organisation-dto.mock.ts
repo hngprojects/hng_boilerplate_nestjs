@@ -5,7 +5,6 @@ export const createMockOrganisationRequestDto = (
 ): OrganisationRequestDto => {
   const defaultMock: OrganisationRequestDto = {
     name: 'John & Co',
-    description: 'An imports organisation',
     email: 'johnCo@example.com',
     industry: 'Import',
     type: 'General',

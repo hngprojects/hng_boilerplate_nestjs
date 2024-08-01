@@ -23,7 +23,6 @@ const profileMock: Profile = {
   profile_pic_url: '',
   created_at: new Date(),
   updated_at: new Date(),
-  user_id: null,
 };
 
 export const newUser: User = {
@@ -51,5 +50,5 @@ export const newUser: User = {
   profile: profileMock,
   user_type: UserType.ADMIN,
   notifications: [],
-  notifications_settings: [],
+  notification_settings: null,
 };
