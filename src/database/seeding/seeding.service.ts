@@ -16,6 +16,7 @@ import { DefaultPermissions } from '../../modules/organisation-permissions/entit
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
+import { v4 as uuidv4 } from 'uuid';
 import { CreateAdminDto } from './dto/admin.dto';
 import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
@@ -52,8 +53,6 @@ export class SeedingService {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
-
-      const notificationRepository = this.dataSource.getRepository(Notification);
 
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
@@ -196,16 +195,16 @@ export class SeedingService {
         }
 
         const inv1 = inviteRepository.create({
-          email: 'Org 1',
-          status: 'pending',
-          user: savedUsers[0],
           organisation: savedOrganisations[0],
+          isGeneric: true,
+          isAccepted: false,
+          token: uuidv4(),
         });
 
         const inv2 = inviteRepository.create({
-          email: 'Org 1',
-          status: 'pending',
-          user: savedUsers[1],
+          isGeneric: true,
+          isAccepted: false,
+          token: uuidv4(),
           organisation: savedOrganisations[1],
         });
 
