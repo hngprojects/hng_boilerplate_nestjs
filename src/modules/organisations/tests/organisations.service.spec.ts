@@ -14,17 +14,14 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   ForbiddenException,
-  ConflictException,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
-import { OrganisationMember } from '../entities/org-members.entity';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
   let organisationRepository: Repository<Organisation>;
   let profileRepository: Repository<Profile>;
-  let organisationMemberRepository: Repository<OrganisationMember>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,12 +36,6 @@ describe('OrganisationsService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
-          },
-        },
-        {
-          provide: getRepositoryToken(OrganisationMember),
-          useValue: {
-            save: jest.fn(),
           },
         },
         UserService,
@@ -71,7 +62,6 @@ describe('OrganisationsService', () => {
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
-    organisationMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
     profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
@@ -101,9 +91,13 @@ describe('OrganisationsService', () => {
     });
 
     it('should throw an error if the email already exists', async () => {
-      organisationRepository.findBy = jest.fn().mockResolvedValue([orgMock]);
+      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([orgMock]);
       await expect(service.create(createMockOrganisationRequestDto(), orgMock.owner.id)).rejects.toThrow(
-        new ConflictException('Organisation with this email already exists')
+        new UnprocessableEntityException({
+          status: 'Unprocessable entity exception',
+          message: 'Invalid organisation credentials',
+          status_code: 422,
+        })
       );
     });
   });

@@ -10,7 +10,7 @@ export class WaitlistController {
   constructor(private readonly waitlistService: WaitlistService) {}
 
   @ApiOperation({ summary: 'Get all waitlist' })
-  @ApiResponse({ status: 200, description: 'Wait list retrieved successfully' })
+  @ApiResponse({ status: 200, description: 'Wait list retrieved successfully', type: GetWaitlistResponseDto })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   @Get()
   getAllWaitlist() {

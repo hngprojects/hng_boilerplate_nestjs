@@ -82,7 +82,7 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      // await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
+      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
         user: {
@@ -287,7 +287,7 @@ export default class AuthenticationService {
       status_code: HttpStatus.OK,
       message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
       data: { backup_codes: backup_codes },
-    };
+    }
   }
 
   async googleAuth(googleAuthPayload: GoogleAuthPayload) {
