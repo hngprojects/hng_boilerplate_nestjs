@@ -66,4 +66,30 @@ export class InviteService {
 
     return responseData;
   }
+
+  async sendEmailInvites(organisationId: string, emails: string[]): Promise<any> {
+    const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+    if (!organisation) {
+      throw new NotFoundException('organisation not found');
+    }
+
+    const existingInvites = await this.inviteRepository.find({
+      where: { organisation: { id: organisationId } },
+      relations: ['organisation'],
+    });
+
+    for (const email of emails) {
+      const existingInvite = existingInvites.find(invite => invite.email === email);
+      if (existingInvite) {
+        await this.inviteRepository.remove(existingInvite);
+      }
+      const token = uuidv4();
+      const invite = await this.inviteRepository.create({ email, token, organisation, isGeneric: false });
+      await this.inviteRepository.save(invite);
+      const link = `${process.env.FRONTEND_URL}/invite?token=${token}`;
+      //email sending logic here (using Bull queue )
+    }
+
+    return { message: 'Invites sent successfully' };
+  }
 }
