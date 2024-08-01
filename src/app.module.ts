@@ -36,6 +36,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { BlogModule } from './modules/blog/blog.module';
 import { CategoryModule } from './modules/category/category.module';
+import { HelpCenterModule } from './modules/help-center/help-center.module';
 
 @Module({
   providers: [
@@ -133,6 +134,7 @@ import { CategoryModule } from './modules/category/category.module';
     BlogModule,
     CategoryModule,
     WaitlistModule,
+    HelpCenterModule,
   ],
   controllers: [HealthController, ProbeController],
 })
