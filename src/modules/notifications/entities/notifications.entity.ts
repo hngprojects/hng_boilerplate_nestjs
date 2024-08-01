@@ -1,6 +1,6 @@
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Notification extends AbstractBaseEntity {
