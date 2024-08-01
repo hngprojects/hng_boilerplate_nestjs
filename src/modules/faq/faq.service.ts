@@ -17,7 +17,7 @@ export class FaqService {
     const faq = this.faqRepository.create(createFaqDto);
     return this.faqRepository.save(faq);
   }
-   async findAllFaq() {
+  async findAllFaq() {
     try {
       const faqs = await this.faqRepository.find();
       return {
@@ -38,15 +38,14 @@ export class FaqService {
   }
 
   async updateFaq(id: string, updateFaqDto: UpdateFaqDto) {
-    
-      const faq = await this.faqRepository.findOne({ where: { id } });
-      if (!faq) {
+    const faq = await this.faqRepository.findOne({ where: { id } });
+    if (!faq) {
       throw new BadRequestException({
-      message: 'Invalid request data',
-      status_code: 400,
+        message: 'Invalid request data',
+        status_code: 400,
       });
-      }
-      try {
+    }
+    try {
       Object.assign(faq, updateFaqDto);
       const updatedFaq = await this.faqRepository.save(faq);
       return {
@@ -55,7 +54,6 @@ export class FaqService {
         answer: updatedFaq.answer,
         category: updatedFaq.category,
       };
-      
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         return {

@@ -88,6 +88,7 @@ export const createMockOrganisation = (): Organisation => {
     role: null,
     organisationMembers: [orgMemberMock],
     products: [],
+    roles: [],
   };
 };
 

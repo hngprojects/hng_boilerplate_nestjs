@@ -35,6 +35,7 @@ import { OrganisationPermissionsModule } from './modules/organisation-permission
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
+import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 
 @Module({
   providers: [
@@ -122,10 +123,11 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
     TestimonialsModule,
     JobsModule,
     ProductsModule,
-    OrganisationPermissionsModule,
     BillingPlanModule,
     JobsModule,
     ProfileModule,
+    OrganisationRoleModule,
+    OrganisationPermissionsModule,
     RunTestsModule,
     ContactUsModule,
     NotificationsModule,
