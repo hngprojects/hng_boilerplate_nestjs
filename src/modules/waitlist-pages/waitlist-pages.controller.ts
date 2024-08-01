@@ -4,9 +4,9 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@ne
 import { GetWaitlistPageResponseDTO } from './dto/get-waitlist-page.dto';
 import { CreateWaitlistPageDTO } from './dto/create-waitlist-page.dto';
 import { CreateWaitlistPageResponseDTO } from './dto/create-waitlist-page-response.dto';
-import { AuthGuard } from 'src/guards/super-admin.guard';
+import { SuperAdminGuard } from 'src/guards/super-admin.guard';
 
-@UseGuards(AuthGuard)
+@UseGuards(SuperAdminGuard)
 @ApiBearerAuth()
 @ApiTags('Waitlist Pages')
 @Controller('waitlist-pages')

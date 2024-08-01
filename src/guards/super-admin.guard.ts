@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { FORBIDDEN_ACTION } from '../helpers/SystemMessages';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class SuperAdminGuard implements CanActivate {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>
