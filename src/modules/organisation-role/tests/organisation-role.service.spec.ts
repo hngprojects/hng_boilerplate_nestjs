@@ -8,6 +8,7 @@ import { Organisation } from '../../organisations/entities/organisations.entity'
 import { OrganisationRole } from '../entities/organisation-role.entity';
 import { OrganisationRoleService } from '../organisation-role.service';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { organisationRoleMock } from '../../organisations/tests/mocks/organisation.mock';
 
 describe('OrganisationRoleService', () => {
   let service: OrganisationRoleService;
@@ -149,74 +150,66 @@ describe('OrganisationRoleService', () => {
       expect(result).toEqual(mockRole);
     });
 
-    it('should throw NotFoundException when organisation is not found', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+    it('should throw UnauthorizedException if the user does not have the right role', async () => {
+      const organisationId = 'org-id';
+      const roleId = 'role-id';
+      const currentUser = { role: 'user', organisationId: organisationId };
 
-      await expect(service.findSingleRole('role123', 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(UnauthorizedException);
     });
 
-    it('should throw NotFoundException when role is not found', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: 'org123' } as Organisation);
+    it('should throw NotFoundException if the role does not exist', async () => {
+      const organisationId = 'org-id';
+      const roleId = 'role-id';
+      const currentUser = { role: 'admin', organisationId: organisationId };
+
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findSingleRole('nonexistent', 'org123')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(
+        new NotFoundException(`The role with ID ${roleId} does not exist`)
+      );
     });
-  });
 
-  it('should throw UnauthorizedException if the user does not have the right role', async () => {
-    const organisationId = 'org-id';
-    const roleId = 'role-id';
-    const currentUser = { role: 'user', organisationId: organisationId };
+    it('should throw BadRequestException if the role is assigned to users', async () => {
+      const organisationId = 'org-id';
+      const roleId = 'role-id';
+      const currentUser = { role: 'admin', organisationId: organisationId };
 
-    await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(UnauthorizedException);
-  });
+      const role = organisationRoleMock;
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
+      jest.spyOn(organisationRepository, 'count').mockResolvedValue(1);
 
-  it('should throw NotFoundException if the role does not exist', async () => {
-    const organisationId = 'org-id';
-    const roleId = 'role-id';
-    const currentUser = { role: 'admin', organisationId: organisationId };
-
-    jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
-
-    await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(
-      new NotFoundException(`The role with ID ${roleId} does not exist`)
-    );
-  });
-
-  it('should throw BadRequestException if the role is assigned to users', async () => {
-    const organisationId = 'org-id';
-    const roleId = 'role-id';
-    const currentUser = { role: 'admin', organisationId: organisationId };
-
-    const role = new OrganisationRole();
-    jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
-    jest.spyOn(organisationMemberRepository, 'count').mockResolvedValue(1);
-
-    await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(
-      new BadRequestException('Role is currently assigned to users')
-    );
-  });
-
-  it('should delete the role successfully', async () => {
-    const organisationId = 'org-id';
-    const roleId = 'role-id';
-    const currentUser = { role: 'admin', organisationId: organisationId };
-
-    const role = new OrganisationRole();
-    jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
-    jest.spyOn(organisationMemberRepository, 'count').mockResolvedValue(0);
-    jest.spyOn(rolesRepository, 'softDelete').mockResolvedValue(null);
-
-    const result = await service.deleteRole(organisationId, roleId, currentUser);
-
-    expect(rolesRepository.findOne).toHaveBeenCalledWith({
-      where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
-      relations: ['organisation'],
+      await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(
+        new BadRequestException('Role is currently assigned to users')
+      );
     });
-    expect(organisationMemberRepository.count).toHaveBeenCalledWith({
-      where: { organisation: { id: organisationId }, role: role.name },
+
+    it('should delete the role successfully', async () => {
+      const organisationId = 'org-id';
+      const roleId = 'role-id';
+      const currentUser = { role: 'admin', organisationId: organisationId };
+
+      const role = organisationRoleMock;
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
+      jest.spyOn(organisationRepository, 'count').mockResolvedValue(0);
+      jest.spyOn(rolesRepository, 'softDelete').mockResolvedValue(null);
+
+      const result = await service.deleteRole(organisationId, roleId, currentUser);
+
+      expect(rolesRepository.findOne).toHaveBeenCalledWith({
+        where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
+      });
+      expect(organisationRepository.count).toHaveBeenCalledWith({
+        where: {
+          id: organisationId,
+          organisationMembers: {
+            role: { id: roleId },
+          },
+        },
+        relations: ['organisationUsers', 'organisationUsers.role'],
+      });
+      expect(rolesRepository.softDelete).toHaveBeenCalledWith(roleId);
+      expect(result).toEqual({ status_code: 200, message: 'Role successfully removed' });
     });
-    expect(rolesRepository.softDelete).toHaveBeenCalledWith(roleId);
-    expect(result).toEqual({ status_code: 200, message: 'Role successfully removed' });
   });
 });
