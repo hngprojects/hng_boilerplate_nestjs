@@ -5,13 +5,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { OrganisationRole } from './entities/organisation-role.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { Permissions } from '../organisation-permissions/entities/permissions.entity';
 import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
+import { Permissions } from '../organisation-permissions/entities/permissions.entity';
+import { Organisation } from '../organisations/entities/organisations.entity';
+import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
+import { OrganisationRole } from './entities/organisation-role.entity';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -44,7 +44,7 @@ export class OrganisationRoleService {
         throw new ConflictException({
           status_code: HttpStatus.CONFLICT,
           error: 'Conflict',
-          message: 'A role with this name already exists in the organization',
+          message: 'A role with this name already exists in the organisation',
         });
       }
 
@@ -75,7 +75,7 @@ export class OrganisationRoleService {
       throw new InternalServerErrorException({
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         error: 'Internal Server Error',
-        message: 'Failed to create organization role',
+        message: 'Failed to create organisation role',
       });
     }
   }
