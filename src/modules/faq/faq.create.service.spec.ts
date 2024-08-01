@@ -17,7 +17,7 @@ describe('FaqService', () => {
       created_at: new Date(),
       updated_at: new Date(),
     })),
-    save: jest.fn().mockImplementation((faq) => Promise.resolve(faq)),
+    save: jest.fn().mockImplementation(faq => Promise.resolve(faq)),
   };
 
   beforeEach(async () => {

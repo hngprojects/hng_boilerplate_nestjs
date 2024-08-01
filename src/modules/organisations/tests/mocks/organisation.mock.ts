@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
+import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -27,12 +28,24 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
   };
 
+  // Create a mock object that matches the OrganisationRole interface
+  const organisationRoleMock: OrganisationRole = {
+    id: uuidv4(),
+    name: 'Admin',
+    description: 'Administrator role with full permissions',
+    permissions: [],
+    organisation: null,
+    organisationMembers: [],
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+
   const orgMemberMock: OrganisationMember = {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
     user_id: null,
-    role: 'admin',
+    role: organisationRoleMock,
     organisation_id: null,
     profile_id: profileMock,
   };
@@ -88,7 +101,6 @@ export const createMockOrganisation = (): Organisation => {
     role: null,
     organisationMembers: [orgMemberMock],
     products: [],
-    roles: [],
   };
 };
 

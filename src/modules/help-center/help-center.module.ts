@@ -10,4 +10,4 @@ import { HelpCenterEntity } from './entities/help-center.entity';
   controllers: [HelpCenterController],
   exports: [HelpCenterService],
 })
-export class HelpCenterModule { }
+export class HelpCenterModule {}
