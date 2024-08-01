@@ -2,7 +2,7 @@ import { Organisation } from '../../organisations/entities/organisations.entity'
 
 export const mockOrganisation = {
   id: 'org_123',
-  name: 'Test Organization',
+  name: 'Test organisation',
   role: [
     {
       id: 'role_456',

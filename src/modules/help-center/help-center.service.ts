@@ -11,8 +11,8 @@ import { HelpCenter } from './interface/help-center.interface';
 export class HelpCenterService {
   constructor(
     @InjectRepository(HelpCenterEntity)
-    private readonly helpCenterRepository: Repository<HelpCenterEntity>,
-  ) { }
+    private readonly helpCenterRepository: Repository<HelpCenterEntity>
+  ) {}
 
   async create(createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenterEntity> {
     const helpCenter = this.helpCenterRepository.create({

@@ -1,10 +1,14 @@
+import { BadRequestException, ForbiddenException, HttpException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import UserService from '../user.service';
-import { User, UserType } from '../entities/user.entity';
-import CreateNewUserOptions from '../options/CreateNewUserOptions';
+import { Profile } from '../../profile/entities/profile.entity';
+import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
+import { UpdateUserDto } from '../dto/update-user-dto';
 import UserResponseDTO from '../dto/user-response.dto';
+import { User, UserType } from '../entities/user.entity';
+import { UserPayload } from '../interfaces/user-payload.interface';
+import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
 import {
   BadRequestException,
@@ -17,6 +21,8 @@ import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
 import { Profile } from '../../profile/entities/profile.entity';
+import UserService from '../user.service';
+
 
 describe('UserService', () => {
   let service: UserService;
@@ -88,7 +94,7 @@ describe('UserService', () => {
       expect(result).toEqual(userResponseDto);
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { email },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
     });
 
@@ -107,7 +113,7 @@ describe('UserService', () => {
       expect(result).toEqual(userResponseDto);
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
     });
 
@@ -173,7 +179,7 @@ describe('UserService', () => {
       });
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
     });
@@ -195,7 +201,7 @@ describe('UserService', () => {
       });
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
     });
@@ -206,7 +212,7 @@ describe('UserService', () => {
       await expect(service.updateUser(userId, updateOptions, anotherUserPayload)).rejects.toThrow(ForbiddenException);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -220,7 +226,7 @@ describe('UserService', () => {
       );
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: invalidUserId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
     });
 
@@ -242,7 +248,7 @@ describe('UserService', () => {
       );
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).toHaveBeenCalled();
     });
@@ -274,7 +280,7 @@ describe('UserService', () => {
       expect(result.message).toBe('Account Deactivated Successfully');
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).toHaveBeenCalledWith({ ...userToUpdate, is_active: false });
     });
@@ -295,7 +301,7 @@ describe('UserService', () => {
       });
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -320,7 +326,7 @@ describe('UserService', () => {
       expect(result.user).not.toHaveProperty('password');
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
+        relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
     });
   });
