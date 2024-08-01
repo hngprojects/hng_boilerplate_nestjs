@@ -1,35 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfileService } from '../profile.service';
-import { Repository, DataSource, QueryRunner } from 'typeorm';
+import { Repository, QueryRunner } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Profile } from '../entities/profile.entity';
-import { NotFoundException, InternalServerErrorException, UnauthorizedException, HttpStatus } from '@nestjs/common';
+import {
+  NotFoundException,
+  InternalServerErrorException,
+  UnauthorizedException,
+  HttpStatus,
+  HttpException,
+  BadRequestException,
+} from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Express } from 'express';
 import { Readable } from 'stream';
+import { ONLY_IMAGE_FILES_ACCEPTED } from '../../../helpers/SystemMessages';
 
 describe('ProfileService', () => {
   let service: ProfileService;
   let userRepository: Repository<User>;
   let profileRepository: Repository<Profile>;
-  let dataSource: DataSource;
-  let queryRunner: QueryRunner;
 
   beforeEach(async () => {
-    queryRunner = {
-      connect: jest.fn(),
-      startTransaction: jest.fn(),
-      commitTransaction: jest.fn(),
-      rollbackTransaction: jest.fn(),
-      release: jest.fn(),
-      manager: {
-        update: jest.fn(),
-      },
-    } as unknown as QueryRunner;
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProfileService,
@@ -41,19 +36,12 @@ describe('ProfileService', () => {
           provide: getRepositoryToken(Profile),
           useClass: Repository,
         },
-        {
-          provide: DataSource,
-          useValue: {
-            createQueryRunner: jest.fn().mockReturnValue(queryRunner),
-          },
-        },
       ],
     }).compile();
 
     service = module.get<ProfileService>(ProfileService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   describe('findOneProfile', () => {
@@ -174,29 +162,46 @@ describe('ProfileService', () => {
     const userId = 'some-uuid';
 
     it('should upload a new profile picture and return the updated profile picture URL', async () => {
-      const user = { id: userId, email: 'test@example.com', profile: { profile_pic_url: 'old_pic.jpg' } } as User;
-      const updatedProfile = { profile_pic_url: `profile-pic__${userId}--new.jpg` } as Profile;
+      const user = { id: userId, email: 'test3210@example.com' } as User;
+      const profile = { id: '1', email: user.email, user_id: user, profile_pic_url: 'old_pic.jpg' } as Profile;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(user.profile);
-      jest.spyOn(fs.promises, 'rmdir').mockResolvedValue(undefined);
-      jest.spyOn(fs.promises, 'rename').mockResolvedValue(undefined);
+      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(profile);
       jest.spyOn(profileRepository, 'update').mockResolvedValue(undefined);
 
-      const result = await service.updateUserProfilePicture(
-        mockFile,
-        userId,
-        'http://localhost',
-        path.join(process.cwd(), '/public/uploads/user-profile-img')
-      );
-
+      const result = await service.updateUserProfilePicture(mockFile, userId);
       expect(result.status).toEqual(201);
+      expect(result.data.profile_picture_url).toBeTruthy();
     });
 
     it('should throw UnauthorizedException if user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateUserProfilePicture(mockFile, userId, '', '')).rejects.toThrow(UnauthorizedException);
+      await expect(service.updateUserProfilePicture(mockFile, userId)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should return bad request if file type is not a supported type', async () => {
+      const user = { id: userId, email: 'test3210@example.com' } as User;
+      const profile = { id: '1', email: user.email, user_id: user, profile_pic_url: 'old_pic.jpg' } as Profile;
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(profile);
+      jest.spyOn(profileRepository, 'update').mockResolvedValue(undefined);
+
+      const tempMockFile = { ...mockFile };
+
+      tempMockFile.filename = 'test.js';
+      tempMockFile.originalname = 'test.js';
+      await expect(service.updateUserProfilePicture(tempMockFile, userId)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should return not found if user profile does not exist', async () => {
+      const user = { id: userId, email: 'test3210@example.com' } as User;
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateUserProfilePicture(mockFile, userId)).rejects.toThrow(NotFoundException);
     });
   });
 });

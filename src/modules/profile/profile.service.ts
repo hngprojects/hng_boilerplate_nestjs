@@ -15,7 +15,11 @@ import { User } from '../user/entities/user.entity';
 import { Express } from 'express';
 import { extname } from 'path';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { UNAUTHENTICATED_MESSAGE, USER_PROFILE_NOT_FOUND } from '../../helpers/SystemMessages';
+import {
+  UNAUTHENTICATED_MESSAGE,
+  USER_PROFILE_NOT_FOUND,
+  ONLY_IMAGE_FILES_ACCEPTED,
+} from '../../helpers/SystemMessages';
 
 @Injectable()
 export class ProfileService {
@@ -51,6 +55,10 @@ export class ProfileService {
 
   async updateUserProfilePicture(file: Express.Multer.File, userId: string) {
     try {
+      if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+        throw new BadRequestException({ status: HttpStatus.BAD_REQUEST, message: ONLY_IMAGE_FILES_ACCEPTED });
+      }
+
       const user: User = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
       if (!user) {
         throw new UnauthorizedException({ status: HttpStatus.UNAUTHORIZED, message: UNAUTHENTICATED_MESSAGE });
@@ -62,7 +70,7 @@ export class ProfileService {
       }
 
       const newFilename = `profile-pic__${userId}--${Date.now()}${extname(file.originalname)}`;
-      // upload the app to cloud and save the returned url
+      // upload the file to cloud and save the returned url
       await this.profileRepository.update(userProfile.id, { profile_pic_url: newFilename });
 
       return {

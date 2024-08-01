@@ -17,7 +17,6 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { validateFileType } from './pic-upload';
 
 @ApiBearerAuth()
 @ApiTags('Profile')
@@ -40,7 +39,7 @@ export class ProfileController {
   @ApiResponse({ status: 204, description: 'Image updated successfully' })
   @Put('pic')
   @Post('pic')
-  @UseInterceptors(FileInterceptor('profile_pic_url', { limits: { fileSize: 3000000 }, fileFilter: validateFileType }))
+  @UseInterceptors(FileInterceptor('profile_pic_url', { limits: { fileSize: 3000000 } }))
   async updateProfilePic(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
     const userId = req.user.id ?? req.user.sub;
     return await this.profileService.updateUserProfilePicture(file, userId);

@@ -3,7 +3,7 @@ import { ONLY_IMAGE_FILES_ACCEPTED } from '../../helpers/SystemMessages';
 
 export const validateFileType = (req: any, file: Express.Multer.File, callback: any) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-    return callback(new Error(ONLY_IMAGE_FILES_ACCEPTED), false);
+    throw callback(new Error(ONLY_IMAGE_FILES_ACCEPTED), false);
   }
   callback(null, true);
 };
