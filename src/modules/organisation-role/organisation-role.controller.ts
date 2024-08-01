@@ -15,14 +15,13 @@ import {
 } from '@nestjs/common';
 import { OrganisationRoleService } from './organisation-role.service';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
-import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 
-@ApiTags('Organisation Settings')
+@ApiTags('Organization Settings')
 @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@Controller('organisations')
+@Controller('organizations')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
@@ -39,16 +38,12 @@ export class OrganisationRoleController {
     const savedRole = await this.organisationRoleService.createOrgRoles(createRoleDto, organisationId);
 
     return {
+      id: savedRole.id,
       status_code: HttpStatus.CREATED,
       name: savedRole.name,
       description: savedRole.description,
       message: 'Role created successfully',
     };
-  }
-
-  @Get()
-  findAll() {
-    return this.organisationRoleService.findAll();
   }
 
   @Get(':id/roles/:roleId')
@@ -83,13 +78,15 @@ export class OrganisationRoleController {
     }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrganisationRoleDto: UpdateOrganisationRoleDto) {
-    return this.organisationRoleService.update(+id, updateOrganisationRoleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organisationRoleService.remove(+id);
+  @Get(':id/roles')
+  @ApiOperation({ summary: 'Get all organisation roles' })
+  @ApiResponse({ status: 200, description: 'Success', type: [Object] })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
+  async getRoles(@Param('id') organisationID: string) {
+    const roles = await this.organisationRoleService.getAllRolesInOrg(organisationID);
+    return {
+      status_code: 200,
+      data: roles,
+    };
   }
 }

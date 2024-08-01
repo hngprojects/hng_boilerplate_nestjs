@@ -1,4 +1,3 @@
-import { DefaultPermissions } from './../../modules/organisation-permissions/entities/default-permissions.entity';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../../modules/user/entities/user.entity';
@@ -6,8 +5,10 @@ import { Organisation } from '../../modules/organisations/entities/organisations
 import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
-import { Profile } from '../../modules/profile/entities/profile.entity';
+import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
+import { Profile } from '../../modules/profile/entities/profile.entity';
+import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
 
 @Injectable()
@@ -23,6 +24,7 @@ export class SeedingService {
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
     const notificationRepository = this.dataSource.getRepository(Notification);
+
     try {
       const existingPermissions = await defaultPermissionRepository.count();
 
@@ -37,15 +39,18 @@ export class SeedingService {
 
         await defaultPermissionRepository.save(defaultPermissions);
       }
+
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const notificationRepository = this.dataSource.getRepository(Notification);
+
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
         Logger.log('Database is already populated. Skipping seeding.');
         return;
       }
-
-      const queryRunner = this.dataSource.createQueryRunner();
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
 
       try {
         const u1 = userRepository.create({
@@ -141,15 +146,25 @@ export class SeedingService {
         const p1 = productRepository.create({
           name: 'Product 1',
           description: 'Description for Product 1',
-          quantity: 10,
-          price: 100,
+          variants: [
+            {
+              size: ProductSizeType.STANDARD,
+              quantity: 1,
+              price: 500,
+            },
+          ],
           org: or1,
         });
         const p2 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          quantity: 20,
-          price: 200,
+          variants: [
+            {
+              size: ProductSizeType.SMALL,
+              quantity: 2,
+              price: 50,
+            },
+          ],
           org: or2,
         });
 

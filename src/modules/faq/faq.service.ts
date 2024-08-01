@@ -9,8 +9,8 @@ import { IFaq } from './faq.interface';
 export class FaqService {
   constructor(
     @InjectRepository(Faq)
-    private faqRepository: Repository<IFaq>,
-  ) { }
+    private faqRepository: Repository<IFaq>
+  ) {}
 
   async create(createFaqDto: CreateFaqDto): Promise<IFaq> {
     const faq = this.faqRepository.create(createFaqDto);

@@ -25,13 +25,12 @@ import { ProfileModule } from './modules/profile/profile.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
-import { NotificationSettingsModule } from './modules/settings/notification-settings/notification-settings.module';
+import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
-import { RunTestsModule } from './run-tests/run-tests.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
@@ -125,7 +124,6 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     ProfileModule,
     OrganisationRoleModule,
     OrganisationPermissionsModule,
-    RunTestsModule,
     NotificationsModule,
   ],
   controllers: [HealthController, ProbeController],

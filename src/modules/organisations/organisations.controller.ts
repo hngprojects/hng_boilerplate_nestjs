@@ -22,8 +22,8 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 
 @ApiBearerAuth()
-@ApiTags('Organisation')
-@Controller('organisations')
+@ApiTags('Organization')
+@Controller('organizations')
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 

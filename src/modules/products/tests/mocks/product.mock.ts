@@ -1,14 +1,22 @@
 import { randomUUID } from 'crypto';
 import { orgMock } from '../../../../modules/organisations/tests/mocks/organisation.mock';
-import { Product, ProductStatusType } from '../../entities/product.entity';
+import { Product, StockStatusType } from '../../entities/product.entity';
+import { ProductSizeType } from '../../entities/product-variant.entity';
 
 export const productMock: Product = {
   id: randomUUID(),
   name: 'TV',
   description: '',
-  price: 35,
-  quantity: 3,
-  satus: ProductStatusType.LOW_STOCK,
+  variants: [
+    {
+      id: randomUUID(),
+      price: 35,
+      quantity: 3,
+      size: ProductSizeType.STANDARD,
+      product: new Product(),
+    },
+  ],
+  stock_status: StockStatusType.LOW_STOCK,
   image: '',
   org: orgMock,
   created_at: new Date(),
