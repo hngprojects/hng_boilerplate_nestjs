@@ -127,10 +127,6 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
     BillingPlanModule,
     JobsModule,
     ProfileModule,
-    ServeStaticModule.forRoot({
-      rootPath: path.join(process.cwd(), '/public/upload/user-profile-img/'),
-      serveRoot: '/profile/pic/',
-    }),
     RunTestsModule,
     ContactUsModule,
     NotificationsModule,

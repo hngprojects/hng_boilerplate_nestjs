@@ -31,3 +31,5 @@ export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
 export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
 export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
+export const ONLY_IMAGE_FILES_ACCEPTED = 'Only image files with .jpg, .jpeg, or .png extensions are allowed';
+export const USER_PROFILE_NOT_FOUND = 'User profile does not exist';

@@ -8,21 +8,16 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
-  MaxFileSizeValidator,
   FileTypeValidator,
   Req,
-  Res,
   Body,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as path from 'path';
-import { skipAuth } from '../../helpers/skipAuth';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-
-const uploadProfilePicFolder = path.join(process.cwd(), '/public/uploads/user-profile-img');
+import { validateFileType } from './pic-upload';
 
 @ApiBearerAuth()
 @ApiTags('Profile')
@@ -42,34 +37,13 @@ export class ProfileController {
   }
 
   @ApiOperation({ summary: 'Update users profile picture' })
-  @ApiResponse({
-    status: 204,
-    description: 'Image updated successfully',
-  })
+  @ApiResponse({ status: 204, description: 'Image updated successfully' })
   @Put('pic')
-  @UseInterceptors(
-    FileInterceptor('profile_pic_url', {
-      dest: uploadProfilePicFolder,
-      limits: { fileSize: 3000000 },
-    })
-  )
-  async updateProfilePic(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 5000000 }), new FileTypeValidator({ fileType: 'image/*' })],
-      })
-    )
-    file: Express.Multer.File,
-    @Req() req
-  ) {
-    const userId = req.user.id;
-    const url = `${req.protocol}://${req.hostname}:${process.env.PORT}${req.url}`;
-    return await this.profileService.updateUserProfilePicture(file, userId, url, uploadProfilePicFolder);
-  }
-
-  @Get('pic/:picName')
-  async getProfilePic(@Param('picName') picName: string, @Res() res) {
-    return await this.profileService.getProfilePic(picName, res, uploadProfilePicFolder);
+  @Post('pic')
+  @UseInterceptors(FileInterceptor('profile_pic_url', { limits: { fileSize: 3000000 }, fileFilter: validateFileType }))
+  async updateProfilePic(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+    const userId = req.user.id ?? req.user.sub;
+    return await this.profileService.updateUserProfilePicture(file, userId);
   }
 
   @ApiOperation({ summary: 'Update User Profile' })
