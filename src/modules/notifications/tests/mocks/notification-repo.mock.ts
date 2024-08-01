@@ -50,9 +50,11 @@ export const mockUser: User = {
   user_type: UserType.ADMIN,
   secret: 'secret',
   is_2fa_enabled: false,
+  backup_codes: [],
   notifications: [],
   organisationMembers: [],
   profile: profileMock,
   phone: '1234-887-09',
   jobs: [],
+  notifications_settings: [],
 };
