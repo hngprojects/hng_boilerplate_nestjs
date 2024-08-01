@@ -256,5 +256,10 @@ export default class UserService {
     }
 
     await this.userRepository.softDelete(userId);
+
+    return {
+      status: 'success',
+      message: 'Deletion in progress',
+    };
   }
 }

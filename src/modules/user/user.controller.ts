@@ -89,10 +89,5 @@ export class UserController {
     const authenticatedUserId = req['user'].id;
 
     await this.userService.softDeleteUser(userId, authenticatedUserId);
-
-    return {
-      status: 'success',
-      message: 'Deletion in progress',
-    };
   }
 }
