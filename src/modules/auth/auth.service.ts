@@ -132,6 +132,57 @@ export default class AuthenticationService {
     }
   }
 
+  async changePassword(user_id: string, oldPassword: string, newPassword: string) {
+    try {
+      const user = await this.userService.getUserRecord({
+        identifier: user_id,
+        identifierType: 'id',
+      });
+
+      if (!user) {
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: USER_NOT_FOUND,
+        });
+      }
+
+      console.log(
+        'oldPassword: ',
+        oldPassword,
+        'newPassword: ',
+        newPassword,
+        'user.password: ',
+        user.password,
+        bcrypt.compareSync(oldPassword, user.password)
+      );
+
+      const isPasswordValid = bcrypt.compareSync(oldPassword, user.password);
+      console.log('isPasswordValid: ', isPasswordValid);
+      if (!isPasswordValid) {
+        throw new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: INVALID_PASSWORD,
+        });
+      }
+
+      await this.userService.updateUserRecord({
+        updatePayload: { password: newPassword },
+        identifierOptions: {
+          identifierType: 'id',
+          identifier: user.id,
+        },
+      });
+
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Password updated successfully',
+      };
+    } catch (error) {
+      console.log('AuthenticationServiceError ~ changePasswordError ~', error);
+      throw new InternalServerErrorException('Error occurred while changing password');
+    }
+  }
+
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     try {
       const { email, password } = loginDto;
@@ -287,7 +338,7 @@ export default class AuthenticationService {
       status_code: HttpStatus.OK,
       message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
       data: { backup_codes: backup_codes },
-    }
+    };
   }
 
   async googleAuth(googleAuthPayload: GoogleAuthPayload) {

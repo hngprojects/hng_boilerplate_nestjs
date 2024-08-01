@@ -14,7 +14,13 @@ import {
   FAILED_TO_CREATE_USER,
   USER_ACCOUNT_DOES_NOT_EXIST,
 } from '../../../helpers/SystemMessages';
-import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
 import { Verify2FADto } from '../dto/verify-2fa.dto';
@@ -298,6 +304,80 @@ describe('AuthenticationService', () => {
     });
   });
 
+  describe('changePassword', () => {
+    const userId = 'some-uuid-here';
+    const oldPassword = 'oldPassword123';
+    const newPassword = 'newPassword123';
+
+    let mockUser: Partial<User>;
+
+    beforeEach(async () => {
+      mockUser = {
+        id: userId,
+        email: 'test@example.com',
+        password: await bcrypt.hash(oldPassword, 10),
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+    });
+
+    it('should change password successfully', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
+      userServiceMock.updateUserRecord.mockResolvedValueOnce(undefined);
+
+      console.log(oldPassword, newPassword, bcrypt.compareSync(oldPassword, mockUser.password));
+      const result = await service.changePassword(userId, oldPassword, newPassword);
+
+      expect(userServiceMock.getUserRecord).toHaveBeenCalledWith({
+        identifier: userId,
+        identifierType: 'id',
+      });
+      expect(bcrypt.compareSync(oldPassword, mockUser.password)).toBe(true);
+      expect(userServiceMock.updateUserRecord).toHaveBeenCalledWith({
+        updatePayload: { password: expect.any(String) },
+        identifierOptions: {
+          identifierType: 'id',
+          identifier: userId,
+        },
+      });
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: 'Password updated successfully',
+      });
+    });
+
+    it('should throw NOT FOUND if user does not exist', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+
+      await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
+        new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: 'Error occurred while changing password',
+        })
+      );
+    });
+
+    it('should throw INVALID PASSWORD if old password is incorrect', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
+      const wrongOldPassword = 'wrongOldPassword';
+
+      await expect(service.changePassword(userId, wrongOldPassword, newPassword)).rejects.toThrow(
+        new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: 'Error occurred while changing password',
+        })
+      );
+    });
+
+    it('should handle unexpected errors gracefully', async () => {
+      userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
+
+      await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
+        new InternalServerErrorException('Error occurred while changing password')
+      );
+    });
+  });
+
   describe('generateBackupCodes', () => {
     it('should generate random backup codes when called', () => {
       const codes = service.generateBackupCodes();
@@ -433,7 +513,12 @@ describe('AuthenticationService', () => {
       };
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
 
-      const secret: speakeasy.GeneratedSecret = { base32: 'base 32', ascii: 'ascii', hex: 'hex', google_auth_qr: 'dhjad'};
+      const secret: speakeasy.GeneratedSecret = {
+        base32: 'base 32',
+        ascii: 'ascii',
+        hex: 'hex',
+        google_auth_qr: 'dhjad',
+      };
       jest.spyOn(speakeasy, 'generateSecret').mockReturnValue(secret);
       jest.spyOn(userServiceMock, 'updateUserRecord').mockResolvedValueOnce(undefined);
 
