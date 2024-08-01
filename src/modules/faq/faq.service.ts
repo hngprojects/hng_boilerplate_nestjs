@@ -11,12 +11,17 @@ export class FaqService {
   constructor(
     @InjectRepository(Faq)
     private faqRepository: Repository<IFaq>
-  ) {}
+  ) { }
 
   async create(createFaqDto: CreateFaqDto): Promise<IFaq> {
-    const faq = this.faqRepository.create(createFaqDto);
-    return this.faqRepository.save(faq);
+    try {
+      const faq = this.faqRepository.create(createFaqDto);
+      return await this.faqRepository.save(faq);
+    } catch (error) {
+      throw new BadRequestException('Error creating FAQ');
+    }
   }
+
   async findAllFaq() {
     try {
       const faqs = await this.faqRepository.find();

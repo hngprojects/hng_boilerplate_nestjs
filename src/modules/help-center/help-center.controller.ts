@@ -13,7 +13,7 @@ import { HelpCenter } from './interface/help-center.interface';
 export class HelpCenterController {
   constructor(private readonly helpCenterService: HelpCenterService) { }
 
-  @Post('help-center/topics')
+  @Post('topics')
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
   @ApiResponse({ status: 422, description: 'Invalid input data.' })

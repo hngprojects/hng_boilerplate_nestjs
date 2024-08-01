@@ -63,7 +63,7 @@ describe('FaqService', () => {
     });
 
     it('should throw an error if saving fails', async () => {
-      jest.spyOn(mockFaqRepository, 'save').mockRejectedValueOnce(new Error('Database error'));
+      jest.spyOn(mockFaqRepository, 'save').mockRejectedValueOnce(new Error('Error creating FAQ'));
 
       const createFaqDto: CreateFaqDto = {
         question: 'What is the return policy?',
@@ -71,7 +71,7 @@ describe('FaqService', () => {
         category: 'Policies',
       };
 
-      await expect(service.create(createFaqDto)).rejects.toThrow('Database error');
+      await expect(service.create(createFaqDto)).rejects.toThrow('Error creating FAQ');
     });
   });
 });

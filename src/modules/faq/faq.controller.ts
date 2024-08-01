@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UsePipes, ValidationPipe, Get, Put, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe, Get, Put, Param, Delete, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { FaqService } from './faq.service';
 import { CreateFaqDto } from './create-faq.dto';
@@ -6,12 +6,13 @@ import { Faq } from './faq.entity';
 import { ICreateFaqResponse, IFaq } from './faq.interface';
 import { skipAuth } from '../../helpers/skipAuth';
 import { UpdateFaqDto } from './update-faq.dto';
+import { string } from 'joi';
 
 @ApiTags('Faqs')
 @Controller('faqs')
 export class FaqController {
-  constructor(private readonly faqService: FaqService) {}
-
+  constructor(private readonly faqService: FaqService) { }
+  @skipAuth()
   @Post()
   @ApiOperation({ summary: 'Create a new FAQ' })
   @ApiResponse({
@@ -29,13 +30,21 @@ export class FaqController {
   })
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async create(@Body() createFaqDto: CreateFaqDto): Promise<ICreateFaqResponse> {
-    const faq: IFaq = await this.faqService.create(createFaqDto);
-    return {
-      status_code: 201,
-      success: true,
-      data: faq,
-    };
+    try {
+      const faq = await this.faqService.create(createFaqDto);
+      return {
+        status_code: 201,
+        success: true,
+        data: faq,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Database error');
+    }
   }
+
   @skipAuth()
   @Get()
   @ApiOperation({ summary: 'Get all frequently asked questions' })
