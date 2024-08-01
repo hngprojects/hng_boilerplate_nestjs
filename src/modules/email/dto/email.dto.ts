@@ -19,7 +19,7 @@ export class SendEmailDto {
 
 export class createTemplateDto {
   @IsString()
-  filename: string;
+  templateName: string;
 
   @IsString()
   template: string;

@@ -101,9 +101,9 @@ describe('AuthenticationService', () => {
   describe('createNewUser', () => {
     const createUserDto = {
       id: '1',
-      email: 'test@example.com',
-      password: 'password123',
-      first_name: 'John',
+      email: 'testing@example.com',
+      password: 'password1234',
+      first_name: 'Johnson',
       last_name: 'Doe',
     };
 

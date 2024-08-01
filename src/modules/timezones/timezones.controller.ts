@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Get, Res, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Post, Body, Get, Res, HttpStatus, Patch, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateTimezoneDto } from './dto/create-timezone.dto';
+import { UpdateTimezoneDto } from './dto/update-timezone.dto';
 import { TimezonesService } from './timezones.service';
 import { Response } from 'express';
 
@@ -10,21 +11,32 @@ export class TimezonesController {
   constructor(private readonly timezonesService: TimezonesService) {}
 
   @Post()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new timezone' })
   @ApiBody({ type: CreateTimezoneDto })
   @ApiResponse({ status: 201, description: 'Timezone successfully created.' })
   @ApiResponse({ status: 409, description: 'Timezone already exists.' })
-  async createTimezone(@Body() createTimezoneDto: CreateTimezoneDto, @Res() response: Response) {
-    const result = await this.timezonesService.createTimezone(createTimezoneDto);
-    return response.status(result.status_code).json(result);
+  async createTimezone(@Body() createTimezoneDto: CreateTimezoneDto) {
+    return this.timezonesService.createTimezone(createTimezoneDto);
   }
 
   @Get()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all supported timezones' })
   @ApiResponse({ status: 200, description: 'List of supported timezones.' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getTimezones(@Res() response: Response): Promise<any> {
     const result = await this.timezonesService.getSupportedTimezones();
     return response.status(result.status_code).json(result);
+  }
+
+  @Patch(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a timezone' })
+  @ApiBody({ type: UpdateTimezoneDto })
+  @ApiResponse({ status: 200, description: 'Timezone successfully updated.' })
+  @ApiResponse({ status: 404, description: 'Timezone not found.' })
+  async updateTimezone(@Param('id') id: string, @Body() updateTimezoneDto: UpdateTimezoneDto) {
+    return this.timezonesService.updateTimezone(id, updateTimezoneDto);
   }
 }

@@ -6,6 +6,9 @@ import { validateOrReject } from 'class-validator';
 import * as Handlebars from 'handlebars';
 import { createFile, deleteFile, getFile } from './email_storage.service';
 import * as htmlValidator from 'html-validator';
+import * as fs from 'fs';
+import { promisify } from 'util';
+import * as path from 'path';
 
 @Injectable()
 export class EmailService {
@@ -45,7 +48,7 @@ export class EmailService {
       }
 
       if (response.status_code === HttpStatus.CREATED) {
-        await createFile('./src/modules/email/templates', `${templateInfo.filename}.hbs`, html);
+        await createFile('./src/modules/email/templates', `${templateInfo.templateName}.hbs`, html);
       }
 
       return response;
@@ -79,7 +82,46 @@ export class EmailService {
   async deleteTemplate(templateInfo: getTemplateDto) {
     try {
       await deleteFile(`./src/modules/email/templates/${templateInfo.templateName}.hbs`);
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Template deleted successfully',
+      };
     } catch (error) {
+      return {
+        status_code: HttpStatus.NOT_FOUND,
+        message: 'Template not found',
+      };
+    }
+  }
+
+  async getAllTemplates() {
+    try {
+      console.log('Getting all templates');
+      const templatesDirectory = './src/modules/email/templates';
+      const files = await promisify(fs.readdir)(templatesDirectory);
+
+      const templates = await Promise.all(
+        files.map(async file => {
+          if (path.extname(file) !== '.hbs') return null;
+
+          const file_path = path.join(templatesDirectory, file);
+          const content = await promisify(fs.readFile)(file_path, 'utf-8');
+
+          return {
+            template_name: path.basename(file),
+            content: content,
+          };
+        })
+      );
+
+      const validTemplates = templates.filter(template => template !== null);
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Templates retrieved successfully',
+        templates: validTemplates,
+      };
+    } catch (error) {
+      console.log(error);
       return {
         status_code: HttpStatus.NOT_FOUND,
         message: 'Template not found',
