@@ -52,10 +52,10 @@ export default class AuthenticationService {
     private googleAuthService: GoogleAuthService
   ) {}
 
-  async createNewUser(creatUserDto: CreateUserDTO) {
+  async createNewUser(createUserDto: CreateUserDTO) {
     try {
       const userExists = await this.userService.getUserRecord({
-        identifier: creatUserDto.email,
+        identifier: createUserDto.email,
         identifierType: 'email',
       });
 
@@ -66,9 +66,9 @@ export default class AuthenticationService {
         });
       }
 
-      await this.userService.createUser(creatUserDto);
+      await this.userService.createUser(createUserDto);
 
-      const user = await this.userService.getUserRecord({ identifier: creatUserDto.email, identifierType: 'email' });
+      const user = await this.userService.getUserRecord({ identifier: createUserDto.email, identifierType: 'email' });
 
       if (!user) {
         throw new BadRequestException({
@@ -76,7 +76,7 @@ export default class AuthenticationService {
           message: FAILED_TO_CREATE_USER,
         });
       }
-
+      console.log(createUserDto.email);
       const token = (await this.otpService.createOtp(user.id)).token;
       await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 

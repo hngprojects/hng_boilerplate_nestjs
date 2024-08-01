@@ -29,7 +29,7 @@ export class EmailService {
       },
     };
 
-    this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
+    this.mailerService.sendMail({ variant: 'register-otp', mail: mailPayload });
   }
 
   async sendForgotPasswordMail(email: string, url: string, token: string) {
@@ -78,6 +78,6 @@ export class EmailService {
       },
     };
 
-    await this.mailerService.sendMail({ variant: 'newsletter', mail: mailPayload });
+    await this.mailerService.sendMail({ variant: 'login-otp', mail: mailPayload });
   }
 }

@@ -7,5 +7,7 @@ export interface MailInterface {
 
   text?: string;
 
+  context?: any;
+
   [key: string]: any;
 }
