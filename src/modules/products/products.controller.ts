@@ -1,18 +1,18 @@
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { skipAuth } from '../../helpers/skipAuth';
-import { UpdateProductDTO } from './dto/update-product.dto';
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
+import { UpdateProductDTO } from './dto/update-product.dto';
 
 @ApiTags('Products')
-@Controller('/organisations/:id/products')
+@Controller('/organizations/:id/products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @UseGuards(OwnershipGuard)
   @Post('')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Creates a new product' })
   @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
@@ -57,7 +57,6 @@ export class ProductsController {
 
   @UseGuards(OwnershipGuard)
   @Delete(':productId')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Delete a product' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
@@ -65,7 +64,6 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async deleteProduct(@Param('id') id: string, @Param('productId') productId: string) {
-    const deletedProduct = await this.productsService.deleteProduct(id, productId);
-    return deletedProduct;
+    return this.productsService.deleteProduct(id, productId);
   }
 }
