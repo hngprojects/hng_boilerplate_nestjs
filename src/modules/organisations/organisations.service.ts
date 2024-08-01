@@ -64,11 +64,16 @@ export class OrganisationsService {
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
     const emailFound = await this.emailExists(createOrganisationDto.email);
+
     if (emailFound) throw new ConflictException('Organisation with this email already exists');
 
     const owner = await this.userRepository.findOne({
       where: { id: userId },
     });
+
+    if (!owner) {
+      throw new Error('Owner not found');
+    }
 
     const mapNewOrganisation = CreateOrganisationMapper.mapToEntity(createOrganisationDto, owner);
     const newOrganisation = this.organisationRepository.create({
@@ -84,6 +89,7 @@ export class OrganisationsService {
     await this.organisationMemberRepository.save(newMember);
 
     const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
+
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }
 
