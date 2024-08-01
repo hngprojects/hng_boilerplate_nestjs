@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
@@ -21,6 +21,19 @@ export class ProductsController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async createProduct(@Param('id') id: string, @Body() createProductDto: CreateProductRequestDto) {
     return this.productsService.createProduct(id, createProductDto);
+  }
+
+  @UseGuards(OwnershipGuard)
+  @Get(':id')
+  @ApiOperation({ summary: 'Gets a product by id' })
+  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
+  @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
+  @ApiResponse({ status: 200, description: 'Product created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getById(@Param('orgId') id: string, @Param('id') productId: string) {
+    return this.productsService.getProductById(productId);
   }
 
   @UseGuards(OwnershipGuard)
