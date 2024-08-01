@@ -75,6 +75,7 @@ describe('InviteService', () => {
       role: null,
       organisationMembers: [],
       products: [],
+      roles: [],
     };
     const mockInvites: Invite[] = [
       {
