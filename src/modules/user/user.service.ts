@@ -36,6 +36,11 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
+    if (createUserPayload.admin_secret == process.env.ADMIN_SECRET_KEY) {
+      newUser.user_type = UserType.SUPER_ADMIN;
+    } else {
+      newUser.user_type = UserType.USER;
+    }
     newUser.profile = profile;
     return await this.userRepository.save(newUser);
   }
@@ -74,7 +79,7 @@ export default class UserService {
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { email: email },
-      relations: ['profile'],
+      relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
     });
     return user;
   }
@@ -82,7 +87,7 @@ export default class UserService {
   private async getUserById(identifier: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { id: identifier },
-      relations: ['profile'],
+      relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
     });
     return user;
   }

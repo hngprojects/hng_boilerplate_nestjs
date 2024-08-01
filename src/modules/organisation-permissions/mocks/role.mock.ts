@@ -1,4 +1,4 @@
-import { Role } from '../../organisation-role/entities/role.entity';
+import { OrganisationRole } from '../../../modules/organisation-role/entities/organisation-role.entity';
 
 export const mockRole = {
   id: 'role_456',
@@ -12,4 +12,4 @@ export const mockRole = {
     { id: 'perm_6', category: 'canEditUsers', permission_list: true },
     { id: 'perm_7', category: 'canBlacklistWhitelistUsers', permission_list: true },
   ],
-} as Role;
+} as OrganisationRole;

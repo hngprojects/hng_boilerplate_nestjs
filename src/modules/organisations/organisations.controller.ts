@@ -22,8 +22,8 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 
 @ApiBearerAuth()
-@ApiTags('Organisation')
-@Controller('organisations')
+@ApiTags('Organization')
+@Controller('organizations')
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
@@ -37,7 +37,7 @@ export class OrganisationsController {
     description: 'Organisation email already exists',
   })
   @Post('/')
-  async create(@Body() createOrganisationDto: OrganisationRequestDto, @Request() req) {
+  async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
   }

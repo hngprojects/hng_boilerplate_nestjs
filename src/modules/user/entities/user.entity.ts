@@ -1,15 +1,15 @@
 import * as bcrypt from 'bcryptjs';
 import { BeforeInsert, Column, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Job } from '../../../modules/jobs/entities/job.entity';
+import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
+import { Notification } from '../../../modules/notifications/entities/notifications.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
-import { Organisation } from '../../organisations/entities/organisations.entity';
-import { Product } from '../../../modules/products/entities/product.entity';
-import { Job } from '../../../modules/jobs/entities/job.entity';
-import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
-import { Notification } from '../../notifications/entities/notifications.entity';
-import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Profile } from '../../profile/entities/profile.entity';
+
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
@@ -73,8 +73,8 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
 
-  @OneToOne(() => Profile, profile => profile.user_id)
-  @JoinColumn()
+  @OneToOne(() => Profile, profile => profile.id)
+  @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
   @OneToMany(() => Testimonial, testimonial => testimonial.user)
@@ -92,5 +92,5 @@ export class User extends AbstractBaseEntity {
   notifications: Notification[];
 
   @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
-  notifications_settings: NotificationSettings[];
+  notification_settings: NotificationSettings[];
 }
