@@ -217,10 +217,21 @@ describe('OrganisationsService', () => {
 
     it('should throw an error if the user is already a member', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
-      jest.spyOn(service, 'checkIfUserIsMember').mockResolvedValue(1);
-      const res = await service.checkIfUserIsMember(newUser.id, orgMock.id);
-      expect(res).toBeGreaterThanOrEqual(1);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue({
+        ...orgMock.creator,
+        hashPassword: async () => {},
+        organisationMembers: [
+          {
+            id: 'org-Mem-897',
+            organisation_id: orgMock,
+            user_id: orgMock.creator,
+            role: 'admin',
+            created_at: new Date(),
+            updated_at: new Date(),
+            profile_id: orgMock.creator.profile,
+          },
+        ],
+      });
 
       await expect(service.addMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
         new ConflictException({

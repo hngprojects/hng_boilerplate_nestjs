@@ -146,9 +146,9 @@ export class OrganisationsService {
 
       const user = await this.checkIfUserExists(userId);
 
-      const isUserAMember = await this.checkIfUserIsMember(userId, orgId);
+      const isUserAMember = await this.checkIfUserIsMember(user, orgId);
 
-      if (isUserAMember > 0) {
+      if (isUserAMember) {
         throw new ConflictException({
           status: 'error',
           message: 'User is already a member of this organisation',
@@ -174,6 +174,7 @@ export class OrganisationsService {
         status_code: 200,
       };
     } catch (err) {
+      console.error(err);
       if (
         err instanceof NotFoundException ||
         err instanceof UnauthorizedException ||
@@ -209,6 +210,7 @@ export class OrganisationsService {
       where: {
         id: userId,
       },
+      relations: ['organisationMembers'],
     });
 
     if (!user) {
@@ -226,13 +228,9 @@ export class OrganisationsService {
     return org.owner.id == ownerId;
   }
 
-  async checkIfUserIsMember(userId: string, orgId: string) {
-    const count = await this.organisationMemberRepository
-      .createQueryBuilder('member')
-      .where('member.user_id = :userId', { userId })
-      .andWhere('member.organisation_id = :orgId', { orgId })
-      .getCount();
+  async checkIfUserIsMember(user: User, orgId: string) {
+    const org = user.organisationMembers.find(organisation => organisation.organisation_id.id === orgId);
 
-    return count;
+    return org;
   }
 }
