@@ -80,6 +80,22 @@ describe('WaitlistService', () => {
       status_code: HttpStatus.CREATED,
       message: 'You are signed up successfully',
       user: waitlistEntry,
+      providers: [WaitlistService, { provide: getRepositoryToken(Waitlist), useValue: mockUserRepository }],
+    }).compile();
+
+    waitlistService = module.get<WaitlistService>(WaitlistService);
+    waitlistRepository = module.get<Repository<Waitlist>>(getRepositoryToken(Waitlist));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('getAllWaitlist', () => {
+    it('should return all waitlist', async () => {
+      await waitlistService.getAllWaitlist();
+
+      expect(waitlistRepository.find).toHaveBeenCalled();
     });
   });
 });

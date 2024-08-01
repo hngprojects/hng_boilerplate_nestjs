@@ -28,6 +28,16 @@ export class WaitlistService {
       status_code: HttpStatus.CREATED,
       message: 'User added to waitlist successfully',
       user: waitlistUser,
+
+  async getAllWaitlist() {
+    const waitlist = await this.waitlistRepo.find();
+    return {
+      status_code: HttpStatus.OK,
+      status: HttpStatus.OK,
+      message: 'Added to waitlist',
+      data: {
+        waitlist,
+      },
     };
   }
 }

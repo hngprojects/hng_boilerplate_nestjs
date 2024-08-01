@@ -6,8 +6,8 @@ import { Waitlist } from './waitlist.entity';
 import { EmailService } from '../email/email.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Waitlist])],
   controllers: [WaitlistController],
-  providers: [WaitlistService, EmailService],
+  providers: [WaitlistService],
+  imports: [TypeOrmModule.forFeature([Waitlist])],
 })
 export class WaitlistModule {}

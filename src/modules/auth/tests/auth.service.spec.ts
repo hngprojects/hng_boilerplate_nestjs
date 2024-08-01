@@ -3,6 +3,8 @@ import * as speakeasy from 'speakeasy';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
+  ERROR_OCCURED,
+  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
   INVALID_PASSWORD,
   TWO_FA_ENABLED,
   TWO_FA_INITIATED,
@@ -15,6 +17,7 @@ import {
 import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
+import { Verify2FADto } from '../dto/verify-2fa.dto';
 import UserService from '../../user/user.service';
 import { OtpService } from '../../otp/otp.service';
 import { EmailService } from '../../email/email.service';
@@ -26,6 +29,9 @@ import { LoginDto } from '../dto/login.dto';
 import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { profile } from 'console';
+import { base } from '@faker-js/faker';
+
+jest.mock('speakeasy');
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -44,8 +50,8 @@ describe('AuthenticationService', () => {
           provide: UserService,
           useValue: {
             getUserRecord: jest.fn(),
-            createUser: jest.fn(),
             updateUserRecord: jest.fn(),
+            createUser: jest.fn(),
           },
         },
         {
@@ -71,6 +77,7 @@ describe('AuthenticationService', () => {
           useValue: {
             sendForgotPasswordMail: jest.fn(),
             sendUserEmailConfirmationOtp: jest.fn(),
+            sendEmail: jest.fn(),
           },
         },
       ],
@@ -238,8 +245,78 @@ describe('AuthenticationService', () => {
     });
   });
 
+  describe('verify2fa', () => {
+    it('should throw error if totp code is incorrect', () => {
+      const verify2faDto: Verify2FADto = { totp_code: '12345' };
+      const userId = 'some-uuid-here';
+
+      const user: UserResponseDTO = {
+        id: userId,
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        attempts_left: 2,
+        is_active: true,
+        secret: 'some-2fa-secret',
+        is_2fa_enabled: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(user);
+      (speakeasy.totp.verify as jest.Mock).mockReturnValue(false);
+
+      expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should enable 2fa if successful', async () => {
+      const verify2faDto: Verify2FADto = { totp_code: '12345' };
+      const userId = 'some-uuid-here';
+
+      const user: UserResponseDTO = {
+        id: userId,
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+        attempts_left: 2,
+        is_active: true,
+        secret: 'some-2fa-secret',
+        is_2fa_enabled: false,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      const codes: string[] = ['98765432', '87654321', '76543210', '65432109', '54321098'];
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(user);
+      jest.spyOn(userServiceMock, 'updateUserRecord').mockResolvedValueOnce(undefined);
+      jest.spyOn(service, 'generateBackupCodes').mockReturnValue(codes);
+      (speakeasy.totp.verify as jest.Mock).mockReturnValue(true);
+
+      const result = await service.verify2fa(verify2faDto, userId);
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+        data: { backup_codes: codes },
+      });
+    });
+  });
+
+  describe('generateBackupCodes', () => {
+    it('should generate random backup codes when called', () => {
+      const codes = service.generateBackupCodes();
+      expect(codes).toBeInstanceOf(Array);
+    });
+  });
   describe('forgotPassword', () => {
     const email = 'test@example.com';
+    const emailData = {
+      to: email,
+      subject: 'Reset Password',
+      template: 'reset-password',
+      context: {
+        link: 'http://example.com/auth/reset-password',
+        email: email,
+        token: '123456',
+      },
+    };
 
     beforeEach(() => {
       process.env.BASE_URL = 'http://example.com';
@@ -259,19 +336,16 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
-      emailServiceMock.sendForgotPasswordMail.mockResolvedValueOnce(undefined);
-
-      const result = await service.forgotPassword({ email });
-
-      expect(emailServiceMock.sendForgotPasswordMail).toHaveBeenCalledWith(
-        email,
-        'http://example.com/auth/reset-password',
-        '123456'
-      );
-      expect(result).toEqual({
+      emailServiceMock.sendEmail.mockResolvedValueOnce({
         status_code: HttpStatus.OK,
         message: 'Email sent successfully',
       });
+
+      const result = await service.forgotPassword({ email });
+
+      expect(result.status_code).toBe(HttpStatus.OK);
+      expect(result.message).toBe('Email sent successfully');
+      expect(emailServiceMock.sendEmail).toHaveBeenCalledWith(emailData);
     });
 
     it('should throw error if user not found', async () => {
@@ -367,7 +441,12 @@ describe('AuthenticationService', () => {
       };
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
 
-      const secret = speakeasy.generateSecret({ length: 32 });
+      const secret: speakeasy.GeneratedSecret = {
+        base32: 'base 32',
+        ascii: 'ascii',
+        hex: 'hex',
+        google_auth_qr: 'dhjad',
+      };
       jest.spyOn(speakeasy, 'generateSecret').mockReturnValue(secret);
       jest.spyOn(userServiceMock, 'updateUserRecord').mockResolvedValueOnce(undefined);
 
