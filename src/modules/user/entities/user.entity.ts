@@ -1,13 +1,13 @@
 import * as bcrypt from 'bcryptjs';
 import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Notification } from '../../../modules/notifications/entities/notification.entity';
+import { Job } from '../../../modules/jobs/entities/job.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
+import { Notification } from '../../../modules/notifications/entities/notifications.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
-import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 
 export enum UserType {

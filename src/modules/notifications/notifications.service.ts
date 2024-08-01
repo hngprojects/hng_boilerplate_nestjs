@@ -15,8 +15,8 @@ import { NotificationSettings } from '../notification-settings/entities/notifica
 import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
 import UserInterface from '../user/interfaces/UserInterface';
 import UserService from '../user/user.service';
-import { CreateNotificationError } from './dto/create-notification-error.dto';
-import { CreateNotificationPropsDto } from './dto/create-notification-props.dto';
+import { CreateNotificationError } from './dtos/create-notification-error.dto';
+import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import { Notification } from './entities/notifications.entity';

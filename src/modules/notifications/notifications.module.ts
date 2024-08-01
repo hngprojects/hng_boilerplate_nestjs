@@ -7,7 +7,7 @@ import { NotificationSettingsService } from '../notification-settings/notificati
 import { Profile } from '../profile/entities/profile.entity';
 import { User } from '../user/entities/user.entity';
 import UserService from '../user/user.service';
-import { Notification } from './entities/notification.entity';
+import { Notification } from './entities/notifications.entity';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 
