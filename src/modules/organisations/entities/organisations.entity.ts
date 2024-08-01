@@ -12,7 +12,7 @@ export class Organisation extends AbstractBaseEntity {
   @Column({ nullable: false })
   name: string;
 
-  @Column('text', { nullable: false })
+  @Column('text', { nullable: true })
   description: string;
 
   @Column({ unique: true, nullable: false })

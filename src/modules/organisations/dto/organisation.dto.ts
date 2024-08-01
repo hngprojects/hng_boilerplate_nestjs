@@ -10,12 +10,6 @@ export class OrganisationRequestDto {
 
   @ApiProperty({
     type: String,
-  })
-  @IsString()
-  readonly description: string;
-
-  @ApiProperty({
-    type: String,
     description: 'Organisation email must be unique',
   })
   @IsEmail()
