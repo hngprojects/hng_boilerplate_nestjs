@@ -7,9 +7,6 @@ export class Invite extends AbstractBaseEntity {
   @Column({ nullable: false })
   token: string;
 
-  @ManyToOne(() => Organisation, organisation => organisation.invites, { nullable: false, onDelete: 'CASCADE' })
-  organisation: Organisation;
-
   @Column({ nullable: true })
   email: string;
 
@@ -18,4 +15,7 @@ export class Invite extends AbstractBaseEntity {
 
   @Column({ default: false })
   isAccepted: boolean;
+
+  @ManyToOne(() => Organisation, organisation => organisation.invites, { nullable: false, onDelete: 'CASCADE' })
+  organisation: Organisation;
 }

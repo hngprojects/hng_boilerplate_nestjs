@@ -2,9 +2,7 @@ import * as bcrypt from 'bcryptjs';
 import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
-import { Invite } from '../../invite/entities/invite.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
-import { Product } from '../../../modules/products/entities/product.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
@@ -63,9 +61,6 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
-
-  // @OneToMany(() => Invite, invite => invite.user)
-  // invites: Invite[];
 
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
