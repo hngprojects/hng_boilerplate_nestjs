@@ -36,6 +36,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
+import { FaqModule } from './modules/faq/faq.module';
 
 @Module({
   providers: [
@@ -131,10 +132,11 @@ import { OrganisationRoleModule } from './modules/organisation-role/organisation
     OrganisationPermissionsModule,
     RunTestsModule,
     ContactUsModule,
+    FaqModule,
+    HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
-    HelpCenterModule,
   ],
   controllers: [HealthController, ProbeController],
 })
-export class AppModule {}
+export class AppModule { }

@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HelpCenterService } from './help-center.service';
 import { HelpCenterController } from './help-center.controller';
-import { HelpCenter } from './entities/help-center.entity';
+import { HelpCenterEntity } from './entities/help-center.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([HelpCenter])],
+  imports: [TypeOrmModule.forFeature([HelpCenterEntity])],
   providers: [HelpCenterService],
   controllers: [HelpCenterController],
+  exports: [HelpCenterService],
 })
-export class HelpCenterModule {}
+export class HelpCenterModule { }
