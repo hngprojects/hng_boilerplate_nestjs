@@ -15,12 +15,16 @@ import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
 
-
 interface SearchCriteria {
   name?: string;
   category?: string;
   minPrice?: number;
   maxPrice?: number;
+}
+
+export interface PaginationParams {
+  page: number;
+  limit: number;
 }
 
 @Injectable()
@@ -176,5 +180,45 @@ export class ProductsService {
       message: 'Product successfully deleted',
       data: {},
     };
+  }
+
+  async listProducts(organisationId: string, { page, limit }: PaginationParams) {
+    if (page < 1 || limit < 1) {
+      throw new BadRequestException('Invalid query params passed');
+    }
+
+    const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+    if (!organisation) {
+      throw new NotFoundException('Organisation not found');
+    }
+
+    try {
+      const [products, totalItems] = await this.productRepository.findAndCount({
+        where: { org: { id: organisationId } },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      const totalPages = Math.ceil(totalItems / limit);
+
+      return {
+        success: true,
+        message: 'Products retrieved successfully',
+        products: products.map(product => ({
+          name: product.name,
+          price: product.price,
+          category: product.category,
+        })),
+        pagination: {
+          totalItems,
+          totalPages,
+          currentPage: page,
+        },
+        status_code: 200,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException({ status: 'error', message: 'Internal server error', status_code: 500 });
+    }
   }
 }

@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductsService } from '../products.service';
+import { PaginationParams, ProductsService } from '../products.service';
 import { Product, StockStatusType } from '../entities/product.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { ProductVariant } from '../entities/product-variant.entity';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 import { productMock } from './mocks/product.mock';
@@ -235,6 +235,48 @@ describe('ProductsService', () => {
 
       expect(result.message).toEqual('Product successfully deleted');
       expect(deletedProductMock.is_deleted).toBe(true);
+    });
+  });
+
+  describe('listProducts', () => {
+    it('should throw BadRequestException if page or limit is less than 1', async () => {
+      const paginationParams: PaginationParams = { page: 0, limit: 10 };
+
+      await expect(service.listProducts(orgMock.id, paginationParams)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw NotFoundException if organisation is not found', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      const paginationParams: PaginationParams = { page: 1, limit: 10 };
+
+      await expect(service.listProducts(orgMock.id, paginationParams)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should return a paginated list of products', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'findAndCount').mockResolvedValue([[productMock], 1]);
+
+      const paginationParams: PaginationParams = { page: 1, limit: 10 };
+
+      const result = await service.listProducts(orgMock.id, paginationParams);
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Products retrieved successfully');
+      expect(result.products).toHaveLength(1);
+      expect(result.pagination.totalItems).toBe(1);
+      expect(result.pagination.totalPages).toBe(1);
+      expect(result.pagination.currentPage).toBe(1);
+      expect(result.status_code).toBe(200);
+    });
+
+    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'findAndCount').mockRejectedValue(new Error('Unexpected error'));
+
+      const paginationParams: PaginationParams = { page: 1, limit: 10 };
+
+      await expect(service.listProducts(orgMock.id, paginationParams)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

@@ -1,5 +1,17 @@
-import { Body, Controller, Delete, HttpCode, Param, Patch, Post, UseGuards, Query, Get} from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  Query,
+  Get,
+  BadRequestException,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
@@ -53,6 +65,24 @@ export class ProductsController {
     @Body() updateProductDto: UpdateProductDTO
   ) {
     return this.productsService.updateProduct(id, productId, updateProductDto);
+  }
+
+  @Get('/')
+  @ApiOperation({ summary: 'List products with pagination' })
+  @ApiParam({ name: 'id', description: 'Organisation ID', example: '12345' })
+  @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async listProducts(@Param('id') id: string, @Query('page') page: string, @Query('limit') limit: string) {
+    const pageNumber = parseInt(page) || 1;
+    const limitNumber = parseInt(limit) || 10;
+
+    if (isNaN(pageNumber) || isNaN(limitNumber) || pageNumber < 1 || limitNumber < 1) {
+      throw new BadRequestException('Invalid query params passed');
+    }
+
+    return this.productsService.listProducts(id, { page: pageNumber, limit: limitNumber });
   }
 
   @UseGuards(OwnershipGuard)
