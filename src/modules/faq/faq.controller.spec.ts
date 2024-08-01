@@ -5,7 +5,6 @@ import { FaqController } from './faq.controller';
 import { CreateFaqDto } from './create-faq.dto';
 import { IFaq, ICreateFaqResponse } from './faq.interface';
 
-
 describe('FaqController (e2e)', () => {
   let app;
   let server;

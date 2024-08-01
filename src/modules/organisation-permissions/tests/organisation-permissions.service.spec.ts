@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrganisationPermissionsService } from './organisation-permissions.service';
-import { Permissions } from './entities/permissions.entity';
+import { OrganisationPermissionsService } from '../../organisation-permissions/organisation-permissions.service';
+import { Permissions } from '../entities/permissions.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Role } from '../organisation-role/entities/role.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
+import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
 import { HttpStatus, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { mockUpdatePermissionDto } from './mocks/organisation-permissions.mock';
-import { mockRole } from './mocks/role.mock';
-import { mockOrganisation } from './mocks/organisation.mock';
+import { mockUpdatePermissionDto } from '../mocks/organisation-permissions.mock';
+import { mockRole } from '../mocks/role.mock';
+import { mockOrganisation } from '../mocks/organisation.mock';
 describe('OrganisationPermissionsService', () => {
   let service: OrganisationPermissionsService;
   let permissionRepository: Repository<Permissions>;
-  let roleRepository: Repository<Role>;
+  let roleRepository: Repository<OrganisationRole>;
   let organisationRepository: Repository<Organisation>;
 
   beforeEach(async () => {
@@ -26,7 +26,7 @@ describe('OrganisationPermissionsService', () => {
           },
         },
         {
-          provide: getRepositoryToken(Role),
+          provide: getRepositoryToken(OrganisationRole),
           useValue: {
             findOne: jest.fn(),
           },
@@ -42,7 +42,7 @@ describe('OrganisationPermissionsService', () => {
 
     service = module.get<OrganisationPermissionsService>(OrganisationPermissionsService);
     permissionRepository = module.get<Repository<Permissions>>(getRepositoryToken(Permissions));
-    roleRepository = module.get<Repository<Role>>(getRepositoryToken(Role));
+    roleRepository = module.get<Repository<OrganisationRole>>(getRepositoryToken(OrganisationRole));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
   });
 
