@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
 import { skipAuth } from '../../helpers/skipAuth';
@@ -24,6 +24,13 @@ export class EmailController {
   @Post('delete-template')
   async deleteTemplate(@Body() body: getTemplateDto, @Res() res: Response): Promise<any> {
     const response = await this.emailService.getTemplate(body);
+    res.status(response.status_code).send(response);
+  }
+
+  @skipAuth()
+  @Get('get-all-templates')
+  async getAllTemplates(@Res() res: Response): Promise<any> {
+    const response = await this.emailService.getAllTemplates();
     res.status(response.status_code).send(response);
   }
 }

@@ -96,7 +96,6 @@ export class EmailService {
 
   async getAllTemplates() {
     try {
-      console.log('Getting all templates');
       const templatesDirectory = './src/modules/email/templates';
       const files = await promisify(fs.readdir)(templatesDirectory);
 
