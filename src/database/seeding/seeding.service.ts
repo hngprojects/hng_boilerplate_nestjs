@@ -294,7 +294,7 @@ export class SeedingService {
 
       user.user_type = UserType.SUPER_ADMIN;
       const admin = await userRepository.save(user);
-      return { status: 200, message: ADMIN_CREATED, data: admin };
+      return { status: 201, message: ADMIN_CREATED, data: admin };
     } catch (error) {
       console.log('Error creating superAdmin:', error);
       if (error instanceof UnauthorizedException || error instanceof ConflictException) throw error;
