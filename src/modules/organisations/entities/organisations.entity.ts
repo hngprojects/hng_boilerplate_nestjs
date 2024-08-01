@@ -1,11 +1,11 @@
 import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
-import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { OrganisationMember } from './org-members.entity';
 import { Product } from '../../../modules/products/entities/product.entity';
+import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
 
 @Entity()
 export class Organisation extends AbstractBaseEntity {
@@ -51,12 +51,9 @@ export class Organisation extends AbstractBaseEntity {
   @OneToMany(() => OrganisationRole, role => role.organisation, { eager: false })
   role: OrganisationRole[];
 
-  @OneToMany(() => Invite, invite => invite.organisation)
+  @OneToMany(() => Invite, invite => invite.organisation.id)
   invites: Invite[];
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
-
-  @OneToMany(() => OrganisationRole, roles => roles.organisation)
-  roles: OrganisationRole[];
 }

@@ -44,7 +44,6 @@ export const mockUser: User = {
   time_left: 3600,
   owned_organisations: [],
   created_organisations: [],
-  invites: [],
   testimonials: [],
   user_type: UserType.ADMIN,
   secret: 'secret',

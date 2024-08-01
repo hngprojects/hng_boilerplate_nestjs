@@ -5,7 +5,6 @@ import { Job } from '../../../modules/jobs/entities/job.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 import { Notification } from '../../../modules/notifications/entities/notifications.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
-import { Invite } from '../../invite/entities/invite.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
@@ -63,9 +62,6 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.creator)
   created_organisations: Organisation[];
-
-  @OneToMany(() => Invite, invite => invite.user)
-  invites: Invite[];
 
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
