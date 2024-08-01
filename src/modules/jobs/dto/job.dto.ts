@@ -2,7 +2,7 @@ import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEnum, IsBoolean, IsNotEmpty, IsOptional, IsDateString } from 'class-validator';
 
 // Enum definitions for clarity
-enum SalaryRange {
+export enum SalaryRange {
   'below_30k' = 'below_30k',
   '30k_to_50k' = '30k_to_50k',
   '50k_to_70k' = '50k_to_70k',
@@ -11,14 +11,14 @@ enum SalaryRange {
   'above_150k' = 'above_150k',
 }
 
-enum JobType {
+export enum JobType {
   FullTime = 'full-time',
   PartTime = 'part-time',
   Internship = 'internship',
   Contract = 'contract',
 }
 
-enum JobMode {
+export enum JobMode {
   Remote = 'remote',
   Onsite = 'onsite',
 }
@@ -63,6 +63,7 @@ export class JobDto {
   @ApiProperty({
     description: 'The salary range for the job',
     enum: SalaryRange,
+    type: SalaryRange,
     example: SalaryRange['30K_to_50K'],
     required: true,
   })
@@ -73,6 +74,7 @@ export class JobDto {
   @ApiProperty({
     description: 'The type of job',
     enum: JobType,
+    type: JobType,
     example: JobType['full_time'],
     required: true,
   })
@@ -83,6 +85,7 @@ export class JobDto {
   @ApiProperty({
     description: 'The mode of the job (e.g., remote, onsite)',
     enum: JobMode,
+    type: JobMode,
     example: JobMode['remote'],
     required: true,
   })

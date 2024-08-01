@@ -4,7 +4,7 @@ import { OrganisationMembersService } from '../services/org-members.service';
 import { OrganisationMember } from '../entities/org-members.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { orgMemberMock, createMockOrganisation } from './mocks/org-members.mock';
+import { orgMemberMock } from './mocks/org-members.mock';
 
 const mockOrganisationMembersRepository = {
   findOneOrFail: jest.fn(),

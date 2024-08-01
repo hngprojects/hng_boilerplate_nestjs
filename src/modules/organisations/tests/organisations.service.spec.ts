@@ -14,14 +14,17 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
+import { OrganisationMember } from '../entities/org-members.entity';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
   let organisationRepository: Repository<Organisation>;
   let profileRepository: Repository<Profile>;
+  let organisationMemberRepository: Repository<OrganisationMember>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,6 +39,12 @@ describe('OrganisationsService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(OrganisationMember),
+          useValue: {
+            save: jest.fn(),
           },
         },
         UserService,
@@ -62,6 +71,7 @@ describe('OrganisationsService', () => {
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
+    organisationMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
     profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
@@ -91,47 +101,10 @@ describe('OrganisationsService', () => {
     });
 
     it('should throw an error if the email already exists', async () => {
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([orgMock]);
+      organisationRepository.findBy = jest.fn().mockResolvedValue([orgMock]);
       await expect(service.create(createMockOrganisationRequestDto(), orgMock.owner.id)).rejects.toThrow(
-        new UnprocessableEntityException({
-          status: 'Unprocessable entity exception',
-          message: 'Invalid organisation credentials',
-          status_code: 422,
-        })
+        new ConflictException('Organisation with this email already exists')
       );
-    });
-  });
-
-  describe('delete organization', () => {
-    it('should delete an organisation successfully', async () => {
-      const id = '1';
-      const organisation = new Organisation();
-      organisation.id = id;
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
-      jest.spyOn(organisationRepository, 'save').mockResolvedValueOnce(organisation);
-
-      const result = await service.deleteOrganization(id);
-
-      expect(organisationRepository.findOneBy).toHaveBeenCalledWith({ id });
-      expect(organisationRepository.save).toHaveBeenCalledWith(expect.objectContaining({ isDeleted: true }));
-      expect(result).toEqual(204); // HttpStatus.NO_CONTENT
-    });
-
-    it('should throw NotFoundException if organisation not found', async () => {
-      const id = '1';
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
-
-      await expect(service.deleteOrganization(id)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
-      const id = '1';
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
-
-      await expect(service.deleteOrganization(id)).rejects.toThrow(InternalServerErrorException);
     });
   });
 

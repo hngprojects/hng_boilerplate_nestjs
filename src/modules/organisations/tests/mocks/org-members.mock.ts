@@ -3,6 +3,7 @@ import { Organisation } from '../../entities/organisations.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
 import { User } from '../../../user/entities/user.entity';
+import { Role } from '../../../organisation-role/entities/role.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -31,6 +32,8 @@ export const createMockProfile = (): Profile => {
 };
 
 export const createMockUser = (): User => {
+  const profile = createMockProfile();
+
   return {
     id: uuidv4(),
     created_at: new Date(),
@@ -52,8 +55,11 @@ export const createMockUser = (): User => {
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
-    profile: createMockProfile(),
+    profile: profile,
     organisationMembers: [],
+    backup_codes: [],
+    notifications: [],
+    notifications_settings: null,
   };
 };
 
@@ -79,6 +85,7 @@ export const createMockOrganisation = (): Organisation => {
     invites: [],
     organisationMembers: [],
     products: [],
+    role: [],
   };
 };
 

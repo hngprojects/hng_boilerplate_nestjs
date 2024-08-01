@@ -4,7 +4,7 @@ import { OrganisationMembersService } from '../services/org-members.service';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { orgMemberMock } from './mocks/org-members.mock';
 import { AuthGuard } from '../../../guards/auth.guard';
-import { OwnershipGuard } from '../guards/ownership.guard';
+import { OwnershipGuard } from '../../../guards/authorization.guard';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { getRepositoryToken } from '@nestjs/typeorm';

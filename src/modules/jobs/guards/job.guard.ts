@@ -19,7 +19,7 @@ export class JobGuard implements CanActivate {
       relations: ['user'],
     });
 
-    if (job.user.id === user.sub) {
+    if (job.user.id === user.id) {
       if (!job || job.is_deleted === true) throw new NotFoundException('Job not found');
       return true;
     } else {

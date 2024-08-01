@@ -28,6 +28,15 @@ import { OrganisationMemberMapper } from '../mapper/org-members.mapper';
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
+  @ApiOperation({ summary: 'Create new Organisation' })
+  @ApiResponse({
+    status: 201,
+    description: 'The created organisation',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Organisation email already exists',
+  })
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Request() req) {
     const user = req['user'];

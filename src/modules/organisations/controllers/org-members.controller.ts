@@ -1,7 +1,7 @@
 import { Controller, Delete, Param, ParseUUIDPipe, Req, UseGuards } from '@nestjs/common';
 import { OrganisationMembersService } from '../services/org-members.service';
 import { AuthGuard } from '../../../guards/auth.guard';
-import { OwnershipGuard } from '../guards/ownership.guard';
+import { OwnershipGuard } from '../../../guards/authorization.guard';
 
 @Controller('organisation-members')
 export class OrganisationMembersController {
