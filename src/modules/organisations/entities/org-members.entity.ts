@@ -17,12 +17,13 @@ export class OrganisationMember extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, organisation => organisation.organisationMembers)
   organisation_id: Organisation;
-
+  
   @Column({
     type: 'enum',
     enum: MemberRole,
     default: MemberRole.MEMBER,
   })
+  @Column({ nullable: true })
   role: string;
 
   @ManyToOne(() => Profile)
