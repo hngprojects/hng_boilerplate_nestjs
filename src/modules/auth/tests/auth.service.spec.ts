@@ -433,7 +433,12 @@ describe('AuthenticationService', () => {
       };
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
 
-      const secret: speakeasy.GeneratedSecret = { base32: 'base 32', ascii: 'ascii', hex: 'hex', google_auth_qr: 'dhjad'};
+      const secret: speakeasy.GeneratedSecret = {
+        base32: 'base 32',
+        ascii: 'ascii',
+        hex: 'hex',
+        google_auth_qr: 'dhjad',
+      };
       jest.spyOn(speakeasy, 'generateSecret').mockReturnValue(secret);
       jest.spyOn(userServiceMock, 'updateUserRecord').mockResolvedValueOnce(undefined);
 
