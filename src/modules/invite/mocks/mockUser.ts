@@ -23,6 +23,6 @@ export const mockUser: User = {
   testimonials: [],
   profile: null,
   organisationMembers: [],
-  notifications_settings: [],
+  notification_settings: [],
   notifications: [],
 };

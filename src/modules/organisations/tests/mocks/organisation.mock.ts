@@ -34,7 +34,7 @@ export const createMockOrganisation = (): Organisation => {
     name: 'Admin',
     description: 'Administrator role with full permissions',
     permissions: [],
-    organisation: [],
+    organisation: null,
     organisationMembers: [],
     created_at: new Date(),
     updated_at: new Date(),
@@ -101,7 +101,6 @@ export const createMockOrganisation = (): Organisation => {
     role: null,
     organisationMembers: [orgMemberMock],
     products: [],
-    roles: [],
   };
 };
 

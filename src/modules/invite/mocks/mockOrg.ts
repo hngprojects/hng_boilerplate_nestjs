@@ -18,7 +18,7 @@ export const mockOrg: Organisation = {
   creator: mockUser,
   preferences: [],
   invites: [],
-  role: null,
+  role: [],
   organisationMembers: [],
   products: [],
 };
