@@ -19,7 +19,7 @@ export class OrganisationRole extends AbstractBaseEntity {
   permissions: Permissions[];
 
   @ManyToOne(() => Organisation, organisation => organisation.role, { eager: false })
-  organisation: Organisation[];
+  organisation: Organisation;
 
   @OneToMany(() => OrganisationMember, member => member.role)
   organisationMembers: OrganisationMember[];

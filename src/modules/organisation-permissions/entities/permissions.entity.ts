@@ -4,7 +4,7 @@ import { OrganisationRole } from '../../organisation-role/entities/organisation-
 
 @Entity()
 export class Permissions extends AbstractBaseEntity {
-  @Column({ type: 'text', unique: true })
+  @Column({ type: 'text' })
   category: string;
 
   @Column({ type: 'boolean', nullable: false })

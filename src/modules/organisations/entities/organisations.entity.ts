@@ -56,4 +56,7 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
+
+  @OneToMany(() => OrganisationRole, roles => roles.organisation)
+  roles: OrganisationRole[];
 }

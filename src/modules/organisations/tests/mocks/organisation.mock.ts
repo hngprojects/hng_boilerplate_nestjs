@@ -26,7 +26,6 @@ export const createMockOrganisation = (): Organisation => {
     profile_pic_url: '',
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: null,
   };
 
   // Create a mock object that matches the OrganisationRole interface
@@ -72,14 +71,14 @@ export const createMockOrganisation = (): Organisation => {
     created_organisations: [],
     invites: [],
     testimonials: [],
+    notifications: [],
+    notification_settings: [],
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
     products: [],
     profile: profileMock,
     organisationMembers: [orgMemberMock],
-    notifications: [],
-    notifications_settings: [],
   };
 
   return {
@@ -102,6 +101,7 @@ export const createMockOrganisation = (): Organisation => {
     role: null,
     organisationMembers: [orgMemberMock],
     products: [],
+    roles: [],
   };
 };
 

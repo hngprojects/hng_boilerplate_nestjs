@@ -1,8 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
   Param,
   InternalServerErrorException,
   HttpException,
@@ -11,8 +9,6 @@ import {
 } from '@nestjs/common';
 import { InviteService } from './invite.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { SendInvitesDto } from './dto/send-invites.dto';
-import { AcceptInviteDto } from './dto/accept-invite.dto';
 
 @ApiBearerAuth()
 @ApiTags('Organisation Invites')
