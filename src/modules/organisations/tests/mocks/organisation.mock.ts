@@ -25,7 +25,6 @@ export const createMockOrganisation = (): Organisation => {
     profile_pic_url: '',
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: null,
   };
 
   const orgMemberMock: OrganisationMember = {
@@ -89,6 +88,7 @@ export const createMockOrganisation = (): Organisation => {
     role: null,
     organisationMembers: [orgMemberMock],
     products: [],
+    roles: [],
   };
 };
 
