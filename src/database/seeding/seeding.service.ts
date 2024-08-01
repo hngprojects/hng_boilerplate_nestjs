@@ -10,12 +10,11 @@ import { DataSource } from 'typeorm';
 import { User, UserType } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Product } from '../../modules/products/entities/product.entity';
+import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
-import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
 import { CreateAdminDto } from './dto/admin.dto';
 import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
@@ -159,49 +158,33 @@ export class SeedingService {
         const p1 = productRepository.create({
           name: 'Product 1',
           description: 'Description for Product 1',
-          variants: [
-            {
-              size: ProductSizeType.STANDARD,
-              quantity: 1,
-              price: 500,
-            },
-          ],
+          size: ProductSizeType.STANDARD,
+          quantity: 1,
+          price: 500,
           org: or1,
         });
         const p2 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          variants: [
-            {
-              size: ProductSizeType.LARGE,
-              quantity: 2,
-              price: 50,
-            },
-          ],
+          size: ProductSizeType.LARGE,
+          quantity: 2,
+          price: 50,
           org: or2,
         });
         const p3 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          variants: [
-            {
-              size: ProductSizeType.STANDARD,
-              quantity: 2,
-              price: 50,
-            },
-          ],
+          size: ProductSizeType.STANDARD,
+          quantity: 2,
+          price: 50,
           org: or1,
         });
         const p4 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          variants: [
-            {
-              size: ProductSizeType.SMALL,
-              quantity: 2,
-              price: 50,
-            },
-          ],
+          size: ProductSizeType.SMALL,
+          quantity: 2,
+          price: 50,
           org: or2,
         });
 
