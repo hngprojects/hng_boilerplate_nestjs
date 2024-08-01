@@ -8,6 +8,8 @@ import * as fs from 'fs';
 import { promisify } from 'util';
 import * as path from 'path';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ArticleInterface } from './interface/article.interface';
+import { IMessageInterface } from './interface/message.interface';
 
 @Injectable()
 export class EmailService {
@@ -133,5 +135,20 @@ export class EmailService {
         message: 'Template not found',
       };
     }
+  }
+
+  async sendNotificationMail(email: string, notificationMail: IMessageInterface) {
+    const { recipient_name, message, support_email } = notificationMail;
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'In-App, Notification',
+      template: 'notification',
+      context: {
+        email,
+        recipient_name,
+        message,
+        support_email,
+      },
+    });
   }
 }

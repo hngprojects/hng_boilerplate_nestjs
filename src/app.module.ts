@@ -14,12 +14,12 @@ import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { EmailService } from './modules/email/email.service';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { InviteModule } from './modules/invite/invite.module';
+import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { OtpModule } from './modules/otp/otp.module';
 import authConfig from '../config/auth.config';
-import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { AuthGuard } from './guards/auth.guard';
 import { EmailModule } from './modules/email/email.module';
-import { InviteModule } from './modules/invite/invite.module';
 import { OtpService } from './modules/otp/otp.service';
 import { ProductsModule } from './modules/products/products.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
@@ -37,6 +37,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
+import { FaqModule } from './modules/faq/faq.module';
 
 @Module({
   providers: [
@@ -88,6 +89,7 @@ import { OrganisationRoleModule } from './modules/organisation-role/organisation
     SqueezeModule,
     TestimonialsModule,
     JobsModule,
+    NotificationsModule,
     ProductsModule,
     BillingPlanModule,
     JobsModule,
@@ -96,9 +98,10 @@ import { OrganisationRoleModule } from './modules/organisation-role/organisation
     OrganisationPermissionsModule,
     RunTestsModule,
     ContactUsModule,
+    FaqModule,
+    HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
-    HelpCenterModule,
   ],
   controllers: [HealthController, ProbeController],
 })

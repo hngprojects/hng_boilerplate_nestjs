@@ -1,34 +1,20 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-  InternalServerErrorException,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import { OrganisationRoleService } from './organisation-role.service';
-import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
+import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
+import { OrganisationRoleService } from './organisation-role.service';
 
-@ApiTags('Organization Settings')
+@ApiTags('organisation Settings')
 @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@Controller('organizations')
+@Controller('organisations')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
   @Post(':id/roles')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new role in an organization' })
-  @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organization' })
+  @ApiOperation({ summary: 'Create a new role in an organisation' })
+  @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organisation' })
   @ApiResponse({ status: 201, description: 'The role has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })

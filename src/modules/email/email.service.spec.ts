@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService } from './email.service';
 import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
@@ -5,7 +6,6 @@ import * as Handlebars from 'handlebars';
 import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
 import { HttpStatus } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
 
 // Mock module-level functions
 jest.mock('./email_storage.service', () => ({
@@ -179,6 +179,27 @@ describe('EmailService', () => {
         status_code: HttpStatus.NOT_FOUND,
         message: 'Template not found',
       });
+    });
+  });
+
+  it('should send notification email', async () => {
+    const email = 'test@example.com';
+    const message = 'You have a new notification';
+    const support_email = 'support@remotebingo.com';
+    const recipient_name = 'John Doe';
+
+    await service.sendNotificationMail(email, { message, support_email, recipient_name });
+
+    expect(mailerService.sendMail).toHaveBeenCalledWith({
+      to: email,
+      subject: 'In-App, Notification',
+      template: 'notification',
+      context: {
+        email,
+        recipient_name,
+        message,
+        support_email,
+      },
     });
   });
 });

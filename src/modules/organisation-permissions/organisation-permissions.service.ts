@@ -1,10 +1,10 @@
 import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
-import { Permissions } from './entities/permissions.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { Permissions } from './entities/permissions.entity';
 
 @Injectable()
 export class OrganisationPermissionsService {
@@ -18,23 +18,23 @@ export class OrganisationPermissionsService {
   ) {}
 
   async handleUpdatePermission(org_id: string, role_id: string, updatePermissionDto: UpdatePermissionDto) {
-    await this.validateOrganizationAndRole(org_id, role_id);
+    await this.validateorganisationAndRole(org_id, role_id);
     await this.validateAndUpdatePermissions(role_id, updatePermissionDto);
     return { message: 'Permissions successfully updated', status_code: HttpStatus.OK };
   }
 
-  private async validateOrganizationAndRole(orgId: string, roleId: string): Promise<void> {
+  private async validateorganisationAndRole(orgId: string, roleId: string): Promise<void> {
     const organisation = await this.organisationRepository.findOne({
       where: { id: orgId },
       relations: ['role'],
     });
 
     if (!organisation) {
-      throw new NotFoundException(`Organization with ID ${orgId} not found`);
+      throw new NotFoundException(`organisation with ID ${orgId} not found`);
     }
 
     if (!organisation.role.some(role => role.id === roleId)) {
-      throw new NotFoundException(`Role with ID ${roleId} not found in the specified organization`);
+      throw new NotFoundException(`Role with ID ${roleId} not found in the specified organisation`);
     }
   }
 

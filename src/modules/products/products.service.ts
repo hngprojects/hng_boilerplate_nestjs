@@ -31,17 +31,15 @@ export class ProductsService {
       });
     const newProduct: Product = this.productRepository.create(dto);
     newProduct.org = org;
-    if (!newProduct)
+    const statusCal = await this.calculateProductStatus(dto.quantity);
+    newProduct.stock_status = statusCal;
+    const product = await this.productRepository.save(newProduct);
+    if (!product || !newProduct)
       throw new InternalServerErrorException({
         status_code: 500,
         status: 'Internal server error',
         message: 'An unexpected error occurred. Please try again later.',
       });
-
-    const statusCal = await this.calculateProductStatus(dto.quantity);
-    newProduct.stock_status = statusCal;
-
-    const product = await this.productRepository.save(newProduct);
 
     return {
       status: 'success',
@@ -50,18 +48,25 @@ export class ProductsService {
         id: product.id,
         name: product.name,
         description: product.description,
-        price: product.variants[0].price,
+        price: product.price,
         status: product.stock_status,
-        quantity: product.variants[0].quantity,
+        is_deleted: product.is_deleted,
+        quantity: product.quantity,
         created_at: product.created_at,
         updated_at: product.updated_at,
       },
     };
   }
 
-  async updateProduct(productId: string, updateProductDto: UpdateProductDTO) {
-    const productExist = await this.productRepository.findOne({ where: { id: productId } });
-
+  async updateProduct(id: string, productId: string, updateProductDto: UpdateProductDTO) {
+    const org = await this.organisationRepository.findOne({ where: { id } });
+    if (!org)
+      throw new InternalServerErrorException({
+        status: 'Unprocessable entity exception',
+        message: 'Invalid organisation credentials',
+        status_code: 422,
+      });
+    const productExist = await this.productRepository.findOne({ where: { id: productId, org } });
     if (!productExist) {
       throw new NotFoundException({
         error: 'Product not found',
@@ -69,48 +74,42 @@ export class ProductsService {
       });
     }
 
-    await this.productRepository.update(productId, updateProductDto);
-    const product = await this.productRepository.findOne({ where: { id: productId } });
-
-    const calculateProductStatus = await this.calculateProductStatus(
-      product.variants.reduce((acc, variant) => acc + variant.quantity, 0)
-    );
-
-    product.stock_status = calculateProductStatus;
-
-    const currentProduct = await this.productRepository.save(product);
-
-    return {
-      status_code: HttpStatus.OK,
-      message: 'Product updated successfully',
-      data: currentProduct,
-    };
-  }
-
-  async deleteProduct(productId: string) {
     try {
-      const product = await this.productRepository.findOne({
-        where: { id: productId },
-        relations: ['variants'],
+      await this.productRepository.update(productId, {
+        ...updateProductDto,
+        stock_status: await this.calculateProductStatus(updateProductDto.quantity),
       });
-      if (!product) {
-        throw new NotFoundException('Product not found');
-      }
 
-      await this.productRepository.delete(productId);
-
-      const responseData = {
-        message: 'Profile successfully deleted',
-        data: {},
+      const updatedProduct = await this.productRepository.findOne({ where: { id: productId } });
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Product updated successfully',
+        data: updatedProduct,
       };
-
-      return responseData;
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
       throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
     }
+  }
+
+  async deleteProduct(orgId: string, productId: string) {
+    const org = await this.organisationRepository.findOne({ where: { id: orgId } });
+    if (!org) {
+      throw new InternalServerErrorException({
+        status: 'Unprocessable entity exception',
+        message: 'Invalid organisation credentials',
+        status_code: 422,
+      });
+    }
+    const product = await this.productRepository.findOne({ where: { id: productId, org } });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    product.is_deleted = true;
+    await this.productRepository.save(product);
+    return {
+      message: 'Product successfully deleted',
+      data: {},
+    };
   }
 
   async calculateProductStatus(quantity: number): Promise<StockStatusType> {
