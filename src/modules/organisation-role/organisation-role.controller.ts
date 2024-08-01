@@ -1,8 +1,24 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRoleService } from './organisation-role.service';
+import { AuthGuard } from '../../guards/auth.guard';
 
 @ApiTags('organisation Settings')
 @UseGuards(OwnershipGuard)
@@ -73,6 +89,42 @@ export class OrganisationRoleController {
         throw error;
       }
       throw new BadRequestException('Failed to fetch role');
+    }
+  }
+
+  @Delete(':id/:roleId')
+  @UseGuards(AuthGuard, OwnershipGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete a role in an organisation' })
+  @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organisation' })
+  @ApiResponse({ status: 200, description: 'Role successfully removed' })
+  @ApiResponse({ status: 400, description: 'Invalid role ID format' })
+  @ApiResponse({ status: 404, description: 'Role not found' })
+  async remove(@Param('id') organisationId: string, @Param('roleId') roleId: string, @Req() req) {
+    const currentUser = req.user;
+
+    try {
+      return await this.organisationRoleService.deleteRole(organisationId, roleId, currentUser);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ status_code: 404, error: 'Not Found', message: error.message }, HttpStatus.NOT_FOUND);
+      }
+      if (error instanceof BadRequestException) {
+        throw new HttpException(
+          { status_code: 400, error: 'Bad Request', message: error.message },
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      if (error instanceof UnauthorizedException) {
+        throw new HttpException(
+          { status_code: 401, error: 'Unauthorized', message: error.message },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+      throw new HttpException(
+        { status_code: 500, error: 'Internal Server Error', message: 'An unexpected error occurred' },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }

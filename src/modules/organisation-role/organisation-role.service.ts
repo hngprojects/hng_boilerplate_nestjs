@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,6 +14,7 @@ import { Permissions } from '../organisation-permissions/entities/permissions.en
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRole } from './entities/organisation-role.entity';
+import { OrganisationMember } from '../organisations/entities/org-members.entity';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -20,6 +23,8 @@ export class OrganisationRoleService {
     private rolesRepository: Repository<OrganisationRole>,
     @InjectRepository(Organisation)
     private organisationRepository: Repository<Organisation>,
+    @InjectRepository(OrganisationMember)
+    private organisationMemberRepository: Repository<OrganisationMember>,
     @InjectRepository(Permissions)
     private permissionRepository: Repository<Permissions>,
     @InjectRepository(DefaultPermissions)
@@ -123,5 +128,39 @@ export class OrganisationRoleService {
       }
       throw new Error(`Failed to fetch role: ${error.message}`);
     }
+  }
+
+  async deleteRole(
+    organisationId: string,
+    roleId: string,
+    currentUser
+  ): Promise<{ status_code: number; message: string }> {
+    if (!['superadmin', 'admin', 'owner'].includes(currentUser.role)) {
+      throw new UnauthorizedException('You are not authorized to manage roles');
+    }
+
+    const role = await this.rolesRepository.findOne({
+      where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
+      relations: ['organisation'],
+    });
+
+    if (!role) {
+      throw new NotFoundException(`The role with ID ${roleId} does not exist`);
+    }
+
+    const usersWithRole = await this.organisationMemberRepository.count({
+      where: { organisation_id: { id: organisationId }, role: role.name },
+    });
+
+    if (usersWithRole > 0) {
+      throw new BadRequestException('Role is currently assigned to users');
+    }
+
+    await this.rolesRepository.softDelete(roleId);
+
+    return {
+      status_code: 200,
+      message: 'Role successfully removed',
+    };
   }
 }

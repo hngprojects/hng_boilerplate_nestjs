@@ -11,7 +11,6 @@ export class OrganisationMember extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, organisation => organisation.organisationMembers)
   organisation_id: Organisation;
-
   @Column({ nullable: true })
   role: string;
 
