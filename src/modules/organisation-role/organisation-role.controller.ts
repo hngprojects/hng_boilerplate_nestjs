@@ -90,7 +90,17 @@ export class OrganisationRoleController {
   }
 
   @Patch(':orgId/roles/:roleId')
-  async update(
+  @ApiOperation({ summary: 'update a role within an organization' })
+  @ApiResponse({
+    status: 200,
+    description: 'The role has been successfully updated',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid role ID format or input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 404, description: 'Role not found' })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
+  async updateRole(
     updateRoleDto: UpdateOrganisationRoleDto,
     @Param('orgId') orgId: string,
     @Param('roleId') roleId: string
