@@ -25,6 +25,6 @@ export class ProductVariant {
   @Column({ type: 'int', nullable: false, default: 0 })
   price: number;
 
-  @ManyToOne(() => Product, product => product.variants)
+  @ManyToOne(() => Product, product => product.variants, { onDelete: 'CASCADE' })
   product: Product;
 }
