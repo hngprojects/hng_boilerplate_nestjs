@@ -1,6 +1,13 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../../modules/user/entities/user.entity';
+import { User, UserType } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product } from '../../modules/products/entities/product.entity';
@@ -10,6 +17,9 @@ import { PermissionCategory } from '../../modules/organisation-permissions/helpe
 import { Profile } from '../../modules/profile/entities/profile.entity';
 import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
+import { CreateAdminDto } from './dto/admin.dto';
+import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
+import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
 
 @Injectable()
 export class SeedingService {
@@ -269,6 +279,26 @@ export class SeedingService {
     } catch (error) {
       console.log('Error fetching users:', error);
       throw new BadRequestException('Error fetching users');
+    }
+  }
+
+  async createSuperAdmin({ secret, ...adminDetails }: CreateAdminDto): Promise<CreateAdminResponseDto> {
+    try {
+      const userRepository = this.dataSource.getRepository(User);
+      const exists = await userRepository.findOne({ where: { email: adminDetails.email } });
+      if (exists) throw new ConflictException('A user already exist with the same email');
+
+      const user = userRepository.create(adminDetails);
+      const { ADMIN_SECRET } = process.env;
+      if (secret !== ADMIN_SECRET) throw new UnauthorizedException(INVALID_ADMIN_SECRET);
+
+      user.user_type = UserType.SUPER_ADMIN;
+      const admin = await userRepository.save(user);
+      return { status: 201, message: ADMIN_CREATED, data: admin };
+    } catch (error) {
+      console.log('Error creating superAdmin:', error);
+      if (error instanceof UnauthorizedException || error instanceof ConflictException) throw error;
+      throw new InternalServerErrorException(SERVER_ERROR);
     }
   }
 }
