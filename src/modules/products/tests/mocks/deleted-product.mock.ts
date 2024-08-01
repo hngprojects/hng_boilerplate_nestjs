@@ -3,7 +3,7 @@ import { orgMock } from '../../../../modules/organisations/tests/mocks/organisat
 import { Product, StockStatusType } from '../../entities/product.entity';
 import { ProductSizeType } from '../../entities/product-variant.entity';
 
-export const productMock: Product = {
+export const deletedProductMock: Product = {
   id: randomUUID(),
   name: 'TV',
   description: '',
@@ -18,7 +18,7 @@ export const productMock: Product = {
   ],
   stock_status: StockStatusType.LOW_STOCK,
   image: '',
-  is_deleted: false,
+  is_deleted: true,
   org: orgMock,
   created_at: new Date(),
   updated_at: new Date(),
