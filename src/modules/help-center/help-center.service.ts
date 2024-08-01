@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HelpCenterEntity } from '../help-center/entities/help-center.entity'; // Adjust the path as necessary
@@ -14,9 +13,6 @@ export class HelpCenterService {
     @InjectRepository(HelpCenterEntity)
     private readonly helpCenterRepository: Repository<HelpCenterEntity>
   ) {}
-    @InjectRepository(HelpCenterEntity)
-    private readonly helpCenterRepository: Repository<HelpCenterEntity>,
-  ) { }
 
   async create(createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenterEntity> {
     const helpCenter = this.helpCenterRepository.create({

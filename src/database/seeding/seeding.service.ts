@@ -15,7 +15,6 @@ import { ProductCategory } from '../../modules/product-category/entities/product
 import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
-
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
 import { CreateAdminDto } from './dto/admin.dto';
 import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
