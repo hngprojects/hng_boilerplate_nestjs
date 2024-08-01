@@ -21,8 +21,8 @@ import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
 
 @ApiBearerAuth()
-@ApiTags('organisation')
-@Controller('organisations')
+@ApiTags('organization')
+@Controller('organizations')
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
