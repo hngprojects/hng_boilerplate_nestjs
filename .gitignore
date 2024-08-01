@@ -395,5 +395,3 @@ dist
 # Migrations
 /db/migrations/*-migration.ts
 /db
-
-/.vscode/settings.json

@@ -139,4 +139,4 @@ import { FaqModule } from './modules/faq/faq.module';
   ],
   controllers: [HealthController, ProbeController],
 })
-export class AppModule { }
+export class AppModule {}
