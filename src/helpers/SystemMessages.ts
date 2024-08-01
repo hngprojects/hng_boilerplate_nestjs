@@ -6,6 +6,9 @@ export const ERROR_OCCURED = 'Error Occured Performing this request';
 export const USER_ACCOUNT_EXIST = 'Account with the specified email exists';
 export const USER_ACCOUNT_DOES_NOT_EXIST = "Account with the specified email doesn't exist";
 export const UNAUTHENTICATED_MESSAGE = 'User is currently unauthorized, kindly authenticate to continue';
+export const TWO_FACTOR_VERIFIED_SUCCESSFULLY = '2FA verified and enabled';
+export const INCORRECT_TOTP_CODE = 'Incorrect totp code';
+export const USER_NOT_ENABLED_2FA = 'Two factor Auth not initiated. Visit api/auth/2fa/enable';
 export const USER_NOT_FOUND = 'User not found!';
 export const INVALID_PASSWORD = 'Invalid password';
 export const TWO_FA_INITIATED = '2FA setup initiated';
@@ -28,3 +31,7 @@ export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
 export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
 export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
+export const INVALID_ADMIN_SECRET = 'Invalid access secret';
+export const ADMIN_CREATED = 'Admin Created Successfully';
+export const SERVER_ERROR = 'Sorry a server error occured';
+export const FORBIDDEN_ACTION = 'You dont have the permission to perform this action';
