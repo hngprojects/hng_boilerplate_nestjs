@@ -16,11 +16,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EmailModule } from './modules/email/email.module';
 import { EmailService } from './modules/email/email.service';
 import { InviteModule } from './modules/invite/invite.module';
-import { JobsModule } from './modules/jobs/jobs.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { ProductsModule } from './modules/products/products.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
 import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
@@ -30,8 +30,13 @@ import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WaitlistModule } from './modules/waitlist/waitlist.module';
+import { HelpCenterModule } from './modules/help-center/help-center.module';
+import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
+import { FaqModule } from './modules/faq/faq.module';
 
 @Module({
   providers: [
@@ -118,13 +123,19 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     SqueezeModule,
     TestimonialsModule,
     JobsModule,
+    NotificationsModule,
     ProductsModule,
-    OrganisationPermissionsModule,
     BillingPlanModule,
     JobsModule,
     ProfileModule,
+    OrganisationRoleModule,
+    OrganisationPermissionsModule,
     RunTestsModule,
+    ContactUsModule,
+    FaqModule,
+    HelpCenterModule,
     NotificationsModule,
+    WaitlistModule,
   ],
   controllers: [HealthController, ProbeController],
 })

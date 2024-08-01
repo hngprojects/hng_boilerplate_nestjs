@@ -16,7 +16,7 @@ import { OrganisationPermissionsService } from './organisation-permissions.servi
 
 @ApiBearerAuth()
 @ApiTags('Organisation Permissions')
-@Controller('organizations')
+@Controller('organisations')
 export class OrganisationPermissionsController {
   constructor(private readonly permissionService: OrganisationPermissionsService) {}
 

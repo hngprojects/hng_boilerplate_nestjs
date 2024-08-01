@@ -6,16 +6,30 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { EmailService } from '../email/email.service';
+import { IMessageInterface } from '../email/interface/message.interface';
+import { NotificationSettingsDto } from '../notification-settings/dto/notification-settings.dto';
+import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
+import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
+import UserInterface from '../user/interfaces/UserInterface';
+import UserService from '../user/user.service';
+import { CreateNotificationError } from './dtos/create-notification-error.dto';
+import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
+import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import { Notification } from './entities/notifications.entity';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
-    private readonly notificationRepository: Repository<Notification>
+    private readonly notificationRepository: Repository<Notification>,
+
+    private readonly emailService: EmailService,
+    private readonly userService: UserService,
+    private readonly notificationSettingsService: NotificationSettingsService
   ) {}
 
   async markNotificationAsRead(options: MarkNotificationAsReadDto, notificationId: string, userId: string) {
@@ -103,6 +117,108 @@ export class NotificationsService {
       } else {
         throw new InternalServerErrorException();
       }
+    }
+  }
+
+  async createNotification(
+    user_id: string,
+    notification_content: CreateNotificationPropsDto
+  ): Promise<CreateNotificationResponseDto | CreateNotificationError> {
+    const user = await this.getUser(user_id);
+
+    const notification_settings = await this.getNotificationSettingsByUserId(user_id);
+
+    await this.sendNotificationEmail(user, notification_content.message, notification_settings);
+    const notification = await this.saveNotification(user, notification_content);
+
+    const { id: notification_id, message, is_read, created_at } = notification;
+
+    return {
+      status: 'success',
+      message: 'Notification created successfully',
+      status_code: HttpStatus.CREATED,
+      data: {
+        notifications: [
+          {
+            notification_id,
+            user_id,
+            message,
+            is_read,
+            created_at,
+          },
+        ],
+      },
+    };
+  }
+
+  private async getUser(user_id: string): Promise<Partial<UserInterface>> {
+    const user: Partial<UserInterface> = await this.userService.getUserRecord({
+      identifier: user_id,
+      identifierType: 'id',
+    });
+
+    if (!user) {
+      throw new BadRequestException({
+        status: 'error',
+        error: 'Not Found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    return user;
+  }
+
+  private async getNotificationSettingsByUserId(user_id: string): Promise<NotificationSettings> {
+    try {
+      return this.notificationSettingsService.findNotificationSettingsByUserId(user_id);
+    } catch (err) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  private async sendNotificationEmail(
+    user: Partial<UserInterface>,
+    message: string,
+    notificationSettings: NotificationSettingsDto
+  ): Promise<void> {
+    const { email, first_name, last_name } = user; // TODO: Implement mobile_push_notification using firebase
+    const {
+      mobile_push_notifications,
+      email_notification_activity_in_workspace,
+      email_notification_always_send_email_notifications,
+      email_notification_email_digest,
+      email_notification_announcement_and_update_emails,
+      slack_notifications_activity_on_your_workspace,
+      slack_notifications_always_send_email_notifications,
+      slack_notifications_announcement_and_update_emails,
+    } = notificationSettings;
+
+    const notificationEmailProps: IMessageInterface = {
+      recipient_name: `${first_name} ${last_name}`,
+      message,
+      support_email: process.env.SUPPORT_EMAIL,
+    };
+
+    if (email_notification_always_send_email_notifications || email_notification_activity_in_workspace) {
+      try {
+        await this.emailService.sendNotificationMail(email, notificationEmailProps);
+      } catch (err) {
+        throw new InternalServerErrorException();
+      }
+    }
+  }
+
+  private async saveNotification(
+    user: Partial<UserInterface>,
+    notification_content: CreateNotificationPropsDto
+  ): Promise<Notification> {
+    try {
+      return await this.notificationRepository.save({
+        ...notification_content,
+        user,
+      });
+    } catch (err) {
+      throw new InternalServerErrorException();
     }
   }
 }

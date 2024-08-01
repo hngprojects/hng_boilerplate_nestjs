@@ -10,25 +10,33 @@ import {
   Post,
   Query,
   Req,
-  Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { OrganisationsService } from './organisations.service';
-import { OrganisationRequestDto } from './dto/organisation.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
+import { OrganisationRequestDto } from './dto/organisation.dto';
+import { UpdateOrganisationDto } from './dto/update-organisation.dto';
+import { OrganisationsService } from './organisations.service';
 
 @ApiBearerAuth()
-@ApiTags('Organisation')
-@Controller('organisations')
+@ApiTags('organization')
+@Controller('organizations')
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
+  @ApiOperation({ summary: 'Create new Organisation' })
+  @ApiResponse({
+    status: 201,
+    description: 'The created organisation',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Organisation email already exists',
+  })
   @Post('/')
-  async create(@Body() createOrganisationDto: OrganisationRequestDto, @Request() req) {
+  async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
   }
@@ -36,7 +44,7 @@ export class OrganisationsController {
   @Delete(':org_id')
   async delete(@Param('org_id') id: string, @Res() response: Response) {
     this.organisationsService;
-    return this.organisationsService.deleteOrganization(id);
+    return this.organisationsService.deleteorganisation(id);
   }
 
   @ApiOperation({ summary: 'Update Organisation' })
