@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OrganisationRoleService } from '../organisation-role.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { OrganisationRole } from '../entities/organisation-role.entity';
-import { Organisation } from '../../organisations/entities/organisations.entity';
-import { Permissions } from '../../organisation-permissions/entities/permissions.entity';
-import { DefaultPermissions } from '../../organisation-permissions/entities/default-permissions.entity';
-import { Repository } from 'typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DefaultPermissions } from '../../organisation-permissions/entities/default-permissions.entity';
+import { Permissions } from '../../organisation-permissions/entities/permissions.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
+import { OrganisationRole } from '../entities/organisation-role.entity';
+import { OrganisationRoleService } from '../organisation-role.service';
 
 describe('OrganisationRoleService', () => {
   let service: OrganisationRoleService;
@@ -89,7 +89,7 @@ describe('OrganisationRoleService', () => {
   });
 
   describe('getAllRolesInOrganisation', () => {
-    it('should return an array of roles for an existing organization', async () => {
+    it('should return an array of roles for an existing organisation', async () => {
       const organisationId = '1';
       const mockRoles = [
         { id: '1', name: 'Admin', description: 'Administrator role' },
