@@ -9,9 +9,10 @@ import { Organisation } from '../../../modules/organisations/entities/organisati
 import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 import { productMock } from './mocks/product.mock';
-import { HttpStatus, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { UpdateProductDTO } from '../dto/update-product.dto';
 import { ProductVariant } from '../entities/product-variant.entity';
+import { deletedProductMock } from './mocks/deleted-product.mock';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -55,9 +56,35 @@ describe('ProductsService', () => {
 
   describe('Update product PUT: /api/v1/products/:productId', () => {
     it('should throw an error if product is not found', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateProduct('123hsb', new UpdateProductDTO())).rejects.toThrow(NotFoundException);
+      await expect(service.updateProduct(orgMock.id, '123hsb', new UpdateProductDTO())).rejects.toThrow(
+        NotFoundException
+      );
+    });
+  });
+
+  describe('Delete a product', () => {
+    it('should deletes a product', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(productMock);
+      jest.spyOn(productRepository, 'save').mockResolvedValue(deletedProductMock);
+      const deletedProduct = await service.deleteProduct(orgMock.id, productMock.id);
+      expect(productRepository.save).toHaveBeenCalledWith({ ...productMock, is_deleted: true });
+    });
+    it('should throw NotFoundException if product does not exist', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.deleteProduct(orgMock.id, 'nonExistingProductId')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException if product is already deleted', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(deletedProductMock);
+
+      await expect(service.deleteProduct(orgMock.id, deletedProductMock.id)).rejects.toThrow(BadRequestException);
     });
   });
 });
