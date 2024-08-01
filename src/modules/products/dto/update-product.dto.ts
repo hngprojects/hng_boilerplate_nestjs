@@ -1,48 +1,43 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsInt, MaxLength, IsOptional, IsEnum, IsArray, ValidateNested } from 'class-validator';
-import { StockStatusType } from '../entities/product.entity';
-import { Type } from 'class-transformer';
-import { ProductVariantDto } from './product-variant.dto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
 
 export class UpdateProductDTO {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The name of the product',
-    example: 'Binatone Fan',
-  })
-  @IsNotEmpty()
-  @IsString()
-  name?: string;
-
-  @ApiProperty({
-    description: 'The product description',
-    example: 'The binatone fan is very efficient',
-  })
-  @IsString()
-  @MaxLength(72, {
-    message: 'Description cannot be more than 72 characters',
-  })
-  description?: string;
-
-  @ApiProperty({
-    description: 'Image URL',
+    minLength: 3,
+    example: 'Product Name',
   })
   @IsOptional()
   @IsString()
-  image?: string;
+  @MinLength(3)
+  name: string;
 
-  @ApiProperty({
-    description: 'Product status',
-    enum: StockStatusType,
+  @ApiPropertyOptional({
+    description: 'The quantity of the product',
+    minimum: 0,
+    example: 10,
   })
-  @IsEnum(StockStatusType, { each: true })
-  stock_status?: StockStatusType;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  quantity: number;
 
-  @ApiProperty({
-    description: 'Product variants',
-    isArray: true,
+  @ApiPropertyOptional({
+    description: 'The price of the product',
+    minimum: 0,
+    example: 99.99,
   })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ProductVariantDto)
-  variants?: ProductVariantDto[];
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  price: number;
+
+  @ApiPropertyOptional({
+    description: 'The category of the product',
+    example: 'Electronics',
+  })
+  @IsOptional()
+  @IsString()
+  @IsOptional()
+  category: string;
 }
