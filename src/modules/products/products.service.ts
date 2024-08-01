@@ -87,6 +87,32 @@ export class ProductsService {
     };
   }
 
+  async deleteProduct(productId: string) {
+    try {
+      const product = await this.productRepository.findOne({
+        where: { id: productId },
+        relations: ['variants'],
+      });
+      if (!product) {
+        throw new NotFoundException('Product not found');
+      }
+
+      await this.productRepository.delete(productId);
+
+      const responseData = {
+        message: 'Profile successfully deleted',
+        data: {},
+      };
+
+      return responseData;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    }
+  }
+
   async calculateProductStatus(quantity: number): Promise<StockStatusType> {
     if (quantity === 0) return StockStatusType.OUT_STOCK;
     return quantity >= 5 ? StockStatusType.IN_STOCK : StockStatusType.LOW_STOCK;

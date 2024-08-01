@@ -27,6 +27,15 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 export class OrganisationsController {
   constructor(private readonly organisationsService: OrganisationsService) {}
 
+  @ApiOperation({ summary: 'Create new Organisation' })
+  @ApiResponse({
+    status: 201,
+    description: 'The created organisation',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Organisation email already exists',
+  })
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];

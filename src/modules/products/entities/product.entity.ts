@@ -28,7 +28,7 @@ export class Product extends AbstractBaseEntity {
   })
   stock_status: StockStatusType;
 
-  @OneToMany(() => ProductVariant, variant => variant.product, { cascade: true })
+  @OneToMany(() => ProductVariant, variant => variant.product, { cascade: true, onDelete: 'CASCADE' })
   variants: ProductVariant[];
 
   @ManyToOne(() => Organisation, org => org.products)
