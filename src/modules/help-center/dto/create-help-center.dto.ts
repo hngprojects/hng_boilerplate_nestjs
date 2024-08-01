@@ -1,20 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateHelpCenterDto {
-  @ApiProperty({
-    description: 'The title of the help center topic',
-    example: 'How to reset your password',
-  })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'The title of the help center entry', example: 'How to reset your password' })
+  @IsNotEmpty({ message: 'Title is required' })
+  @IsString({ message: 'Title must be a string' })
   title: string;
 
   @ApiProperty({
-    description: 'The content of the help center topic',
-    example: 'To reset your password, go to the settings page...',
+    description: 'The content of the help center entry',
+    example: 'To reset your password, go to the login page and click "Forgot Password".',
   })
-  @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Content is required' })
+  @IsString({ message: 'Content must be a string' })
   content: string;
+
+  @ApiProperty({ description: 'The author of the help center entry', example: 'John Doe' })
+  @IsNotEmpty({ message: 'Author is required' })
+  @IsString({ message: 'Author must be a string' })
+  author: string;
 }

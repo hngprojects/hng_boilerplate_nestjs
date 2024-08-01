@@ -34,8 +34,8 @@ import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
-import { FaqModule } from './modules/faq/faq.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
+import { FaqModule } from './modules/faq/faq.module';
 
 @Module({
   providers: [
@@ -133,6 +133,7 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
     HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
+    HelpCenterModule,
   ],
   controllers: [HealthController, ProbeController],
 })
