@@ -133,7 +133,6 @@ import { FaqModule } from './modules/faq/faq.module';
     HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
-    HelpCenterModule,
   ],
   controllers: [HealthController, ProbeController],
 })

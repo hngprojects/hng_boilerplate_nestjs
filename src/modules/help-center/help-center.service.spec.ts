@@ -1,9 +1,10 @@
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { HelpCenterService } from './help-center.service';
-import { HelpCenterEntity } from './help-center.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { HelpCenterEntity } from './entities/help-center.entity';
 
 describe('HelpCenterService', () => {
   let service: HelpCenterService;

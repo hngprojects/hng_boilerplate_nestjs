@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
 import { HelpCenterService } from '../help-center.service';
-import { HelpCenter } from '../../help-center/entities/help-center.entity';
 import { UpdateHelpCenterDto } from '../dto/update-help-center.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { HelpCenter } from '../interface/help-center.interface';
+import { HelpCenterEntity } from '../entities/help-center.entity';
 
 describe('HelpCenterService', () => {
   let service: HelpCenterService;
-  let repository: Repository<HelpCenter>;
+  let repository: Repository<HelpCenterEntity>;
 
   const mockHelpCenterRepository = () => ({
     update: jest.fn(),
@@ -20,14 +21,14 @@ describe('HelpCenterService', () => {
       providers: [
         HelpCenterService,
         {
-          provide: getRepositoryToken(HelpCenter),
+          provide: getRepositoryToken(HelpCenterEntity),
           useValue: mockHelpCenterRepository(),
         },
       ],
     }).compile();
 
     service = module.get<HelpCenterService>(HelpCenterService);
-    repository = module.get<Repository<HelpCenter>>(getRepositoryToken(HelpCenter));
+    repository = module.get<Repository<HelpCenter>>(getRepositoryToken(HelpCenterEntity));
   });
 
   it('should be defined', () => {
