@@ -23,11 +23,19 @@ describe('ProductsService', () => {
         ProductsService,
         {
           provide: getRepositoryToken(Product),
-          useClass: Repository,
+          useValue: {
+            createQueryBuilder: jest.fn(),
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(Organisation),
-          useClass: Repository,
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(ProductVariant),
@@ -54,15 +62,19 @@ describe('ProductsService', () => {
 
   describe('searchProducts', () => {
     it('should return products based on name search', async () => {
+      orgMock.products = [productMock];
       const searchCriteria = { name: 'Product 1' };
       const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+        getMany: jest.fn().mockResolvedValue([productMock]),
       };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
 
-      const products = await service.searchProducts(searchCriteria);
+      const products = await service.searchProducts(orgMock.id, searchCriteria);
 
+      console.log(products);
       expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
     });
 
@@ -80,109 +92,50 @@ describe('ProductsService', () => {
     // });
 
     it('should return products based on price range search', async () => {
+      orgMock.products = [productMock];
       const searchCriteria = { minPrice: 100, maxPrice: 200 };
       const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+        getMany: jest.fn().mockResolvedValue([productMock]),
       };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
 
-      const products = await service.searchProducts(searchCriteria);
+      const products = await service.searchProducts(orgMock.id, searchCriteria);
 
       expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
     });
 
     it('should return products based on combined search criteria', async () => {
+      orgMock.products = [productMock];
       // const searchCriteria = { name: 'TV', category: 'kids', minPrice: 100, maxPrice: 200 };
       const searchCriteria = { name: 'Product 1', minPrice: 100, maxPrice: 200 };
       const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
+        getMany: jest.fn().mockResolvedValue([productMock]),
       };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
 
-      const products = await service.searchProducts(searchCriteria);
+      const products = await service.searchProducts(orgMock.id, searchCriteria);
 
       expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
     });
 
     it('should throw NotFoundException if no products match search criteria', async () => {
+      orgMock.products = [];
       const searchCriteria = { name: 'nonexistent' };
       const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([]), // Return empty array
+        getMany: jest.fn().mockResolvedValue([]),
       };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
 
-      await expect(service.searchProducts(searchCriteria)).rejects.toThrow(
-        new NotFoundException({ status: 'No Content', status_code: 204, message: 'No products found' })
-      );
-    });
-  });
-
-  describe('searchProducts', () => {
-    it('should return products based on name search', async () => {
-      const searchCriteria = { name: 'Product 1' };
-      const queryBuilderMock = {
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
-      };
-      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
-
-      const products = await service.searchProducts(searchCriteria);
-
-      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
-    });
-
-    // it('should return products based on category search', async () => {
-    //   const searchCriteria = { category: 'kids' };
-    //   const queryBuilderMock = {
-    //     andWhere: jest.fn().mockReturnThis(),
-    //     getMany: jest.fn().mockResolvedValue([productMock]),  // Return array of products
-    //   };
-    //   jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
-
-    //   const products = await service.searchProducts(searchCriteria);
-
-    //   expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
-    // });
-
-    it('should return products based on price range search', async () => {
-      const searchCriteria = { minPrice: 100, maxPrice: 200 };
-      const queryBuilderMock = {
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
-      };
-      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
-
-      const products = await service.searchProducts(searchCriteria);
-
-      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
-    });
-
-    it('should return products based on combined search criteria', async () => {
-      // const searchCriteria = { name: 'TV', category: 'kids', minPrice: 100, maxPrice: 200 };
-      const searchCriteria = { name: 'Product 1', minPrice: 100, maxPrice: 200 };
-      const queryBuilderMock = {
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([productMock]), // Return array of products
-      };
-      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
-
-      const products = await service.searchProducts(searchCriteria);
-
-      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
-    });
-
-    it('should throw NotFoundException if no products match search criteria', async () => {
-      const searchCriteria = { name: 'nonexistent' };
-      const queryBuilderMock = {
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([]), // Return empty array
-      };
-      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
-
-      await expect(service.searchProducts(searchCriteria)).rejects.toThrow(
+      await expect(service.searchProducts(orgMock.id, searchCriteria)).rejects.toThrow(
         new NotFoundException({ status: 'No Content', status_code: 204, message: 'No products found' })
       );
     });

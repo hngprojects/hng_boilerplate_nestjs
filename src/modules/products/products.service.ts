@@ -15,7 +15,6 @@ import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
 
-
 interface SearchCriteria {
   name?: string;
   category?: string;
@@ -68,13 +67,24 @@ export class ProductsService {
     };
   }
 
-  async searchProducts(criteria: SearchCriteria) {
+  async searchProducts(orgId: string, criteria: SearchCriteria) {
+    console.log(orgId, 'orgId');
+    const org = await this.organisationRepository.findOne({ where: { id: orgId } });
+    console.log(org, 'org');
+    if (!org)
+      throw new InternalServerErrorException({
+        status: 'Unprocessable entity exception',
+        message: 'Invalid organisation credentials',
+        status_code: 422,
+      });
+
     const { name, category, minPrice, maxPrice } = criteria;
-    const query = this.productRepository.createQueryBuilder('product');
+    const query = this.productRepository.createQueryBuilder('product').where('product.orgId = :orgId', { orgId });
 
     if (name) {
       query.andWhere('product.name ILIKE :name', { name: `%${name}%` });
     }
+    // Uncomment and update this line if the category field is available
     // if (category) {
     //   query.andWhere('product.category ILIKE :category', { category: `%${category}%` });
     // }
