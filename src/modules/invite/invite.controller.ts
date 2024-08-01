@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 
 @ApiBearerAuth()
 @ApiTags('Organisation Invites')
-@Controller('organisations/invitations')
+@Controller('organizations/invitations')
 export class InviteController {
   constructor(private readonly inviteService: InviteService) {}
 
