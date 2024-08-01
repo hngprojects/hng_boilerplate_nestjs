@@ -15,6 +15,7 @@ import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
 
+
 interface SearchCriteria {
   name?: string;
   category?: string;
