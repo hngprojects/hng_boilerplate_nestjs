@@ -31,3 +31,7 @@ export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
 export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
 export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
+export const INVALID_ADMIN_SECRET = 'Invalid access secret';
+export const ADMIN_CREATED = 'Admin Created Successfully';
+export const SERVER_ERROR = 'Sorry a server error occured';
+export const FORBIDDEN_ACTION = 'You dont have the permission to perform this action';

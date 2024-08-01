@@ -28,7 +28,6 @@ const profileMock: Profile = {
   profile_pic_url: '',
   created_at: new Date(),
   updated_at: new Date(),
-  user_id: null,
 };
 
 export const mockUser: User = {
@@ -52,9 +51,9 @@ export const mockUser: User = {
   is_2fa_enabled: false,
   backup_codes: [],
   notifications: [],
+  notification_settings: [],
   organisationMembers: [],
   profile: profileMock,
   phone: '1234-887-09',
   jobs: [],
-  notifications_settings: [],
 };
