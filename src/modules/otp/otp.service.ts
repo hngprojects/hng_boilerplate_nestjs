@@ -57,11 +57,7 @@ export class OtpService {
 
   async findOtp(userId: string): Promise<Otp | null> {
     const otp = await this.otpRepository.findOne({ where: { user_id: userId } });
-
-    if (!otp) {
-      throw new NotFoundException('OTP is invalid');
-    }
-    return otp;
+    return otp ? otp : null;
   }
 
   async deleteOtp(userId: string) {
