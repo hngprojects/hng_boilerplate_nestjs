@@ -28,6 +28,9 @@ export class Product extends AbstractBaseEntity {
   })
   stock_status: StockStatusType;
 
+  @Column({ nullable: true, default: false })
+  is_deleted: boolean;
+
   @OneToMany(() => ProductVariant, variant => variant.product, { cascade: true })
   variants: ProductVariant[];
 
