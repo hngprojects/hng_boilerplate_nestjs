@@ -1,13 +1,17 @@
-import { ProductCategory } from '../../../modules/product-category/entities/product-category.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
-import { ProductVariant } from './product-variant.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',
   OUT_STOCK = 'out of stock',
   LOW_STOCK = 'low on stock',
+}
+
+export enum ProductSizeType {
+  SMALL = 'Small',
+  STANDARD = 'Standard',
+  LARGE = 'Large',
 }
 
 @Entity()
@@ -19,7 +23,26 @@ export class Product extends AbstractBaseEntity {
   description: string;
 
   @Column({ type: 'text', nullable: true })
+  category: string;
+
+  @Column({ type: 'text', nullable: true })
   image: string;
+
+  @Column({ type: 'int', nullable: false, default: 0 })
+  price: number;
+
+  @Column({ type: 'int', nullable: false, default: 0 })
+  quantity: number;
+
+  @Column({ nullable: true, default: false })
+  is_deleted: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: ProductSizeType,
+    default: ProductSizeType.STANDARD,
+  })
+  size: ProductSizeType;
 
   @Column({
     type: 'enum',
@@ -28,13 +51,6 @@ export class Product extends AbstractBaseEntity {
   })
   stock_status: StockStatusType;
 
-  @OneToMany(() => ProductVariant, variant => variant.product, { cascade: true, onDelete: 'CASCADE' })
-  variants: ProductVariant[];
-
   @ManyToOne(() => Organisation, org => org.products)
   org: Organisation;
-
-  /* To be implemented in another pr */
-  // @ManyToOne(() => ProductCategory, category => category.products)
-  // category: ProductCategory;
 }
