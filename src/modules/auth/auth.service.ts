@@ -45,6 +45,7 @@ import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import CustomExceptionHandler from '../../helpers/exceptionHandler';
+import { SendEmailDto } from '../email/dto/email.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -119,7 +120,13 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+      const emailData = new SendEmailDto();
+      emailData.to = dto.email;
+      emailData.subject = 'Reset Password';
+      emailData.template = 'reset-password';
+      emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
+      await this.emailService.sendEmail(emailData);
+
       return {
         status_code: HttpStatus.OK,
         message: EMAIL_SENT,
@@ -168,7 +175,7 @@ export default class AuthenticationService {
             last_name: user.last_name,
             email: user.email,
             role: user.user_type,
-            avatar_url: user.profile.profile_pic_url,
+            avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
           },
         },
       };
@@ -287,7 +294,7 @@ export default class AuthenticationService {
       status_code: HttpStatus.OK,
       message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
       data: { backup_codes: backup_codes },
-    }
+    };
   }
 
   async googleAuth(googleAuthPayload: GoogleAuthPayload) {
@@ -382,7 +389,12 @@ export default class AuthenticationService {
 
     const otp = await this.otpService.createOtp(user.id);
 
-    await this.emailService.sendLoginOtp(user.email, otp.token);
+    const emailData = new SendEmailDto();
+    emailData.to = user.email;
+    emailData.subject = 'Login with OTP';
+    emailData.template = 'login-otp';
+    emailData.context = { token: otp.token, email: user.email };
+    await this.emailService.sendEmail(emailData);
 
     return {
       message: SIGN_IN_OTP_SENT,
