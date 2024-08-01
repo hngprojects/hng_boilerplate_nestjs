@@ -57,4 +57,36 @@ export class OrganisationRoleController {
       data: roles,
     };
   }
+
+  @Get(':id/roles/:roleId')
+  @ApiOperation({ summary: 'Fetch a single role within an organization' })
+  @ApiParam({ name: 'id', required: true, description: 'ID of the role' })
+  @ApiResponse({ status: 200, description: 'The role has been successfully fetched.' })
+  @ApiResponse({ status: 400, description: 'Bad Request - Invalid role ID format.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 404, description: 'Not Found - Role does not exist.' })
+  async findOne(@Param('roleId') roleId: string, @Param('id') organisationId: string) {
+    try {
+      const role = await this.organisationRoleService.findSingleRole(roleId, organisationId);
+      return {
+        status_code: 200,
+        data: {
+          id: role.id,
+          name: role.name,
+          description: role.description,
+          permissions: role.permissions.map(permission => ({
+            id: permission.id,
+            category: permission.category,
+            permission_list: permission.permission_list,
+          })),
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Failed to fetch role');
+    }
+  }
 }

@@ -98,4 +98,30 @@ export class OrganisationRoleService {
         }))
       );
   }
+
+  async findSingleRole(id: string, organisationId: string): Promise<OrganisationRole> {
+    try {
+      const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+
+      if (!organisation) {
+        throw new NotFoundException(`Organisation with ID ${organisationId} not found`);
+      }
+
+      const role = await this.rolesRepository.findOne({
+        where: { id, organisation: { id: organisationId } },
+        relations: ['permissions'],
+      });
+
+      if (!role) {
+        throw new NotFoundException(`The role with ID ${id} does not exist in the organisation`);
+      }
+
+      return role;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Failed to fetch role: ${error.message}`);
+    }
+  }
 }
