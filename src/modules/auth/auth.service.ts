@@ -83,12 +83,6 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      const emailData = new SendEmailDto();
-      emailData.to = user.email;
-      emailData.subject = 'Welcome to My App! confirm your Email';
-      emailData.template = 'register-otp';
-      emailData.context = { email: user.email, otp: token };
-      await this.emailService.sendEmail(emailData);
 
       const responsePayload = {
         user: {
