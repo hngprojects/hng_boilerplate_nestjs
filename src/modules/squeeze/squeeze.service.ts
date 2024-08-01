@@ -1,10 +1,12 @@
 import {
   BadRequestException,
-  Injectable,
-  UnprocessableEntityException,
+  ConflictException,
   ForbiddenException,
+  HttpStatus,
+  Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +15,7 @@ import { SqueezeRequestDto } from './dto/squeeze.dto';
 import { CreateSqueezeMapper } from './mapper/create-squeeze.mapper';
 import { SqueezeMapper } from './mapper/squeeze.mapper';
 import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
+import CustomExceptionHandler from 'src/helpers/exceptionHandler';
 
 @Injectable()
 export class SqueezeService {
@@ -24,6 +27,20 @@ export class SqueezeService {
   async create(createSqueezeDto: SqueezeRequestDto) {
     try {
       const mapNewSqueeze = CreateSqueezeMapper.mapToEntity(createSqueezeDto);
+
+      const existingSqueeze = this.SqueezeRepository.findOne({
+        where: {
+          email: mapNewSqueeze.email,
+        },
+      });
+
+      if (existingSqueeze) {
+        throw new ConflictException({
+          status_code: HttpStatus.CONFLICT,
+          message: 'A squeeze has already been generated using this email',
+        });
+      }
+
       const newSqueeze = this.SqueezeRepository.create({
         ...mapNewSqueeze,
       });
@@ -35,6 +52,8 @@ export class SqueezeService {
         data: mappedResponse,
       };
     } catch (error) {
+      CustomExceptionHandler(error);
+
       throw new BadRequestException({
         message: 'Failed to submit your request',
         status_code: 400,
