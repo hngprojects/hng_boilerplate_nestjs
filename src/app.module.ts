@@ -38,7 +38,7 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { FaqModule } from './modules/faq/faq.module';
-import { WaitlistPageModule } from './modules/waitlist-pages/waitlist/waitlist-pages.module';
+import { WaitlistPageModule } from './modules/waitlist-pages/waitlist-pages.module';
 
 @Module({
   providers: [
