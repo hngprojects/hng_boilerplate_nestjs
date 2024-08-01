@@ -59,8 +59,9 @@ export class ProductsService {
     };
   }
 
-  async updateProduct(productId: string, updateProductDto: UpdateProductDTO) {
-    const productExist = await this.productRepository.findOne({ where: { id: productId } });
+  async updateProduct(id: string, productId: string, updateProductDto: UpdateProductDTO) {
+    const org = await this.organisationRepository.findOne({ where: { id } });
+    const productExist = await this.productRepository.findOne({ where: { id: productId, org } });
 
     if (!productExist) {
       throw new NotFoundException({
@@ -85,6 +86,29 @@ export class ProductsService {
       message: 'Product updated successfully',
       data: currentProduct,
     };
+  }
+
+  async deleteProduct(id: string, productId: string) {
+    const org = await this.organisationRepository.findOne({ where: { id } });
+    const productExist = await this.productRepository.findOne({ where: { id: productId, org } });
+
+    if (!productExist) {
+      throw new NotFoundException({
+        error: 'Product not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    if (productExist.is_deleted) {
+      throw new BadRequestException({
+        error: 'Product deleted already',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    productExist.is_deleted = true;
+    await this.productRepository.save(productExist);
+    return;
   }
 
   async calculateProductStatus(quantity: number): Promise<StockStatusType> {
