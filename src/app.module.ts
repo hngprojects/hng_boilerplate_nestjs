@@ -34,6 +34,8 @@ import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
+import { FaqModule } from './modules/faq/faq.module';
+import { HelpCenterModule } from './modules/help-center/help-center.module';
 
 @Module({
   providers: [
@@ -127,9 +129,11 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
     ProfileModule,
     RunTestsModule,
     ContactUsModule,
+    FaqModule,
+    HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
   ],
   controllers: [HealthController, ProbeController],
 })
-export class AppModule {}
+export class AppModule { }
