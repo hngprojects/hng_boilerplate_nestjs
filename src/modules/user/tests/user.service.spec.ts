@@ -10,10 +10,12 @@ import { BadRequestException, HttpException, ForbiddenException, NotFoundExcepti
 import { UpdateUserDto } from '../dto/update-user-dto';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
+import { Profile } from '../../profile/entities/profile.entity';
 
 describe('UserService', () => {
   let service: UserService;
   let repository: Repository<User>;
+  let profileRepository: Repository<Profile>;
 
   const mockUserRepository = {
     save: jest.fn(),
@@ -29,11 +31,16 @@ describe('UserService', () => {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useValue: mockUserRepository,
+        },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
     repository = module.get<Repository<User>>(getRepositoryToken(User));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
   afterEach(() => {
@@ -72,7 +79,7 @@ describe('UserService', () => {
 
       const result = await service.getUserRecord({ identifier: email, identifierType: 'email' });
       expect(result).toEqual(userResponseDto);
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { email } });
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { email }, relations: ['profile'] });
     });
 
     it('should return a user by id', async () => {
@@ -88,7 +95,7 @@ describe('UserService', () => {
 
       const result = await service.getUserRecord({ identifier: id, identifierType: 'id' });
       expect(result).toEqual(userResponseDto);
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id } });
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { id }, relations: ['profile'] });
     });
 
     it('should handle exceptions gracefully', async () => {
@@ -151,7 +158,7 @@ describe('UserService', () => {
           phone_number: '1234567890',
         },
       });
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
       expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
     });
 
@@ -170,7 +177,7 @@ describe('UserService', () => {
           phone_number: '1234567890',
         },
       });
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
       expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
     });
 
@@ -178,7 +185,7 @@ describe('UserService', () => {
       mockUserRepository.findOne.mockResolvedValueOnce(existingUser);
 
       await expect(service.updateUser(userId, updateOptions, anotherUserPayload)).rejects.toThrow(ForbiddenException);
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
 
@@ -189,7 +196,7 @@ describe('UserService', () => {
       await expect(service.updateUser(invalidUserId, updateOptions, superAdminPayload)).rejects.toThrow(
         NotFoundException
       );
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: invalidUserId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: invalidUserId }, relations: ['profile'] });
     });
 
     it('should throw BadRequestException for missing userId', async () => {
@@ -208,7 +215,7 @@ describe('UserService', () => {
       await expect(service.updateUser(userId, invalidUpdateOptions, superAdminPayload)).rejects.toThrow(
         BadRequestException
       );
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
       expect(mockUserRepository.save).toHaveBeenCalled();
     });
   });
@@ -237,7 +244,7 @@ describe('UserService', () => {
 
       expect(result.is_active).toBe(false);
       expect(result.message).toBe('Account Deactivated Successfully');
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
       expect(mockUserRepository.save).toHaveBeenCalledWith({ ...userToUpdate, is_active: false });
     });
 
@@ -255,7 +262,7 @@ describe('UserService', () => {
         status_code: 404,
         error: 'User not found',
       });
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
   });
@@ -279,6 +286,7 @@ describe('UserService', () => {
       expect(result.user).not.toHaveProperty('password');
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
+        relations: ['profile'],
       });
     });
   });
