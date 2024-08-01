@@ -7,7 +7,6 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@nestjs/common';
-import { InviteService } from './invite.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InviteService } from './invite.service';
 
