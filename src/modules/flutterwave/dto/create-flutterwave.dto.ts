@@ -5,8 +5,8 @@ export class CreateFlutterwaveDto {
   name: string;
 
   @IsNumber()
-  price: number;
+  amount: number;
 
   @IsString()
-  description: string;
+  interval: string;
 }

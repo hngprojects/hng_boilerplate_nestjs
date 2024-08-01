@@ -51,6 +51,7 @@ export const mockUser: User = {
   secret: 'secret',
   is_2fa_enabled: false,
   notifications: [],
+  notifications_settings: [],
   organisationMembers: [],
   profile: profileMock,
   phone: '1234-887-09',
