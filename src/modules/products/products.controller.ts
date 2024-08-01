@@ -7,7 +7,7 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 
 @ApiTags('Products')
-@Controller('products')
+@Controller('organizations/:id/products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -35,6 +35,7 @@ export class ProductsController {
     return this.updateProduct(productId, updateProductDto);
   }
 
+  @UseGuards(OwnershipGuard)
   @Delete(':productId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Delete a product' })
@@ -43,7 +44,7 @@ export class ProductsController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async deleteProduct(@Param('productId') productId: string) {
+  async deleteProduct(@Param('id') orgId: string, @Param('productId') productId: string) {
     const deletedProduct = await this.productsService.deleteProduct(productId);
     return deletedProduct;
   }
