@@ -99,6 +99,24 @@ export class ProductsService {
     }
   }
 
+  async getProductById(productId: string) {
+    try {
+      const product = await this.productRepository.findOne({ where: { id: productId } });
+      if (!product) {
+        throw new NotFoundException(`Product ${productId} not found`);
+      }
+      return {
+        message: 'Product retrieved successfully',
+        data: product,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    }
+  }
+
   async deleteProduct(orgId: string, productId: string) {
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
     if (!org) {
