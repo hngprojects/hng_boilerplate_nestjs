@@ -1,6 +1,15 @@
-
 import { profile } from 'console';
-import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -55,7 +64,10 @@ export class ProfileService {
   async updateUserProfilePicture(file: Express.Multer.File, userId: string) {
     try {
       if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-        throw new BadRequestException({ status: HttpStatus.BAD_REQUEST, message: ONLY_IMAGE_FILES_ACCEPTED });
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: ONLY_IMAGE_FILES_ACCEPTED,
+        });
       }
 
       const user: User = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
@@ -63,7 +75,7 @@ export class ProfileService {
         throw new UnauthorizedException({ status: HttpStatus.UNAUTHORIZED, message: UNAUTHENTICATED_MESSAGE });
       }
 
-      const userProfile = await this.profileRepository.findOne({ where: { user_id: { id: userId } } });
+      const userProfile = await this.profileRepository.findOne({ where: { id: user.profile.id } });
       if (!userProfile) {
         throw new NotFoundException({ status: HttpStatus.NOT_FOUND, message: USER_PROFILE_NOT_FOUND });
       }

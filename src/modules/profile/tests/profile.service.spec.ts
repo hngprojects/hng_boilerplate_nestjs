@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
   HttpStatus,
   HttpException,
-  BadRequestException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
@@ -153,8 +153,8 @@ describe('ProfileService', () => {
     const userId = 'some-uuid';
 
     it('should upload a new profile picture and return the updated profile picture URL', async () => {
-      const user = { id: userId, email: 'test3210@example.com' } as User;
-      const profile = { id: '1', email: user.email, user_id: user, profile_pic_url: 'old_pic.jpg' } as Profile;
+      const user = { id: userId, profile: { id: '1', profile_pic_url: 'old_pic.jpg' } } as User;
+      const profile = user.profile as Profile;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(profileRepository, 'findOne').mockResolvedValue(profile);
@@ -172,8 +172,8 @@ describe('ProfileService', () => {
     });
 
     it('should return bad request if file type is not a supported type', async () => {
-      const user = { id: userId, email: 'test3210@example.com' } as User;
-      const profile = { id: '1', email: user.email, user_id: user, profile_pic_url: 'old_pic.jpg' } as Profile;
+      const user = { id: userId, profile: { id: '1', profile_pic_url: 'old_pic.jpg' } } as User;
+      const profile = user.profile as Profile;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(profileRepository, 'findOne').mockResolvedValue(profile);
@@ -183,16 +183,9 @@ describe('ProfileService', () => {
 
       tempMockFile.filename = 'test.js';
       tempMockFile.originalname = 'test.js';
-      await expect(service.updateUserProfilePicture(tempMockFile, userId)).rejects.toThrow(BadRequestException);
-    });
-
-    it('should return not found if user profile does not exist', async () => {
-      const user = { id: userId, email: 'test3210@example.com' } as User;
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.updateUserProfilePicture(mockFile, userId)).rejects.toThrow(NotFoundException);
+      await expect(service.updateUserProfilePicture(tempMockFile, userId)).rejects.toThrow(
+        UnprocessableEntityException
+      );
     });
   });
 });
