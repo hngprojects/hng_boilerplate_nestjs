@@ -146,18 +146,7 @@ export default class AuthenticationService {
         });
       }
 
-      console.log(
-        'oldPassword: ',
-        oldPassword,
-        'newPassword: ',
-        newPassword,
-        'user.password: ',
-        user.password,
-        bcrypt.compareSync(oldPassword, user.password)
-      );
-
       const isPasswordValid = bcrypt.compareSync(oldPassword, user.password);
-      console.log('isPasswordValid: ', isPasswordValid);
       if (!isPasswordValid) {
         throw new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,

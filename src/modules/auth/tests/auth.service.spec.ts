@@ -325,7 +325,6 @@ describe('AuthenticationService', () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       userServiceMock.updateUserRecord.mockResolvedValueOnce(undefined);
 
-      console.log(oldPassword, newPassword, bcrypt.compareSync(oldPassword, mockUser.password));
       const result = await service.changePassword(userId, oldPassword, newPassword);
 
       expect(userServiceMock.getUserRecord).toHaveBeenCalledWith({
