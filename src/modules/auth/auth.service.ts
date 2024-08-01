@@ -168,7 +168,7 @@ export default class AuthenticationService {
             last_name: user.last_name,
             email: user.email,
             role: user.user_type,
-            avatar_url: user.profile.profile_pic_url,
+            avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
           },
         },
       };
@@ -287,7 +287,7 @@ export default class AuthenticationService {
       status_code: HttpStatus.OK,
       message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
       data: { backup_codes: backup_codes },
-    }
+    };
   }
 
   async googleAuth(googleAuthPayload: GoogleAuthPayload) {

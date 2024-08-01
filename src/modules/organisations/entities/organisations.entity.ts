@@ -51,7 +51,7 @@ export class Organisation extends AbstractBaseEntity {
   @OneToMany(() => OrganisationRole, role => role.organisation, { eager: false })
   role: OrganisationRole[];
 
-  @OneToMany(() => Invite, invite => invite.organisation)
+  @OneToMany(() => Invite, invite => invite.organisation.id)
   invites: Invite[];
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
