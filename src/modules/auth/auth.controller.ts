@@ -1,10 +1,5 @@
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  INCORRECT_TOTP_CODE,
-  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
-  BAD_REQUEST,
-  TWO_FA_INITIATED,
-} from '../../helpers/SystemMessages';
+import { INCORRECT_TOTP_CODE, TWO_FACTOR_VERIFIED_SUCCESSFULLY } from '../../helpers/SystemMessages';
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -14,6 +9,7 @@ import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-passw
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { Verify2FADto } from './dto/verify-2fa.dto';
+import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
@@ -23,7 +19,6 @@ import {
   RequestVerificationToken,
   SuccessCreateUserResponse,
 } from '../user/dto/user-response.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -140,19 +135,6 @@ export default class RegistrationController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signInToken(@Body() body: RequestSigninTokenDto) {
     return await this.authService.requestSignInToken(body);
-  }
-
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Change user password' })
-  @ApiResponse({ status: 200, description: 'Password changed successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @HttpCode(200)
-  @Post('change-password')
-  public async changePassword(@Body() body: ChangePasswordDto, @Req() request: Request): Promise<any> {
-    const user = request['user'];
-    const userId = user.id;
-    return this.authService.changePassword(userId, body.oldPassword, body.newPassword);
   }
 
   @skipAuth()
