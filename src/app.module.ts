@@ -16,11 +16,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EmailModule } from './modules/email/email.module';
 import { EmailService } from './modules/email/email.service';
 import { InviteModule } from './modules/invite/invite.module';
-import { JobsModule } from './modules/jobs/jobs.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { OtpModule } from './modules/otp/otp.module';
 import { OtpService } from './modules/otp/otp.service';
 import { ProductsModule } from './modules/products/products.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
 import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
@@ -124,6 +124,7 @@ import { OrganisationRoleModule } from './modules/organisation-role/organisation
     SqueezeModule,
     TestimonialsModule,
     JobsModule,
+    NotificationsModule,
     ProductsModule,
     BillingPlanModule,
     JobsModule,
