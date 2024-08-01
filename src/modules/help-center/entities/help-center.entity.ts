@@ -1,14 +1,15 @@
 import { Entity, Column } from 'typeorm';
+import { HelpCenter } from '../interface/help-center.interface';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 
-@Entity('help_centers')
-export class HelpCenter extends AbstractBaseEntity {
+@Entity()
+export class HelpCenterEntity extends AbstractBaseEntity implements HelpCenter {
   @Column({ nullable: false })
   title: string;
 
   @Column({ nullable: false })
   content: string;
 
-  @Column({ nullable: false })
+  @Column({ default: 'ADMIN', nullable: false })
   author: string;
 }
