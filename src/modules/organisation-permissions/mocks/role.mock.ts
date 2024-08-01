@@ -1,4 +1,4 @@
-import { OrganisationRole } from '../../../modules/organisation-role/entities/organisation-role.entity';
+import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
 
 export const mockRole = {
   id: 'role_456',
