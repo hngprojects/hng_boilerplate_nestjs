@@ -128,9 +128,9 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
     ProfileModule,
     RunTestsModule,
     ContactUsModule,
-    NotificationsModule,
-    WaitlistModule,
+    NotificationsModule, 
     HelpCenterModule,
+    WaitlistModule,
   ],
   controllers: [HealthController, ProbeController],
 })
