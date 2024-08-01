@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, HttpException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,19 +16,7 @@ import { User, UserType } from '../entities/user.entity';
 import { UserPayload } from '../interfaces/user-payload.interface';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
-import {
-  BadRequestException,
-  HttpException,
-  ForbiddenException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { UpdateUserDto } from '../dto/update-user-dto';
-import { UserPayload } from '../interfaces/user-payload.interface';
-import { DeactivateAccountDto } from '../dto/deactivate-account.dto';
-import { Profile } from '../../profile/entities/profile.entity';
 import UserService from '../user.service';
-
 
 describe('UserService', () => {
   let service: UserService;
