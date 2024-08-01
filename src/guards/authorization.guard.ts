@@ -17,6 +17,7 @@ export class OwnershipGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const organisationId = request.params.id;
+
     if (user.user_type === UserType.SUPER_ADMIN) {
       return true;
     }
@@ -24,6 +25,7 @@ export class OwnershipGuard implements CanActivate {
       where: { id: organisationId },
       relations: ['owner', 'creator'],
     });
+    // console.log(organisation);
     if (!organisation) {
       throw new NotFoundException('Organisation not found');
     }

@@ -8,9 +8,7 @@ import { ProductCategory } from '../../modules/product-category/entities/product
 import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
-
 import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
-
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
 
 @Injectable()
