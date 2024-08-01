@@ -72,14 +72,14 @@ describe('ProductsService', () => {
       await expect(service.deleteProduct('invalid-id')).rejects.toThrow(NotFoundException);
     });
 
-    it('should remove the product, which cascades to its variants', async () => {
+    it('should delete the product, which cascades to its variants', async () => {
       const product = { id: 'valid-id', variants: [{ id: 'variant-id-1' }, { id: 'variant-id-2' }] } as Product;
       jest.spyOn(productRepository, 'findOne').mockResolvedValue(product);
-      jest.spyOn(productRepository, 'remove').mockResolvedValue(undefined);
+      jest.spyOn(productRepository, 'delete').mockResolvedValue(undefined);
 
       await service.deleteProduct('valid-id');
 
-      expect(productRepository.remove).toHaveBeenCalledWith(product);
+      expect(productRepository.delete).toHaveBeenCalledWith(product.id);
     });
 
     it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
