@@ -46,12 +46,10 @@ describe('FaqService', () => {
       const result = await service.findAllFaq();
 
       expect(result).toEqual({
-      
-        data: mockFaqs
-      ,
-      message: "Faq fetched successfully",
-      status_code: 200
-    });
+        data: mockFaqs,
+        message: 'Faq fetched successfully',
+        status_code: 200,
+      });
       expect(mockRepository.find).toHaveBeenCalled();
     });
   });
