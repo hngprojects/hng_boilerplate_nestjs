@@ -24,6 +24,10 @@ describe('InviteService', () => {
           provide: getRepositoryToken(Organisation),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
@@ -55,6 +59,8 @@ describe('InviteService', () => {
       testimonials: [],
       profile: null,
       organisationMembers: [],
+      notifications_settings: [],
+      notifications: [],
     };
 
     const mockOrg: Organisation = {
@@ -74,6 +80,7 @@ describe('InviteService', () => {
       creator: mockUser,
       preferences: [],
       invites: [],
+      role: null,
       organisationMembers: [],
       products: [],
     };

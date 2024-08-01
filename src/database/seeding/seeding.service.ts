@@ -5,7 +5,14 @@ import { Organisation } from '../../modules/organisations/entities/organisations
 import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
+import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
+import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
+
+import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
+
+import { Notification } from '../../modules/notifications/entities/notifications.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class SeedingService {
@@ -18,17 +25,33 @@ export class SeedingService {
     const organisationRepository = this.dataSource.getRepository(Organisation);
     const productRepository = this.dataSource.getRepository(Product);
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
+    const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
+    const notificationRepository = this.dataSource.getRepository(Notification);
 
     try {
-      const existingUsers = await userRepository.count();
-      if (existingUsers > 0) {
-        Logger.log('Database is already populated. Skipping seeding.');
-        return;
+      const existingPermissions = await defaultPermissionRepository.count();
+
+      //Populate the database with default permissions if none exits else stop execution
+      if (existingPermissions <= 0) {
+        const defaultPermissions = Object.values(PermissionCategory).map(category =>
+          defaultPermissionRepository.create({
+            category,
+            permission_list: false,
+          })
+        );
+
+        await defaultPermissionRepository.save(defaultPermissions);
       }
 
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
+
+      const existingUsers = await userRepository.count();
+      if (existingUsers > 0) {
+        Logger.log('Database is already populated. Skipping seeding.');
+        return;
+      }
 
       try {
         const u1 = userRepository.create({
@@ -124,15 +147,25 @@ export class SeedingService {
         const p1 = productRepository.create({
           name: 'Product 1',
           description: 'Description for Product 1',
-          quantity: 10,
-          price: 100,
+          variants: [
+            {
+              size: ProductSizeType.STANDARD,
+              quantity: 1,
+              price: 500,
+            },
+          ],
           org: or1,
         });
         const p2 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          quantity: 20,
-          price: 200,
+          variants: [
+            {
+              size: ProductSizeType.SMALL,
+              quantity: 2,
+              price: 50,
+            },
+          ],
           org: or2,
         });
 
@@ -144,12 +177,16 @@ export class SeedingService {
         }
 
         const inv1 = inviteRepository.create({
-          status: 'pending',
           organisation: savedOrganisations[0],
+          isGeneric: true,
+          isAccepted: false,
+          token: uuidv4(),
         });
 
         const inv2 = inviteRepository.create({
-          status: 'pending',
+          isGeneric: true,
+          isAccepted: false,
+          token: uuidv4(),
           organisation: savedOrganisations[1],
         });
 
@@ -161,6 +198,31 @@ export class SeedingService {
         const savedCategories = await categoryRepository.find({ relations: ['products'] });
         if (savedCategories.length !== 3) {
           throw new Error('Failed to create all categories');
+        }
+
+        const notifications = [
+          notificationRepository.create({
+            message: 'Notification 1 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for John',
+            user: savedUsers[0],
+          }),
+          notificationRepository.create({
+            message: 'Notification 1 for Jane',
+            user: savedUsers[1],
+          }),
+          notificationRepository.create({
+            message: 'Notification 2 for Jane',
+            user: savedUsers[1],
+          }),
+        ];
+
+        await notificationRepository.save(notifications);
+        const savedNotifications = await notificationRepository.find();
+        if (savedNotifications.length !== 4) {
+          throw new Error('Failed to create all notifications');
         }
 
         await queryRunner.commitTransaction();
