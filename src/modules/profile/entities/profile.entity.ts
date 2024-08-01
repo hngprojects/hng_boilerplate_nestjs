@@ -36,8 +36,4 @@ export class Profile extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   profile_pic_url: string;
-
-  @OneToOne(() => User, user => user.profile)
-  @JoinColumn({ name: 'user_id' })
-  user_id: User;
 }

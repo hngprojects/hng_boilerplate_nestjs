@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from '../organisation-role/entities/role.entity';
+import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
 import { Permissions } from './entities/permissions.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
@@ -11,8 +11,8 @@ export class OrganisationPermissionsService {
   constructor(
     @InjectRepository(Organisation)
     private readonly organisationRepository: Repository<Organisation>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(OrganisationRole)
+    private readonly roleRepository: Repository<OrganisationRole>,
     @InjectRepository(Permissions)
     private readonly permissionRepository: Repository<Permissions>
   ) {}

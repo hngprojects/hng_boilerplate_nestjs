@@ -8,11 +8,8 @@ import { ProductCategory } from '../../modules/product-category/entities/product
 import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
-
 import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
-
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
-
 
 @Injectable()
 export class SeedingService {
@@ -78,19 +75,24 @@ export class SeedingService {
 
         const prf1 = profileRepository.create({
           username: 'Johnsmith',
-          user_id: savedUsers[0],
+          email: 'john.smith@example.com',
         });
         const prf2 = profileRepository.create({
           username: 'Janesmith',
-          user_id: savedUsers[1],
+          email: 'jane.smith@example.com',
         });
 
         await profileRepository.save([prf1, prf2]);
+        const savedProfiles = await profileRepository.find();
 
-        const savedProfile = await userRepository.find();
-        if (savedProfile.length !== 2) {
-          throw new Error('Failed to create all profile');
+        if (savedProfiles.length !== 2) {
+          throw new Error('Failed to create all profiles');
         }
+
+        savedUsers[0].profile = savedProfiles[0];
+        savedUsers[1].profile = savedProfiles[1];
+
+        await userRepository.save(savedUsers);
 
         const or1 = organisationRepository.create({
           name: 'Org 1',
@@ -161,6 +163,30 @@ export class SeedingService {
           description: 'Description for Product 2',
           variants: [
             {
+              size: ProductSizeType.LARGE,
+              quantity: 2,
+              price: 50,
+            },
+          ],
+          org: or2,
+        });
+        const p3 = productRepository.create({
+          name: 'Product 2',
+          description: 'Description for Product 2',
+          variants: [
+            {
+              size: ProductSizeType.STANDARD,
+              quantity: 2,
+              price: 50,
+            },
+          ],
+          org: or1,
+        });
+        const p4 = productRepository.create({
+          name: 'Product 2',
+          description: 'Description for Product 2',
+          variants: [
+            {
               size: ProductSizeType.SMALL,
               quantity: 2,
               price: 50,
@@ -169,10 +195,10 @@ export class SeedingService {
           org: or2,
         });
 
-        await productRepository.save([p1, p2]);
+        await productRepository.save([p1, p2, p3, p4]);
 
         const savedProducts = await productRepository.find({ relations: ['category'] });
-        if (savedProducts.length !== 2) {
+        if (savedProducts.length !== 4) {
           throw new Error('Failed to create all products');
         }
 
