@@ -36,14 +36,15 @@ export class ProductsController {
   }
 
   @Delete(':productId')
-  @HttpCode(204)
+  @HttpCode(200)
   @ApiOperation({ summary: 'Delete a product' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
-  @ApiResponse({ status: 204, description: 'Product deleted successfully' })
+  @ApiResponse({ status: 200, description: 'Product deleted successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async deleteProduct(@Param('productId') productId: string) {
-    return await this.productsService.deleteProduct(productId);
+    const deletedProduct = await this.productsService.deleteProduct(productId);
+    return deletedProduct;
   }
 }

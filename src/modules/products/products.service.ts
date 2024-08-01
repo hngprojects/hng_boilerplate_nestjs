@@ -98,7 +98,13 @@ export class ProductsService {
       }
 
       await this.productRepository.delete(productId);
-      return { message: 'Product deleted successfully' };
+
+      const responseData = {
+        message: 'Profile successfully deleted',
+        data: {},
+      };
+
+      return responseData;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

@@ -165,6 +165,30 @@ export class SeedingService {
           description: 'Description for Product 2',
           variants: [
             {
+              size: ProductSizeType.LARGE,
+              quantity: 2,
+              price: 50,
+            },
+          ],
+          org: or2,
+        });
+        const p3 = productRepository.create({
+          name: 'Product 2',
+          description: 'Description for Product 2',
+          variants: [
+            {
+              size: ProductSizeType.STANDARD,
+              quantity: 2,
+              price: 50,
+            },
+          ],
+          org: or1,
+        });
+        const p4 = productRepository.create({
+          name: 'Product 2',
+          description: 'Description for Product 2',
+          variants: [
+            {
               size: ProductSizeType.SMALL,
               quantity: 2,
               price: 50,
@@ -173,10 +197,10 @@ export class SeedingService {
           org: or2,
         });
 
-        await productRepository.save([p1, p2]);
+        await productRepository.save([p1, p2, p3, p4]);
 
         const savedProducts = await productRepository.find({ relations: ['category'] });
-        if (savedProducts.length !== 2) {
+        if (savedProducts.length !== 4) {
           throw new Error('Failed to create all products');
         }
 
