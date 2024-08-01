@@ -7,7 +7,7 @@ import { ICreateFaqResponse, IFaq } from './faq.interface';
 import { skipAuth } from '../../helpers/skipAuth';
 import { UpdateFaqDto } from './update-faq.dto';
 
-@ApiTags('faqs')
+@ApiTags('Faqs')
 @Controller('faqs')
 export class FaqController {
   constructor(private readonly faqService: FaqService) {}

@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { HelpCenterEntity } from '../help-center/entities/help-center.entity'; // Adjust the path as necessary
 import { CreateHelpCenterDto } from './dto/create-help-center.dto';
-import { HelpCenterEntity } from './help-center.entity';
-import { HelpCenter } from './help-center.interface';
+import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
+import { HelpCenter } from './interface/help-center.interface';
 
 @Injectable()
 export class HelpCenterService {
@@ -12,6 +14,9 @@ export class HelpCenterService {
     @InjectRepository(HelpCenterEntity)
     private readonly helpCenterRepository: Repository<HelpCenterEntity>
   ) {}
+    @InjectRepository(HelpCenterEntity)
+    private readonly helpCenterRepository: Repository<HelpCenterEntity>,
+  ) { }
 
   async create(createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenterEntity> {
     const helpCenter = this.helpCenterRepository.create({
@@ -42,5 +47,14 @@ export class HelpCenterService {
       queryBuilder.andWhere('help_center.content LIKE :content', { content: `%${criteria.content}%` });
     }
     return queryBuilder.getMany();
+  }
+
+  async updateTopic(id: string, updateHelpCenterDto: UpdateHelpCenterDto): Promise<HelpCenter> {
+    await this.helpCenterRepository.update(id, updateHelpCenterDto);
+    return this.helpCenterRepository.findOneBy({ id });
+  }
+
+  async removeTopic(id: string): Promise<void> {
+    await this.helpCenterRepository.delete(id);
   }
 }

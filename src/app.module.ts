@@ -136,7 +136,6 @@ import { OrganisationRoleModule } from './modules/organisation-role/organisation
     HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
-    HelpCenterModule,
   ],
   controllers: [HealthController, ProbeController],
 })
