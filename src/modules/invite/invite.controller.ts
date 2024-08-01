@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, InternalServerErrorException } from '@nestjs/common';
 import { InviteService } from './invite.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { skipAuth } from 'src/helpers/skipAuth';
 
 @ApiBearerAuth()
 @ApiTags('Organisation Invites')

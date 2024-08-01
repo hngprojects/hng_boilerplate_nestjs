@@ -5,6 +5,7 @@ import { FaqController } from './faq.controller';
 import { CreateFaqDto } from './create-faq.dto';
 import { IFaq, ICreateFaqResponse } from './faq.interface';
 
+
 describe('FaqController (e2e)', () => {
   let app;
   let server;
@@ -51,10 +52,7 @@ describe('FaqController (e2e)', () => {
         category: 'Policies',
       };
 
-      const response = await request(server)
-        .post('/faqs')
-        .send(createFaqDto)
-        .expect(201);
+      const response = await request(server).post('/faqs').send(createFaqDto).expect(201);
 
       const expectedResponse: ICreateFaqResponse = {
         status_code: 201,
@@ -79,10 +77,7 @@ describe('FaqController (e2e)', () => {
         category: 'Policies',
       };
 
-      const response = await request(server)
-        .post('/faqs')
-        .send(createFaqDto)
-        .expect(400);
+      const response = await request(server).post('/faqs').send(createFaqDto).expect(400);
 
       expect(response.body.message).toContain('Question is required');
     });
@@ -93,10 +88,7 @@ describe('FaqController (e2e)', () => {
         category: 'Policies',
       };
 
-      const response = await request(server)
-        .post('/faqs')
-        .send(createFaqDto)
-        .expect(400);
+      const response = await request(server).post('/faqs').send(createFaqDto).expect(400);
 
       expect(response.body.message).toContain('Answer is required');
     });
@@ -112,10 +104,7 @@ describe('FaqController (e2e)', () => {
         throw new Error('Unexpected error');
       });
 
-      const response = await request(server)
-        .post('/faqs')
-        .send(createFaqDto)
-        .expect(500);
+      const response = await request(server).post('/faqs').send(createFaqDto).expect(500);
 
       expect(response.body).toEqual({
         statusCode: 500,
