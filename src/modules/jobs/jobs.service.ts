@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, FindOptionsSelect, Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
 import { JobDto } from './dto/job.dto';
-import { pick } from '../../helpers/pick';
-import { PaginationDto } from './dto/pagination.dto';
+import { omit } from '../../helpers/omit';
+
+const omitColumns: string[] = ['user', 'created_at', 'updated_at', 'is_deleted'];
 
 @Injectable()
 export class JobsService {
@@ -39,24 +40,26 @@ export class JobsService {
       status: 'success',
       status_code: 201,
       message: 'Job listing created successfully',
-      data: pick(
-        newJob,
-        Object.keys(newJob).filter(x => !['user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
-      ),
+      data: omit(newJob, omitColumns),
     };
   }
 
   async getJobs() {
-    const jobs = await this.jobRepository.find();
+    console.log(Object.keys(new Job()));
+    const jobs = await this.jobRepository.find({
+      where: {
+        is_deleted: false,
+      },
+    });
     return {
       message: 'Jobs listing fetched successfully',
       status_code: 200,
-      data: jobs,
+      data: jobs.map(entry => omit(entry, omitColumns)),
     };
   }
 
   async getJob(id: string) {
-    const job = await this.jobRepository.findOne({ where: { id } });
+    const job = await this.jobRepository.findOne({ where: { id, is_deleted: false } });
     if (!job)
       throw new NotFoundException({
         status_code: 404,
@@ -66,7 +69,7 @@ export class JobsService {
     return {
       message: 'Job fetched successfully',
       status_code: 200,
-      data: job,
+      data: omit(job, omitColumns),
     };
   }
   async delete(jobId: string) {
