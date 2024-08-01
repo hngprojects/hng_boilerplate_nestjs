@@ -30,5 +30,5 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["Janesmith", "Johnsmith"]
+  "cSpell.words": ["Janesmith", "Johnsmith", "mockuser"]
 }

@@ -1,21 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationsService } from '../notifications.service';
-import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Notification } from '../entities/notifications.entity';
-import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
-import {
-  BadRequestException,
-  ForbiddenException,
-  HttpStatus,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { mockNotificationRepository } from './mocks/notification-repo.mock';
+import { BadRequestException, HttpStatus, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
+import { mockUserRepository } from './mocks/user-repo.mock';
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
-  let notificationRepository: Repository<Notification>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,15 +18,14 @@ describe('NotificationsService', () => {
           provide: getRepositoryToken(Notification),
           useValue: mockNotificationRepository,
         },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepository,
+        },
       ],
     }).compile();
 
     service = module.get<NotificationsService>(NotificationsService);
-    notificationRepository = module.get<Repository<Notification>>(getRepositoryToken(Notification));
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
