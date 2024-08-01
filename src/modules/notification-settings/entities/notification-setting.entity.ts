@@ -42,6 +42,6 @@ export class NotificationSettings extends AbstractBaseEntity {
   slack_notifications_announcement_and_update_emails: boolean;
 
   @ApiProperty()
-  @OneToOne(() => User, user => user.notifications_settings)
+  @OneToOne(() => User, user => user.notification_settings)
   user: User;
 }
