@@ -415,7 +415,7 @@ export default class AuthenticationService {
 
     if (!user) {
       throw new BadRequestException({
-        message: 'Invalid credentials',
+        message: 'Invalid credential',
         status_code: HttpStatus.BAD_REQUEST,
       });
     }
