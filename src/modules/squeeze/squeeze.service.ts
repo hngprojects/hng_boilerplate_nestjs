@@ -6,7 +6,6 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,7 +14,7 @@ import { SqueezeRequestDto } from './dto/squeeze.dto';
 import { CreateSqueezeMapper } from './mapper/create-squeeze.mapper';
 import { SqueezeMapper } from './mapper/squeeze.mapper';
 import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
-import CustomExceptionHandler from 'src/helpers/exceptionHandler';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 
 @Injectable()
 export class SqueezeService {
