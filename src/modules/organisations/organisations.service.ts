@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   HttpCode,
   HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -23,6 +25,7 @@ import { AddMemberToOrganisationDto } from './dto/add-user-dto';
 import { AddMemberToOrganisationMapper } from './mapper/add-member-to-org.mapper';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
+import { OrganisationMember } from './entities/org-members.entity';
 
 @Injectable()
 export class OrganisationsService {
@@ -33,6 +36,7 @@ export class OrganisationsService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(OrganisationMember)
     private readonly orgMemberRepository: Repository<OrganisationMember>
+    private readonly organisationMemberRepository: Repository<OrganisationMember>
   ) {}
 
   async getOrganisationMembers(
@@ -63,23 +67,25 @@ export class OrganisationsService {
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
     const emailFound = await this.emailExists(createOrganisationDto.email);
-    if (emailFound)
-      throw new UnprocessableEntityException({
-        status: 'Unprocessable entity exception',
-        message: 'Invalid organisation credentials',
-        status_code: 422,
-      });
+    if (emailFound) throw new ConflictException('Organisation with this email already exists');
+
     const owner = await this.userRepository.findOne({
       where: { id: userId },
     });
-    if (!owner) {
-      throw new Error('Owner not found');
-    }
+
     const mapNewOrganisation = CreateOrganisationMapper.mapToEntity(createOrganisationDto, owner);
     const newOrganisation = this.organisationRepository.create({
       ...mapNewOrganisation,
     });
+
     await this.organisationRepository.save(newOrganisation);
+
+    const newMember = new OrganisationMember();
+    newMember.user_id = owner;
+    newMember.organisation_id = newOrganisation;
+
+    await this.organisationMemberRepository.save(newMember);
+
     const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }

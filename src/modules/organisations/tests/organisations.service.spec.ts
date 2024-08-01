@@ -20,6 +20,7 @@ import {
 import { newUser } from './mocks/new-user.mock';
 import { OrganisationMember } from '../entities/org-members.entity';
 import { Profile } from '../../profile/entities/profile.entity';
+import { OrganisationMember } from '../entities/org-members.entity';
 
 class MockQueryBuilder {
   getCount = jest.fn().mockResolvedValue(0);
@@ -38,6 +39,7 @@ describe('OrganisationsService', () => {
   let orgMemberRepository: Repository<OrganisationMember>;
   let mockQueryBuilder: MockQueryBuilder = new MockQueryBuilder();
   let profileRepository: Repository<Profile>;
+  let organisationMemberRepository: Repository<OrganisationMember>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -64,6 +66,7 @@ describe('OrganisationsService', () => {
             findOneBy: jest.fn(),
             update: jest.fn(),
             createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+            save: jest.fn(),
           },
         },
         UserService,
@@ -90,7 +93,7 @@ describe('OrganisationsService', () => {
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
-    orgMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
+    organisationMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
     profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
@@ -120,13 +123,9 @@ describe('OrganisationsService', () => {
     });
 
     it('should throw an error if the email already exists', async () => {
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([orgMock]);
+      organisationRepository.findBy = jest.fn().mockResolvedValue([orgMock]);
       await expect(service.create(createMockOrganisationRequestDto(), orgMock.owner.id)).rejects.toThrow(
-        new UnprocessableEntityException({
-          status: 'Unprocessable entity exception',
-          message: 'Invalid organisation credentials',
-          status_code: 422,
-        })
+        new ConflictException('Organisation with this email already exists')
       );
     });
   });
