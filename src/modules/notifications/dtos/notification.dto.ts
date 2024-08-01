@@ -19,7 +19,7 @@ export class NotificationDto {
 
   @IsBoolean()
   @IsNotEmpty()
-  isRead: boolean;
+  is_read: boolean;
 
   @IsDateString()
   @IsNotEmpty()
