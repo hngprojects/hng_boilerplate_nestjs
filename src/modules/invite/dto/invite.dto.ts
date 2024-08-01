@@ -1,15 +1,22 @@
-import { IsString, IsUUID, IsEnum } from 'class-validator';
+import { IsString, IsUUID, IsBoolean, IsEmail, isObject, IsObject } from 'class-validator';
+import { Organisation } from '../../organisations/entities/organisations.entity';
 
 export class InviteDto {
   @IsUUID()
   id: string;
 
   @IsString()
-  link: string;
+  token: string;
 
-  @IsString()
-  org_id: string;
+  @IsObject()
+  organisation: Organisation;
 
-  @IsEnum(['pending', 'approved', 'rejected'])
-  status: string;
+  @IsEmail()
+  email?: string;
+
+  @IsBoolean()
+  isGeneric: boolean;
+
+  @IsBoolean()
+  isAccepted: boolean;
 }

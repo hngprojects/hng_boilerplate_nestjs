@@ -6,6 +6,7 @@ import { Organisation } from '../../organisations/entities/organisations.entity'
 import { User, UserType } from '../../user/entities/user.entity';
 import { Invite } from '../entities/invite.entity';
 import { InviteService } from '../invite.service';
+import { InviteDto } from '../dto/invite.dto';
 
 describe('InviteService', () => {
   let service: InviteService;
@@ -106,6 +107,24 @@ describe('InviteService', () => {
         isAccepted: true,
       },
     ];
+    const mockInvitesResponse: InviteDto[] = [
+      {
+        id: '1',
+        token: 'url',
+        organisation: mockOrg,
+        email: 'string',
+        isGeneric: true,
+        isAccepted: true,
+      },
+      {
+        id: '2',
+        token: 'url',
+        organisation: mockOrg,
+        email: 'string',
+        isGeneric: true,
+        isAccepted: true,
+      },
+    ];
 
     jest.spyOn(repository, 'find').mockResolvedValue(mockInvites);
 
@@ -114,7 +133,7 @@ describe('InviteService', () => {
     expect(result).toEqual({
       status_code: 200,
       message: 'Successfully fetched invites',
-      data: mockInvites,
+      data: mockInvitesResponse,
     });
   });
 

@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InviteDto } from './dto/invite.dto';
 import { Invite } from './entities/invite.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
@@ -16,14 +22,25 @@ export class InviteService {
     @InjectRepository(User) private userRepository: Repository<User>
   ) {}
 
-  async findAllInvitations(): Promise<{ status_code: number; message: string; data: Invite[] }> {
+  async findAllInvitations(): Promise<{ status_code: number; message: string; data: InviteDto[] }> {
     try {
       const invites = await this.inviteRepository.find();
+
+      const allInvites: InviteDto[] = invites.map(invite => {
+        return {
+          token: invite.token,
+          id: invite.id,
+          isAccepted: invite.isAccepted,
+          isGeneric: invite.isGeneric,
+          organisation: invite.organisation,
+          email: invite.email,
+        };
+      });
 
       const responseData = {
         status_code: 200,
         message: 'Successfully fetched invites',
-        data: invites,
+        data: allInvites,
       };
 
       return responseData;
@@ -51,7 +68,7 @@ export class InviteService {
     const link = `${process.env.APP_URL}/invite?token=${token}`;
 
     const responseData = {
-      status_code: 200,
+      status_code: HttpStatus.OK,
       message: 'Invite Link generated successfully',
       link,
     };
