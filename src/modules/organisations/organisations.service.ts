@@ -2,26 +2,22 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
-  HttpCode,
   HttpStatus,
-  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { Organisation } from './entities/organisations.entity';
-import { OrganisationRequestDto } from './dto/organisation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
-import { OrganisationMapper } from './mapper/organisation.mapper';
-import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
-import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
-import { OrganisationMemberMapper } from './mapper/org-members.mapper';
+import { OrganisationRequestDto } from './dto/organisation.dto';
+import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationMember } from './entities/org-members.entity';
+import { Organisation } from './entities/organisations.entity';
+import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
+import { OrganisationMemberMapper } from './mapper/org-members.mapper';
+import { OrganisationMapper } from './mapper/organisation.mapper';
 
 @Injectable()
 export class OrganisationsService {
@@ -53,7 +49,7 @@ export class OrganisationsService {
     });
 
     const isMember = data.find(member => member.id === sub);
-    if (!isMember) throw new ForbiddenException('User does not have access to the organization');
+    if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
 
     data = data.splice(skip, skip + page_size);
 
@@ -62,16 +58,11 @@ export class OrganisationsService {
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
     const emailFound = await this.emailExists(createOrganisationDto.email);
-
     if (emailFound) throw new ConflictException('Organisation with this email already exists');
 
     const owner = await this.userRepository.findOne({
       where: { id: userId },
     });
-
-    if (!owner) {
-      throw new Error('Owner not found');
-    }
 
     const mapNewOrganisation = CreateOrganisationMapper.mapToEntity(createOrganisationDto, owner);
     const newOrganisation = this.organisationRepository.create({
@@ -91,7 +82,7 @@ export class OrganisationsService {
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }
 
-  async deleteOrganization(id: string) {
+  async deleteorganisation(id: string) {
     try {
       const org = await this.organisationRepository.findOneBy({ id });
       if (!org) {
@@ -119,7 +110,7 @@ export class OrganisationsService {
     try {
       const org = await this.organisationRepository.findOneBy({ id });
       if (!org) {
-        throw new NotFoundException('Organization not found');
+        throw new NotFoundException('organisation not found');
       }
       await this.organisationRepository.update(id, updateOrganisationDto);
       const updatedOrg = await this.organisationRepository.findOneBy({ id });
