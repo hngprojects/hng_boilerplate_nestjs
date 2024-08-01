@@ -32,8 +32,10 @@ import { ProfileModule } from './modules/profile/profile.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WaitlistModule } from './modules/waitlist/waitlist.module';
 
 @Module({
   providers: [
@@ -130,7 +132,9 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
       serveRoot: '/profile/pic/',
     }),
     RunTestsModule,
+    ContactUsModule,
     NotificationsModule,
+    WaitlistModule,
   ],
   controllers: [HealthController, ProbeController],
 })
