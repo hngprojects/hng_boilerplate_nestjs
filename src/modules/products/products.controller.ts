@@ -1,19 +1,19 @@
-import { ProductsService } from './products.service';
+import { Body, Controller, Delete, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UpdateProductDTO } from './dto/update-product.dto';
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
+import { UpdateProductDTO } from './dto/update-product.dto';
+import { ProductsService } from './products.service';
 
 @ApiTags('Products')
-@Controller('/organizations/:id/products')
+@Controller('/organisations/:id/products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @UseGuards(OwnershipGuard)
   @Post('')
   @ApiOperation({ summary: 'Creates a new product' })
-  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
+  @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
