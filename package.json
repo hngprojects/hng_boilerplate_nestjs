@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "@css-inline/css-inline": "^0.14.1",
-    "@css-inline/css-inline-darwin-x64": "^0.14.1",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/bull": "^10.2.0",
     "@faker-js/faker": "^8.4.1",
