@@ -63,7 +63,7 @@ export class OrganisationsController {
 
   @ApiOperation({ summary: 'Add User To Organisation' })
   @Post('/:org_id/users')
-  async addUser(@Param('org_id') orgId: string, @Body() addUserDto: AddUserToOrganisationDto, @Request() req) {
+  async addUser(@Param('org_id') orgId: string, @Body() addUserDto: AddUserToOrganisationDto, @Req() req) {
     const userId = addUserDto.userId;
     const currentUser = req['user'];
     return this.organisationsService.addMember(orgId, userId, currentUser.sub);

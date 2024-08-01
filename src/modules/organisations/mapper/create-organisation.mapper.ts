@@ -11,7 +11,6 @@ export class CreateOrganisationMapper {
 
     const organisation = new Organisation();
     organisation.name = dto.name;
-    organisation.description = dto.description;
     organisation.email = dto.email;
     organisation.industry = dto.industry;
     organisation.type = dto.type;

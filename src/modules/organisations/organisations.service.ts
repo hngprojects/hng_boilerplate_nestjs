@@ -6,13 +6,11 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnprocessableEntityException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
-import { OrganisationMember } from './entities/org-members.entity';
 import { AddMemberToOrganisationDto } from './dto/add-user-dto';
 import { AddMemberToOrganisationMapper } from './mapper/add-member-to-org.mapper';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';

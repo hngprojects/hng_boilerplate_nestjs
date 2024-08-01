@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrganisationsService } from '../organisations.service';
-import { createQueryBuilder, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,16 +9,13 @@ import { orgMock } from '../tests/mocks/organisation.mock';
 import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
 import {
-  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
-  UnprocessableEntityException,
   ForbiddenException,
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
 import { newUser } from './mocks/new-user.mock';
-import { OrganisationMember } from '../entities/org-members.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
 
@@ -65,8 +62,6 @@ describe('OrganisationsService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
-            createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
-            save: jest.fn(),
           },
         },
         UserService,
