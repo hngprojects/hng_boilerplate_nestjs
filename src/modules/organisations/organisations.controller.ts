@@ -19,6 +19,8 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
+import { Response } from 'express';
+import { createReadStream } from 'fs';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -83,5 +85,20 @@ export class OrganisationsController {
   ): Promise<OrganisationMembersResponseDto> {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
+  }
+
+  @ApiOperation({ summary: 'Export members of an Organisation to a CSV file' })
+  @Get(':org_id/members/export')
+  async exportOrganisationMembers(@Param('org_id') orgId: string, @Req() req: Request, @Res() res: Response) {
+    const userId = req['user'].id;
+    const filePath = await this.organisationsService.exportOrganisationMembers(orgId, userId);
+    const fileStream = createReadStream(filePath);
+
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="organisation-members-${orgId}.csv"`,
+    });
+
+    fileStream.pipe(res);
   }
 }

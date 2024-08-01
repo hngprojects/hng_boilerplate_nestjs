@@ -18,6 +18,9 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { createObjectCsvStringifier } from 'csv-writer';
+import { join } from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class OrganisationsService {
@@ -127,5 +130,25 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
+  }
+
+  async exportOrganisationMembers(orgId: string, userId: string): Promise<string> {
+    const membersResponse = await this.getOrganisationMembers(orgId, 1, Number.MAX_SAFE_INTEGER, userId);
+
+    const csvStringifier = createObjectCsvStringifier({
+      header: [
+        { id: 'id', title: 'ID' },
+        { id: 'name', title: 'Name' },
+        { id: 'email', title: 'Email' },
+        { id: 'role', title: 'Role' },
+      ],
+    });
+
+    const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(membersResponse.data);
+
+    const filePath = join(__dirname, `organisation-members-${orgId}.csv`);
+    fs.writeFileSync(filePath, csvData);
+
+    return filePath;
   }
 }
