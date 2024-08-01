@@ -81,7 +81,7 @@ export default class UserService {
   private async getUserById(identifier: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { id: identifier },
-      relations: ['profile'],
+      relations: ['profile', 'organizationMembers', 'created_organisations', 'owned_organizations'],
     });
     return user;
   }
