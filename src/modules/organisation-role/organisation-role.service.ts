@@ -130,26 +130,24 @@ export class OrganisationRoleService {
     }
   }
 
-  async deleteRole(
-    organisationId: string,
-    roleId: string,
-    currentUser
-  ): Promise<{ status_code: number; message: string }> {
+  async deleteRole(organisationId: string, roleId: string, currentUser) {
     if (!['superadmin', 'admin', 'owner'].includes(currentUser.role)) {
       throw new UnauthorizedException('You are not authorized to manage roles');
     }
-
     const role = await this.rolesRepository.findOne({
       where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
-      relations: ['organisation'],
     });
-
     if (!role) {
       throw new NotFoundException(`The role with ID ${roleId} does not exist`);
     }
-
-    const usersWithRole = await this.organisationMemberRepository.count({
-      where: { organisation_id: { id: organisationId }, role: role.name },
+    const usersWithRole = await this.organisationRepository.count({
+      where: {
+        id: organisationId,
+        organisationMembers: {
+          role: { id: roleId },
+        },
+      },
+      relations: ['organisationUsers', 'organisationUsers.role'],
     });
 
     if (usersWithRole > 0) {
