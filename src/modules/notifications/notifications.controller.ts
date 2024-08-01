@@ -30,7 +30,7 @@ export class NotificationsController {
     description: 'Notifications retrieved successfully',
     type: notificationPropDto,
   })
-  @ApiResponse({
+  @ApiInternalServerErrorResponse({
     status: 500,
     description: 'Failed to retrieve notifications.',
   })
