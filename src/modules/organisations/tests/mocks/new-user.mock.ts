@@ -47,6 +47,7 @@ export const newUser: User = {
   jobs: [],
   secret: 'secret',
   is_2fa_enabled: false,
+  backup_codes: [],
   profile: profileMock,
   user_type: UserType.ADMIN,
   notifications: [],

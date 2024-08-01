@@ -10,7 +10,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   UnauthorizedException,
-  ConflictException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Organisation } from './entities/organisations.entity';
@@ -25,7 +24,6 @@ import { AddMemberToOrganisationDto } from './dto/add-user-dto';
 import { AddMemberToOrganisationMapper } from './mapper/add-member-to-org.mapper';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
-import { OrganisationMember } from './entities/org-members.entity';
 
 @Injectable()
 export class OrganisationsService {
@@ -35,7 +33,6 @@ export class OrganisationsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(OrganisationMember)
-    private readonly orgMemberRepository: Repository<OrganisationMember>
     private readonly organisationMemberRepository: Repository<OrganisationMember>
   ) {}
 
@@ -227,7 +224,7 @@ export class OrganisationsService {
   }
 
   async checkIfUserIsMember(userId: string, orgId: string) {
-    const count = await this.orgMemberRepository
+    const count = await this.organisationMemberRepository
       .createQueryBuilder('member')
       .where('member.user_id = :userId', { userId })
       .andWhere('member.organisation_id = :orgId', { orgId })
