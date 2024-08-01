@@ -12,7 +12,6 @@ import { string } from 'joi';
 @Controller('faqs')
 export class FaqController {
   constructor(private readonly faqService: FaqService) { }
-  @skipAuth()
   @Post()
   @ApiOperation({ summary: 'Create a new FAQ' })
   @ApiResponse({
