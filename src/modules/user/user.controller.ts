@@ -88,6 +88,6 @@ export class UserController {
   async softDeleteUser(@Param('userId') userId: string, @Req() req) {
     const authenticatedUserId = req['user'].id;
 
-    await this.userService.softDeleteUser(userId, authenticatedUserId);
+    return this.userService.softDeleteUser(userId, authenticatedUserId);
   }
 }
