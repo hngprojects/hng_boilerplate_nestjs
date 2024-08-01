@@ -19,6 +19,7 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
+import CustomExceptionHandler from '../../../src/helpers/exceptionHandler';
 
 @Injectable()
 export default class UserService {
@@ -244,15 +245,17 @@ export default class UserService {
     const user = await this.getUserRecord(identifierOptions);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      CustomExceptionHandler(new NotFoundException('User not found'));
     }
 
     if (user.id !== authenticatedUserId) {
-      throw new UnauthorizedException({
-        status: 'error',
-        message: 'You are not authorized to delete this user',
-        status_code: 401,
-      });
+      CustomExceptionHandler(
+        new UnauthorizedException({
+          status: 'error',
+          message: 'You are not authorized to delete this user',
+          status_code: 401,
+        })
+      );
     }
 
     await this.userRepository.softDelete(userId);
