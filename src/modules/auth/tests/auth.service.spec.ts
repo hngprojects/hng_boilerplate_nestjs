@@ -77,6 +77,7 @@ describe('AuthenticationService', () => {
           useValue: {
             sendForgotPasswordMail: jest.fn(),
             sendUserEmailConfirmationOtp: jest.fn(),
+            sendEmail: jest.fn(),
           },
         },
       ],
@@ -306,6 +307,16 @@ describe('AuthenticationService', () => {
   });
   describe('forgotPassword', () => {
     const email = 'test@example.com';
+    const emailData = {
+      to: email,
+      subject: 'Reset Password',
+      template: 'reset-password',
+      context: {
+        link: 'http://example.com/auth/reset-password',
+        email: email,
+        token: '123456',
+      },
+    };
 
     beforeEach(() => {
       process.env.BASE_URL = 'http://example.com';
@@ -325,19 +336,16 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
-      emailServiceMock.sendForgotPasswordMail.mockResolvedValueOnce(undefined);
-
-      const result = await service.forgotPassword({ email });
-
-      expect(emailServiceMock.sendForgotPasswordMail).toHaveBeenCalledWith(
-        email,
-        'http://example.com/auth/reset-password',
-        '123456'
-      );
-      expect(result).toEqual({
+      emailServiceMock.sendEmail.mockResolvedValueOnce({
         status_code: HttpStatus.OK,
         message: 'Email sent successfully',
       });
+
+      const result = await service.forgotPassword({ email });
+
+      expect(result.status_code).toBe(HttpStatus.OK);
+      expect(result.message).toBe('Email sent successfully');
+      expect(emailServiceMock.sendEmail).toHaveBeenCalledWith(emailData);
     });
 
     it('should throw error if user not found', async () => {
