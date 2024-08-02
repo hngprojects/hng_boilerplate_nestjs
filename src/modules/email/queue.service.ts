@@ -12,8 +12,6 @@ export default class QueueService {
 
   async sendMail({ variant, mail }: MailSender) {
     const mailJob = await this.emailQueue.add(variant, { mail });
-    console.log('Mail is being sent yaaa....');
-    console.log(mailJob.id);
     return { jobId: mailJob.id };
   }
 }
