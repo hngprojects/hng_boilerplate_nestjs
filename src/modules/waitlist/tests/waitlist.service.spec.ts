@@ -5,19 +5,22 @@ import { Waitlist } from '../waitlist.entity';
 import { CreateWaitlistUserDto } from '../dto/create-waitlist-user.dto';
 import { EmailService } from '../../email/email.service';
 import { HttpStatus } from '@nestjs/common';
+import { Repository } from 'typeorm';
 
 describe('WaitlistService', () => {
-  let service: WaitlistService;
+  let waitlistService: WaitlistService;
   let emailService: EmailService;
+  let waitlistRepository: Partial<Repository<Waitlist>>;
 
-  const mockWaitlistRepository = {
+  const mockWaitlistRepository: Partial<Repository<Waitlist>> = {
     save: jest.fn(),
     findOne: jest.fn(),
     create: jest.fn(),
+    find: jest.fn(),
   };
 
   const mockEmailService = {
-    sendWaitListMail: jest.fn().mockResolvedValue({}),
+    sendEmail: jest.fn().mockResolvedValue(void 0),
   };
 
   beforeEach(async () => {
@@ -35,23 +38,27 @@ describe('WaitlistService', () => {
       ],
     }).compile();
 
-    service = module.get<WaitlistService>(WaitlistService);
+    waitlistService = module.get<WaitlistService>(WaitlistService);
     emailService = module.get<EmailService>(EmailService);
+    waitlistRepository = module.get(getRepositoryToken(Waitlist));
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(waitlistService).toBeDefined();
   });
 
   it('should return conflict if email exists', async () => {
     const data: CreateWaitlistUserDto = {
-      email: 'test@example.com',
+      to: 'test@example.com',
       fullName: 'Test User',
+      context: {},
+      subject: 'Test mail',
+      template: '',
     };
 
-    mockWaitlistRepository.findOne.mockResolvedValue(data);
+    (waitlistRepository.findOne as jest.Mock).mockResolvedValue(data);
 
-    const result = await service.create(data);
+    const result = await waitlistService.create(data);
 
     expect(result).toEqual({
       status_code: HttpStatus.CONFLICT,
@@ -61,30 +68,29 @@ describe('WaitlistService', () => {
 
   it('should create a waitlist entry if email does not exist', async () => {
     const data: CreateWaitlistUserDto = {
-      email: 'test@example.com',
+      to: 'test@example.com',
       fullName: 'Test User',
+      context: {},
+      subject: 'Test mail',
+      template: '',
     };
 
     const waitlistEntry = { ...data, id: 1, createdAt: new Date() };
 
-    mockWaitlistRepository.findOne.mockResolvedValue(null);
-    mockWaitlistRepository.create.mockReturnValue(waitlistEntry);
-    mockWaitlistRepository.save.mockResolvedValue(waitlistEntry);
+    (waitlistRepository.findOne as jest.Mock).mockResolvedValue(null);
+    (waitlistRepository.create as jest.Mock).mockReturnValue(waitlistEntry);
+    (waitlistRepository.save as jest.Mock).mockResolvedValue(waitlistEntry);
 
-    const result = await service.create(data);
+    const result = await waitlistService.create(data);
 
-    expect(mockWaitlistRepository.create).toHaveBeenCalledWith(data);
-    expect(mockWaitlistRepository.save).toHaveBeenCalledWith(waitlistEntry);
-    expect(mockEmailService.sendWaitListMail).toHaveBeenCalledWith(data.email, process.env.CLIENT_URL);
+    expect(waitlistRepository.create).toHaveBeenCalledWith(data);
+    expect(waitlistRepository.save).toHaveBeenCalledWith(waitlistEntry);
+    expect(mockEmailService.sendEmail).toHaveBeenCalledWith(data);
     expect(result).toEqual({
       status_code: HttpStatus.CREATED,
       message: 'You are signed up successfully',
       user: waitlistEntry,
-      providers: [WaitlistService, { provide: getRepositoryToken(Waitlist), useValue: mockUserRepository }],
-    }).compile();
-
-    waitlistService = module.get<WaitlistService>(WaitlistService);
-    waitlistRepository = module.get<Repository<Waitlist>>(getRepositoryToken(Waitlist));
+    });
   });
 
   afterEach(() => {
@@ -93,9 +99,14 @@ describe('WaitlistService', () => {
 
   describe('getAllWaitlist', () => {
     it('should return all waitlist', async () => {
-      await waitlistService.getAllWaitlist();
+      const waitlistEntries = [{ id: 1, to: 'test@example.com', fullName: 'Test User' }];
+
+      (waitlistRepository.find as jest.Mock).mockResolvedValue(waitlistEntries);
+
+      const result = await waitlistService.getAllWaitlist();
 
       expect(waitlistRepository.find).toHaveBeenCalled();
+      expect(result.data.waitlist).toEqual(waitlistEntries);
     });
   });
 });

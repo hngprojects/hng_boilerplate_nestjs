@@ -14,7 +14,7 @@ export class WaitlistService {
     private readonly emailService: EmailService
   ) {}
   async create(createWaitlistUserDto: CreateWaitlistUserDto) {
-    const emailExist = await this.waitlistRepo.findOne({ where: { email: createWaitlistUserDto.email } });
+    const emailExist = await this.waitlistRepo.findOne({ where: { email: createWaitlistUserDto.to } });
     if (emailExist) {
       return {
         status_code: HttpStatus.CONFLICT,
@@ -23,11 +23,13 @@ export class WaitlistService {
     }
     const waitlistUser = await this.waitlistRepo.create(createWaitlistUserDto);
     await this.waitlistRepo.save(waitlistUser);
-    await this.emailService.sendWaitListMail(createWaitlistUserDto.email, process.env.CLIENT_URL);
+    await this.emailService.sendEmail(createWaitlistUserDto);
     return {
       status_code: HttpStatus.CREATED,
-      message: 'User added to waitlist successfully',
+      message: 'You are signed up successfully',
       user: waitlistUser,
+    };
+  }
 
   async getAllWaitlist() {
     const waitlist = await this.waitlistRepo.find();
