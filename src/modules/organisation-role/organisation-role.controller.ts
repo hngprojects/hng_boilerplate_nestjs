@@ -103,29 +103,7 @@ export class OrganisationRoleController {
   @ApiResponse({ status: 400, description: 'Invalid role ID format' })
   @ApiResponse({ status: 404, description: 'Role not found' })
   async remove(@Param('id') organisationId: string, @Param('roleId') roleId: string) {
-    try {
-      return await this.organisationRoleService.deleteRole(organisationId, roleId);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new HttpException({ status_code: 404, error: 'Not Found', message: error.message }, HttpStatus.NOT_FOUND);
-      }
-      if (error instanceof BadRequestException) {
-        throw new HttpException(
-          { status_code: 400, error: 'Bad Request', message: error.message },
-          HttpStatus.BAD_REQUEST
-        );
-      }
-      if (error instanceof UnauthorizedException) {
-        throw new HttpException(
-          { status_code: 401, error: 'Unauthorized', message: error.message },
-          HttpStatus.UNAUTHORIZED
-        );
-      }
-      throw new HttpException(
-        { status_code: 500, error: 'Internal Server Error', message: 'An unexpected error occurred' },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+    return await this.organisationRoleService.removeRole(organisationId, roleId);
   }
 
   @Patch(':orgId/roles/:roleId')

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -131,7 +132,7 @@ export class OrganisationRoleService {
     }
   }
 
-  async deleteRole(organisationId: string, roleId: string) {
+  async removeRole(organisationId: string, roleId: string) {
     const role = await this.rolesRepository.findOne({
       where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
     });
@@ -151,9 +152,29 @@ export class OrganisationRoleService {
     if (usersWithRole > 0) {
       throw new BadRequestException('Role is currently assigned to users');
     }
-
-    await this.rolesRepository.softDelete(roleId);
-
+    try {
+      await this.rolesRepository.softDelete(roleId);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ status_code: 404, error: 'Not Found', message: error.message }, HttpStatus.NOT_FOUND);
+      }
+      if (error instanceof BadRequestException) {
+        throw new HttpException(
+          { status_code: 400, error: 'Bad Request', message: error.message },
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      if (error instanceof UnauthorizedException) {
+        throw new HttpException(
+          { status_code: 401, error: 'Unauthorized', message: error.message },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+      throw new HttpException(
+        { status_code: 500, error: 'Internal Server Error', message: 'An unexpected error occurred' },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
     return {
       status_code: 200,
       message: 'Role successfully removed',

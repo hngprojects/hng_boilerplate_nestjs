@@ -157,7 +157,7 @@ describe('OrganisationRoleService', () => {
 
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.deleteRole(organisationId, roleId)).rejects.toThrow(
+      await expect(service.removeRole(organisationId, roleId)).rejects.toThrow(
         new NotFoundException(`The role with ID ${roleId} does not exist`)
       );
     });
@@ -169,7 +169,7 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
       jest.spyOn(organisationRepository, 'count').mockResolvedValue(1);
 
-      await expect(service.deleteRole(organisationId, roleId)).rejects.toThrow(
+      await expect(service.removeRole(organisationId, roleId)).rejects.toThrow(
         new BadRequestException('Role is currently assigned to users')
       );
     });
@@ -182,7 +182,7 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(organisationRepository, 'count').mockResolvedValue(0);
       jest.spyOn(rolesRepository, 'softDelete').mockResolvedValue(null);
 
-      const result = await service.deleteRole(organisationId, roleId);
+      const result = await service.removeRole(organisationId, roleId);
 
       expect(rolesRepository.findOne).toHaveBeenCalledWith({
         where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
