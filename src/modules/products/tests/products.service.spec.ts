@@ -29,6 +29,7 @@ describe('ProductsService', () => {
             save: jest.fn(),
             create: jest.fn(),
             update: jest.fn(),
+            findAndCount: jest.fn(),
           },
         },
         {
