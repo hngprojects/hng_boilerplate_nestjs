@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Blog } from '../../blog/entities/blog.entity';
 
 @Entity()
-export class BlogPostCategory {
+export class Category {
   @PrimaryGeneratedColumn()
   id: string;
 

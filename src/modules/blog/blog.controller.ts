@@ -14,13 +14,12 @@ export class BlogController {
     private readonly userService: UserService
   ) {}
 
-  @Post()
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard('jwt'))
-  // @ApiBody({type : CreateBlogDto})
   @ApiCreatedResponse({ description: 'User Registration' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized..' })
   @skipAuth()
+  @Post()
   create(@Body() createBlogDto: CreateBlogPost) {
     Logger.log('blog controller user');
     return this.blogService.create(createBlogDto, 'userId');

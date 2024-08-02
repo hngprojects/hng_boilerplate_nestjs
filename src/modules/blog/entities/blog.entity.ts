@@ -1,8 +1,8 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, UpdateDateColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { AbstractBaseEntity } from 'src/entities/base.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { BlogPostCategory } from '../../category/entities/category.entity';
+import { Category } from '../../category/entities/category.entity';
 
 @Entity()
 export class Blog extends AbstractBaseEntity {
@@ -18,8 +18,8 @@ export class Blog extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.id)
   author: User;
 
-  @ManyToOne(() => BlogPostCategory, category => category.blog)
-  category_id: BlogPostCategory;
+  @ManyToOne(() => Category, category => category.blog)
+  category_id: Category;
 
   @Column({ default: true })
   is_Published: boolean;

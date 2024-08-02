@@ -12,14 +12,14 @@ import { Blog } from './entities/blog.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import UserService from '../user/user.service';
 import { Repository } from 'typeorm';
-import { BlogPostCategory } from '../category/entities/category.entity';
+import { Category } from '../category/entities/category.entity';
 
 @Injectable()
 export class BlogService {
   private readonly logger = new Logger(BlogService.name);
   constructor(
     @InjectRepository(Blog) private readonly blogRepository: Repository<Blog>,
-    @InjectRepository(Blog) private readonly categoryRepository: Repository<BlogPostCategory>,
+    @InjectRepository(Blog) private readonly categoryRepository: Repository<Category>,
     private readonly userService: UserService
   ) {}
 
