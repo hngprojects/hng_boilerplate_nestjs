@@ -1,4 +1,5 @@
 import {
+  Logger,
   CallHandler,
   ExecutionContext,
   HttpException,
@@ -12,15 +13,20 @@ import { catchError, map } from 'rxjs/operators';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(ResponseInterceptor.name);
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
       map((res: any) => this.responseHandler(res, context)),
-      catchError((err: HttpException) => throwError(() => this.errorHandler(err, context)))
+      catchError((err: unknown) => throwError(() => this.errorHandler(err, context)))
     );
   }
 
-  errorHandler(exception: HttpException, context: ExecutionContext) {
+  errorHandler(exception: unknown, context: ExecutionContext) {
+    const req = context.switchToHttp().getRequest();
     if (exception instanceof HttpException) return exception;
+    this.logger.error(
+      `Error processing request for ${req.method} ${req.url}, Message: ${exception['message']}, Stack: ${exception['stack']}`
+    );
     return new InternalServerErrorException({
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Internal server error',
