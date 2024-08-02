@@ -19,7 +19,7 @@ export class CustomHttpException extends HttpException {
 
     return {
       message: response,
-      status_code: status,
+      status,
     };
   }
 }
