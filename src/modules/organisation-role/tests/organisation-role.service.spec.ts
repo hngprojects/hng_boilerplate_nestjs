@@ -7,6 +7,7 @@ import { Permissions } from '../../organisation-permissions/entities/permissions
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { OrganisationRole } from '../entities/organisation-role.entity';
 import { OrganisationRoleService } from '../organisation-role.service';
+import { UpdateOrganisationRoleDto } from '../dto/update-organisation-role.dto';
 
 describe('OrganisationRoleService', () => {
   let service: OrganisationRoleService;
@@ -153,6 +154,57 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.findSingleRole('nonexistent', 'org123')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('updateRole', () => {
+    it('should update the role successfully', async () => {
+      const updateRoleDto: UpdateOrganisationRoleDto = { name: 'Updated Role', description: 'Updated Description' };
+      const orgId = 'org-id';
+      const roleId = 'role-id';
+
+      const organisation = new Organisation();
+      organisation.id = orgId;
+
+      const role = new OrganisationRole();
+      role.id = roleId;
+      role.name = 'Original Role';
+      role.description = 'Original Description';
+      role.organisation = organisation;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
+      jest.spyOn(rolesRepository, 'save').mockResolvedValue(role);
+
+      const result = await service.updateRole(updateRoleDto, orgId, roleId);
+
+      expect(result.name).toBe('Updated Role');
+      expect(result.description).toBe('Updated Description');
+      expect(rolesRepository.save).toHaveBeenCalledWith(expect.objectContaining(updateRoleDto));
+    });
+
+    it('should throw NotFoundException if the organisation does not exist', async () => {
+      const updateRoleDto: UpdateOrganisationRoleDto = { name: 'Starlight Role', description: 'Updated Description' };
+      const orgId = 'non-existent-org-id';
+      const roleId = 'role-id';
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateRole(updateRoleDto, orgId, roleId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException if the role does not exist', async () => {
+      const updateRoleDto: UpdateOrganisationRoleDto = { name: 'Starlight Mentor', description: 'Updated Description' };
+      const orgId = 'org-id';
+      const roleId = 'non-existent-role-id';
+
+      const organisation = new Organisation();
+      organisation.id = orgId;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateRole(updateRoleDto, orgId, roleId)).rejects.toThrow(NotFoundException);
     });
   });
 });
