@@ -3,7 +3,7 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 
 @Entity()
 export class Squeeze extends AbstractBaseEntity {
-  @Column({ nullable: false })
+  @Column({ nullable: false, unique: true })
   email: string;
 
   @Column({ nullable: true })
