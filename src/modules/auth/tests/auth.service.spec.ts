@@ -36,7 +36,7 @@ import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { profile } from 'console';
 import { base } from '@faker-js/faker';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 jest.mock('speakeasy');
 
