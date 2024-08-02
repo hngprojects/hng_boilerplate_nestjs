@@ -78,19 +78,6 @@ describe('ProductsService', () => {
       expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
     });
 
-    // it('should return products based on category search', async () => {
-    //   const searchCriteria = { category: 'kids' };
-    //   const queryBuilderMock = {
-    //     andWhere: jest.fn().mockReturnThis(),
-    //     getMany: jest.fn().mockResolvedValue([productMock]),  // Return array of products
-    //   };
-    //   jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
-
-    //   const products = await service.searchProducts(searchCriteria);
-
-    //   expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
-    // });
-
     it('should return products based on price range search', async () => {
       orgMock.products = [productMock];
       const searchCriteria = { minPrice: 100, maxPrice: 200 };
@@ -109,7 +96,6 @@ describe('ProductsService', () => {
 
     it('should return products based on combined search criteria', async () => {
       orgMock.products = [productMock];
-      // const searchCriteria = { name: 'TV', category: 'kids', minPrice: 100, maxPrice: 200 };
       const searchCriteria = { name: 'Product 1', minPrice: 100, maxPrice: 200 };
       const queryBuilderMock = {
         where: jest.fn().mockReturnThis(),

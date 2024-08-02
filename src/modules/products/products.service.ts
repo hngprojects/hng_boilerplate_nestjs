@@ -84,10 +84,7 @@ export class ProductsService {
     if (name) {
       query.andWhere('product.name ILIKE :name', { name: `%${name}%` });
     }
-    // Uncomment and update this line if the category field is available
-    // if (category) {
-    //   query.andWhere('product.category ILIKE :category', { category: `%${category}%` });
-    // }
+
     if (minPrice) {
       query.andWhere('product.price >= :minPrice', { minPrice });
     }
