@@ -18,6 +18,9 @@ import {
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
+import { Response } from 'express';
+import { promisify } from 'node:util';
+import * as jsonexport from 'jsonexport/dist';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -219,6 +222,70 @@ describe('OrganisationsService', () => {
       expect(result.data).toEqual([
         { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
       ]);
+    });
+  });
+
+  describe('exportOrganisationMembers', () => {
+    const orgMembers = [
+      { user_id: { id: 'muuid', first_name: 'jane', last_name: 'doe', email: 'janedoe@org.com', phone: '080' } },
+      { user_id: { id: 'mmb-uid', first_name: 'joe', last_name: 'mag', email: 'joemag@org.com', phone: '080' } },
+      { user_id: { id: 'mm-uuid', first_name: 'sid', last_name: 'lis', email: 'sidlis@org.com', phone: '080' } },
+      { user_id: { id: 'mb-uuid', first_name: 'boh', last_name: 'tak', email: 'bohtak@org.com', phone: '080' } },
+    ];
+    const orgMock = {
+      id: 'some-org-id',
+      owner: { id: 'owner-id', first_name: 'john', last_name: 'doe', email: 'johndoe@org.com' },
+      organisationMembers: orgMembers,
+    } as unknown as Organisation;
+
+    const toOrgMembersResFormat = ({ user_id: member }) => {
+      return {
+        id: member.id,
+        name: `${member.first_name} ${member.last_name}`,
+        phone_number: member.phone,
+        email: member.email,
+      };
+    };
+
+    it('should throw NotFoundException if organisation does not exits', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+      const resMock = { setHeader: jest.fn(), attachment: jest.fn(), send: jest.fn() } as unknown as Response;
+
+      await expect(service.exportOrganisationMembers('some-uuid', 'some-uuid', resMock)).rejects.toThrow(
+        NotFoundException
+      );
+    });
+
+    it('should throw ForbiddenException if logged in user does not own the organisation', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
+      const resMock = { setHeader: jest.fn(), attachment: jest.fn(), send: jest.fn() } as unknown as Response;
+
+      await expect(service.exportOrganisationMembers(orgMock.id, 'not-owner-id', resMock)).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+
+    it('should return members in an organisation in a csv format', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
+      const resMock = { setHeader: jest.fn(), attachment: jest.fn(), send: jest.fn() } as unknown as Response;
+
+      const orgMembersResFormat = orgMembers.map(toOrgMembersResFormat);
+      const orgMembersCSV: string = await promisify(jsonexport)(orgMembersResFormat);
+
+      await service.exportOrganisationMembers(orgMock.id, orgMock.owner.id, resMock);
+      expect(resMock.send).toHaveBeenCalledWith(orgMembersCSV);
+    });
+
+    it('should return InternalServerErrorException for other exceptions', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
+      const resMock = { send: jest.fn() } as unknown as Response;
+
+      const orgMembersResFormat = orgMembers.map(toOrgMembersResFormat);
+      const orgMembersCSV: string = await promisify(jsonexport)(orgMembersResFormat);
+
+      await expect(service.exportOrganisationMembers(orgMock.id, orgMock.owner.id, resMock)).rejects.toThrow(
+        InternalServerErrorException
+      );
     });
   });
 });

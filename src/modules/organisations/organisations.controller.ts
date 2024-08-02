@@ -84,4 +84,15 @@ export class OrganisationsController {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
+
+  @ApiOperation({ summary: 'Get CSV of all members in an organisation' })
+  @ApiResponse({ status: 200, description: 'CSV of all members in an organisation' })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
+  @ApiResponse({ status: 403, description: 'User not a member of the organisation' })
+  @Get(':org_id/members/export')
+  @Get('members/export')
+  async exportOrganisationMembers(@Param('org_id') orgId: string, @Req() req, @Res() res) {
+    const userId: string = req.user.sub ?? req.user.id;
+    return this.organisationsService.exportOrganisationMembers(orgId, userId, res);
+  }
 }

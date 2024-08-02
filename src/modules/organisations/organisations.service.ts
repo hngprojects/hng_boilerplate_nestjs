@@ -2,9 +2,11 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +20,8 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import * as jsonexport from 'jsonexport/dist';
+import { promisify } from 'util';
 
 @Injectable()
 export class OrganisationsService {
@@ -120,6 +124,31 @@ export class OrganisationsService {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
+      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+  }
+
+  async exportOrganisationMembers(orgId: string, userId: string, res: any) {
+    try {
+      const org = await this.organisationRepository.findOne({
+        where: { id: orgId },
+        relations: ['owner', 'organisationMembers', 'organisationMembers.user_id'],
+      });
+
+      if (!org) throw new NotFoundException('No organisation found');
+      if (org.owner.id != userId) throw new ForbiddenException('You do not have the authorised to view this file');
+      console.log('Owner validated');
+
+      const orgMembers = org.organisationMembers.map(member => {
+        return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
+      });
+      const orgMembersCSV: string = await promisify(jsonexport)(orgMembers);
+      res.setHeader('Content-Type', 'application/csv');
+      res.attachment(`organisations_members.csv`);
+      res.send(orgMembersCSV);
+    } catch (error) {
+      Logger.log(error);
+      if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
