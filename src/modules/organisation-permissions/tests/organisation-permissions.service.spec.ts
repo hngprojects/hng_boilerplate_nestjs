@@ -1,18 +1,18 @@
+import { HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrganisationPermissionsService } from './organisation-permissions.service';
-import { Permissions } from './entities/permissions.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Role } from '../organisation-role/entities/role.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { HttpStatus, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { mockUpdatePermissionDto } from './mocks/organisation-permissions.mock';
-import { mockRole } from './mocks/role.mock';
-import { mockOrganisation } from './mocks/organisation.mock';
+import { OrganisationPermissionsService } from '../../organisation-permissions/organisation-permissions.service';
+import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Permissions } from '../entities/permissions.entity';
+import { mockUpdatePermissionDto } from '../mocks/organisation-permissions.mock';
+import { mockOrganisation } from '../mocks/organisation.mock';
+import { mockRole } from '../mocks/role.mock';
 describe('OrganisationPermissionsService', () => {
   let service: OrganisationPermissionsService;
   let permissionRepository: Repository<Permissions>;
-  let roleRepository: Repository<Role>;
+  let roleRepository: Repository<OrganisationRole>;
   let organisationRepository: Repository<Organisation>;
 
   beforeEach(async () => {
@@ -26,7 +26,7 @@ describe('OrganisationPermissionsService', () => {
           },
         },
         {
-          provide: getRepositoryToken(Role),
+          provide: getRepositoryToken(OrganisationRole),
           useValue: {
             findOne: jest.fn(),
           },
@@ -42,7 +42,7 @@ describe('OrganisationPermissionsService', () => {
 
     service = module.get<OrganisationPermissionsService>(OrganisationPermissionsService);
     permissionRepository = module.get<Repository<Permissions>>(getRepositoryToken(Permissions));
-    roleRepository = module.get<Repository<Role>>(getRepositoryToken(Role));
+    roleRepository = module.get<Repository<OrganisationRole>>(getRepositoryToken(OrganisationRole));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
   });
 
@@ -64,20 +64,20 @@ describe('OrganisationPermissionsService', () => {
       });
     });
 
-    it('should throw NotFoundException if organization is not found', async () => {
+    it('should throw NotFoundException if organisation is not found', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.handleUpdatePermission('org_id', 'role_id', mockUpdatePermissionDto)).rejects.toThrow(
-        new NotFoundException(`Organization with ID org_id not found`)
+        new NotFoundException(`organisation with ID org_id not found`)
       );
     });
 
-    it('should throw NotFoundException if role is not found in the organization', async () => {
+    it('should throw NotFoundException if role is not found in the organisation', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...mockOrganisation, role: [] });
       jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.handleUpdatePermission('org_id', 'role_id', mockUpdatePermissionDto)).rejects.toThrow(
-        new NotFoundException(`Role with ID role_id not found in the specified organization`)
+        new NotFoundException(`Role with ID role_id not found in the specified organisation`)
       );
     });
 
