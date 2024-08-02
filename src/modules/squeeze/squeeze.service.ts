@@ -27,7 +27,7 @@ export class SqueezeService {
     try {
       const mapNewSqueeze = CreateSqueezeMapper.mapToEntity(createSqueezeDto);
 
-      const existingSqueeze = this.SqueezeRepository.findOne({
+      const existingSqueeze = await this.SqueezeRepository.findOne({
         where: {
           email: mapNewSqueeze.email,
         },
