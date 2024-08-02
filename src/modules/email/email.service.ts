@@ -1,19 +1,24 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
-import { validateOrReject } from 'class-validator';
+import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { SendEmailDto } from './dto/email.dto';
+import { isInstance, validateOrReject } from 'class-validator';
 import * as Handlebars from 'handlebars';
-import { createFile, deleteFile, getFile } from './email_storage.service';
-import * as htmlValidator from 'html-validator';
-import * as fs from 'fs';
-import { promisify } from 'util';
-import * as path from 'path';
+import { createFile, deleteFile } from './email_storage.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { ArticleInterface } from './interface/article.interface';
 import { IMessageInterface } from './interface/message.interface';
+import { CreateEmailTemplateDto } from './dto/create-email-template.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EmailTemplate } from './entities/email-template.entity';
+import { Repository } from 'typeorm';
+import { promises as fs }  from 'fs';
+import { UpdateEmailTemplateDto } from './dto/update-email-template.dto';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    @InjectRepository(EmailTemplate)
+    private readonly emailTemplatesRepository: Repository<EmailTemplate>,
+  ) {}
 
   async sendEmail(emailData: SendEmailDto) {
     await validateOrReject(emailData);
@@ -31,109 +36,153 @@ export class EmailService {
     }
   }
 
-  async createTemplate(templateInfo: createTemplateDto) {
+  async checkFileExists(filePath: string): Promise<boolean> {
     try {
-      const html = Handlebars.compile(templateInfo.template)({});
+      await fs.access(filePath);
+      return true;
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return false;
+      } else {
+        Logger.error('Error checking file existence', error);
+        throw new InternalServerErrorException('Error checking file existence');
+      }
+    }
+  }
 
-      const validationResult = await htmlValidator({ data: html });
+  async createEmailTemplate(createEmailTemplateDto: CreateEmailTemplateDto) {
+    const emailTempletePath = `./src/modules/email/templates/${createEmailTemplateDto.name}.hbs`;
+    if (await this.checkFileExists(emailTempletePath)) {
+      throw new BadRequestException({
+        status_code: HttpStatus.BAD_REQUEST,
+        error: 'Bad Request',
+        message: 'Template name already exists',
+      });
+    }
+    try {
+      const html = Handlebars.compile(createEmailTemplateDto.content)({});
+      await createFile('./src/modules/email/templates', `${createEmailTemplateDto.name}.hbs`, html);
 
-      const filteredMessages = validationResult.messages.filter(
-        message =>
-          !(
-            (message.message.includes('Trailing slash on void elements has no effect') && message.type === 'info') ||
-            (message.message.includes('Consider adding a “lang” attribute') && message.subType === 'warning')
-          )
-      );
-
-      const response = {
-        status_code: HttpStatus.CREATED,
+      const emailTemplate = this.emailTemplatesRepository.create(createEmailTemplateDto)
+      const  template = await this.emailTemplatesRepository.save(emailTemplate);
+      return {
+        status: 'success',
         message: 'Template created successfully',
-        validation_errors: [] as string[],
+        template
       };
-
-      if (filteredMessages.length > 0) {
-        response.status_code = HttpStatus.BAD_REQUEST;
-        response.message = 'Invalid HTML format';
-        response.validation_errors = filteredMessages.map(msg => msg.message);
-      }
-
-      if (response.status_code === HttpStatus.CREATED) {
-        await createFile('./src/modules/email/templates', `${templateInfo.templateName}.hbs`, html);
-      }
-
-      return response;
     } catch (error) {
       return {
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Internal server error',
         message: 'Something went wrong, please try again',
       };
     }
   }
 
-  async getTemplate(templateInfo: getTemplateDto) {
-    try {
-      const template = await getFile(`./src/modules/email/templates/${templateInfo.templateName}.hbs`, 'utf-8');
-      console.log(template);
+  async updateEmailTemplate(id: string, updateEmailTemplateDto: UpdateEmailTemplateDto) {
+    // Check if template exists
+    const emailTemplate = (await this.getEmailTemplate(id)).template;
+    const emailTempletePath = `./src/modules/email/templates/${emailTemplate.name}.hbs`;
+    if (!await this.checkFileExists(emailTempletePath)) {
+      Logger.log('File not present in file system but present in db');
+      throw new NotFoundException('Template not found');
+    }
 
-      return {
-        status_code: HttpStatus.OK,
-        message: 'Template retrieved successfully',
-        template: template,
-      };
-    } catch (error) {
-      return {
-        status_code: HttpStatus.NOT_FOUND,
-        message: 'Template not found',
-      };
+    // delete pre-existing file if both name and content are changed
+    if (updateEmailTemplateDto.content && updateEmailTemplateDto.name) {
+      try {
+        const html = Handlebars.compile(updateEmailTemplateDto.content)({});
+        await deleteFile(`./src/modules/email/templates/${emailTemplate.name}.hbs`);
+        if (await this.checkFileExists(`./src/modules/email/templates/${updateEmailTemplateDto.name}.hbs`)) {
+          await createFile('./src/modules/email/templates', `${emailTemplate.name}.hbs`, emailTemplate.content);
+          throw new BadRequestException();
+        }
+        await createFile('./src/modules/email/templates', `${updateEmailTemplateDto.name}.hbs`, html);
+      }
+      catch (error) {
+        if (error instanceof BadRequestException) throw new BadRequestException('Template name alredy exists')
+        Logger.log('Error compiling html content', error)
+        throw new InternalServerErrorException('Something went wrong, please try again');
+      }
+    }
+
+    // update the contents of the file if only the content is changed
+    if (updateEmailTemplateDto.content && !updateEmailTemplateDto.name) {
+      try {
+        const html = Handlebars.compile(updateEmailTemplateDto.content)({});
+        await createFile('./src/modules/email/templates', `${emailTemplate.name}.hbs`, html);
+      }
+      catch (error) {
+        Logger.log('Error compiling html content', error)
+        throw new InternalServerErrorException('Something went wrong, please try again');
+      }
+    }
+
+    // delete pre-existing file and create a new file with same content if only name is changed
+    if (!updateEmailTemplateDto.content && updateEmailTemplateDto.name) {
+      try {
+        const html = Handlebars.compile(emailTemplate.content)({});
+        await deleteFile(`./src/modules/email/templates/${emailTemplate.name}.hbs`);
+        if (await this.checkFileExists(`./src/modules/email/templates/${updateEmailTemplateDto.name}.hbs`)) {
+          await createFile('./src/modules/email/templates', `${emailTemplate.name}.hbs`, emailTemplate.content);
+          throw new BadRequestException();
+        }
+        await createFile('./src/modules/email/templates', `${updateEmailTemplateDto.name}.hbs`, html);
+      }
+      catch (error) {
+        if (error instanceof BadRequestException) throw new BadRequestException('Template name alredy exists')
+        Logger.log('Error compiling html content', error)
+        throw new InternalServerErrorException('Something went wrong, please try again');
+      }
+    }
+    const template = await this.emailTemplatesRepository.update({ id }, updateEmailTemplateDto);
+    return {
+      status: 'success',
+      message: 'Template updated successfully',
+      template: await this.emailTemplatesRepository.findBy({ id })
     }
   }
 
-  async deleteTemplate(templateInfo: getTemplateDto) {
-    try {
-      await deleteFile(`./src/modules/email/templates/${templateInfo.templateName}.hbs`);
-      return {
-        status_code: HttpStatus.OK,
-        message: 'Template deleted successfully',
-      };
-    } catch (error) {
-      return {
-        status_code: HttpStatus.NOT_FOUND,
-        message: 'Template not found',
-      };
+  async getEmailTemplate(id: string) {
+    const emailTemplate = await this.emailTemplatesRepository.findOne({ where: { id }});
+    if (!emailTemplate) {
+      throw new NotFoundException('Template not found');
     }
+    return {
+      status: 'success',
+      message: 'Template retrieved successfully',
+      template: emailTemplate,
+    };
   }
 
-  async getAllTemplates() {
+  async deleteEmailTemplate(id: string) {
+    const emailTemplate = (await this.getEmailTemplate(id)).template;
     try {
-      const templatesDirectory = './src/modules/email/templates';
-      const files = await promisify(fs.readdir)(templatesDirectory);
-
-      const templates = await Promise.all(
-        files.map(async file => {
-          if (path.extname(file) !== '.hbs') return null;
-
-          const file_path = path.join(templatesDirectory, file);
-          const content = await promisify(fs.readFile)(file_path, 'utf-8');
-
-          return {
-            template_name: path.basename(file),
-            content: content,
-          };
-        })
-      );
-
-      const validTemplates = templates.filter(template => template !== null);
-      return {
-        status_code: HttpStatus.OK,
-        message: 'Templates retrieved successfully',
-        templates: validTemplates,
-      };
+      // await deleteFile(`./src/modules/email/templates/${emailTemplate.name}.hbs`);
     } catch (error) {
-      console.log(error);
-      return {
-        status_code: HttpStatus.NOT_FOUND,
-        message: 'Template not found',
-      };
+      Logger.log('Not found in file system storage');
+      throw new InternalServerErrorException('Not found');
+    }
+    await this.emailTemplatesRepository.remove(emailTemplate);
+    return {
+      status: 'success',
+      message: 'Template deleted successfully',
+    };
+  }
+
+  async getAllEmailTemplates(page: number, limit: number) {
+    const numberOfTemplates = await this.emailTemplatesRepository.count();
+    const templates = await this.emailTemplatesRepository.find({
+      skip: (page - 1) * limit,
+      take: limit
+    });
+    return {
+      status: 'success',
+      message: 'Templates retreived successfully',
+      templates,
+      total: Math.ceil(numberOfTemplates / limit),
+      page,
+      limit,
     }
   }
 

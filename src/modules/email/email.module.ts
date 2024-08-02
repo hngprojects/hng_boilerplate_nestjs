@@ -5,6 +5,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailController } from './email.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { EmailTemplate } from './entities/email-template.entity';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { EmailController } from './email.controller';
       inject: [ConfigService],
     }),
     ConfigModule,
+    TypeOrmModule.forFeature([EmailTemplate])
   ],
   providers: [EmailService],
   controllers: [EmailController],

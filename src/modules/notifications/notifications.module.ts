@@ -10,9 +10,10 @@ import UserService from '../user/user.service';
 import { Notification } from './entities/notifications.entity';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
+import { EmailTemplate } from '../email/entities/email-template.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification, User, Profile, NotificationSettings])],
+  imports: [TypeOrmModule.forFeature([Notification, User, Profile, NotificationSettings, EmailTemplate])],
   controllers: [NotificationsController],
   providers: [NotificationsService, Repository, UserService, NotificationSettingsService, EmailService],
 })

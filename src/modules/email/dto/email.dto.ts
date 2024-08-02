@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, IsObject } from 'class-validator';
+import { IsHtml } from '../validators/html.validator';
 
 export class SendEmailDto {
   @IsEmail()
@@ -17,15 +18,7 @@ export class SendEmailDto {
   context: object;
 }
 
-export class createTemplateDto {
-  @IsString()
-  templateName: string;
-
-  @IsString()
-  template: string;
-}
-
 export class getTemplateDto {
   @IsString()
-  templateName: string;
+  name: string;
 }

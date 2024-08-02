@@ -16,6 +16,7 @@ import { Otp } from '../otp/entities/otp.entity';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthService } from './google-auth.service';
 import { Profile } from '../profile/entities/profile.entity';
+import { EmailTemplate } from '../email/entities/email-template.entity';
 
 @Module({
   controllers: [RegistrationController],
@@ -29,7 +30,7 @@ import { Profile } from '../profile/entities/profile.entity';
     GoogleAuthService,
   ],
   imports: [
-    TypeOrmModule.forFeature([User, Otp, Profile]),
+    TypeOrmModule.forFeature([User, Otp, Profile, EmailTemplate]),
     PassportModule,
     OtpModule,
     EmailModule,
