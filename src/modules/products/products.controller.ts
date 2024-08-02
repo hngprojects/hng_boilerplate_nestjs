@@ -37,17 +37,32 @@ export class ProductsController {
 
   @Get('search')
   @ApiOperation({ summary: 'Search for products' })
+  @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Products found successfully' })
   @ApiResponse({ status: 204, description: 'No products found' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async searchProducts(
+    @Param('id') id: string,
     @Query('name') name?: string,
     @Query('category') category?: string,
     @Query('minPrice') minPrice?: number,
     @Query('maxPrice') maxPrice?: number
   ) {
-    return this.productsService.searchProducts({ name, category, minPrice, maxPrice });
+    return this.productsService.searchProducts(id, { name, category, minPrice, maxPrice });
+  }
+
+  @UseGuards(OwnershipGuard)
+  @Get(':id')
+  @ApiOperation({ summary: 'Gets a product by id' })
+  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
+  @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
+  @ApiResponse({ status: 200, description: 'Product created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getById(@Param('orgId') id: string, @Param('id') productId: string) {
+    return this.productsService.getProductById(productId);
   }
 
   @UseGuards(OwnershipGuard)
