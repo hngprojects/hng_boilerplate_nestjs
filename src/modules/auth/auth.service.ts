@@ -45,7 +45,7 @@ import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import CustomExceptionHandler from '../../helpers/exceptionHandler';
-import { SendEmailDto } from '../email/dto/email.dto';
+import { SendEmailDto } from '../email/dto/send-email.dto';
 
 @Injectable()
 export default class AuthenticationService {

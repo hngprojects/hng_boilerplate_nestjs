@@ -1,6 +1,6 @@
 import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { SendEmailDto } from './dto/email.dto';
-import { isInstance, validateOrReject } from 'class-validator';
+import { SendEmailDto } from './dto/send-email.dto';
+import { validateOrReject } from 'class-validator';
 import * as Handlebars from 'handlebars';
 import { createFile, deleteFile } from './email_storage.service';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -100,7 +100,7 @@ export class EmailService {
         await createFile('./src/modules/email/templates', `${updateEmailTemplateDto.name}.hbs`, html);
       }
       catch (error) {
-        if (error instanceof BadRequestException) throw new BadRequestException('Template name alredy exists')
+        if (error instanceof BadRequestException) throw new BadRequestException('Template name already exists')
         Logger.log('Error compiling html content', error)
         throw new InternalServerErrorException('Something went wrong, please try again');
       }
@@ -158,10 +158,10 @@ export class EmailService {
   async deleteEmailTemplate(id: string) {
     const emailTemplate = (await this.getEmailTemplate(id)).template;
     try {
-      // await deleteFile(`./src/modules/email/templates/${emailTemplate.name}.hbs`);
+      await deleteFile(`./src/modules/email/templates/${emailTemplate.name}.hbs`);
     } catch (error) {
       Logger.log('Not found in file system storage');
-      throw new InternalServerErrorException('Not found');
+      throw new InternalServerErrorException('Template not found');
     }
     await this.emailTemplatesRepository.remove(emailTemplate);
     return {

@@ -20,6 +20,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateAdminDto } from './dto/admin.dto';
 import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
+import { EmailTemplate } from '../../modules/email/entities/email-template.entity';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class SeedingService {
@@ -34,6 +37,7 @@ export class SeedingService {
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
     const notificationRepository = this.dataSource.getRepository(Notification);
+    const emailTemplatesRepository = this.dataSource.getRepository(EmailTemplate);
 
     try {
       const existingPermissions = await defaultPermissionRepository.count();
@@ -101,6 +105,19 @@ export class SeedingService {
         savedUsers[1].profile = savedProfiles[1];
 
         await userRepository.save(savedUsers);
+
+        const existingTemplatesCount = await emailTemplatesRepository.count();
+        if (existingTemplatesCount >= 0) {
+          const templatesDir = './src/modules/email/templates/';
+          const files = fs.readdirSync(templatesDir);
+          const templates = files.map(file => {
+            const content = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+            const name = path.parse(file).name;
+            return emailTemplatesRepository.create({ name, subject: `Boilerplate ${name}`,content });
+          });
+      
+          await emailTemplatesRepository.save(templates);
+        }
 
         const or1 = organisationRepository.create({
           name: 'Org 1',

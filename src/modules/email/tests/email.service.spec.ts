@@ -4,17 +4,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { EmailTemplate } from '../entities/email-template.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException, BadRequestException, InternalServerErrorException, HttpStatus } from '@nestjs/common';
-import * as fs from 'fs';
-import * as Handlebars from 'handlebars';
 import { MailerService } from '@nestjs-modules/mailer';
-import { SendEmailDto } from '../dto/email.dto';
-import { Subject } from 'rxjs';
-
-// jest.mock('fs', () => ({
-//   promises: {
-//     access: jest.fn(),
-//   },
-// }));
+import { SendEmailDto } from '../dto/send-email.dto';
 
 jest.mock('handlebars', () => ({
   compile: jest.fn().mockReturnValue(() => '<html></html>'),
@@ -172,9 +163,11 @@ describe('EmailService', () => {
         message: 'Template retrieved successfully',
         template: mockTemplate,
       });
-      jest.spyOn(service, 'checkFileExists').mockResolvedValue(true);
+      const mockFunction = jest.spyOn(service, 'checkFileExists');
+      mockFunction.mockResolvedValueOnce(true);
+      mockFunction.mockResolvedValueOnce(true);
 
-      await expect(service.updateEmailTemplate('test-id', { name: 'new-name', content: 'new-content', subject: null})).rejects.toThrow(BadRequestException);
+      await expect(service.updateEmailTemplate('test-id', { name: 'new-name', content: 'new-content', subject: null})).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

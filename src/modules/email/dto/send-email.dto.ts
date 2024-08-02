@@ -17,8 +17,3 @@ export class SendEmailDto {
   @IsObject()
   context: object;
 }
-
-export class getTemplateDto {
-  @IsString()
-  name: string;
-}
