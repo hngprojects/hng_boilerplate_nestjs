@@ -9,8 +9,8 @@ import {
   BadRequestException,
   ForbiddenException,
   HttpStatus,
-  InternalServerErrorException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
 import { NotificationSettingsDto } from 'src/modules/notification-settings/dto/notification-settings.dto';
@@ -43,6 +43,14 @@ describe('NotificationsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NotificationsService,
+        {
+          provide: getRepositoryToken(Notification),
+          useValue: mockNotificationRepository,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
         { provide: getRepositoryToken(Notification), useValue: mockNotificationRepository },
         { provide: EmailService, useValue: mockEmailService },
         { provide: UserService, useValue: mockUserService },

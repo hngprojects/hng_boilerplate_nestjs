@@ -1,5 +1,5 @@
 import { UserPayload } from '../user/interfaces/user-payload.interface';
-import { Body, Controller, Param, Patch, Req, Request, Delete, Get } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Req, Request, Delete, Get, Query } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
@@ -15,6 +15,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { UnreadNotificationsResponseDto } from './dtos/unread-notifications-response.dto';
+import { ErrorDto } from './dtos/unread-response-error.dto';
 import { notificationPropDto } from './dtos/notification-prop.dto';
 import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
 import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
@@ -57,7 +59,7 @@ export class NotificationsController {
 
   @Patch('/:notificationId')
   @ApiBody({ type: MarkNotificationAsReadDto, description: 'Read status of the notification' })
-  @ApiOkResponse({ type: CreateNotificationResponseDto, description: 'Notification created successfully' })
+  @ApiOkResponse({ type: CreateNotificationResponseDto, description: 'Notification marked as read successfully' })
   @ApiUnauthorizedResponse({ type: MarkNotificationAsReadErrorDto, description: 'Unauthorized' })
   @ApiBadRequestResponse({ type: MarkNotificationAsReadErrorDto, description: 'Bad Request' })
   @ApiInternalServerErrorResponse({ type: MarkNotificationAsReadErrorDto, description: 'Internal Server Error' })
@@ -72,6 +74,7 @@ export class NotificationsController {
     const userId = user.id;
     return this.notificationsService.markNotificationAsRead(markNotificationAsRead, notification_id, userId);
   }
+
   @Delete('/clear')
   @ApiOkResponse({ type: MarkAllNotificationAsReadResponse, description: 'Notifications cleared successfully.' })
   @ApiUnauthorizedResponse({ type: MarkAllNotificationAsReadError, description: 'Unauthorized' })
@@ -83,5 +86,32 @@ export class NotificationsController {
     const userId = user.id;
 
     return this.notificationsService.markAllNotificationsAsReadForUser(userId);
+  }
+
+  @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Unread notifications retrieved successfully',
+    type: UnreadNotificationsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request or User not found',
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Failed to retrieve unread notifications',
+    type: ErrorDto,
+  })
+  async getUnreadNotificationsForUser(@Req() req: { user: UserPayload }, @Query('is_read') is_read: string) {
+    const userId = req.user.id;
+    const notifications = await this.notificationsService.getUnreadNotificationsForUser(userId, is_read);
+    return {
+      status: 'success',
+      message: 'Unread notifications retrieved successfully',
+      status_code: 200,
+      data: notifications,
+    };
   }
 }
