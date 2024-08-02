@@ -43,6 +43,14 @@ describe('NotificationsService', () => {
       providers: [
         NotificationsService,
         Logger,
+        {
+          provide: getRepositoryToken(Notification),
+          useValue: mockNotificationRepository,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
         { provide: getRepositoryToken(Notification), useValue: mockNotificationRepository },
         { provide: EmailService, useValue: mockEmailService },
         { provide: UserService, useValue: mockUserService },

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -20,6 +20,8 @@ import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications
 import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import { notificationPropDto } from './dtos/notification-prop.dto';
+import { UnreadNotificationsResponseDto } from './dtos/unread-notifications-response.dto';
+import { ErrorDto } from './dtos/unread-response-error.dto';
 import { NotificationsService } from './notifications.service';
 
 @ApiBearerAuth()
@@ -92,6 +94,7 @@ export class NotificationsController {
     const userId = user.id;
     return this.notificationsService.markNotificationAsRead(markNotificationAsRead, notification_id, userId);
   }
+
   @Delete('/clear')
   @ApiOkResponse({ type: MarkAllNotificationAsReadResponse, description: 'Notifications cleared successfully.' })
   @ApiUnauthorizedResponse({ type: MarkAllNotificationAsReadError, description: 'Unauthorized' })
@@ -103,5 +106,32 @@ export class NotificationsController {
     const userId = user.id;
 
     return this.notificationsService.markAllNotificationsAsReadForUser(userId);
+  }
+
+  @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Unread notifications retrieved successfully',
+    type: UnreadNotificationsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request or User not found',
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Failed to retrieve unread notifications',
+    type: ErrorDto,
+  })
+  async getUnreadNotificationsForUser(@Req() req: { user: UserPayload }, @Query('is_read') is_read: string) {
+    const userId = req.user.id;
+    const notifications = await this.notificationsService.getUnreadNotificationsForUser(userId, is_read);
+    return {
+      status: 'success',
+      message: 'Unread notifications retrieved successfully',
+      status_code: 200,
+      data: notifications,
+    };
   }
 }

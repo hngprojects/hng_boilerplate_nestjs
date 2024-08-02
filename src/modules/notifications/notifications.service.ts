@@ -81,6 +81,43 @@ export class NotificationsService {
     }
   }
 
+  async getUnreadNotificationsForUser(userId: string, is_read: string) {
+    if (is_read !== 'false') {
+      throw new BadRequestException('Invalid value for is_read');
+    }
+
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const notifications = await this.notificationRepository.find({
+        where: { user: { id: userId }, is_read: false },
+        order: { created_at: 'DESC' },
+      });
+
+      const totalNotificationCount = await this.notificationRepository.count({ where: { user: { id: userId } } });
+      const totalUnreadNotificationCount = notifications.length;
+
+      return {
+        totalNotificationCount,
+        totalUnreadNotificationCount,
+        notifications,
+      };
+    } catch (error) {
+      if (
+        error instanceof HttpException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
+  }
+
   async markNotificationAsRead(options: MarkNotificationAsReadDto, notificationId: string, userId: string) {
     try {
       if (!notificationId || !options) {

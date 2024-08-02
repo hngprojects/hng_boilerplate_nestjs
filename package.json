@@ -75,7 +75,7 @@
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@nestjs-modules/mailer": "^2.0.2",
-    "@nestjs/cli": "^10.0.0",
+    "@nestjs/cli": "^10.4.2",
     "@nestjs/common": "^10.3.10",
     "@nestjs/schematics": "^10.1.3",
     "@nestjs/testing": "^10.3.10",
