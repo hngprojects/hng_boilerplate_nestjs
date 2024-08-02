@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
+import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -25,7 +26,18 @@ export const createMockOrganisation = (): Organisation => {
     profile_pic_url: '',
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: null,
+  };
+
+  // Create a mock object that matches the OrganisationRole interface
+  const organisationRoleMock: OrganisationRole = {
+    id: uuidv4(),
+    name: 'Admin',
+    description: 'Administrator role with full permissions',
+    permissions: [],
+    organisation: null,
+    organisationMembers: [],
+    created_at: new Date(),
+    updated_at: new Date(),
   };
 
   const orgMemberMock: OrganisationMember = {
@@ -33,7 +45,7 @@ export const createMockOrganisation = (): Organisation => {
     created_at: new Date(),
     updated_at: new Date(),
     user_id: null,
-    role: 'admin',
+    role: organisationRoleMock,
     organisation_id: null,
     profile_id: profileMock,
   };
@@ -46,6 +58,10 @@ export const createMockOrganisation = (): Organisation => {
     last_name: 'Smith',
     email: 'john.smith@example.com',
     password: 'pass123',
+    is_two_factor_enabled: false,
+    two_factor_secret: 'some-secret',
+    backup_codes: [],
+    jobs: [],
     phone: '+1234567890',
     hashPassword: async () => {},
     is_active: true,
@@ -55,6 +71,8 @@ export const createMockOrganisation = (): Organisation => {
     created_organisations: [],
     invites: [],
     testimonials: [],
+    notifications: [],
+    notification_settings: [],
     user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
@@ -80,6 +98,7 @@ export const createMockOrganisation = (): Organisation => {
     isDeleted: false,
     preferences: [],
     invites: [],
+    role: null,
     organisationMembers: [orgMemberMock],
     products: [],
   };

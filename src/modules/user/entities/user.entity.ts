@@ -1,14 +1,16 @@
 import * as bcrypt from 'bcryptjs';
 import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Job } from '../../../modules/jobs/entities/job.entity';
+import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
+import { Notification } from '../../../modules/notifications/entities/notifications.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { BlogPost } from '../../../modules/blog/entities/blog.entity';
 import { BlogPostComment } from '../../../modules/blog/entities/blog-comments.entity';
-import { Organisation } from '../../organisations/entities/organisations.entity';
-import { Product } from '../../../modules/products/entities/product.entity';
-import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { Organisation } from '../../organisations/entities/organisations.entity';
+import { Profile } from '../../profile/entities/profile.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -35,6 +37,9 @@ export class User extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   is_active: boolean;
+
+  @Column('simple-array', { nullable: true })
+  backup_codes: string[];
 
   @Column({ nullable: true })
   attempts_left: number;
@@ -68,9 +73,11 @@ export class User extends AbstractBaseEntity {
   comments?: BlogPostComment[];
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
-
-  @OneToOne(() => Profile, profile => profile.user_id)
-  @JoinColumn()
+  @OneToMany(() => Job, job => job.user)
+  jobs: Job[];
+  
+  @OneToOne(() => Profile, profile => profile.id)
+  @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
   @OneToMany(() => Testimonial, testimonial => testimonial.user)
@@ -83,4 +90,10 @@ export class User extends AbstractBaseEntity {
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
+
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
+  @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
+  notification_settings: NotificationSettings[];
 }

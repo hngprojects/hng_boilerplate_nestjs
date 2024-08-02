@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsEmail, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class SqueezeRequestDto {
   @ApiProperty()
@@ -8,36 +8,44 @@ export class SqueezeRequestDto {
   readonly email: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  readonly first_name: string;
+  readonly first_name?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  readonly last_name: string;
+  readonly last_name?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  readonly phone: string;
+  readonly phone?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  readonly location: string;
+  readonly location?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  readonly job_title: string;
+  readonly job_title?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  readonly company: string;
+  readonly company?: string;
 
   @ApiProperty()
+  @IsOptional()
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @IsString({ each: true })
-  readonly interests: string[];
+  readonly interests?: string[];
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  readonly referral_source: string;
+  readonly referral_source?: string;
 }

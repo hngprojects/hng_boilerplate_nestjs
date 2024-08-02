@@ -2,6 +2,7 @@ import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Profile } from '../../profile/entities/profile.entity';
 import { User } from '../../user/entities/user.entity';
 import UserService from '../../user/user.service';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
@@ -12,7 +13,6 @@ describe('TestimonialsService', () => {
   let service: TestimonialsService;
   let userService: UserService;
   let testimonialRepository: Repository<Testimonial>;
-  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,13 +27,16 @@ describe('TestimonialsService', () => {
           provide: getRepositoryToken(User),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
     service = module.get<TestimonialsService>(TestimonialsService);
     userService = module.get<UserService>(UserService);
     testimonialRepository = module.get<Repository<Testimonial>>(getRepositoryToken(Testimonial));
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -46,7 +49,7 @@ describe('TestimonialsService', () => {
         name: 'John Doe',
         content: 'Great service!',
       };
-      const user = { id: 'user-id' } as User;
+      const user = { id: 'user_id' } as User;
 
       jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
       jest.spyOn(testimonialRepository, 'save').mockResolvedValue(undefined);
@@ -54,7 +57,7 @@ describe('TestimonialsService', () => {
       const result = await service.createTestimonial(createTestimonialDto, user);
 
       expect(result).toEqual({
-        user_id: 'user-id',
+        user_id: 'user_id',
         ...createTestimonialDto,
         created_at: expect.any(Date),
       });
@@ -70,8 +73,8 @@ describe('TestimonialsService', () => {
 
       await expect(service.createTestimonial(createTestimonialDto, null)).rejects.toThrow(
         new NotFoundException({
-          message: 'User is currently unauthorized, kindly authenticate to continue',
-          status_code: 401,
+          message: 'Not Found Exception',
+          status_code: 404,
         })
       );
     });
@@ -81,7 +84,7 @@ describe('TestimonialsService', () => {
         name: 'John Doe',
         content: 'Great service!',
       };
-      const user = { id: 'user-id' } as User;
+      const user = { id: 'user_id' } as User;
       const error = new Error('Database error');
 
       jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);

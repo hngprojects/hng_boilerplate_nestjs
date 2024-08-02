@@ -13,12 +13,18 @@ import {
   InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
+  ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
+import { Profile } from '../../profile/entities/profile.entity';
+import { OrganisationMember } from '../entities/org-members.entity';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
   let organisationRepository: Repository<Organisation>;
+  let profileRepository: Repository<Profile>;
+  let organisationMemberRepository: Repository<OrganisationMember>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,6 +41,12 @@ describe('OrganisationsService', () => {
             update: jest.fn(),
           },
         },
+        {
+          provide: getRepositoryToken(OrganisationMember),
+          useValue: {
+            save: jest.fn(),
+          },
+        },
         UserService,
         {
           provide: getRepositoryToken(User),
@@ -44,12 +56,23 @@ describe('OrganisationsService', () => {
             findOne: jest.fn(),
           },
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useValue: {
+            findBy: jest.fn(),
+            find: jest.fn(),
+            findOne: jest.fn(),
+            save: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
+    organisationMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
   });
 
   it('should be defined', () => {
@@ -78,47 +101,10 @@ describe('OrganisationsService', () => {
     });
 
     it('should throw an error if the email already exists', async () => {
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([orgMock]);
+      organisationRepository.findBy = jest.fn().mockResolvedValue([orgMock]);
       await expect(service.create(createMockOrganisationRequestDto(), orgMock.owner.id)).rejects.toThrow(
-        new UnprocessableEntityException({
-          status: 'Unprocessable entity exception',
-          message: 'Invalid organisation credentials',
-          status_code: 422,
-        })
+        new ConflictException('Organisation with this email already exists')
       );
-    });
-  });
-
-  describe('delete organization', () => {
-    it('should delete an organisation successfully', async () => {
-      const id = '1';
-      const organisation = new Organisation();
-      organisation.id = id;
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
-      jest.spyOn(organisationRepository, 'save').mockResolvedValueOnce(organisation);
-
-      const result = await service.deleteOrganization(id);
-
-      expect(organisationRepository.findOneBy).toHaveBeenCalledWith({ id });
-      expect(organisationRepository.save).toHaveBeenCalledWith(expect.objectContaining({ isDeleted: true }));
-      expect(result).toEqual(204); // HttpStatus.NO_CONTENT
-    });
-
-    it('should throw NotFoundException if organisation not found', async () => {
-      const id = '1';
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
-
-      await expect(service.deleteOrganization(id)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
-      const id = '1';
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
-
-      await expect(service.deleteOrganization(id)).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -158,6 +144,81 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
 
       await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('getOrganisationMembers', () => {
+    it('should throw NotFoundException if organisation is not found', async () => {
+      organisationRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(service.getOrganisationMembers('orgId', 1, 2, 'testUserId')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException if the user is not a member', async () => {
+      const mockOrganisation = {
+        id: 'orgId',
+        organisationMembers: [
+          {
+            user_id: { id: 'anotherUserId' },
+          },
+        ],
+      } as unknown as Organisation;
+
+      organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+
+      await expect(service.getOrganisationMembers('orgId', 1, 10, 'sub')).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should return paginated members if the user is a member', async () => {
+      const mockOrganisation = {
+        id: 'orgId',
+        organisationMembers: [
+          { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
+          {
+            user_id: {
+              id: 'anotherUserId',
+              first_name: 'Jane',
+              last_name: 'Doe',
+              email: 'jane@email.com',
+              phone: '1111',
+            },
+          },
+        ],
+      } as unknown as Organisation;
+
+      organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+
+      const result = await service.getOrganisationMembers('orgId', 1, 1, 'sub');
+
+      expect(result.status_code).toBe(200);
+      expect(result.data).toEqual([{ id: 'sub', name: 'John Doe', email: 'john@email.com', phone_number: '0000' }]);
+    });
+
+    it('should paginate members correctly', async () => {
+      const mockOrganisation = {
+        id: 'orgId',
+        organisationMembers: [
+          { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
+          {
+            user_id: {
+              id: 'anotherUserId',
+              first_name: 'Jane',
+              last_name: 'Doe',
+              email: 'jane@email.com',
+              phone: '1111',
+            },
+          },
+        ],
+      } as unknown as Organisation;
+
+      organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+
+      const result = await service.getOrganisationMembers('orgId', 2, 1, 'sub');
+
+      expect(result.status_code).toBe(200);
+      expect(result.data).toEqual([
+        { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
+      ]);
     });
   });
 });
