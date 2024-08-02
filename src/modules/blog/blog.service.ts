@@ -23,65 +23,6 @@ export class BlogService {
     private readonly userService: UserService
   ) {}
 
-  async create(createBlogPost: CreateBlogPost, userId: string): Promise<Blog> {
-    try {
-      const user = await this.userService.getUserRecord({ identifier: userId, identifierType: 'id' });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      // if (!user.is_superuser) {
-      //   throw new UnauthorizedException('Only super users can create blog posts');
-      // }
-
-      const category = await this.categoryRepository.findOne({ where: { id: createBlogPost.category_id } });
-      if (!category) {
-        throw new NotFoundException('Category not found');
-      }
-
-      const blog = this.blogRepository.create({
-        ...createBlogPost,
-        author: user,
-        category_id: category,
-        image_url: createBlogPost.image_url ? createBlogPost.image_url.join(',') : '',
-      });
-      await this.blogRepository.save(blog);
-
-      this.logger.log(`Blog created successfully: ${JSON.stringify(blog)}`);
-
-      return blog;
-    } catch (error) {
-      this.logger.error(`Error creating blog post: ${error.message}`);
-      throw new HttpException(
-        {
-          status: 'error',
-          message: 'Error creating blog post',
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
-
-  // async userBlog(user) {
-  //   const userInfo = await this.userService.getUserRecord(user);
-  //   const getUserId = userInfo.id;
-  //   const blogupdate = await this.blogRepository.find({
-  //     where: {
-  //       user: {
-  //         id: getUserId,
-  //       },
-  //     },
-  //     relations: {
-  //       user: true,
-  //     },
-  //   });
-  //   if (blogupdate.length === 0) {
-  //     throw new NotFoundException('No data available for this user');
-  //   }
-  //   return blogupdate;
-  // }
-
   async findAll(): Promise<Blog[]> {
     return this.blogRepository.find({ relations: ['user', 'category'] });
   }
