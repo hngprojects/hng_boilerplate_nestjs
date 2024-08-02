@@ -19,7 +19,6 @@ export class CustomHttpException extends HttpException {
 
     return {
       message: response,
-      error: this.name,
       status_code: status,
     };
   }
