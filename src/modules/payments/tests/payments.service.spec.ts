@@ -7,6 +7,7 @@ import { BillingPlan } from '../../billing-plans/entities/billing-plan.entity';
 import { Repository } from 'typeorm';
 import axios from 'axios';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Organisation } from '../../organisations/entities/organisations.entity';
 
 jest.mock('axios');
 
@@ -15,6 +16,7 @@ describe('PaymentsService', () => {
   let userRepository: Repository<User>;
   let subscriptionRepository: Repository<Subscription>;
   let billingPlanRepository: Repository<BillingPlan>;
+  let organisationRepository: Repository<Organisation>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,6 +34,10 @@ describe('PaymentsService', () => {
           provide: getRepositoryToken(BillingPlan),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(Organisation),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
@@ -39,20 +45,33 @@ describe('PaymentsService', () => {
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     subscriptionRepository = module.get<Repository<Subscription>>(getRepositoryToken(Subscription));
     billingPlanRepository = module.get<Repository<BillingPlan>>(getRepositoryToken(BillingPlan));
+    organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
   });
 
   describe('createSubscription', () => {
     it('should throw a NotFoundException if the user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
 
-      await expect(service.createSubscription({} as any, 'user-id')).rejects.toThrow(HttpException);
+      await expect(service.createSubscription({} as any, 'user-id')).rejects.toThrow(NotFoundException);
     });
 
     it('should throw a NotFoundException if the billing plan is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(new User());
       jest.spyOn(billingPlanRepository, 'findOneBy').mockResolvedValueOnce(null);
 
-      await expect(service.createSubscription({ plan_id: 'plan-id' } as any, 'user-id')).rejects.toThrow(HttpException);
+      await expect(service.createSubscription({ plan_id: 'plan-id' } as any, 'user-id')).rejects.toThrow(
+        NotFoundException
+      );
+    });
+
+    it('should throw a NotFoundException if the organisation is not found', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(new User());
+      jest.spyOn(billingPlanRepository, 'findOneBy').mockResolvedValueOnce(new BillingPlan());
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
+
+      await expect(
+        service.createSubscription({ plan_id: 'plan-id', organization_id: 'org-id' } as any, 'user-id')
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should initiate a payment with Paystack and return the payment URL', async () => {
@@ -64,6 +83,7 @@ describe('PaymentsService', () => {
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(user);
       jest.spyOn(billingPlanRepository, 'findOneBy').mockResolvedValueOnce(billingPlan);
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(new Organisation());
       jest.spyOn(subscriptionRepository, 'create').mockReturnValueOnce(new Subscription());
       jest.spyOn(subscriptionRepository, 'save').mockResolvedValueOnce(new Subscription());
 
@@ -84,12 +104,13 @@ describe('PaymentsService', () => {
       });
 
       const result = await service.createSubscription(
-        { plan_id: 'plan-id', billing_option: 'monthly' } as any,
+        { plan_id: 'plan-id', organization_id: 'org-id', billing_option: 'monthly' } as any,
         'user-id'
       );
 
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'user-id' } });
       expect(billingPlanRepository.findOneBy).toHaveBeenCalledWith({ id: 'plan-id' });
+      expect(organisationRepository.findOneBy).toHaveBeenCalledWith({ id: 'org-id' });
       expect(subscriptionRepository.create).toHaveBeenCalled();
       expect(subscriptionRepository.save).toHaveBeenCalled();
       expect(result).toEqual({
@@ -155,7 +176,12 @@ describe('PaymentsService', () => {
       jest.spyOn(subscriptionRepository, 'findOne').mockResolvedValueOnce(new Subscription());
       (axios.get as jest.Mock).mockRejectedValueOnce(new Error('Paystack API error'));
 
-      await expect(service.verifyPayStackPayment('transaction-ref', 'subscription-id')).rejects.toThrow(Error);
+      const result = await service.verifyPayStackPayment('transaction-ref', 'subscription-id');
+
+      expect(result).toEqual({
+        message: 'Payment failed',
+        data: { status: 'failed' },
+      });
     });
   });
 });

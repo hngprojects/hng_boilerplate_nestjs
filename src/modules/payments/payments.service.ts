@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { Subscription } from './entities/subscription.entity';
 import axios from 'axios';
 import { BillingPlan } from '../billing-plans/entities/billing-plan.entity';
+import { Organisation } from '../organisations/entities/organisations.entity';
 
 @Injectable()
 export class PaymentsService {
@@ -18,7 +19,9 @@ export class PaymentsService {
     @InjectRepository(Subscription)
     private readonly subscriptionRepository: Repository<Subscription>,
     @InjectRepository(BillingPlan)
-    private readonly billingPlanRepository: Repository<BillingPlan>
+    private readonly billingPlanRepository: Repository<BillingPlan>,
+    @InjectRepository(Organisation)
+    private readonly organisationRepository: Repository<Organisation>
   ) {}
 
   async createSubscription(createSubscriptionDto: CreateSubscriptionDto, userId: string) {
@@ -40,6 +43,15 @@ export class PaymentsService {
         throw new NotFoundException({
           status_code: 404,
           message: 'Billing plan not found',
+        });
+      }
+
+      const organisation = await this.organisationRepository.findOneBy({ id: createSubscriptionDto.organization_id });
+
+      if (!organisation) {
+        throw new NotFoundException({
+          status_code: 404,
+          message: 'Organisation not found',
         });
       }
 
@@ -66,6 +78,7 @@ export class PaymentsService {
         price: amount,
         status: 'inactive',
         expiresAt,
+        organisation_id: createSubscriptionDto.organization_id,
       };
 
       const subscription = this.subscriptionRepository.create(
@@ -78,7 +91,7 @@ export class PaymentsService {
         email: user.email,
         amount: amount * 100,
         plan: planCreationResponse?.data?.data?.plan_code,
-        callback_url: `http://localhost:3000/api/v1/payments/paystack/verify?subscriptionId=${subscription.id}`,
+        callback_url: `${process.env.SERVER_BASE_URL}/api/v1/payments/paystack/verify?subscriptionId=${subscription.id}`,
       });
 
       return {
@@ -90,6 +103,10 @@ export class PaymentsService {
         },
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       throw new HttpException(
         {
           message: `Internal server error: ${error.message}`,
@@ -149,14 +166,6 @@ export class PaymentsService {
           where: { id: subscriptionId },
         });
 
-        if (!subscription) {
-          throw new NotFoundException({
-            status_code: 404,
-            status: 'Not found Exception',
-            message: 'Subscription not found',
-          });
-        }
-
         // Update subscription status
         subscription.status = 'active';
         subscription.transactionRef = transactionReference;
@@ -170,13 +179,7 @@ export class PaymentsService {
         return { message: 'Payment failed', data: { status: 'failed' } };
       }
     } catch (error) {
-      throw new HttpException(
-        {
-          message: `PayStack Error: ${error.message}`,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      return { message: 'Payment failed', data: { status: 'failed' } };
     }
   }
 }

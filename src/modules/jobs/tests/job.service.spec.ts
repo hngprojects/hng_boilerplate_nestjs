@@ -28,7 +28,6 @@ describe('JobsService', () => {
     user_type: UserType.USER,
     owned_organisations: [],
     created_organisations: [],
-    invites: [],
     profile: null,
     testimonials: [],
     backup_codes: [],
@@ -36,9 +35,9 @@ describe('JobsService', () => {
     jobs: [],
     created_at: new Date(),
     updated_at: new Date(),
-    hashPassword: () => null,
+    notification_settings: [],
     notifications: [],
-    notifications_settings: [],
+    hashPassword: () => null,
   };
 
   const mockJob: Job = {
