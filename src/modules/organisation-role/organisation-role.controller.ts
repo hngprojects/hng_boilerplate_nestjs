@@ -7,6 +7,7 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRoleService } from './organisation-role.service';
+import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 
 @ApiTags('organisation Settings')
 @UseGuards(OwnershipGuard)
@@ -85,5 +87,29 @@ export class OrganisationRoleController {
       }
       throw new BadRequestException('Failed to fetch role');
     }
+  }
+
+  @Patch(':orgId/roles/:roleId')
+  @ApiOperation({ summary: 'update a role within an organization' })
+  @ApiResponse({
+    status: 200,
+    description: 'The role has been successfully updated',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid role ID format or input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 404, description: 'Role not found' })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
+  async updateRole(
+    updateRoleDto: UpdateOrganisationRoleDto,
+    @Param('orgId') orgId: string,
+    @Param('roleId') roleId: string
+  ) {
+    const data = await this.organisationRoleService.updateRole(updateRoleDto, orgId, roleId);
+
+    return {
+      status_code: 200,
+      data,
+    };
   }
 }
