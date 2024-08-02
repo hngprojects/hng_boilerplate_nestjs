@@ -25,11 +25,5 @@ export class WaitlistController {
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
-  @ApiOperation({ summary: 'Get all waitlist' })
-  @ApiResponse({ status: 200, description: 'Wait list retrieved successfully' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  @Get()
-  getAllWaitlist() {
-    return this.waitlistService.getAllWaitlist();
   }
 }
