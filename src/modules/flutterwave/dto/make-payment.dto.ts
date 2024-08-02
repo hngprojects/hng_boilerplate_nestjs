@@ -14,14 +14,17 @@ export class makePaymentDto {
   transaction_id: string;
 
   @IsString()
+  plan_id: string;
+
+  @IsString()
   full_name: string;
 
   @IsString()
   phone_number: string;
 
+  @IsString()
+  redirect_url: string;
+
   @IsNumber()
   amount: number;
-
-  @IsString()
-  interval: string;
 }

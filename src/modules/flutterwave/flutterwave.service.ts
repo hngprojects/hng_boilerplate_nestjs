@@ -3,9 +3,13 @@ import { makePaymentDto } from './dto/make-payment.dto';
 const { Injectable, HttpStatus } = require('@nestjs/common');
 const axios = require('axios');
 const Flutterwave = require('flutterwave-node-v3');
+const { v4: uuid4 } = require('uuid');
 
 @Injectable()
 export class FlutterwaveService {
+  generateTransactionId() {
+    return uuid4();
+  }
   flw = new Flutterwave(process.env.FLW_PUBLIC_KEY, process.env.FLW_SECRET_KEY);
   async createPaymentPlan(details: { name: string; amount: number; interval: string }) {
     try {
@@ -121,15 +125,17 @@ export class FlutterwaveService {
       };
     }
   }
+
   async makePayment(data: makePaymentDto) {
     try {
       const response = await axios.post(
         'https://api.flutterwave.com/v3/payments',
         {
-          tx_ref: data.tx_ref,
+          tx_ref: this.generateTransactionId(),
           amount: data.amount,
           currency: 'NGN',
           redirect_url: 'http://localhost:3008/payment/flutterwave/:id',
+          payment_plan: data.plan_id,
           customer: {
             email: data.email,
             name: data.full_name,
@@ -146,6 +152,8 @@ export class FlutterwaveService {
           },
         }
       );
+      console.log(response)
+      return response;
     } catch (error) {
       return {
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,

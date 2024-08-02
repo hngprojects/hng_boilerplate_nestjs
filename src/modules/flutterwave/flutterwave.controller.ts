@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { FlutterwaveService } from './flutterwave.service';
-import { CreateFlutterwaveDto } from './dto/create-flutterwave.dto';
+import { CreateFlutterwaveDto } from './dto/create-paymentplan.dto';
 import { UpdateFlutterwaveDto } from './dto/update-flutterwave.dto';
 import { skipAuth } from 'src/helpers/skipAuth';
 
@@ -8,29 +8,29 @@ import { skipAuth } from 'src/helpers/skipAuth';
 export class FlutterwaveController {
   constructor(private readonly flutterwaveService: FlutterwaveService) {}
 
-  @Post()
+  @Post('payment-plan')
   create(@Body() createFlutterwaveDto: CreateFlutterwaveDto) {
     return this.flutterwaveService.createPaymentPlan(createFlutterwaveDto);
   }
 
   @skipAuth()
-  @Get()
+  @Get('payment-plan')
   getAllPaymentPlan() {
     return this.flutterwaveService.getAllPaymentPlan();
   }
 
   @skipAuth()
-  @Get(':id')
+  @Get('payment-plan/:id')
   getSinglePaymentPlan(@Param() id) {
     return this.flutterwaveService.getSinglePaymentPlan(id);
   }
 
-  @Patch(':id')
+  @Patch('payment-plan/:id')
   updatePaymentPlan(@Param() id: string, @Body() updateFlutterwaveDto: UpdateFlutterwaveDto) {
     return this.flutterwaveService.updatePaymentPlan(id, updateFlutterwaveDto);
   }
 
-  @Delete(':id')
+  @Delete('payment-plan/:id')
   cancelPaymentPlan(@Param() id: string) {
     return this.cancelPaymentPlan(id);
   }
@@ -38,11 +38,16 @@ export class FlutterwaveController {
   @skipAuth()
   @Post('subscription/:id')
   activateSubscription(@Param() id: string) {
-    return this.flutterwaveService.activateSubscription(id)
+    return this.flutterwaveService.activateSubscription(id);
   }
   @Get('subscription')
-
   GetAllSubscription() {
-    return this.flutterwaveService.getAllSubscription()
+    return this.flutterwaveService.getAllSubscription();
+  }
+
+  @skipAuth()
+  @Post('payment')
+  makePayment(@Body() data) {
+    return this.flutterwaveService.makePayment(data)
   }
 }
