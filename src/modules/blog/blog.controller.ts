@@ -14,21 +14,6 @@ export class BlogController {
     private readonly userService: UserService
   ) {}
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiCreatedResponse({ description: 'User Registration' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized..' })
-  @skipAuth()
-  @Post()
-  create(@Body() createBlogDto: CreateBlogPost) {
-    Logger.log('blog controller user');
-    return this.blogService.create(createBlogDto, 'userId');
-  }
-  // @Post()
-  // create(@Body() createBlogDto: CreateBlogPost) {
-  //   return this.blogService.create(createBlogDto);
-  // }
-
   @skipAuth()
   @Get()
   findAll() {
