@@ -194,10 +194,7 @@ export default class AuthenticationService {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      throw new UnauthorizedException({
-        status_code: HttpStatus.UNAUTHORIZED,
-        message: INVALID_CREDENTIALS,
-      });
+      throw new CustomHttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
 
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
