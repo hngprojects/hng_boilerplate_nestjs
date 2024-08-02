@@ -1,4 +1,20 @@
-import { Controller, Post, Get, Body, Res, Delete, Patch, Param, Query, DefaultValuePipe, ParseIntPipe, HttpCode, HttpStatus, ParseUUIDPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Res,
+  Delete,
+  Patch,
+  Param,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
 import { CreateEmailTemplateDto } from './dto/create-email-template.dto';
@@ -29,9 +45,8 @@ export class EmailController {
     status: 500,
     description: 'Internal Server Error if an unexpected error occurs',
   })
-  async createEmailTemplate(@Body() createEmailTemplateDto: CreateEmailTemplateDto, @Res() res: Response): Promise<any> {
-    const response =  await this.emailService.createEmailTemplate(createEmailTemplateDto);
-    res.status(HttpStatus.CREATED).send(response);
+  async createEmailTemplate(@Body() createEmailTemplateDto: CreateEmailTemplateDto): Promise<any> {
+    return await this.emailService.createEmailTemplate(createEmailTemplateDto);
   }
 
   @Get(':id')
@@ -59,7 +74,7 @@ export class EmailController {
   async getAllEmailTemplates(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number
-  ){
+  ) {
     return this.emailService.getAllEmailTemplates(page, limit);
   }
 
@@ -84,7 +99,7 @@ export class EmailController {
   })
   async updateEmailTemplate(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateEmailTemplateDto: UpdateEmailTemplateDto,
+    @Body() updateEmailTemplateDto: UpdateEmailTemplateDto
   ) {
     return this.emailService.updateEmailTemplate(id, updateEmailTemplateDto);
   }
