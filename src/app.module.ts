@@ -85,6 +85,7 @@ import { FaqModule } from './modules/faq/faq.module';
     EmailModule,
     InviteModule,
     OrganisationsModule,
+    SqueezeModule,
     NotificationSettingsModule,
     SqueezeModule,
     TestimonialsModule,
