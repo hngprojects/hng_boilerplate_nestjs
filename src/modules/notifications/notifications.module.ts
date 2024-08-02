@@ -8,8 +8,8 @@ import { Profile } from '../profile/entities/profile.entity';
 import { User } from '../user/entities/user.entity';
 import UserService from '../user/user.service';
 import { Notification } from './entities/notifications.entity';
-import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
+import { NotificationsController } from './notifications.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Notification, User, Profile, NotificationSettings])],

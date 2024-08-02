@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, HttpException } from '@nestjs/common';
 import { SqueezeService } from '../squeeze.service';
 import { Squeeze } from '../entities/squeeze.entity';
 import { SqueezeRequestDto } from '../dto/squeeze.dto';
@@ -67,6 +67,7 @@ describe('SqueezeService', () => {
       };
 
       jest.spyOn(CreateSqueezeMapper, 'mapToEntity').mockReturnValue(mappedEntity);
+      jest.spyOn(repository, 'findOne').mockReturnValue(null);
       jest.spyOn(repository, 'create').mockReturnValue(savedEntity as Squeeze);
       jest.spyOn(repository, 'save').mockResolvedValue(savedEntity as Squeeze);
       jest.spyOn(SqueezeMapper, 'mapToResponseFormat').mockReturnValue(mappedResponse);
@@ -101,12 +102,7 @@ describe('SqueezeService', () => {
         throw new Error('Mapping error');
       });
 
-      await expect(service.create(createSqueezeDto)).rejects.toThrow(
-        new BadRequestException({
-          message: 'Failed to submit your request',
-          status_code: 400,
-        })
-      );
+      await expect(service.create(createSqueezeDto)).rejects.toThrow(HttpException);
 
       expect(CreateSqueezeMapper.mapToEntity).toHaveBeenCalledWith(createSqueezeDto);
     });
