@@ -222,7 +222,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(null);
 
-      expect(await service.loginUser(loginDto)).toThrow(CustomHttpException);
+      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw an unauthorized error for invalid password', async () => {
@@ -241,6 +241,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
+      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
