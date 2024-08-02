@@ -13,7 +13,6 @@ export class CustomHttpException extends HttpException {
       const res = response as Record<string, any>;
       return {
         message: res.message || 'An error occurred',
-        error: res.error || this.name,
         status_code: status,
       };
     }
