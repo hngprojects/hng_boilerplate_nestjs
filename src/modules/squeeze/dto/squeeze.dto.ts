@@ -8,43 +8,44 @@ export class SqueezeRequestDto {
   readonly email: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   readonly first_name?: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   readonly last_name?: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   readonly phone?: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   readonly location?: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   readonly job_title?: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   readonly company?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   readonly interests?: string[];
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   readonly referral_source?: string;
 }

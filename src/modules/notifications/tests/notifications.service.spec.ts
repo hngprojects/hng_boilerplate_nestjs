@@ -55,6 +55,11 @@ describe('NotificationsService', () => {
         { provide: EmailService, useValue: mockEmailService },
         { provide: UserService, useValue: mockUserService },
         { provide: NotificationSettingsService, useValue: mockNotificationSettingsService },
+        { provide: getRepositoryToken(User), useValue: mockUser },
+        {
+          provide: getRepositoryToken(NotificationSettings),
+          useValue: mockRepository,
+        },
       ],
     }).compile();
 

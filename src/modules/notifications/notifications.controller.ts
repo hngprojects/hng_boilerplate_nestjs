@@ -1,5 +1,9 @@
-import { Body, Controller, Param, Patch, Req, Request, Get, Query, Delete } from '@nestjs/common';
+import { UserPayload } from '../user/interfaces/user-payload.interface';
+import { Body, Controller, Param, Patch, Req, Request, Delete, Get, Query } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
+import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -11,20 +15,47 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
-import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
-import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
 import { UnreadNotificationsResponseDto } from './dtos/unread-notifications-response.dto';
 import { ErrorDto } from './dtos/unread-response-error.dto';
-import { UserPayload } from '../user/interfaces/user-payload.interface';
+import { notificationPropDto } from './dtos/notification-prop.dto';
 import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
 import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
 
 @ApiBearerAuth()
-@ApiTags('Notification')
+@ApiTags('Notifications')
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
+  @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Notifications retrieved successfully',
+    type: notificationPropDto,
+  })
+  @ApiInternalServerErrorResponse({
+    status: 500,
+    description: 'Failed to retrieve notifications.',
+  })
+  async getNotifications(@Req() req: { user: UserPayload }) {
+    const userId = req.user.id;
+    const notifications = await this.notificationsService.getNotificationsForUser(userId);
+
+    return {
+      status: 'success',
+      status_code: 200,
+      message: 'Notifications retrieved successfully',
+      data: {
+        total_notification_count: notifications.totalNotificationCount,
+        total_unread_notification_count: notifications.totalUnreadNotificationCount,
+        notifications: notifications.notifications.map(({ id, is_read, message, created_at }) => ({
+          notification_id: id,
+          is_read,
+          message,
+          created_at,
+        })),
+      },
+    };
+  }
 
   @Patch('/:notificationId')
   @ApiBody({ type: MarkNotificationAsReadDto, description: 'Read status of the notification' })

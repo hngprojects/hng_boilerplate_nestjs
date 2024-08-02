@@ -1,3 +1,8 @@
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Notification } from './entities/notifications.entity';
+import { User } from '../user/entities/user.entity';
+import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import {
   BadRequestException,
   HttpException,
@@ -5,9 +10,8 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
 import { IMessageInterface } from '../email/interface/message.interface';
 import { NotificationSettingsDto } from '../notification-settings/dto/notification-settings.dto';
@@ -18,10 +22,6 @@ import UserService from '../user/user.service';
 import { CreateNotificationError } from './dtos/create-notification-error.dto';
 import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
-import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
-import { Notification } from './entities/notifications.entity';
-import { User } from '../user/entities/user.entity';
-
 @Injectable()
 export class NotificationsService {
   constructor(
@@ -34,6 +34,38 @@ export class NotificationsService {
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
+
+  async getNotificationsForUser(userId: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const notifications = await this.notificationRepository.find({
+        where: { user: { id: userId } },
+        order: { created_at: 'DESC' },
+      });
+
+      const totalNotificationCount = notifications.length;
+      const totalUnreadNotificationCount = notifications.filter(notification => !notification.is_read).length;
+      return {
+        totalNotificationCount,
+        totalUnreadNotificationCount,
+        notifications,
+      };
+    } catch (error) {
+      Logger.error(
+        `Failed to retrieve notifications for user with ID ${userId}: ${error.message}`,
+        error.stack,
+        'NotificationsService'
+      );
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to retrieve notifications.');
+    }
+  }
 
   async getUnreadNotificationsForUser(userId: string, is_read: string) {
     if (is_read !== 'false') {

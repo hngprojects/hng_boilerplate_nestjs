@@ -5,5 +5,4 @@ export default function CustomExceptionHandler(exception) {
   if (status !== 500) {
     throw new HttpException(response, status);
   }
-  return;
 }
