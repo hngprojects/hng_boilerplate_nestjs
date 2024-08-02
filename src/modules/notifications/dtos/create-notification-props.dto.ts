@@ -11,7 +11,11 @@ export class CreateNotificationPropsDto {
 
   @IsDateString()
   @IsOptional()
-  created_at: string;
+  created_at?: string;
+
+  @IsString()
+  @IsOptional()
+  created_by: string;
 
   @IsBoolean()
   is_read: boolean;

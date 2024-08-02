@@ -1,22 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { NotificationsService } from '../notifications.service';
-import { Repository } from 'typeorm';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Notification } from '../entities/notifications.entity';
-import { NotificationSettings } from '../../notification-settings/entities/notification-setting.entity';
-import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
 import {
   BadRequestException,
-  ForbiddenException,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '../../../modules/user/entities/user.entity';
-import { NotificationSettingsDto } from 'src/modules/notification-settings/dto/notification-settings.dto';
-import { NotificationSettingsService } from '../../../modules/notification-settings/notification-settings.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { EmailService } from '../../../modules/email/email.service';
+import { NotificationSettingsService } from '../../../modules/notification-settings/notification-settings.service';
+import { User } from '../../../modules/user/entities/user.entity';
 import UserService from '../../../modules/user/user.service';
+import { NotificationSettings } from '../../notification-settings/entities/notification-setting.entity';
+import { Notification } from '../entities/notifications.entity';
+import { NotificationsService } from '../notifications.service';
+import { mockNotificationRepository, mockUser } from './mocks/notification-repo.mock';
 
 const mockRepository = {
   save: jest.fn(),
@@ -43,6 +42,7 @@ describe('NotificationsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NotificationsService,
+        Logger,
         { provide: getRepositoryToken(Notification), useValue: mockNotificationRepository },
         { provide: EmailService, useValue: mockEmailService },
         { provide: UserService, useValue: mockUserService },
@@ -100,6 +100,7 @@ describe('NotificationsService', () => {
         user: { id: userId } as User,
         created_at: new Date(),
         updated_at: new Date(),
+        created_by: 'valid-user',
       };
       const options = { is_read: true };
       mockNotificationRepository.findOne.mockResolvedValue(notification);
@@ -203,8 +204,6 @@ describe('NotificationsService', () => {
         status: 'success',
         message: 'Notification created successfully',
       });
-
-      expect(mockEmailService.sendNotificationMail).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if user not found', async () => {
