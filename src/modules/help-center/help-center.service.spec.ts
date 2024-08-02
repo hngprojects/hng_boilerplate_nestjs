@@ -1,4 +1,3 @@
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { HelpCenterService } from './help-center.service';
 import { Repository } from 'typeorm';
@@ -23,15 +22,15 @@ describe('HelpCenterService', () => {
   };
 
   const mockRepository = {
-    create: jest.fn().mockImplementation((dto) => ({
+    create: jest.fn().mockImplementation(dto => ({
       ...dto,
       id: '1234',
     })),
     save: jest.fn().mockResolvedValue(mockHelpCenter),
     find: jest.fn().mockResolvedValue([mockHelpCenter]),
-    findOne: jest.fn().mockImplementation((options) =>
-      Promise.resolve(options.where.id === '1234' ? mockHelpCenter : null),
-    ),
+    findOne: jest
+      .fn()
+      .mockImplementation(options => Promise.resolve(options.where.id === '1234' ? mockHelpCenter : null)),
     createQueryBuilder: jest.fn().mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue([mockHelpCenter]),
@@ -50,9 +49,7 @@ describe('HelpCenterService', () => {
     }).compile();
 
     service = module.get<HelpCenterService>(HelpCenterService);
-    repository = module.get<Repository<HelpCenterEntity>>(
-      getRepositoryToken(HelpCenterEntity),
-    );
+    repository = module.get<Repository<HelpCenterEntity>>(getRepositoryToken(HelpCenterEntity));
   });
 
   it('should be defined', () => {
@@ -92,7 +89,7 @@ describe('HelpCenterService', () => {
 
     it('should throw a NotFoundException if topic not found', async () => {
       await expect(service.findOne('wrong-id')).rejects.toThrow(
-        new NotFoundException('Help center topic with ID wrong-id not found'),
+        new NotFoundException('Help center topic with ID wrong-id not found')
       );
     });
   });
@@ -110,10 +107,7 @@ describe('HelpCenterService', () => {
 
       expect(result).toEqual([mockHelpCenter]);
       expect(repository.createQueryBuilder).toHaveBeenCalledWith('help_center');
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'help_center.title LIKE :title',
-        { title: '%Sample%' }
-      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('help_center.title LIKE :title', { title: '%Sample%' });
     });
 
     it('should return an array of help center topics matching multiple search criteria', async () => {
@@ -128,14 +122,10 @@ describe('HelpCenterService', () => {
 
       expect(result).toEqual([mockHelpCenter]);
       expect(repository.createQueryBuilder).toHaveBeenCalledWith('help_center');
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'help_center.title LIKE :title',
-        { title: '%Sample%' }
-      );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'help_center.content LIKE :content',
-        { content: '%Sample Content%' }
-      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('help_center.title LIKE :title', { title: '%Sample%' });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('help_center.content LIKE :content', {
+        content: '%Sample Content%',
+      });
     });
   });
 });

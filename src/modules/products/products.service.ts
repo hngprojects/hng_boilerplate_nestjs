@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,14 +13,13 @@ import { UpdateProductDTO } from './dto/update-product.dto';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { Product, StockStatusType } from './entities/product.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
-import { ProductVariant } from './entities/product-variant.entity';
 
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger(ProductsService.name);
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
-    @InjectRepository(Organisation) private organisationRepository: Repository<Organisation>,
-    @InjectRepository(ProductVariant) private productVariantRepository: Repository<ProductVariant>
+    @InjectRepository(Organisation) private organisationRepository: Repository<Organisation>
   ) {}
 
   async createProduct(id: string, dto: CreateProductRequestDto) {
@@ -66,11 +67,17 @@ export class ProductsService {
         message: 'Invalid organisation credentials',
         status_code: 422,
       });
-    const productExist = await this.productRepository.findOne({ where: { id: productId, org } });
-    if (!productExist) {
+    const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
+    if (!product) {
       throw new NotFoundException({
         error: 'Product not found',
         status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+    if (product.org.id !== org.id) {
+      throw new ForbiddenException({
+        status: 'fail',
+        message: 'Not allowed to perform this action',
       });
     }
 
@@ -87,6 +94,25 @@ export class ProductsService {
         data: updatedProduct,
       };
     } catch (error) {
+      this.logger.log(error);
+      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    }
+  }
+
+  async getProductById(productId: string) {
+    try {
+      const product = await this.productRepository.findOne({ where: { id: productId } });
+      if (!product) {
+        throw new NotFoundException(`Product ${productId} not found`);
+      }
+      return {
+        message: 'Product retrieved successfully',
+        data: product,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
     }
   }
@@ -100,12 +126,22 @@ export class ProductsService {
         status_code: 422,
       });
     }
-    const product = await this.productRepository.findOne({ where: { id: productId, org } });
-    if (!product) {
-      throw new NotFoundException('Product not found');
+
+    try {
+      const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
+      if (product.org.id !== org.id) {
+        throw new ForbiddenException({
+          status: 'fail',
+          message: 'Not allowed to perform this action',
+        });
+      }
+      product.is_deleted = true;
+      await this.productRepository.save(product);
+    } catch (error) {
+      this.logger.log(error);
+      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
     }
-    product.is_deleted = true;
-    await this.productRepository.save(product);
+
     return {
       message: 'Product successfully deleted',
       data: {},
