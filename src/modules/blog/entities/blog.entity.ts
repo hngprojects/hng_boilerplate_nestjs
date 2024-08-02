@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, UpdateDateColumn } from 't
 import { User } from '../../user/entities/user.entity';
 import { AbstractBaseEntity } from 'src/entities/base.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { BlogPostCategory } from '../../category/entities/category.entity';
 
 @Entity()
 export class Blog extends AbstractBaseEntity {
@@ -17,6 +18,9 @@ export class Blog extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.id)
   author: User;
 
+  @ManyToOne(() => BlogPostCategory, category => category.blog)
+  category_id: BlogPostCategory;
+
   @Column({ default: true })
   is_Published: boolean;
 
@@ -27,4 +31,7 @@ export class Blog extends AbstractBaseEntity {
   @ApiProperty({ type: Date, description: 'modify_on of blog' })
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', onUpdate: 'CURRENT_TIMESTAMP(6)' })
   modify_on: Date;
+
+  @ManyToOne(() => User, user => user.id)
+  user: User;
 }

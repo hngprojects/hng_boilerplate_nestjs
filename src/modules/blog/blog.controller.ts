@@ -23,7 +23,7 @@ export class BlogController {
   @skipAuth()
   create(@Body() createBlogDto: CreateBlogPost) {
     Logger.log('blog controller user');
-    return this.blogService.create(createBlogDto);
+    return this.blogService.create(createBlogDto, 'userId');
   }
   // @Post()
   // create(@Body() createBlogDto: CreateBlogPost) {
@@ -39,18 +39,18 @@ export class BlogController {
   @skipAuth()
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.blogService.findOne(+id);
+    return this.blogService.getBlogById(id);
   }
 
   @skipAuth()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
-    return this.blogService.update(+id, updateBlogDto);
+    return this.blogService.updateBlogPost(id, updateBlogDto);
   }
 
   @skipAuth()
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.blogService.remove(+id);
+    return this.blogService.deleteBlogPost(id);
   }
 }
