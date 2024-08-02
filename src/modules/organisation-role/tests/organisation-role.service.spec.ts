@@ -151,22 +151,13 @@ describe('OrganisationRoleService', () => {
       expect(result).toEqual(mockRole);
     });
 
-    it('should throw UnauthorizedException if the user does not have the right role', async () => {
-      const organisationId = 'org-id';
-      const roleId = 'role-id';
-      const currentUser = { role: 'user', organisationId: organisationId };
-
-      await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(UnauthorizedException);
-    });
-
     it('should throw NotFoundException if the role does not exist', async () => {
       const organisationId = 'org-id';
       const roleId = 'role-id';
-      const currentUser = { role: 'admin', organisationId: organisationId };
 
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(
+      await expect(service.deleteRole(organisationId, roleId)).rejects.toThrow(
         new NotFoundException(`The role with ID ${roleId} does not exist`)
       );
     });
@@ -174,13 +165,11 @@ describe('OrganisationRoleService', () => {
     it('should throw BadRequestException if the role is assigned to users', async () => {
       const organisationId = 'org-id';
       const roleId = 'role-id';
-      const currentUser = { role: 'admin', organisationId: organisationId };
-
       const role = organisationRoleMock;
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
       jest.spyOn(organisationRepository, 'count').mockResolvedValue(1);
 
-      await expect(service.deleteRole(organisationId, roleId, currentUser)).rejects.toThrow(
+      await expect(service.deleteRole(organisationId, roleId)).rejects.toThrow(
         new BadRequestException('Role is currently assigned to users')
       );
     });
@@ -188,14 +177,12 @@ describe('OrganisationRoleService', () => {
     it('should delete the role successfully', async () => {
       const organisationId = 'org-id';
       const roleId = 'role-id';
-      const currentUser = { role: 'admin', organisationId: organisationId };
-
       const role = organisationRoleMock;
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
       jest.spyOn(organisationRepository, 'count').mockResolvedValue(0);
       jest.spyOn(rolesRepository, 'softDelete').mockResolvedValue(null);
 
-      const result = await service.deleteRole(organisationId, roleId, currentUser);
+      const result = await service.deleteRole(organisationId, roleId);
 
       expect(rolesRepository.findOne).toHaveBeenCalledWith({
         where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },

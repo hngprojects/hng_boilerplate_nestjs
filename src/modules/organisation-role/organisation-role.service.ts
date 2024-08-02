@@ -131,10 +131,7 @@ export class OrganisationRoleService {
     }
   }
 
-  async deleteRole(organisationId: string, roleId: string, currentUser) {
-    if (!['superadmin', 'admin', 'owner'].includes(currentUser.role)) {
-      throw new UnauthorizedException('You are not authorized to manage roles');
-    }
+  async deleteRole(organisationId: string, roleId: string) {
     const role = await this.rolesRepository.findOne({
       where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
     });

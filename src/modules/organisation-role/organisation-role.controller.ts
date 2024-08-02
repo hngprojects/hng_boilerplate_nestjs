@@ -94,7 +94,7 @@ export class OrganisationRoleController {
     }
   }
 
-  @Delete(':id/:roleId')
+  @Delete(':id/roles:roleId')
   @UseGuards(AuthGuard, OwnershipGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a role in an organisation' })
@@ -102,11 +102,9 @@ export class OrganisationRoleController {
   @ApiResponse({ status: 200, description: 'Role successfully removed' })
   @ApiResponse({ status: 400, description: 'Invalid role ID format' })
   @ApiResponse({ status: 404, description: 'Role not found' })
-  async remove(@Param('id') organisationId: string, @Param('roleId') roleId: string, @Req() req) {
-    const currentUser = req.user;
-
+  async remove(@Param('id') organisationId: string, @Param('roleId') roleId: string) {
     try {
-      return await this.organisationRoleService.deleteRole(organisationId, roleId, currentUser);
+      return await this.organisationRoleService.deleteRole(organisationId, roleId);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new HttpException({ status_code: 404, error: 'Not Found', message: error.message }, HttpStatus.NOT_FOUND);
