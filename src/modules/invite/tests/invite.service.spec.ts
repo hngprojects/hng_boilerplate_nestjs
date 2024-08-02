@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
-import { User, UserType } from '../../user/entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { Invite } from '../entities/invite.entity';
 import { InviteService } from '../invite.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,72 +42,6 @@ describe('InviteService', () => {
   });
 
   it('should fetch all invites', async () => {
-    const mockUser: User = {
-      email: 'tester@example.com',
-      first_name: 'John',
-      last_name: 'Doe',
-      is_active: true,
-      phone: '+1234567890',
-      id: 'some-uuid-value-here',
-      attempts_left: 2,
-      created_at: new Date(),
-      updated_at: new Date(),
-      user_type: UserType.ADMIN,
-      owned_organisations: [],
-      created_organisations: [],
-      invites: [],
-      jobs: [],
-      hashPassword: () => null,
-      password: 'password123',
-      time_left: new Date(),
-      secret: 'secret',
-      is_2fa_enabled: true,
-      testimonials: [],
-      profile: null,
-      organisationMembers: [],
-    };
-
-    const mockOrg: Organisation = {
-      id: 'some-random-id',
-      created_at: new Date(),
-      updated_at: new Date(),
-      name: 'Org 1',
-      description: 'Description 1',
-      email: 'test1@email.com',
-      industry: 'industry1',
-      type: 'type1',
-      country: 'country1',
-      address: 'address1',
-      state: 'state1',
-      isDeleted: false,
-      owner: mockUser,
-      creator: mockUser,
-      preferences: [],
-      invites: [],
-      organisationMembers: [],
-      products: [],
-    };
-    const mockInvites: Invite[] = [
-      {
-        id: '1',
-        email: 'user1@example.com',
-        status: 'pending',
-        created_at: new Date(),
-        updated_at: new Date(),
-        organisation: mockOrg,
-        user: mockUser,
-      },
-      {
-        id: '2',
-        email: 'user2@example.com',
-        status: 'approved',
-        created_at: new Date(),
-        updated_at: new Date(),
-        organisation: mockOrg,
-        user: mockUser,
-      },
-    ];
-
     jest.spyOn(repository, 'find').mockResolvedValue(mockInvites);
 
     const result = await service.findAllInvitations();
