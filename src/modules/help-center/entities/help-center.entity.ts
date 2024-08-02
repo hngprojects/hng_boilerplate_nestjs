@@ -4,7 +4,6 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 
 @Entity()
 export class HelpCenterEntity extends AbstractBaseEntity implements HelpCenter {
-
   @Column({ nullable: false })
   title: string;
 
@@ -13,5 +12,4 @@ export class HelpCenterEntity extends AbstractBaseEntity implements HelpCenter {
 
   @Column({ default: 'ADMIN', nullable: false })
   author: string;
-
 }

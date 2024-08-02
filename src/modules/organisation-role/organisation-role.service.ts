@@ -12,6 +12,7 @@ import { Permissions } from '../organisation-permissions/entities/permissions.en
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRole } from './entities/organisation-role.entity';
+import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -97,5 +98,67 @@ export class OrganisationRoleService {
           description: role.description,
         }))
       );
+  }
+
+  async findSingleRole(id: string, organisationId: string): Promise<OrganisationRole> {
+    try {
+      const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+
+      if (!organisation) {
+        throw new NotFoundException(`Organisation with ID ${organisationId} not found`);
+      }
+
+      const role = await this.rolesRepository.findOne({
+        where: { id, organisation: { id: organisationId } },
+        relations: ['permissions'],
+      });
+
+      if (!role) {
+        throw new NotFoundException(`The role with ID ${id} does not exist in the organisation`);
+      }
+
+      return role;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Failed to fetch role: ${error.message}`);
+    }
+  }
+
+  async updateRole(updateRoleDto: UpdateOrganisationRoleDto, orgId: string, roleId: string) {
+    const organisation = await this.organisationRepository.findOne({
+      where: {
+        id: orgId,
+      },
+    });
+
+    if (!organisation) {
+      throw new NotFoundException({
+        status_code: HttpStatus.NOT_FOUND,
+        error: 'Organization not found',
+        message: `The organization with ID ${orgId} does not exist`,
+      });
+    }
+
+    const role = await this.rolesRepository.findOne({
+      where: {
+        id: roleId,
+        organisation: organisation,
+      },
+    });
+
+    if (!role) {
+      throw new NotFoundException({
+        status_code: HttpStatus.NOT_FOUND,
+        error: 'Role not found',
+        message: `The role with ID ${roleId} does not exist`,
+      });
+    }
+
+    Object.assign(role, updateRoleDto);
+
+    await this.rolesRepository.save(role);
+    return role;
   }
 }
