@@ -3,19 +3,41 @@ import { NotificationsService } from '../notifications.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Notification } from '../entities/notifications.entity';
+import { NotificationSettings } from '../../notification-settings/entities/notification-setting.entity';
 import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
 import {
   BadRequestException,
   ForbiddenException,
   HttpStatus,
-  InternalServerErrorException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
+import { NotificationSettingsDto } from 'src/modules/notification-settings/dto/notification-settings.dto';
+import { NotificationSettingsService } from '../../../modules/notification-settings/notification-settings.service';
+import { EmailService } from '../../../modules/email/email.service';
+import UserService from '../../../modules/user/user.service';
+
+const mockRepository = {
+  save: jest.fn(),
+};
+
+const mockEmailService = {
+  sendNotificationMail: jest.fn(),
+};
+
+const mockUserService = {
+  getUserRecord: jest.fn(),
+};
+
+const mockNotificationSettingsService = {
+  findNotificationSettingsByUserId: jest.fn(),
+};
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
-  let notificationRepository: Repository<Notification>;
+  let repository: Repository<Notification>;
+  let NotificationSettingsRepository: Repository<NotificationSettings>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,11 +47,24 @@ describe('NotificationsService', () => {
           provide: getRepositoryToken(Notification),
           useValue: mockNotificationRepository,
         },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        { provide: getRepositoryToken(Notification), useValue: mockNotificationRepository },
+        { provide: EmailService, useValue: mockEmailService },
+        { provide: UserService, useValue: mockUserService },
+        { provide: NotificationSettingsService, useValue: mockNotificationSettingsService },
+        { provide: getRepositoryToken(User), useValue: mockUser },
+        {
+          provide: getRepositoryToken(NotificationSettings),
+          useValue: mockRepository,
+        },
       ],
     }).compile();
 
     service = module.get<NotificationsService>(NotificationsService);
-    notificationRepository = module.get<Repository<Notification>>(getRepositoryToken(Notification));
+    repository = module.get<Repository<Notification>>(getRepositoryToken(Notification));
   });
 
   afterEach(() => {
@@ -145,6 +180,62 @@ describe('NotificationsService', () => {
       await expect(service.markAllNotificationsAsReadForUser(userId)).rejects.toThrowError(
         new InternalServerErrorException()
       );
+    });
+  });
+
+  describe('createNotification', () => {
+    const user_id = '123';
+    const notification_content = {
+      message: 'New Notification',
+      is_read: false,
+      created_at: '2021-09-01T00:00:00.000Z',
+    };
+
+    it('should create a notification successfully', async () => {
+      mockUserService.getUserRecord.mockResolvedValue({
+        id: user_id,
+        email: 'user@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+      });
+      mockNotificationSettingsService.findNotificationSettingsByUserId.mockResolvedValue({
+        email_notification_always_send_email_notifications: true,
+      });
+      mockNotificationRepository.save.mockResolvedValue({
+        ...notification_content,
+        id: '12345',
+        user: { id: user_id },
+      });
+
+      await expect(service.createNotification(user_id, notification_content)).resolves.toMatchObject({
+        status: 'success',
+        message: 'Notification created successfully',
+      });
+
+      expect(mockEmailService.sendNotificationMail).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException if user not found', async () => {
+      mockUserService.getUserRecord.mockResolvedValue(null);
+      await expect(service.createNotification(user_id, notification_content)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should handle internal server errors', async () => {
+      mockUserService.getUserRecord.mockResolvedValue({ id: user_id });
+      mockNotificationRepository.save.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.createNotification(user_id, notification_content)).rejects.toThrow(
+        InternalServerErrorException
+      );
+    });
+
+    it('should throw NotFoundException with specific user_id not found', async () => {
+      mockUserService.getUserRecord.mockImplementation(() => {
+        throw new NotFoundException();
+      });
+      await expect(service.createNotification(user_id, notification_content)).rejects.toThrow(NotFoundException);
     });
   });
 });

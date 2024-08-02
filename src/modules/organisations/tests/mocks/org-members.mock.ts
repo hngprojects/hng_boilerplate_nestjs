@@ -3,8 +3,7 @@ import { Organisation } from '../../entities/organisations.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
 import { User } from '../../../user/entities/user.entity';
-import { Role } from '../../../organisation-role/entities/role.entity';
-
+import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
@@ -27,7 +26,6 @@ export const createMockProfile = (): Profile => {
     profile_pic_url: '',
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: null,
   };
 };
 
@@ -50,7 +48,6 @@ export const createMockUser = (): User => {
     time_left: 3600,
     owned_organisations: [],
     created_organisations: [],
-    invites: [],
     testimonials: [],
     user_type: UserType.ADMIN,
     secret: 'secret',
@@ -59,7 +56,7 @@ export const createMockUser = (): User => {
     organisationMembers: [],
     backup_codes: [],
     notifications: [],
-    notifications_settings: null,
+    notification_settings: null,
   };
 };
 
@@ -89,6 +86,17 @@ export const createMockOrganisation = (): Organisation => {
   };
 };
 
+const organisationRoleMock: OrganisationRole = {
+  id: uuidv4(),
+  name: 'Admin',
+  description: 'Administrator role with full permissions',
+  permissions: [],
+  organisation: null,
+  organisationMembers: [],
+  created_at: new Date(),
+  updated_at: new Date(),
+};
+
 export const createMockOrganisationMember = (): OrganisationMember => {
   const profileMock = createMockProfile();
   const userMock = createMockUser();
@@ -99,7 +107,7 @@ export const createMockOrganisationMember = (): OrganisationMember => {
     created_at: new Date(),
     updated_at: new Date(),
     user_id: userMock,
-    role: 'admin',
+    role: organisationRoleMock,
     organisation_id: organisationMock,
     profile_id: profileMock,
   };
