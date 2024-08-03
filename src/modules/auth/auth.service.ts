@@ -45,6 +45,7 @@ import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import CustomExceptionHandler from '../../helpers/exceptionHandler';
+import { SendEmailDto } from '../email/dto/email.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -82,7 +83,6 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      // await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
         user: {
@@ -119,7 +119,13 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+      const emailData = new SendEmailDto();
+      emailData.to = dto.email;
+      emailData.subject = 'Reset Password';
+      emailData.template = 'reset-password';
+      emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
+      await this.emailService.sendEmail(emailData);
+
       return {
         status_code: HttpStatus.OK,
         message: EMAIL_SENT,
@@ -129,6 +135,46 @@ export default class AuthenticationService {
       CustomExceptionHandler(forgotPasswordError);
 
       throw new InternalServerErrorException('Error occured creating user');
+    }
+  }
+
+  async changePassword(user_id: string, oldPassword: string, newPassword: string) {
+    try {
+      const user = await this.userService.getUserRecord({
+        identifier: user_id,
+        identifierType: 'id',
+      });
+
+      if (!user) {
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: USER_NOT_FOUND,
+        });
+      }
+
+      const isPasswordValid = bcrypt.compareSync(oldPassword, user.password);
+      if (!isPasswordValid) {
+        throw new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: INVALID_PASSWORD,
+        });
+      }
+
+      await this.userService.updateUserRecord({
+        updatePayload: { password: newPassword },
+        identifierOptions: {
+          identifierType: 'id',
+          identifier: user.id,
+        },
+      });
+
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Password updated successfully',
+      };
+    } catch (error) {
+      console.log('AuthenticationServiceError ~ changePasswordError ~', error);
+      throw new InternalServerErrorException('Error occurred while changing password');
     }
   }
 
@@ -382,7 +428,12 @@ export default class AuthenticationService {
 
     const otp = await this.otpService.createOtp(user.id);
 
-    await this.emailService.sendLoginOtp(user.email, otp.token);
+    const emailData = new SendEmailDto();
+    emailData.to = user.email;
+    emailData.subject = 'Login with OTP';
+    emailData.template = 'login-otp';
+    emailData.context = { token: otp.token, email: user.email };
+    await this.emailService.sendEmail(emailData);
 
     return {
       message: SIGN_IN_OTP_SENT,

@@ -1,4 +1,18 @@
-import { Controller, Body, Patch, Param, Delete, HttpException, HttpStatus, Get, NotFoundException, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
+  Get,
+  NotFoundException,
+  Post,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { ApiTags, ApiBearerAuth, ApiResponse, ApiOperation } from '@nestjs/swagger';
@@ -11,7 +25,7 @@ import { HelpCenter } from './interface/help-center.interface';
 @ApiBearerAuth()
 @Controller('help-center')
 export class HelpCenterController {
-  constructor(private readonly helpCenterService: HelpCenterService) { }
+  constructor(private readonly helpCenterService: HelpCenterService) {}
 
   @Post('help-center/topics')
   @ApiOperation({ summary: 'Create a new help center topic' })
@@ -48,7 +62,6 @@ export class HelpCenterController {
   async search(@Query() query: SearchHelpCenterDto): Promise<HelpCenter[]> {
     return this.helpCenterService.search(query);
   }
-
 
   @Patch('topics/:id')
   @ApiOperation({ summary: 'Update a help center topic by id' })
