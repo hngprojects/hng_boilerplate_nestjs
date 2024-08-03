@@ -1,3 +1,4 @@
+import { User } from '../../../modules/user/entities/user.entity';
 import { Invite } from '../entities/invite.entity';
 import { mockOrg } from './mockOrg';
 
@@ -11,6 +12,7 @@ export const mockInvites: Invite[] = [
     email: 'string',
     isGeneric: true,
     isAccepted: true,
+    user: new User(),
   },
   {
     id: '2',
@@ -21,5 +23,6 @@ export const mockInvites: Invite[] = [
     email: 'string',
     isGeneric: true,
     isAccepted: true,
+    user: new User(),
   },
 ];

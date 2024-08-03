@@ -71,11 +71,13 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => BlogPostComment, comment => comment.author, { nullable: true })
   comments?: BlogPostComment[];
+
   @OneToMany(() => Invite, invite => invite.user)
   invites: Invite[];
+
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
-  
+
   @OneToOne(() => Profile, profile => profile.id)
   @JoinColumn({ name: 'profile_id' })
   profile: Profile;

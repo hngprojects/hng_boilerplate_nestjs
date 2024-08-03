@@ -38,6 +38,7 @@ describe('JobsService', () => {
     notification_settings: [],
     notifications: [],
     hashPassword: () => null,
+    invites: [],
   };
 
   const mockJob: Job = {

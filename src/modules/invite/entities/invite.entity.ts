@@ -1,6 +1,7 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
+import { User } from '../../../modules/user/entities/user.entity';
 
 @Entity()
 export class Invite extends AbstractBaseEntity {
@@ -18,4 +19,7 @@ export class Invite extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, organisation => organisation.invites, { nullable: false, onDelete: 'CASCADE' })
   organisation: Organisation;
+
+  @ManyToOne(() => User, user => user.invites)
+  user: User;
 }
