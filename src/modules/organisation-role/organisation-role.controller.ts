@@ -7,7 +7,7 @@ import { OrganisationRoleService } from './organisation-role.service';
 @ApiTags('organisation Settings')
 @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@Controller('organisations')
+@Controller('organizations')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 

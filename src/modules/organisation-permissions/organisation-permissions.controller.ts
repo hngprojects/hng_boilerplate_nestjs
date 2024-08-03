@@ -16,7 +16,8 @@ import { OrganisationPermissionsService } from './organisation-permissions.servi
 
 @ApiBearerAuth()
 @ApiTags('Organisation Permissions')
-@Controller('organisations')
+@UseGuards(OwnershipGuard)
+@Controller('organizations')
 export class OrganisationPermissionsController {
   constructor(private readonly permissionService: OrganisationPermissionsService) {}
 
@@ -26,7 +27,6 @@ export class OrganisationPermissionsController {
     description: 'The found record',
     type: UpdatePermissionDto,
   })
-  @UseGuards(OwnershipGuard)
   @Patch(':org_id/:role_id/permissions')
   async updatePermission(
     @Param('org_id') org_id: string,
