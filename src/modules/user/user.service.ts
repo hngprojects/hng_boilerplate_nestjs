@@ -1,35 +1,45 @@
-import { Repository } from 'typeorm';
-import { User, UserType } from './entities/user.entity';
 import {
-  Injectable,
   BadRequestException,
-  HttpException,
-  NotFoundException,
   ForbiddenException,
+  HttpException,
   HttpStatus,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import CreateNewUserOptions from './options/CreateNewUserOptions';
-import UserIdentifierOptionsType from './options/UserIdentifierOptions';
-import UserResponseDTO from './dto/user-response.dto';
-import UpdateUserRecordOption from './options/UpdateUserRecordOption';
+import { Repository } from 'typeorm';
+import { Profile } from '../profile/entities/profile.entity';
+import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
+import UserResponseDTO from './dto/user-response.dto';
+import { User, UserType } from './entities/user.entity';
 import { UserPayload } from './interfaces/user-payload.interface';
-import { DeactivateAccountDto } from './dto/deactivate-account.dto';
+import CreateNewUserOptions from './options/CreateNewUserOptions';
+import UpdateUserRecordOption from './options/UpdateUserRecordOption';
+import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 
 @Injectable()
 export default class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>
+    private userRepository: Repository<User>,
+    @InjectRepository(Profile)
+    private profileRepository: Repository<Profile>
   ) {}
 
-  async createUser(user: CreateNewUserOptions): Promise<any> {
+  async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
+    const profile = await this.profileRepository.save({ email: createUserPayload.email, username: '' });
     const newUser = new User();
-    Object.assign(newUser, user);
+    Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
-    return this.userRepository.save(newUser);
+    if (createUserPayload.admin_secret == process.env.ADMIN_SECRET_KEY) {
+      newUser.user_type = UserType.SUPER_ADMIN;
+    } else {
+      newUser.user_type = UserType.USER;
+    }
+    newUser.profile = profile;
+    return await this.userRepository.save(newUser);
   }
 
   async updateUserRecord(userUpdateOptions: UpdateUserRecordOption) {
@@ -64,12 +74,18 @@ export default class UserService {
   }
 
   private async getUserByEmail(email: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({ where: { email: email } });
+    const user: UserResponseDTO = await this.userRepository.findOne({
+      where: { email: email },
+      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+    });
     return user;
   }
 
   private async getUserById(identifier: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({ where: { id: identifier } });
+    const user: UserResponseDTO = await this.userRepository.findOne({
+      where: { id: identifier },
+      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+    });
     return user;
   }
 

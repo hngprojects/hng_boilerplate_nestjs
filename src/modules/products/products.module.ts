@@ -6,6 +6,7 @@ import { Product } from './entities/product.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { ProductComment } from '../product-comment/entities/product-comment.entity';
 import { User } from '../user/entities/user.entity';
+import { ProductVariant } from './entities/product-variant.entity';
 
 @Module({
   controllers: [ProductsController],
