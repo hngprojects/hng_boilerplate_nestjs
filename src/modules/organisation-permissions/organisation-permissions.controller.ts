@@ -15,7 +15,7 @@ import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { OrganisationPermissionsService } from './organisation-permissions.service';
 
 @ApiBearerAuth()
-@ApiTags('Organisation Permissions')
+@ApiTags('organisation Settings')
 @UseGuards(OwnershipGuard)
 @Controller('organizations')
 export class OrganisationPermissionsController {

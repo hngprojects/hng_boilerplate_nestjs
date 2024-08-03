@@ -25,7 +25,7 @@ export class OwnershipGuard implements CanActivate {
       where: { id: organisationId },
       relations: ['owner', 'creator'],
     });
-    // console.log(organisation);
+
     if (!organisation) {
       throw new NotFoundException('Organisation not found');
     }
