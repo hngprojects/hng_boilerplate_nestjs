@@ -16,6 +16,8 @@ interface UserInterface {
 
   backup_codes_2fa: string;
 
+  backup_codes: string[];
+
   secret: string;
 
   user_type: UserType;

@@ -15,10 +15,13 @@ import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import {
   FAILED_TO_CREATE_USER,
+  INCORRECT_TOTP_CODE,
+  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+  USER_ACCOUNT_EXIST,
+  USER_NOT_ENABLED_2FA,
   USER_ACCOUNT_DOES_NOT_EXIST,
   INVALID_PASSWORD,
   TWO_FA_INITIATED,
-  USER_ACCOUNT_EXIST,
   USER_CREATED_SUCCESSFULLY,
   USER_NOT_FOUND,
   UNAUTHORISED_TOKEN,
@@ -33,6 +36,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
 import UserService from '../user/user.service';
+import { Verify2FADto } from './dto/verify-2fa.dto';
 import { OtpService } from '../otp/otp.service';
 import { EmailService } from '../email/email.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -48,6 +52,8 @@ import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import CustomExceptionHandler from '../../helpers/exceptionHandler';
+import { SendEmailDto } from '../email/dto/email.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export default class AuthenticationService {
@@ -87,7 +93,6 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
       const responsePayload = {
         user: {
@@ -202,7 +207,13 @@ export default class AuthenticationService {
       }
 
       const token = (await this.otpService.createOtp(user.id)).token;
-      await this.emailService.sendForgotPasswordMail(dto.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+      const emailData = new SendEmailDto();
+      emailData.to = dto.email;
+      emailData.subject = 'Reset Password';
+      emailData.template = 'reset-password';
+      emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
+      await this.emailService.sendEmail(emailData);
+
       return {
         status_code: HttpStatus.OK,
         message: EMAIL_SENT,
@@ -215,56 +226,81 @@ export default class AuthenticationService {
     }
   }
 
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
+  async changePassword(user_id: string, oldPassword: string, newPassword: string) {
     try {
-      const { email, password } = loginDto;
-
       const user = await this.userService.getUserRecord({
-        identifier: email,
-        identifierType: 'email',
+        identifier: user_id,
+        identifierType: 'id',
       });
 
       if (!user) {
-        throw new UnauthorizedException({
-          status_code: HttpStatus.UNAUTHORIZED,
-          message: INVALID_CREDENTIALS,
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: USER_NOT_FOUND,
         });
       }
 
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-        throw new UnauthorizedException({
-          status_code: HttpStatus.UNAUTHORIZED,
-          message: INVALID_CREDENTIALS,
+      const isPasswordValid = bcrypt.compareSync(oldPassword, user.password);
+      if (!isPasswordValid) {
+        throw new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: INVALID_PASSWORD,
         });
       }
 
-      const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
-
-      const responsePayload = {
-        access_token,
-        data: {
-          user: {
-            id: user.id,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email,
-            role: user.user_type,
-            avatar_url: user.profile.profile_pic_url,
-          },
+      await this.userService.updateUserRecord({
+        updatePayload: { password: newPassword },
+        identifierOptions: {
+          identifierType: 'id',
+          identifier: user.id,
         },
-      };
-
-      return { message: LOGIN_SUCCESSFUL, ...responsePayload };
-    } catch (error) {
-      console.log('AuthenticationServiceError ~ loginError ~', error);
-      CustomExceptionHandler(error);
-      throw new InternalServerErrorException({
-        message: LOGIN_ERROR,
-        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
+
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Password updated successfully',
+      };
+    } catch (error) {
+      console.log('AuthenticationServiceError ~ changePasswordError ~', error);
+      throw new InternalServerErrorException('Error occurred while changing password');
     }
+  }
+
+  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
+    const { email, password } = loginDto;
+
+    const user = await this.userService.getUserRecord({
+      identifier: email,
+      identifierType: 'email',
+    });
+
+    if (!user) {
+      throw new CustomHttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      throw new CustomHttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+
+    const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
+
+    const responsePayload = {
+      access_token,
+      data: {
+        user: {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          role: user.user_type,
+          avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
+        },
+      },
+    };
+
+    return { message: LOGIN_SUCCESSFUL, ...responsePayload };
   }
 
   private async validateUserAndPassword(user_id: string, password: string) {
@@ -325,6 +361,51 @@ export default class AuthenticationService {
         secret: secret.base32,
         qr_code_url: qrCodeUrl,
       },
+    };
+  }
+  generateBackupCodes(): string[] {
+    const codes = [];
+    for (let i = 0; i < 5; i++) {
+      codes.push(Math.floor(10000000 + Math.random() * 90000000).toString());
+    }
+    return codes;
+  }
+
+  async verify2fa(verify2faDto: Verify2FADto, user_id: string) {
+    const user = await this.userService.getUserRecord({ identifier: user_id, identifierType: 'id' });
+    if (!user) {
+      return { status_code: 404, message: USER_NOT_FOUND };
+    }
+    if (!user.secret) {
+      throw new BadRequestException({ status_code: 400, message: USER_NOT_ENABLED_2FA });
+    }
+
+    const verify = speakeasy.totp.verify({
+      secret: user.secret,
+      encoding: 'base32',
+      token: verify2faDto.totp_code,
+    });
+    if (!verify) {
+      throw new BadRequestException({ status_code: 400, message: INCORRECT_TOTP_CODE });
+    }
+
+    const backup_codes = this.generateBackupCodes();
+    const payload = {
+      backup_codes,
+      is_2fa_enabled: true,
+    };
+    await this.userService.updateUserRecord({
+      updatePayload: payload,
+      identifierOptions: {
+        identifierType: 'id',
+        identifier: user.id,
+      },
+    });
+
+    return {
+      status_code: HttpStatus.OK,
+      message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+      data: { backup_codes: backup_codes },
     };
   }
 
@@ -420,7 +501,12 @@ export default class AuthenticationService {
 
     const otp = await this.otpService.createOtp(user.id);
 
-    await this.emailService.sendLoginOtp(user.email, otp.token);
+    const emailData = new SendEmailDto();
+    emailData.to = user.email;
+    emailData.subject = 'Login with OTP';
+    emailData.template = 'login-otp';
+    emailData.context = { token: otp.token, email: user.email };
+    await this.emailService.sendEmail(emailData);
 
     return {
       message: SIGN_IN_OTP_SENT,

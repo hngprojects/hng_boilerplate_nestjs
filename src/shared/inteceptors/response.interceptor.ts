@@ -1,49 +1,49 @@
-import { CallHandler, ExecutionContext, HttpException, HttpStatus, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  Logger,
+  CallHandler,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(ResponseInterceptor.name);
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
       map((res: any) => this.responseHandler(res, context)),
-      catchError((err: HttpException) => throwError(() => this.errorHandler(err, context)))
+      catchError((err: unknown) => throwError(() => this.errorHandler(err, context)))
     );
   }
 
-  errorHandler(exception: HttpException, context: ExecutionContext) {
-    const ctx = context.switchToHttp();
-    const response = ctx.getResponse();
-    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    const exceptionResponse: any = exception.getResponse();
-
-    let errorMessage = 'An error occurred';
-
-    if (typeof exceptionResponse === 'object' && 'message' in exceptionResponse) {
-      if (Array.isArray(exceptionResponse.message)) {
-        errorMessage = exceptionResponse.message.join(', ');
-      } else {
-        errorMessage = exceptionResponse.message;
-      }
-    }
-
-    response.status(status).json({
-      status_code: status,
-      message: errorMessage,
+  errorHandler(exception: unknown, context: ExecutionContext) {
+    const req = context.switchToHttp().getRequest();
+    if (exception instanceof HttpException) return exception;
+    this.logger.error(
+      `Error processing request for ${req.method} ${req.url}, Message: ${exception['message']}, Stack: ${exception['stack']}`
+    );
+    return new InternalServerErrorException({
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Internal server error',
     });
   }
 
   responseHandler(res: any, context: ExecutionContext) {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse();
-    const status_code = response.statusCode;
+    const status = response.statusCode;
 
     response.setHeader('Content-Type', 'application/json');
     if (typeof res === 'object') {
       const { message, ...data } = res;
 
       return {
-        status: status_code,
+        status,
         message,
         ...data,
       };

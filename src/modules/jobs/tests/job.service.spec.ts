@@ -28,21 +28,19 @@ describe('JobsService', () => {
     user_type: UserType.USER,
     owned_organisations: [],
     created_organisations: [],
-    invites: [],
     profile: null,
     testimonials: [],
+    backup_codes: [],
     organisationMembers: [],
     jobs: [],
     created_at: new Date(),
     updated_at: new Date(),
-    hashPassword: () => null,
-
     totp_code: 28282828,
     encryptBackupCodes: async () => {},
     backup_codes_2fa: null,
-
+    notification_settings: [],
     notifications: [],
-
+    hashPassword: () => null,
   };
 
   const mockJob: Job = {

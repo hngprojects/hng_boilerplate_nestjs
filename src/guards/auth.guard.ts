@@ -1,8 +1,8 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, HttpStatus } from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import appConfig from '../../config/auth.config';
 import { Request } from 'express';
+import appConfig from '../../config/auth.config';
 import { IS_PUBLIC_KEY } from '../helpers/skipAuth';
 import { UNAUTHENTICATED_MESSAGE } from '../helpers/SystemMessages';
 
@@ -28,6 +28,7 @@ export class AuthGuard implements CanActivate {
 
     if (!token) {
       throw new UnauthorizedException({
+        status: 'error',
         message: UNAUTHENTICATED_MESSAGE,
         status_code: HttpStatus.UNAUTHORIZED,
       });
@@ -40,6 +41,7 @@ export class AuthGuard implements CanActivate {
 
       if (this.isExpiredToken(payload)) {
         throw new UnauthorizedException({
+          status: 'error',
           message: UNAUTHENTICATED_MESSAGE,
           status_code: HttpStatus.UNAUTHORIZED,
         });
@@ -48,6 +50,7 @@ export class AuthGuard implements CanActivate {
       request['token'] = token;
     } catch {
       throw new UnauthorizedException({
+        status: 'error',
         message: UNAUTHENTICATED_MESSAGE,
         status_code: HttpStatus.UNAUTHORIZED,
       });
