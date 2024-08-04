@@ -39,6 +39,7 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { FaqModule } from './modules/faq/faq.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
+import { TeamsModule } from './modules/teams/teams.module';
 
 @Module({
   providers: [
@@ -111,6 +112,7 @@ import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/
     NotificationsModule,
     WaitlistModule,
     NewsletterSubscriptionModule,
+    TeamsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
