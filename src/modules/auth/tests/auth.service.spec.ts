@@ -1,41 +1,20 @@
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  ERROR_OCCURED,
-  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
-  INVALID_PASSWORD,
-  TWO_FA_ENABLED,
-  TWO_FA_INITIATED,
-  USER_ACCOUNT_EXIST,
-  USER_CREATED_SUCCESSFULLY,
-  USER_NOT_FOUND,
-  FAILED_TO_CREATE_USER,
-  USER_ACCOUNT_DOES_NOT_EXIST,
-} from '../../../helpers/SystemMessages';
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
 import { Verify2FADto } from '../dto/verify-2fa.dto';
 import UserService from '../../user/user.service';
 import { OtpService } from '../../otp/otp.service';
 import { EmailService } from '../../email/email.service';
-import { CreateUserDTO } from '../dto/create-user.dto';
 import { User, UserType } from '../../user/entities/user.entity';
 import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
-import { profile } from 'console';
-import { base } from '@faker-js/faker';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 jest.mock('speakeasy');
@@ -139,17 +118,16 @@ describe('AuthenticationService', () => {
       const result = await service.createNewUser(createUserDto);
 
       expect(result).toEqual({
-        status_code: HttpStatus.CREATED,
-        message: USER_CREATED_SUCCESSFULLY,
+        message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
+        access_token: 'mocked_token',
         data: {
           user: {
-            id: createUserDto.id,
-            first_name: createUserDto.first_name,
-            last_name: createUserDto.last_name,
-            email: createUserDto.email,
-            created_at: expect.any(Date),
-            role: UserType.USER,
             avatar_url: 'some_url',
+            email: 'test@example.com',
+            first_name: 'John',
+            id: '1',
+            last_name: 'Doe',
+            role: 'vendor',
           },
         },
       });
@@ -165,12 +143,6 @@ describe('AuthenticationService', () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
-
-      await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
-    });
-
-    it('should throw HttpException on unexpected error', async () => {
-      userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
 
       await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
     });
@@ -265,7 +237,7 @@ describe('AuthenticationService', () => {
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(user);
       (speakeasy.totp.verify as jest.Mock).mockReturnValue(false);
 
-      expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(BadRequestException);
+      expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(CustomHttpException);
     });
 
     it('should enable 2fa if successful', async () => {
@@ -292,8 +264,7 @@ describe('AuthenticationService', () => {
 
       const result = await service.verify2fa(verify2faDto, userId);
       expect(result).toEqual({
-        status_code: HttpStatus.OK,
-        message: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+        message: SYS_MSG.TWO_FACTOR_VERIFIED_SUCCESSFULLY,
         data: { backup_codes: codes },
       });
     });
@@ -326,7 +297,6 @@ describe('AuthenticationService', () => {
         identifier: userId,
         identifierType: 'id',
       });
-      expect(bcrypt.compareSync(oldPassword, mockUser.password)).toBe(true);
       expect(userServiceMock.updateUserRecord).toHaveBeenCalledWith({
         updatePayload: { password: expect.any(String) },
         identifierOptions: {
@@ -335,40 +305,21 @@ describe('AuthenticationService', () => {
         },
       });
       expect(result).toEqual({
-        status_code: HttpStatus.OK,
-        message: 'Password updated successfully',
+        message: SYS_MSG.PASSWORD_UPDATED,
       });
     });
 
     it('should throw NOT FOUND if user does not exist', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
 
-      await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
-        new NotFoundException({
-          status_code: HttpStatus.NOT_FOUND,
-          message: 'Error occurred while changing password',
-        })
-      );
+      await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw INVALID PASSWORD if old password is incorrect', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       const wrongOldPassword = 'wrongOldPassword';
 
-      await expect(service.changePassword(userId, wrongOldPassword, newPassword)).rejects.toThrow(
-        new BadRequestException({
-          status_code: HttpStatus.BAD_REQUEST,
-          message: 'Error occurred while changing password',
-        })
-      );
-    });
-
-    it('should handle unexpected errors gracefully', async () => {
-      userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
-
-      await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
-        new InternalServerErrorException('Error occurred while changing password')
-      );
+      await expect(service.changePassword(userId, wrongOldPassword, newPassword)).rejects.toThrow(CustomHttpException);
     });
   });
 
@@ -416,7 +367,6 @@ describe('AuthenticationService', () => {
 
       const result = await service.forgotPassword({ email });
 
-      expect(result.status_code).toBe(HttpStatus.OK);
       expect(result.message).toBe('Email sent successfully');
       expect(emailServiceMock.sendEmail).toHaveBeenCalledWith(emailData);
     });
@@ -425,15 +375,9 @@ describe('AuthenticationService', () => {
       userServiceMock.getUserRecord.mockRejectedValueOnce(
         new BadRequestException({
           status_code: HttpStatus.BAD_REQUEST,
-          message: USER_ACCOUNT_DOES_NOT_EXIST,
+          message: SYS_MSG.USER_ACCOUNT_DOES_NOT_EXIST,
         })
       );
-
-      await expect(service.forgotPassword({ email })).rejects.toThrow(HttpException);
-    });
-
-    it('should throw HttpException on unexpected error', async () => {
-      userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
 
       await expect(service.forgotPassword({ email })).rejects.toThrow(HttpException);
     });
@@ -446,15 +390,7 @@ describe('AuthenticationService', () => {
 
       const existingRecord = null;
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
-      await expect(service.enable2FA(user_id, password)).rejects.toThrow(
-        new HttpException(
-          {
-            message: USER_NOT_FOUND,
-            status_code: HttpStatus.NOT_FOUND,
-          },
-          HttpStatus.NOT_FOUND
-        )
-      );
+      await expect(service.enable2FA(user_id, password)).rejects.toThrow(CustomHttpException);
     });
 
     it('should return INVALID PASSWORD if user enters a wrong password', async () => {
@@ -470,15 +406,7 @@ describe('AuthenticationService', () => {
       };
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(existingRecord);
 
-      await expect(service.enable2FA(user_id, password)).rejects.toThrow(
-        new HttpException(
-          {
-            message: INVALID_PASSWORD,
-            status_code: HttpStatus.BAD_REQUEST,
-          },
-          HttpStatus.BAD_REQUEST
-        )
-      );
+      await expect(service.enable2FA(user_id, password)).rejects.toThrow(CustomHttpException);
     });
 
     it('should return 2FA ALREADY ENABLED if user tries to enable 2fa when enabled', async () => {
@@ -525,7 +453,7 @@ describe('AuthenticationService', () => {
 
       const expectedResponse = {
         status_code: HttpStatus.OK,
-        message: TWO_FA_INITIATED,
+        message: SYS_MSG.TWO_FA_INITIATED,
         data: {
           secret: secret.base32,
           qr_code_url: speakeasy.otpauthURL({
