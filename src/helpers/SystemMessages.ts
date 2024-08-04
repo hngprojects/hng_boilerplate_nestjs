@@ -37,3 +37,4 @@ export const FORBIDDEN_ACTION = 'You dont have the permission to perform this ac
 export const ORG_NOT_FOUND = 'Organisation not found';
 export const NOT_ORG_OWNER = 'You do not have permission to update this organisation';
 export const PASSWORD_UPDATED = 'Password updated successfully';
+export const REQUEST_SUCCESSFUL = 'Request completed successfully';

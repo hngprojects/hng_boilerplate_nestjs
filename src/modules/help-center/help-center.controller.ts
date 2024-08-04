@@ -10,8 +10,6 @@ import {
   NotFoundException,
   Post,
   Query,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
@@ -21,6 +19,10 @@ import { GetHelpCenterDto } from './dto/get-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { HelpCenter } from './interface/help-center.interface';
 import { skipAuth } from 'src/helpers/skipAuth';
+import {
+  HelpCenterMultipleInstancResponseType,
+  HelpCenterSingleInstancResponseType,
+} from './dto/help-center.response.dto';
 
 @ApiTags('help-center')
 @Controller('help-center')
@@ -32,7 +34,7 @@ export class HelpCenterController {
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
   @ApiResponse({ status: 422, description: 'Invalid input data.' })
-  async create(@Body() createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenter> {
+  async create(@Body() createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
     return this.helpCenterService.create(createHelpCenterDto);
   }
 
@@ -49,7 +51,7 @@ export class HelpCenterController {
   @ApiOperation({ summary: 'Get a help center topic by ID' })
   @ApiResponse({ status: 200, description: 'The found record' })
   @ApiResponse({ status: 404, description: 'Topic not found' })
-  async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenter> {
+  async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
     const helpCenter = await this.helpCenterService.findOne(params.id);
     if (!helpCenter) {
       throw new NotFoundException(`Help center topic with ID ${params.id} not found`);
@@ -62,7 +64,7 @@ export class HelpCenterController {
   @ApiOperation({ summary: 'Search help center topics' })
   @ApiResponse({ status: 200, description: 'The found records' })
   @ApiResponse({ status: 422, description: 'Invalid search criteria.' })
-  async search(@Query() query: SearchHelpCenterDto): Promise<HelpCenter[]> {
+  async search(@Query() query: SearchHelpCenterDto): Promise<HelpCenterMultipleInstancResponseType> {
     return this.helpCenterService.search(query);
   }
 
