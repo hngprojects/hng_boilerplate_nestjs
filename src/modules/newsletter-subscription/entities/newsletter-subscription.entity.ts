@@ -1,8 +1,8 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, DeleteDateColumn, Entity, ManyToOne } from 'typeorm';
+import { Column, DeleteDateColumn, Entity } from 'typeorm';
 
 @Entity('newsletters')
-export class Newsletter extends AbstractBaseEntity {
+export class NewsletterSubscription extends AbstractBaseEntity {
   @Column({ unique: true })
   email: string;
 
