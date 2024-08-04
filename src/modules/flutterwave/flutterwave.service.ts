@@ -1,9 +1,10 @@
 import { makePaymentDto } from './dto/make-payment.dto';
-
+import * as dotenv from 'dotenv';
 const { Injectable, HttpStatus } = require('@nestjs/common');
 const axios = require('axios');
 const Flutterwave = require('flutterwave-node-v3');
 const { v4: uuid4 } = require('uuid');
+dotenv.config();
 
 @Injectable()
 export class FlutterwaveService {
@@ -136,10 +137,11 @@ export class FlutterwaveService {
           currency: 'NGN',
           redirect_url: 'http://localhost:3008/payment/flutterwave/:id',
           payment_plan: data.plan_id,
+          payment_options: 'card',
           customer: {
             email: data.email,
             name: data.full_name,
-            phonenumber: data.phone_number,
+            phoneNumber: data.phone_number,
           },
           customizations: {
             title: 'Flutterwave Standard Payment',
@@ -152,7 +154,6 @@ export class FlutterwaveService {
           },
         }
       );
-      console.log(response)
       return response;
     } catch (error) {
       return {

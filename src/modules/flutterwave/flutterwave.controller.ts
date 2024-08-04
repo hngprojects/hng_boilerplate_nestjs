@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { FlutterwaveService } from './flutterwave.service';
 import { CreateFlutterwaveDto } from './dto/create-paymentplan.dto';
 import { UpdateFlutterwaveDto } from './dto/update-flutterwave.dto';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @Controller('payment/flutterwave')
 export class FlutterwaveController {
@@ -40,6 +40,7 @@ export class FlutterwaveController {
   activateSubscription(@Param() id: string) {
     return this.flutterwaveService.activateSubscription(id);
   }
+
   @Get('subscription')
   GetAllSubscription() {
     return this.flutterwaveService.getAllSubscription();
@@ -48,6 +49,6 @@ export class FlutterwaveController {
   @skipAuth()
   @Post('payment')
   makePayment(@Body() data) {
-    return this.flutterwaveService.makePayment(data)
+    return this.flutterwaveService.makePayment(data);
   }
 }
