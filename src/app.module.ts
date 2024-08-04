@@ -38,6 +38,7 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { FaqModule } from './modules/faq/faq.module';
+import { NewsletterModule } from './modules/newsletter/newsletter.module';
 
 @Module({
   providers: [
@@ -103,6 +104,7 @@ import { FaqModule } from './modules/faq/faq.module';
     HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
+    NewsletterModule,
   ],
   controllers: [HealthController, ProbeController],
 })
