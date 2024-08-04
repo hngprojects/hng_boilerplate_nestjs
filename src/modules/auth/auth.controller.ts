@@ -1,7 +1,6 @@
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
-import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';

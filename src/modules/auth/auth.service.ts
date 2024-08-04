@@ -47,13 +47,14 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
 
+    const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
+
     const responsePayload = {
       user: {
         id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
-        created_at: user.created_at,
         avatar_url: user.profile.profile_pic_url,
         role: user.user_type,
       },
@@ -61,6 +62,7 @@ export default class AuthenticationService {
 
     return {
       message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
+      access_token,
       data: responsePayload,
     };
   }

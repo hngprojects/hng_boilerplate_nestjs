@@ -1,30 +1,20 @@
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import * as SYS_MSG from '../../../helpers/SystemMessages';
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
 import { Verify2FADto } from '../dto/verify-2fa.dto';
 import UserService from '../../user/user.service';
 import { OtpService } from '../../otp/otp.service';
 import { EmailService } from '../../email/email.service';
-import { CreateUserDTO } from '../dto/create-user.dto';
 import { User, UserType } from '../../user/entities/user.entity';
 import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
 import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
-import { profile } from 'console';
-import { base } from '@faker-js/faker';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 jest.mock('speakeasy');
@@ -129,15 +119,15 @@ describe('AuthenticationService', () => {
 
       expect(result).toEqual({
         message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
+        access_token: 'mocked_token',
         data: {
           user: {
-            id: createUserDto.id,
-            first_name: createUserDto.first_name,
-            last_name: createUserDto.last_name,
-            email: createUserDto.email,
-            created_at: expect.any(Date),
-            role: UserType.USER,
             avatar_url: 'some_url',
+            email: 'test@example.com',
+            first_name: 'John',
+            id: '1',
+            last_name: 'Doe',
+            role: 'vendor',
           },
         },
       });
