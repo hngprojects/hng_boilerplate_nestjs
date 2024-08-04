@@ -14,7 +14,13 @@ import {
   FAILED_TO_CREATE_USER,
   USER_ACCOUNT_DOES_NOT_EXIST,
 } from '../../../helpers/SystemMessages';
-import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import AuthenticationService from '../auth.service';
 import { Verify2FADto } from '../dto/verify-2fa.dto';
@@ -30,6 +36,7 @@ import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { profile } from 'console';
 import { base } from '@faker-js/faker';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 jest.mock('speakeasy');
 
@@ -77,6 +84,7 @@ describe('AuthenticationService', () => {
           useValue: {
             sendForgotPasswordMail: jest.fn(),
             sendUserEmailConfirmationOtp: jest.fn(),
+            sendEmail: jest.fn(),
           },
         },
       ],
@@ -214,7 +222,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(null);
 
-      //await expect(service.loginUser(loginDto)).toBe({ message: 'Invalid password or email', status_code: HttpStatus.UNAUTHORIZED });
+      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw an unauthorized error for invalid password', async () => {
@@ -233,14 +241,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-    });
-
-    it('should handle unexpected errors gracefully', async () => {
-      const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
-
-      userServiceMock.getUserRecord.mockRejectedValue(new Error('Unexpected error'));
-
-      await expect(service.loginUser(loginDto)).rejects.toThrow(HttpException);
+      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
@@ -298,6 +299,79 @@ describe('AuthenticationService', () => {
     });
   });
 
+  describe('changePassword', () => {
+    const userId = 'some-uuid-here';
+    const oldPassword = 'oldPassword123';
+    const newPassword = 'newPassword123';
+
+    let mockUser: Partial<User>;
+
+    beforeEach(async () => {
+      mockUser = {
+        id: userId,
+        email: 'test@example.com',
+        password: await bcrypt.hash(oldPassword, 10),
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+    });
+
+    it('should change password successfully', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
+      userServiceMock.updateUserRecord.mockResolvedValueOnce(undefined);
+
+      const result = await service.changePassword(userId, oldPassword, newPassword);
+
+      expect(userServiceMock.getUserRecord).toHaveBeenCalledWith({
+        identifier: userId,
+        identifierType: 'id',
+      });
+      expect(bcrypt.compareSync(oldPassword, mockUser.password)).toBe(true);
+      expect(userServiceMock.updateUserRecord).toHaveBeenCalledWith({
+        updatePayload: { password: expect.any(String) },
+        identifierOptions: {
+          identifierType: 'id',
+          identifier: userId,
+        },
+      });
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: 'Password updated successfully',
+      });
+    });
+
+    it('should throw NOT FOUND if user does not exist', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+
+      await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
+        new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: 'Error occurred while changing password',
+        })
+      );
+    });
+
+    it('should throw INVALID PASSWORD if old password is incorrect', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
+      const wrongOldPassword = 'wrongOldPassword';
+
+      await expect(service.changePassword(userId, wrongOldPassword, newPassword)).rejects.toThrow(
+        new BadRequestException({
+          status_code: HttpStatus.BAD_REQUEST,
+          message: 'Error occurred while changing password',
+        })
+      );
+    });
+
+    it('should handle unexpected errors gracefully', async () => {
+      userServiceMock.getUserRecord.mockRejectedValueOnce(new Error('Unexpected error'));
+
+      await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
+        new InternalServerErrorException('Error occurred while changing password')
+      );
+    });
+  });
+
   describe('generateBackupCodes', () => {
     it('should generate random backup codes when called', () => {
       const codes = service.generateBackupCodes();
@@ -306,6 +380,16 @@ describe('AuthenticationService', () => {
   });
   describe('forgotPassword', () => {
     const email = 'test@example.com';
+    const emailData = {
+      to: email,
+      subject: 'Reset Password',
+      template: 'reset-password',
+      context: {
+        link: 'http://example.com/auth/reset-password',
+        email: email,
+        token: '123456',
+      },
+    };
 
     beforeEach(() => {
       process.env.BASE_URL = 'http://example.com';
@@ -325,19 +409,16 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
-      emailServiceMock.sendForgotPasswordMail.mockResolvedValueOnce(undefined);
-
-      const result = await service.forgotPassword({ email });
-
-      expect(emailServiceMock.sendForgotPasswordMail).toHaveBeenCalledWith(
-        email,
-        'http://example.com/auth/reset-password',
-        '123456'
-      );
-      expect(result).toEqual({
+      emailServiceMock.sendEmail.mockResolvedValueOnce({
         status_code: HttpStatus.OK,
         message: 'Email sent successfully',
       });
+
+      const result = await service.forgotPassword({ email });
+
+      expect(result.status_code).toBe(HttpStatus.OK);
+      expect(result.message).toBe('Email sent successfully');
+      expect(emailServiceMock.sendEmail).toHaveBeenCalledWith(emailData);
     });
 
     it('should throw error if user not found', async () => {

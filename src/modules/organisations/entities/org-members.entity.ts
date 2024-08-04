@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from './../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from './organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
+import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
 
 @Entity()
 export class OrganisationMember extends AbstractBaseEntity {
@@ -12,8 +13,8 @@ export class OrganisationMember extends AbstractBaseEntity {
   @ManyToOne(() => Organisation, organisation => organisation.organisationMembers)
   organisation_id: Organisation;
 
-  @Column({ nullable: true })
-  role: string;
+  @ManyToOne(() => OrganisationRole, role => role.organisationMembers)
+  role: OrganisationRole;
 
   @ManyToOne(() => Profile)
   profile_id: Profile;

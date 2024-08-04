@@ -1,15 +1,25 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../../modules/user/entities/user.entity';
+import { User, UserType } from '../../modules/user/entities/user.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Product } from '../../modules/products/entities/product.entity';
+import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
-import { ProductSizeType } from '../../modules/products/entities/product-variant.entity';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { CreateAdminDto } from './dto/admin.dto';
+import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
+import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
 
 @Injectable()
 export class SeedingService {
@@ -43,8 +53,6 @@ export class SeedingService {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
-
-      const notificationRepository = this.dataSource.getRepository(Notification);
 
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
@@ -149,49 +157,33 @@ export class SeedingService {
         const p1 = productRepository.create({
           name: 'Product 1',
           description: 'Description for Product 1',
-          variants: [
-            {
-              size: ProductSizeType.STANDARD,
-              quantity: 1,
-              price: 500,
-            },
-          ],
+          size: ProductSizeType.STANDARD,
+          quantity: 1,
+          price: 500,
           org: or1,
         });
         const p2 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          variants: [
-            {
-              size: ProductSizeType.LARGE,
-              quantity: 2,
-              price: 50,
-            },
-          ],
+          size: ProductSizeType.LARGE,
+          quantity: 2,
+          price: 50,
           org: or2,
         });
         const p3 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          variants: [
-            {
-              size: ProductSizeType.STANDARD,
-              quantity: 2,
-              price: 50,
-            },
-          ],
+          size: ProductSizeType.STANDARD,
+          quantity: 2,
+          price: 50,
           org: or1,
         });
         const p4 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          variants: [
-            {
-              size: ProductSizeType.SMALL,
-              quantity: 2,
-              price: 50,
-            },
-          ],
+          size: ProductSizeType.SMALL,
+          quantity: 2,
+          price: 50,
           org: or2,
         });
 
@@ -203,16 +195,16 @@ export class SeedingService {
         }
 
         const inv1 = inviteRepository.create({
-          email: 'Org 1',
-          status: 'pending',
-          user: savedUsers[0],
           organisation: savedOrganisations[0],
+          isGeneric: true,
+          isAccepted: false,
+          token: uuidv4(),
         });
 
         const inv2 = inviteRepository.create({
-          email: 'Org 1',
-          status: 'pending',
-          user: savedUsers[1],
+          isGeneric: true,
+          isAccepted: false,
+          token: uuidv4(),
           organisation: savedOrganisations[1],
         });
 
@@ -269,6 +261,26 @@ export class SeedingService {
     } catch (error) {
       console.log('Error fetching users:', error);
       throw new BadRequestException('Error fetching users');
+    }
+  }
+
+  async createSuperAdmin({ secret, ...adminDetails }: CreateAdminDto): Promise<CreateAdminResponseDto> {
+    try {
+      const userRepository = this.dataSource.getRepository(User);
+      const exists = await userRepository.findOne({ where: { email: adminDetails.email } });
+      if (exists) throw new ConflictException('A user already exist with the same email');
+
+      const user = userRepository.create(adminDetails);
+      const { ADMIN_SECRET } = process.env;
+      if (secret !== ADMIN_SECRET) throw new UnauthorizedException(INVALID_ADMIN_SECRET);
+
+      user.user_type = UserType.SUPER_ADMIN;
+      const admin = await userRepository.save(user);
+      return { status: 201, message: ADMIN_CREATED, data: admin };
+    } catch (error) {
+      console.log('Error creating superAdmin:', error);
+      if (error instanceof UnauthorizedException || error instanceof ConflictException) throw error;
+      throw new InternalServerErrorException(SERVER_ERROR);
     }
   }
 }

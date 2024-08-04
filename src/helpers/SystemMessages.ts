@@ -33,3 +33,7 @@ export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
 export const ONLY_IMAGE_FILES_ACCEPTED = 'Only image files with .jpg, .jpeg, or .png extensions are allowed';
 export const USER_PROFILE_NOT_FOUND = 'User profile does not exist';
+export const INVALID_ADMIN_SECRET = 'Invalid access secret';
+export const ADMIN_CREATED = 'Admin Created Successfully';
+export const SERVER_ERROR = 'Sorry a server error occured';
+export const FORBIDDEN_ACTION = 'You dont have the permission to perform this action';
