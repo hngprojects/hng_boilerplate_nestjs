@@ -46,6 +46,7 @@ import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import CustomExceptionHandler from '../../helpers/exceptionHandler';
 import { SendEmailDto } from '../email/dto/email.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export default class AuthenticationService {
@@ -179,55 +180,40 @@ export default class AuthenticationService {
   }
 
   async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
-    try {
-      const { email, password } = loginDto;
+    const { email, password } = loginDto;
 
-      const user = await this.userService.getUserRecord({
-        identifier: email,
-        identifierType: 'email',
-      });
+    const user = await this.userService.getUserRecord({
+      identifier: email,
+      identifierType: 'email',
+    });
 
-      if (!user) {
-        throw new UnauthorizedException({
-          status_code: HttpStatus.UNAUTHORIZED,
-          message: INVALID_CREDENTIALS,
-        });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-        throw new UnauthorizedException({
-          status_code: HttpStatus.UNAUTHORIZED,
-          message: INVALID_CREDENTIALS,
-        });
-      }
-
-      const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
-
-      const responsePayload = {
-        access_token,
-        data: {
-          user: {
-            id: user.id,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email,
-            role: user.user_type,
-            avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
-          },
-        },
-      };
-
-      return { message: LOGIN_SUCCESSFUL, ...responsePayload };
-    } catch (error) {
-      console.log('AuthenticationServiceError ~ loginError ~', error);
-      CustomExceptionHandler(error);
-      throw new InternalServerErrorException({
-        message: LOGIN_ERROR,
-        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-      });
+    if (!user) {
+      throw new CustomHttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      throw new CustomHttpException(INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+
+    const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
+
+    const responsePayload = {
+      access_token,
+      data: {
+        user: {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          role: user.user_type,
+          avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
+        },
+      },
+    };
+
+    return { message: LOGIN_SUCCESSFUL, ...responsePayload };
   }
 
   private async validateUserAndPassword(user_id: string, password: string) {

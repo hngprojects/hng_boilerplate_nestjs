@@ -36,6 +36,7 @@ import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { profile } from 'console';
 import { base } from '@faker-js/faker';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 jest.mock('speakeasy');
 
@@ -221,7 +222,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(null);
 
-      //await expect(service.loginUser(loginDto)).toBe({ message: 'Invalid password or email', status_code: HttpStatus.UNAUTHORIZED });
+      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw an unauthorized error for invalid password', async () => {
@@ -240,14 +241,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-    });
-
-    it('should handle unexpected errors gracefully', async () => {
-      const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
-
-      userServiceMock.getUserRecord.mockRejectedValue(new Error('Unexpected error'));
-
-      await expect(service.loginUser(loginDto)).rejects.toThrow(HttpException);
+      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
