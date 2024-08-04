@@ -5,8 +5,7 @@ import { HelpCenterEntity } from '../help-center/entities/help-center.entity'; /
 import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
-import { HelpCenter } from './interface/help-center.interface';
-import { REQUEST_SUCCESSFUL } from 'src/helpers/SystemMessages';
+import { REQUEST_SUCCESSFUL } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class HelpCenterService {
@@ -22,7 +21,7 @@ export class HelpCenterService {
     });
     const newEntity = await this.helpCenterRepository.save(helpCenter);
     return {
-      status_code: HttpStatus.OK,
+      status_code: HttpStatus.CREATED,
       message: REQUEST_SUCCESSFUL,
       data: newEntity,
     };
@@ -68,10 +67,11 @@ export class HelpCenterService {
 
   async updateTopic(id: string, updateHelpCenterDto: UpdateHelpCenterDto) {
     await this.helpCenterRepository.update(id, updateHelpCenterDto);
-    const query = this.helpCenterRepository.findOneBy({ id });
+    const query = await this.helpCenterRepository.findOneBy({ id });
     return {
       status_code: HttpStatus.OK,
       message: REQUEST_SUCCESSFUL,
+      data: query,
     };
   }
 
