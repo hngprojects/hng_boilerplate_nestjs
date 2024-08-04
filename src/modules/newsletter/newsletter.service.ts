@@ -18,11 +18,11 @@ export class NewsletterService {
 
     const existingSubscription = await this.newsletterRepository.findOne({ where: { email: email } });
     if (existingSubscription) {
-      return { message: 'Newsletter subscription successful' };
+      return { message: 'Subscriber subscription successful' };
     }
     const newSubscription = this.newsletterRepository.create({ ...createNewsletterDto });
     await this.newsletterRepository.save(newSubscription);
-    const response = { status: 'success', message: 'Newsletter subscription successful' };
+    const response = { status: 'success', message: 'Subscriber subscription successful' };
     return response;
   }
 
@@ -40,10 +40,10 @@ export class NewsletterService {
   async remove(id: string) {
     const newsletter = await this.newsletterRepository.findOne({ where: { id } });
     if (!newsletter) {
-      throw new NotFoundException(`Newsletter with ID ${id} not found`);
+      throw new NotFoundException(`Subscriber with ID ${id} not found`);
     }
     await this.newsletterRepository.softDelete(id);
-    return { message: `Newsletter with ID ${id} has been soft deleted` };
+    return { message: `Subscriber with ID ${id} has been soft deleted` };
   }
 
   @UseGuards(SuperAdminGuard)
@@ -58,8 +58,8 @@ export class NewsletterService {
   async restore(id: string) {
     const result = await this.newsletterRepository.restore(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Newsletter with ID ${id} not found or already restored`);
+      throw new NotFoundException(`Subscriber with ID ${id} not found or already restored`);
     }
-    return { message: `Newsletter with ID ${id} has been restored` };
+    return { message: `Subscriber with ID ${id} has been restored` };
   }
 }
