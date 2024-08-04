@@ -1,10 +1,5 @@
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  INCORRECT_TOTP_CODE,
-  TWO_FACTOR_VERIFIED_SUCCESSFULLY,
-  BAD_REQUEST,
-  TWO_FA_INITIATED,
-} from '../../helpers/SystemMessages';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -48,11 +43,11 @@ export default class RegistrationController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+    description: SYS_MSG.TWO_FACTOR_VERIFIED_SUCCESSFULLY,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: INCORRECT_TOTP_CODE,
+    description: SYS_MSG.INCORRECT_TOTP_CODE,
   })
   @Post('2fa/verify')
   verify2fa(@Body() verify2faDto: Verify2FADto, @Req() req) {
@@ -98,8 +93,8 @@ export default class RegistrationController {
     type: Enable2FADto,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
-  @ApiResponse({ status: 400, description: BAD_REQUEST })
+  @ApiResponse({ status: 200, description: SYS_MSG.TWO_FA_INITIATED })
+  @ApiResponse({ status: 400, description: SYS_MSG.BAD_REQUEST })
   @HttpCode(200)
   public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
     const { password } = body;
