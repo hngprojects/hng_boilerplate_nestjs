@@ -35,3 +35,4 @@ export const INVALID_ADMIN_SECRET = 'Invalid access secret';
 export const ADMIN_CREATED = 'Admin Created Successfully';
 export const SERVER_ERROR = 'Sorry a server error occured';
 export const FORBIDDEN_ACTION = 'You dont have the permission to perform this action';
+export const REQUEST_SUCCESSFUL = 'Request completed successfully';
