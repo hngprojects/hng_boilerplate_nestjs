@@ -40,7 +40,6 @@ export class ResponseInterceptor implements NestInterceptor {
 
     response.setHeader('Content-Type', 'application/json');
     if (typeof res === 'object') {
-      console.log(res);
       const { message, ...data } = res;
 
       return {
