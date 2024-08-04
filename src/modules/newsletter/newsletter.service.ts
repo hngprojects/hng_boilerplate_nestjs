@@ -28,7 +28,12 @@ export class NewsletterService {
 
   @UseGuards(SuperAdminGuard)
   async findAll() {
-    return await this.newsletterRepository.find();
+    const subscribers = await this.newsletterRepository.find();
+
+    return subscribers.map(newsletter => ({
+      id: newsletter.id,
+      email: newsletter.email,
+    }));
   }
 
   @UseGuards(SuperAdminGuard)
