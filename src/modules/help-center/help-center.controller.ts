@@ -23,11 +23,11 @@ import { HelpCenter } from './interface/help-center.interface';
 import { skipAuth } from 'src/helpers/skipAuth';
 
 @ApiTags('help-center')
-@ApiBearerAuth()
 @Controller('help-center')
 export class HelpCenterController {
   constructor(private readonly helpCenterService: HelpCenterService) {}
 
+  @ApiBearerAuth()
   @Post('help-center/topics')
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
@@ -66,6 +66,7 @@ export class HelpCenterController {
     return this.helpCenterService.search(query);
   }
 
+  @ApiBearerAuth()
   @Patch('topics/:id')
   @ApiOperation({ summary: 'Update a help center topic by id' })
   @ApiResponse({ status: 200, description: 'Topic updated successfully' })
@@ -121,6 +122,8 @@ export class HelpCenterController {
       }
     }
   }
+
+  @ApiBearerAuth()
   @Delete('topics/:id')
   //@Roles('superadmin')
   @ApiOperation({ summary: 'Delete a help center topic by id' })
