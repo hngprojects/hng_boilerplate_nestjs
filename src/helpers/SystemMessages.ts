@@ -1,5 +1,4 @@
-export const USER_CREATED_SUCCESSFULLY =
-  'User Created Successfully, Kindly check your mail for your verification token';
+export const USER_CREATED_SUCCESSFULLY = 'User Created Successfully';
 export const USER_CREATED = 'User Created Successfully';
 export const FAILED_TO_CREATE_USER = 'Error Occured while creating user, kindly try again';
 export const ERROR_OCCURED = 'Error Occured Performing this request';
@@ -23,7 +22,7 @@ export const TIMEZONE_CREATED_SUCCESSFULLY = 'Timezone created Successfully';
 export const FETCH_TIMEZONE_FAILURE = 'Error Occured while creating Timezone, kindly try again';
 export const SUCCESS = 'Timezone fetched successfully';
 export const TIMEZONE_ALREADY_EXISTS = 'Timezone already exists';
-export const INVALID_CREDENTIALS = 'Invalid email or password';
+export const INVALID_CREDENTIALS = 'Invalid credentials';
 export const LOGIN_SUCCESSFUL = 'Login successful';
 export const LOGIN_ERROR = 'An error occurred during login';
 export const EMAIL_SENT = 'Email sent successfully';
@@ -35,3 +34,7 @@ export const INVALID_ADMIN_SECRET = 'Invalid access secret';
 export const ADMIN_CREATED = 'Admin Created Successfully';
 export const SERVER_ERROR = 'Sorry a server error occured';
 export const FORBIDDEN_ACTION = 'You dont have the permission to perform this action';
+export const ORG_NOT_FOUND = 'Organisation not found';
+export const NOT_ORG_OWNER = 'You do not have permission to update this organisation';
+export const PASSWORD_UPDATED = 'Password updated successfully';
+export const REQUEST_SUCCESSFUL = 'Request completed successfully';

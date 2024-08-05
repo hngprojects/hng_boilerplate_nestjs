@@ -24,12 +24,12 @@ import { OtpService } from './modules/otp/otp.service';
 import { ProductsModule } from './modules/products/products.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
 import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
-import { ProfileModule } from './modules/profile/profile.module';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
@@ -38,6 +38,8 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { FaqModule } from './modules/faq/faq.module';
+import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
+import { TeamsModule } from './modules/teams/teams.module';
 
 @Module({
   providers: [
@@ -60,6 +62,12 @@ import { FaqModule } from './modules/faq/faq.module';
   ],
   imports: [
     ConfigModule.forRoot({
+      /*
+       * By default, the package looks for a env file in the root directory of the application.
+       * We don't use ".env" file because it is prioritize as the same level as real environment variables.
+       * To specify multiple. env files, set the envFilePath property.
+       * If a variable is found in multiple files, the first one takes precedence.
+       */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
       load: [serverConfig, authConfig],
@@ -85,6 +93,7 @@ import { FaqModule } from './modules/faq/faq.module';
     EmailModule,
     InviteModule,
     OrganisationsModule,
+    SqueezeModule,
     NotificationSettingsModule,
     SqueezeModule,
     TestimonialsModule,
@@ -102,6 +111,8 @@ import { FaqModule } from './modules/faq/faq.module';
     HelpCenterModule,
     NotificationsModule,
     WaitlistModule,
+    NewsletterSubscriptionModule,
+    TeamsModule,
   ],
   controllers: [HealthController, ProbeController],
 })

@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BillingPlanService } from './billing-plan.service';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '../../helpers/skipAuth';
 import { BillingPlanDto } from './dto/billing-plan.dto';
 
 @ApiTags('Billing Plans')

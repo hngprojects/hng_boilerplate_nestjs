@@ -6,7 +6,6 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { Permissions } from './entities/permissions.entity';
 
-
 @Injectable()
 export class OrganisationPermissionsService {
   constructor(
