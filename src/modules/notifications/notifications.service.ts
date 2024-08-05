@@ -45,28 +45,21 @@ export class NotificationsService {
     const users = await this.userRepository.find({
       select: ['id'],
     });
-    try {
-      do {
-        const notifications = users.map(user => {
-          return this.notificationRepository.create({
-            message: dto.message,
-            user,
-          });
+    do {
+      const notifications = users.map(user => {
+        return this.notificationRepository.create({
+          message: dto.message,
+          user,
         });
-        await this.notificationRepository.save(notifications);
-        page++;
-      } while (users.length === pageSize);
-      return {
-        status: 'success',
-        message: 'Notification created successfully',
-        data: null,
-      };
-    } catch (error) {
-      throw new CustomHttpException(
-        { message: 'An unexpected error occurred', error: error.message },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+      });
+      await this.notificationRepository.save(notifications);
+      page++;
+    } while (users.length === pageSize);
+    return {
+      status: 'success',
+      message: 'Notification created successfully',
+      data: null,
+    };
   }
 
   async getNotificationsForUser(userId: string) {
