@@ -15,7 +15,7 @@ export class BlogService {
     private userRepository: Repository<User>
   ) {}
 
-  async createBlog(createBlogDto: CreateBlogDto, user: User): Promise<Blog> {
+  async createBlog(createBlogDto: CreateBlogDto, user: User): Promise<any> {
     const fullUser = await this.userRepository.findOne({
       where: { id: user.id },
       select: ['first_name', 'last_name'],
@@ -33,6 +33,17 @@ export class BlogService {
       author: fullUser,
     });
 
-    return this.blogRepository.save(blog);
+    const savedBlog = await this.blogRepository.save(blog);
+    const author = `${fullUser.first_name} ${fullUser.last_name}`;
+
+    return {
+      blog_id: savedBlog.id,
+      title: savedBlog.title,
+      content: savedBlog.content,
+      tags: savedBlog.tags,
+      image_urls: savedBlog.image_urls,
+      author: author,
+      created_at: savedBlog.created_at,
+    };
   }
 }

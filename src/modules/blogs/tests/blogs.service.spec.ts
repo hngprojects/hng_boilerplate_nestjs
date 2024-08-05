@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { getRepositoryToken } from '@nestjs/typeorm';
-
 import { Repository } from 'typeorm';
-import { BlogService } from '../blog.service';
+import { BlogService } from '../blogs.service';
 import { Blog } from '../entities/blog.entity';
 import { User } from '../../user/entities/user.entity';
 
@@ -61,13 +59,23 @@ describe('BlogService', () => {
       blog.created_at = new Date();
       blog.updated_at = new Date();
 
+      const expectedResponse = {
+        blog_id: 'blog-id',
+        title: 'Test Blog',
+        content: 'Test Content',
+        tags: ['test'],
+        image_urls: ['http://example.com/image.jpg'],
+        author: 'John Doe',
+        created_at: blog.created_at,
+      };
+
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(fullUser as unknown as User);
       jest.spyOn(blogRepository, 'create').mockReturnValue(blog);
       jest.spyOn(blogRepository, 'save').mockResolvedValue(blog);
 
       const result = await service.createBlog(createBlogDto, user);
 
-      expect(result).toEqual(blog);
+      expect(result).toEqual(expectedResponse);
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: user.id },
         select: ['first_name', 'last_name'],

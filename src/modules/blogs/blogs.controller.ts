@@ -1,5 +1,5 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
-import { BlogService } from './blog.service';
+import { BlogService } from './blogs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { User } from '../user/entities/user.entity';
 import { CreateBlogDto } from './dtos/create-blog.dto';
@@ -16,20 +16,19 @@ export class BlogController {
   @ApiOperation({ summary: 'Create a new blog' })
   @ApiResponse({ status: 201, description: 'The blog has been successfully created.', type: BlogResponseDto })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<BlogResponseDto> {
-    const user: User = req.user;
-    const blog = await this.blogService.createBlog(createBlogDto, user);
-
-    const author = `${blog.author.first_name} ${blog.author.last_name}`;
-
+  async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<any> {
+    const blog = await this.blogService.createBlog(createBlogDto, req.user);
     return {
-      blog_id: blog.id,
-      title: blog.title,
-      content: blog.content,
-      tags: blog.tags,
-      image_urls: blog.image_urls,
-      author: author,
-      created_at: blog.created_at,
+      message: 'Blog created successfully',
+      data: {
+        blog_id: blog.blog_id,
+        title: blog.title,
+        content: blog.content,
+        image_urls: blog.image_urls,
+        tags: blog.tags,
+        author: blog.author,
+        created_at: blog.created_at,
+      },
     };
   }
 }
