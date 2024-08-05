@@ -20,7 +20,7 @@ import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
 import { Response } from 'express';
-import { createReadStream } from 'fs';
+import { createReadStream, unlink } from 'fs';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -100,5 +100,13 @@ export class OrganisationsController {
     });
 
     fileStream.pipe(res);
+
+    fileStream.on('end', () => {
+      unlink(filePath, err => {
+        if (err) {
+          console.error('Failed to delete file:', err);
+        }
+      });
+    });
   }
 }
