@@ -123,4 +123,19 @@ export class OrganisationsService {
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
+
+  async getOrganizationDetailsById(orgId: string) {
+    try {
+      const orgDetails = await this.organisationRepository.findOne({ where: { id: orgId } });
+      if (!orgId) {
+        throw new BadRequestException('Must Provide a valid organization Id');
+      }
+      return { message: 'Fetched Organization Details Successfully', data: orgDetails };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('An internal server error occured');
+    }
+  }
 }

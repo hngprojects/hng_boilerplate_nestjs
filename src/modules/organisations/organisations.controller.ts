@@ -84,4 +84,22 @@ export class OrganisationsController {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
+
+  @ApiOperation({ summary: 'Get Organization details by Id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Fetched Organization details',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Must provide a valid organization Id',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organization not found',
+  })
+  @Get(':org_id')
+  async getById(@Param('org_id') org_id: string) {
+    return this.organisationsService.getOrganizationDetailsById(org_id);
+  }
 }
