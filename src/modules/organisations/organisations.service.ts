@@ -153,9 +153,6 @@ export class OrganisationsService {
     member.role = newRole;
     await this.organisationMemberRepository.save(member);
 
-    // Log the role change (you might want to implement a separate logging service)
-    console.log(`Role changed for member ${memberId} to ${newRole.name}`);
-
     return {
       message: `${member.user_id.first_name} ${member.user_id.last_name} has successfully been added to the ${newRole.name} role`,
       status_code: 201,
