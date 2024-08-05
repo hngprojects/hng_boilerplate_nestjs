@@ -1,10 +1,11 @@
-import { Injectable, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId, Repository } from 'typeorm';
 import { Otp } from './entities/otp.entity';
 import { User } from '../user/entities/user.entity';
 import { generateSixDigitToken } from '../../utils/generate-token';
 import { isInstance } from 'class-validator';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class OtpService {
@@ -62,6 +63,14 @@ export class OtpService {
       throw new NotFoundException('OTP is invalid');
     }
     return otp;
+  }
+
+  async retrieveUserAndOtp(token: string): Promise<User | null> {
+    const otp = await this.otpRepository.findOne({ where: { token }, relations: ['user'] });
+
+    if (!otp) throw new CustomHttpException('OTP is invalid', HttpStatus.BAD_REQUEST);
+
+    return otp.user;
   }
 
   async deleteOtp(userId: string) {
