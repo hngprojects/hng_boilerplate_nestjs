@@ -10,8 +10,6 @@ import {
   NotFoundException,
   Post,
   Query,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
@@ -20,22 +18,27 @@ import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { GetHelpCenterDto } from './dto/get-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { HelpCenter } from './interface/help-center.interface';
+import { skipAuth } from 'src/helpers/skipAuth';
+import {
+  HelpCenterMultipleInstancResponseType,
+  HelpCenterSingleInstancResponseType,
+} from './dto/help-center.response.dto';
 
 @ApiTags('help-center')
-@ApiBearerAuth()
 @Controller('help-center')
 export class HelpCenterController {
   constructor(private readonly helpCenterService: HelpCenterService) {}
 
+  @ApiBearerAuth()
   @Post('help-center/topics')
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
   @ApiResponse({ status: 422, description: 'Invalid input data.' })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  async create(@Body() createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenter> {
+  async create(@Body() createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
     return this.helpCenterService.create(createHelpCenterDto);
   }
 
+  @skipAuth()
   @Get('topics')
   @ApiOperation({ summary: 'Get all help center topics' })
   @ApiResponse({ status: 200, description: 'The found records' })
@@ -43,11 +46,12 @@ export class HelpCenterController {
     return this.helpCenterService.findAll();
   }
 
+  @skipAuth()
   @Get('topics/:id')
   @ApiOperation({ summary: 'Get a help center topic by ID' })
   @ApiResponse({ status: 200, description: 'The found record' })
   @ApiResponse({ status: 404, description: 'Topic not found' })
-  async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenter> {
+  async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
     const helpCenter = await this.helpCenterService.findOne(params.id);
     if (!helpCenter) {
       throw new NotFoundException(`Help center topic with ID ${params.id} not found`);
@@ -55,14 +59,16 @@ export class HelpCenterController {
     return helpCenter;
   }
 
+  @skipAuth()
   @Get('topics/search')
   @ApiOperation({ summary: 'Search help center topics' })
   @ApiResponse({ status: 200, description: 'The found records' })
   @ApiResponse({ status: 422, description: 'Invalid search criteria.' })
-  async search(@Query() query: SearchHelpCenterDto): Promise<HelpCenter[]> {
+  async search(@Query() query: SearchHelpCenterDto): Promise<HelpCenterMultipleInstancResponseType> {
     return this.helpCenterService.search(query);
   }
 
+  @ApiBearerAuth()
   @Patch('topics/:id')
   @ApiOperation({ summary: 'Update a help center topic by id' })
   @ApiResponse({ status: 200, description: 'Topic updated successfully' })
@@ -118,6 +124,8 @@ export class HelpCenterController {
       }
     }
   }
+
+  @ApiBearerAuth()
   @Delete('topics/:id')
   //@Roles('superadmin')
   @ApiOperation({ summary: 'Delete a help center topic by id' })
