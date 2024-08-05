@@ -18,6 +18,7 @@ import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import { SendEmailDto } from '../email/dto/email.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { UpdatePasswordDto } from './dto/updatePasswordDto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -86,6 +87,13 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.EMAIL_SENT,
     };
+  }
+
+  async updateForgotPassword(updatePasswordDto: UpdatePasswordDto) {
+    const { newPassword, otp } = updatePasswordDto;
+    const user = await this.otpService.retrieveUserAndOtp(otp);
+
+    return this.userService.updateUser(user.id, { password: newPassword }, user);
   }
 
   async changePassword(user_id: string, oldPassword: string, newPassword: string) {
