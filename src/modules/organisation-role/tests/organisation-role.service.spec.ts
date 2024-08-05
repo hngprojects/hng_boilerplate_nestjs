@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConflictException, HttpException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -205,6 +205,59 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.updateRole(updateRoleDto, orgId, roleId)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('removeRole', () => {
+    it('should remove the role successfully', async () => {
+      const orgId = 'c2316d10-5a04-4343-9e53-0173f53f6a51';
+      const roleId = '52f56e95-7e23-4220-a419-96e96c957bcf';
+
+      const organisation = new Organisation();
+      organisation.id = orgId;
+
+      const role = new OrganisationRole();
+      role.id = roleId;
+      role.organisation = organisation;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
+      jest.spyOn(rolesRepository, 'remove').mockResolvedValue(role);
+
+      const result = await service.removeRole(orgId, roleId);
+
+      expect(result).toEqual({
+        status_code: 200,
+        message: 'Role successfully removed',
+      });
+    });
+
+    it('should throw HttpException if the organisation does not exist', async () => {
+      const orgId = 'non-existent-org-id';
+      const roleId = 'role-id';
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(HttpException);
+      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(
+        'The organisation with ID role-id does not exist'
+      );
+    });
+
+    it('should throw HttpException if the role does not exist', async () => {
+      const orgId = 'org-id';
+      const roleId = 'non-existent-role-id';
+
+      const organisation = new Organisation();
+      organisation.id = orgId;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(HttpException);
+      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(
+        'The role with ID non-existent-role-id does not exist'
+      );
     });
   });
 });
