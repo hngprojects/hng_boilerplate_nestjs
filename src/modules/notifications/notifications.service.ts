@@ -22,6 +22,8 @@ import UserService from '../user/user.service';
 import { CreateNotificationError } from './dtos/create-notification-error.dto';
 import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 @Injectable()
 export class NotificationsService {
   constructor(
@@ -34,6 +36,29 @@ export class NotificationsService {
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
+
+  async createGlobalNotifications(dto: CreateNotificationForAllUsersDto) {
+    const users = await this.userRepository.find();
+    try {
+      const notifications = users.map(user => {
+        return this.notificationRepository.create({
+          message: dto.message,
+          user,
+        });
+      });
+      await this.notificationRepository.save(notifications);
+      return {
+        status: 'success',
+        message: 'Notification created successfully',
+        data: null,
+      };
+    } catch (error) {
+      throw new CustomHttpException(
+        { message: 'An unexpected error occurred', error: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
   async getNotificationsForUser(userId: string) {
     try {
