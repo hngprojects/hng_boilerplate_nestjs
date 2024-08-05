@@ -4,10 +4,10 @@ import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Blog extends AbstractBaseEntity {
-  @Column()
+  @Column({ nullable: false })
   title: string;
 
-  @Column('text')
+  @Column('text', { nullable: false })
   content: string;
 
   @Column('simple-array', { nullable: true })

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 import { User } from '../user/entities/user.entity';
 import { CreateBlogDto } from './dtos/create-blog.dto';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 
 @Injectable()
 export class BlogService {
@@ -21,7 +22,10 @@ export class BlogService {
     });
 
     if (!fullUser) {
-      throw new Error('User not found');
+      CustomExceptionHandler({
+        response: 'User not found',
+        status: 404,
+      });
     }
 
     const blog = this.blogRepository.create({
