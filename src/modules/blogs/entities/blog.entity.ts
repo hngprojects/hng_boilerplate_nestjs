@@ -1,11 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity()
-export class Blog {
-  @PrimaryGeneratedColumn('uuid')
-  blog_id: string;
-
+export class Blog extends AbstractBaseEntity {
   @Column()
   title: string;
 
@@ -20,7 +18,4 @@ export class Blog {
 
   @ManyToOne(() => User, user => user.blogs)
   author: User;
-
-  @CreateDateColumn()
-  created_at: Date;
 }

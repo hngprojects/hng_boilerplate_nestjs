@@ -9,13 +9,24 @@ import { CreateBlogDto } from './dtos/create-blog.dto';
 export class BlogService {
   constructor(
     @InjectRepository(Blog)
-    private blogRepository: Repository<Blog>
+    private blogRepository: Repository<Blog>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) {}
 
   async createBlog(createBlogDto: CreateBlogDto, user: User): Promise<Blog> {
+    const fullUser = await this.userRepository.findOne({
+      where: { id: user.id },
+      select: ['first_name', 'last_name'],
+    });
+
+    if (!fullUser) {
+      throw new Error('User not found');
+    }
+
     const blog = this.blogRepository.create({
       ...createBlogDto,
-      author: user,
+      author: fullUser,
     });
 
     return this.blogRepository.save(blog);
