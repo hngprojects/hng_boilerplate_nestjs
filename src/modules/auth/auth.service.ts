@@ -47,7 +47,9 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
 
-    const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
+    await this.otpService.createOtp(user.id);
+
+    const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
 
     const responsePayload = {
       user: {
