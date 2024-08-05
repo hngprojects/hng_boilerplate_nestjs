@@ -113,10 +113,7 @@ describe('NotificationsService', () => {
       mockNotificationRepository.save.mockRejectedValue(saveError);
 
       await expect(service.createGlobalNotifications(createNotificationDto)).rejects.toThrow(
-        new CustomHttpException(
-          { message: 'An unexpected error occurred', error: saveError.message },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
+        new CustomHttpException('Failed to save notifications', HttpStatus.INTERNAL_SERVER_ERROR)
       );
 
       expect(mockUserRepository.find).toHaveBeenCalledTimes(1);
