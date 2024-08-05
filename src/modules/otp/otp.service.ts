@@ -65,8 +65,8 @@ export class OtpService {
     return otp;
   }
 
-  async retrieveUserAndOtp(token: string): Promise<User | null> {
-    const otp = await this.otpRepository.findOne({ where: { token }, relations: ['user'] });
+  async retrieveUserAndOtp(user_id: string, token: string): Promise<User | null> {
+    const otp = await this.otpRepository.findOne({ where: { token, user_id }, relations: ['user'] });
 
     if (!otp) throw new CustomHttpException('OTP is invalid', HttpStatus.BAD_REQUEST);
 
