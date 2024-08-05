@@ -20,13 +20,15 @@ export class BlogController {
     const user: User = req.user;
     const blog = await this.blogService.createBlog(createBlogDto, user);
 
+    const author = `${blog.author.first_name} ${blog.author.last_name}`;
+
     return {
       blog_id: blog.id,
       title: blog.title,
       content: blog.content,
       tags: blog.tags,
       image_urls: blog.image_urls,
-      author: `${user.first_name} ${user.last_name}`,
+      author: author,
       created_at: blog.created_at,
     };
   }
