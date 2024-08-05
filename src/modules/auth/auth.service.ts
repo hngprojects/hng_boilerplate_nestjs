@@ -90,8 +90,12 @@ export default class AuthenticationService {
   }
 
   async updateForgotPassword(updatePasswordDto: UpdatePasswordDto) {
-    const { newPassword, otp } = updatePasswordDto;
-    const user = await this.otpService.retrieveUserAndOtp(otp);
+    const { email, newPassword, otp } = updatePasswordDto;
+
+    const exists = await this.userService.getUserRecord({ identifier: email, identifierType: 'email' });
+    if (!exists) throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_DOES_NOT_EXIST, HttpStatus.NOT_FOUND);
+
+    const user = await this.otpService.retrieveUserAndOtp(exists.id, otp);
 
     return this.userService.updateUser(user.id, { password: newPassword }, user);
   }
