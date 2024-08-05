@@ -48,4 +48,14 @@ export class JobsController {
   async delete(@Param('id') id: string) {
     return this.jobService.delete(id);
   }
+
+  @UseGuards(JobGuard)
+  @Patch('/:id')
+  @ApiOperation({ summary: 'Update a job' })
+  @ApiResponse({ status: 200, description: 'Job updated successfully' })
+  @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
+  @ApiResponse({ status: 404, description: 'Job not found' })
+  async update(@Param('id') id: string, @Body() updateJobDto: JobDto) {
+    return this.jobService.update(id, updateJobDto);
+  }
 }

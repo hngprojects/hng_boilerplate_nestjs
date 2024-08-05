@@ -96,6 +96,40 @@ describe('JobsService', () => {
     });
   });
 
+  describe('updateJob', () => {
+    it('should update the job successfully', async () => {
+      const jobId = 'job-1';
+      const updateJobDto: JobDto = {
+        ...createJobDto,
+        title: 'Updated Software Engineer II',
+        salary_range: '80k_to_110k',
+      };
+
+      const updatedJob = { ...updateJobDto, id: jobId, is_deleted: false, user: userDto };
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(updatedJob as Job);
+      jest.spyOn(jobRepository, 'save').mockResolvedValue(updatedJob as Job);
+
+      const result = await service.update(jobId, updateJobDto);
+
+      expect(result.status_code).toEqual(200);
+      expect(result.message).toEqual('Job details updated successfully');
+      expect(result.data).toEqual(updatedJob);
+
+      expect(jobRepository.findOne).toHaveBeenCalledWith({ where: { id: jobId } });
+      expect(jobRepository.save).toHaveBeenCalledWith(updatedJob);
+    });
+
+    it('should throw NotFoundException when job is not found', async () => {
+      const jobId = 'non-existent-job';
+      const updateJobDto: JobDto = { ...createJobDto };
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.update(jobId, updateJobDto)).rejects.toThrowError('Job not found');
+    });
+  });
+
   describe('deleteJob', () => {
     it('should delete the job successfully', async () => {
       const result = await service.delete('job-1');
