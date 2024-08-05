@@ -23,7 +23,7 @@ import { EmailController } from './email.controller';
           from: `"Team Remote Bingo" <${configService.get<string>('SMTP_USER')}>`,
         },
         template: {
-          dir: process.cwd() + '/src/modules/email/templates',
+          dir: process.cwd() + '/src/modules/email/hng-templates',
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

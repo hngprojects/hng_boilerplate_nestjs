@@ -2,7 +2,6 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { validateOrReject } from 'class-validator';
 import * as Handlebars from 'handlebars';
-import { createFile, deleteFile, getFile } from './email_storage.service';
 import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
 import { promisify } from 'util';
@@ -10,6 +9,7 @@ import * as path from 'path';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ArticleInterface } from './interface/article.interface';
 import { IMessageInterface } from './interface/message.interface';
+import { getFile, createFile, deleteFile } from '../../helpers/fileHelpers';
 
 @Injectable()
 export class EmailService {
@@ -33,9 +33,7 @@ export class EmailService {
 
   async createTemplate(templateInfo: createTemplateDto) {
     try {
-      const html = Handlebars.compile(templateInfo.template)({});
-
-      const validationResult = await htmlValidator({ data: html });
+      const validationResult = await htmlValidator({ data: templateInfo.template });
 
       const filteredMessages = validationResult.messages.filter(
         message =>
@@ -58,7 +56,11 @@ export class EmailService {
       }
 
       if (response.status_code === HttpStatus.CREATED) {
-        await createFile('./src/modules/email/templates', `${templateInfo.templateName}.hbs`, html);
+        await createFile(
+          './src/modules/email/hng-templates',
+          `${templateInfo.templateName}.hbs`,
+          templateInfo.template
+        );
       }
 
       return response;
@@ -72,8 +74,7 @@ export class EmailService {
 
   async getTemplate(templateInfo: getTemplateDto) {
     try {
-      const template = await getFile(`./src/modules/email/templates/${templateInfo.templateName}.hbs`, 'utf-8');
-      console.log(template);
+      const template = await getFile(`./src/modules/email/hng-templates/${templateInfo.templateName}.hbs`, 'utf-8');
 
       return {
         status_code: HttpStatus.OK,
@@ -90,7 +91,7 @@ export class EmailService {
 
   async deleteTemplate(templateInfo: getTemplateDto) {
     try {
-      await deleteFile(`./src/modules/email/templates/${templateInfo.templateName}.hbs`);
+      await deleteFile(`./src/modules/email/hng-templates/${templateInfo.templateName}.hbs`);
       return {
         status_code: HttpStatus.OK,
         message: 'Template deleted successfully',
@@ -105,7 +106,7 @@ export class EmailService {
 
   async getAllTemplates() {
     try {
-      const templatesDirectory = './src/modules/email/templates';
+      const templatesDirectory = './src/modules/email/hng-templates';
       const files = await promisify(fs.readdir)(templatesDirectory);
 
       const templates = await Promise.all(
@@ -129,7 +130,6 @@ export class EmailService {
         templates: validTemplates,
       };
     } catch (error) {
-      console.log(error);
       return {
         status_code: HttpStatus.NOT_FOUND,
         message: 'Template not found',

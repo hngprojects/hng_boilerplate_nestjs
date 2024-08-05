@@ -9,6 +9,13 @@ import { skip } from 'node:test';
 export class EmailController {
   constructor(private emailService: EmailService) {}
 
+  @skipAuth()
+  @Post('send-confirmation-otp')
+  async sendEmailConfirmationOtp(@Body() body: SendEmailDto, @Res() response: Response): Promise<any> {
+    await this.emailService.sendEmail(body);
+    return response.status(200).json({ message: 'Email confirmation OTP sent successfully' });
+  }
+
   @Post('store-template')
   async storeTemplate(@Body() body: createTemplateDto, @Res() res: Response): Promise<any> {
     const response = await this.emailService.createTemplate(body);
@@ -23,7 +30,7 @@ export class EmailController {
 
   @Post('delete-template')
   async deleteTemplate(@Body() body: getTemplateDto, @Res() res: Response): Promise<any> {
-    const response = await this.emailService.getTemplate(body);
+    const response = await this.emailService.deleteTemplate(body);
     res.status(response.status_code).send(response);
   }
 

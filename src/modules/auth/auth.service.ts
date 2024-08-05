@@ -80,8 +80,8 @@ export default class AuthenticationService {
     const emailData = new SendEmailDto();
     emailData.to = dto.email;
     emailData.subject = 'Reset Password';
-    emailData.template = 'reset-password';
-    emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
+    emailData.template = 'Password-Reset-Complete-Template';
+    emailData.context = { name: dto.email, recoveryLink: `${process.env.BASE_URL}/auth/reset-password` };
     await this.emailService.sendEmail(emailData);
 
     return {

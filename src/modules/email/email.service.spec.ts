@@ -6,9 +6,10 @@ import * as Handlebars from 'handlebars';
 import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
 import { HttpStatus } from '@nestjs/common';
+import { createFile, deleteFile, getFile } from '../../helpers/fileHelpers';
 
 // Mock module-level functions
-jest.mock('./email_storage.service', () => ({
+jest.mock('../../helpers/fileHelpers', () => ({
   createFile: jest.fn(),
   deleteFile: jest.fn(),
   getFile: jest.fn(),
@@ -69,9 +70,8 @@ describe('EmailService', () => {
   describe('createTemplate', () => {
     it('should create a template if HTML is valid', async () => {
       const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
-      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
       (htmlValidator as jest.Mock).mockResolvedValue({ messages: [] });
-      (require('./email_storage.service').createFile as jest.Mock).mockResolvedValue(Promise.resolve());
+      (createFile as jest.Mock).mockResolvedValue(Promise.resolve());
 
       const result = await service.createTemplate(templateInfo);
 
@@ -80,18 +80,12 @@ describe('EmailService', () => {
         message: 'Template created successfully',
         validation_errors: [],
       });
-      expect(require('./email_storage.service').createFile).toHaveBeenCalledWith(
-        './src/modules/email/templates',
-        'test.hbs',
-        '<div></div>'
-      );
+      expect(createFile).toHaveBeenCalledWith('./src/modules/email/hng-templates', 'test.hbs', '<div></div>');
     });
 
     it('should return validation errors if HTML is invalid', async () => {
       const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
-      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
       (htmlValidator as jest.Mock).mockResolvedValue({ messages: [{ message: 'Invalid HTML', type: 'error' }] });
-      (require('./email_storage.service').createFile as jest.Mock).mockResolvedValue(Promise.resolve());
 
       const result = await service.createTemplate(templateInfo);
 
@@ -104,7 +98,6 @@ describe('EmailService', () => {
 
     it('should handle errors during template creation', async () => {
       const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
-      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
       (htmlValidator as jest.Mock).mockRejectedValue(new Error('Validation error'));
 
       const result = await service.createTemplate(templateInfo);
@@ -119,7 +112,7 @@ describe('EmailService', () => {
   describe('getTemplate', () => {
     it('should return the content of a template', async () => {
       const templateInfo: getTemplateDto = { templateName: 'test' };
-      (require('./email_storage.service').getFile as jest.Mock).mockResolvedValue('template content');
+      (getFile as jest.Mock).mockResolvedValue('template content');
 
       const result = await service.getTemplate(templateInfo);
 
@@ -132,7 +125,7 @@ describe('EmailService', () => {
 
     it('should return NOT_FOUND if template does not exist', async () => {
       const templateInfo: getTemplateDto = { templateName: 'test' };
-      (require('./email_storage.service').getFile as jest.Mock).mockRejectedValue(new Error('File not found'));
+      (getFile as jest.Mock).mockRejectedValue(new Error('File not found'));
 
       const result = await service.getTemplate(templateInfo);
 
@@ -146,7 +139,7 @@ describe('EmailService', () => {
   describe('deleteTemplate', () => {
     it('should delete a template', async () => {
       const templateInfo: getTemplateDto = { templateName: 'test' };
-      (require('./email_storage.service').deleteFile as jest.Mock).mockResolvedValue(Promise.resolve());
+      (deleteFile as jest.Mock).mockResolvedValue(Promise.resolve());
 
       const result = await service.deleteTemplate(templateInfo);
 
@@ -158,7 +151,7 @@ describe('EmailService', () => {
 
     it('should return NOT_FOUND if template does not exist', async () => {
       const templateInfo: getTemplateDto = { templateName: 'test' };
-      (require('./email_storage.service').deleteFile as jest.Mock).mockRejectedValue(new Error('File not found'));
+      (deleteFile as jest.Mock).mockRejectedValue(new Error('File not found'));
 
       const result = await service.deleteTemplate(templateInfo);
 
