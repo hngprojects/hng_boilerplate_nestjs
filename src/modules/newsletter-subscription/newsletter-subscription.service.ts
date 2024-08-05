@@ -3,6 +3,7 @@ import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscri
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
 import { NewsletterSubscription } from './entities/newsletter-subscription.entity';
+import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 
 @Injectable()
 export class NewsletterSubscriptionService {
@@ -24,13 +25,10 @@ export class NewsletterSubscriptionService {
     return response;
   }
 
-  async findAll() {
+  async findAll(): Promise<NewsletterSubscriptionResponseDto[]> {
     const subscribers = await this.newsletterSubscriptionRepository.find();
 
-    return subscribers.map(newsletter => ({
-      id: newsletter.id,
-      email: newsletter.email,
-    }));
+    return subscribers.map(this.mapSubscriberToResponseDto);
   }
 
   async remove(id: string) {
@@ -55,5 +53,14 @@ export class NewsletterSubscriptionService {
       throw new NotFoundException(`Subscriber with ID ${id} not found or already restored`);
     }
     return { message: `Subscriber with ID ${id} has been restored` };
+  }
+
+  private mapSubscriberToResponseDto(
+    newsletterSubscription: NewsletterSubscription
+  ): NewsletterSubscriptionResponseDto {
+    return {
+      id: newsletterSubscription.id,
+      email: newsletterSubscription.email,
+    };
   }
 }

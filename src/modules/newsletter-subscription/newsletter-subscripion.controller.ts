@@ -4,6 +4,7 @@ import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscri
 import { skipAuth } from '../../helpers/skipAuth';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 
 @ApiTags('Newsletter Subscription')
 @Controller('newsletter-subscription')
@@ -23,9 +24,26 @@ export class NewsletterSubscriptionController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fetch all subscribers to newsletter' })
-  @ApiResponse({ status: 200, type: [Object] })
-  findAll() {
-    return this.newsletterSubscriptionService.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'Return all team members',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/NewsletterSubscriptionResponseDto' },
+        },
+      },
+    },
+  })
+  async findAll(): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[] }> {
+    const subscribers = await this.newsletterSubscriptionService.findAll();
+    return {
+      message: 'Subscriber list fetched successfully',
+      data: subscribers,
+    };
   }
 
   @UseGuards(SuperAdminGuard)
