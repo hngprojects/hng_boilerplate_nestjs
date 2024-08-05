@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, UseGuards, Query, Delete } from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
 import { createTemplateDto, getTemplateDto } from './dto/email.dto';
@@ -16,14 +16,14 @@ export class EmailController {
   }
 
   @UseGuards(SuperAdminGuard)
-  @Post('get-template')
-  async getTemplate(@Body() body: getTemplateDto, @Res() res: Response): Promise<any> {
-    const response = await this.emailService.getTemplate(body);
+  @Get('get-template')
+  async getTemplate(@Query() query: getTemplateDto, @Res() res: Response): Promise<any> {
+    const response = await this.emailService.getTemplate(query);
     res.status(response.status_code).send(response);
   }
 
   @UseGuards(SuperAdminGuard)
-  @Post('delete-template')
+  @Delete('delete-template')
   async deleteTemplate(@Body() body: getTemplateDto, @Res() res: Response): Promise<any> {
     const response = await this.emailService.deleteTemplate(body);
     res.status(response.status_code).send(response);
