@@ -11,11 +11,18 @@ import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 import { productMock } from './mocks/product.mock';
 import { UpdateProductDTO } from '../dto/update-product.dto';
 import { deletedProductMock } from './mocks/deleted-poruct.mock';
+import { User } from '../../../modules/user/entities/user.entity';
+import { mockUser } from '../../../modules/user/tests/mocks/user.mock';
+import { Comment } from '../../../modules/comments/entities/comments.entity';
+import { mockComment } from './mocks/comment.mock';
+import { AddCommentDto } from 'src/modules/comments/dto/add-comment.dto';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let productRepository: Repository<Product>;
   let organisationRepository: Repository<Organisation>;
+  let userRepository: Repository<User>;
+  let commentRepository: Repository<Comment>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,12 +48,26 @@ describe('ProductsService', () => {
           provide: getRepositoryToken(ProductVariant),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(Comment),
+          useValue: {
+            createQueryBuilder: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
     productRepository = module.get<Repository<Product>>(getRepositoryToken(Product));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    commentRepository = module.get<Repository<Comment>>(getRepositoryToken(Comment));
   });
 
   it('should create a new product', async () => {
@@ -74,7 +95,6 @@ describe('ProductsService', () => {
 
       const products = await service.searchProducts(orgMock.id, searchCriteria);
 
-      console.log(products);
       expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
     });
 
@@ -174,6 +194,41 @@ describe('ProductsService', () => {
 
       expect(result.message).toEqual('Product successfully deleted');
       expect(deletedProductMock.is_deleted).toBe(true);
+    });
+  });
+
+  describe('Add a comment under a product', () => {
+    it('should add a comment successfully', async () => {
+      const addCommentDto: AddCommentDto = {
+        comment: 'New Comment',
+      };
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(productMock);
+      jest.spyOn(commentRepository, 'create').mockReturnValue(mockComment);
+      jest.spyOn(commentRepository, 'save').mockResolvedValue(mockComment);
+
+      const result = await service.addCommentToProduct(productMock.id, addCommentDto, mockUser.id);
+
+      expect(result.message).toEqual('Comment added successfully');
+      expect(result.status).toEqual('success');
+      expect(result.status_code).toEqual(201);
+      expect(result.data).toBeDefined();
+    });
+
+    it('should throw an error', async () => {
+      const addCommentDto: AddCommentDto = {
+        comment: 'New Comment',
+      };
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(commentRepository, 'create').mockReturnValue(mockComment);
+      jest.spyOn(commentRepository, 'save').mockResolvedValue(mockComment);
+
+      await expect(service.addCommentToProduct(productMock.id, addCommentDto, mockUser.id)).rejects.toThrow(
+        NotFoundException
+      );
     });
   });
 });

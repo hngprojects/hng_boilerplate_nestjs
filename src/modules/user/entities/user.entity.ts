@@ -8,6 +8,7 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
+import { Comment } from '../../comments/entities/comments.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -86,4 +87,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
   notification_settings: NotificationSettings[];
+
+  @OneToMany(() => Comment, comment => comment.user)
+  comments?: Comment[];
 }
