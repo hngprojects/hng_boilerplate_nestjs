@@ -21,9 +21,9 @@ import { CreateEmailTemplateDto } from './dto/create-email-template.dto';
 import { UpdateEmailTemplateDto } from './dto/update-email-template.dto';
 import { EmailTemplate } from './entities/email-template.entity';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from 'src/guards/super-admin.guard';
+import { SuperAdminGuard } from 'src/guards/super-admin.guard';
 
-@UseGuards(AuthGuard)
+@UseGuards(SuperAdminGuard)
 @ApiBearerAuth()
 @ApiTags('Email Templates')
 @Controller('email-template')
