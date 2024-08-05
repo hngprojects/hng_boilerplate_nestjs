@@ -38,15 +38,24 @@ export class NotificationsService {
   ) {}
 
   async createGlobalNotifications(dto: CreateNotificationForAllUsersDto) {
-    const users = await this.userRepository.find();
+    /* Adding pagination for performance enhancement */
+    let page = 0;
+    const pageSize = 100;
+    /* Only selecting the id for performance enhancement */
+    const users = await this.userRepository.find({
+      select: ['id'],
+    });
     try {
-      const notifications = users.map(user => {
-        return this.notificationRepository.create({
-          message: dto.message,
-          user,
+      do {
+        const notifications = users.map(user => {
+          return this.notificationRepository.create({
+            message: dto.message,
+            user,
+          });
         });
-      });
-      await this.notificationRepository.save(notifications);
+        await this.notificationRepository.save(notifications);
+        page++;
+      } while (users.length === pageSize);
       return {
         status: 'success',
         message: 'Notification created successfully',
