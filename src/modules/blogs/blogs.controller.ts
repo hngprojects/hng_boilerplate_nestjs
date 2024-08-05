@@ -1,7 +1,6 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { BlogService } from './blogs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { User } from '../user/entities/user.entity';
 import { CreateBlogDto } from './dtos/create-blog.dto';
 import { BlogResponseDto } from './dtos/blog-response.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
