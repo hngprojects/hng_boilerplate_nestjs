@@ -233,4 +233,26 @@ export default class UserService {
       },
     };
   }
+
+  async updateUserStatus(userId: string, status: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'updated_at'],
+    });
+    if (!user) {
+      throw new NotFoundException({
+        error: 'Not Found',
+        message: 'User not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+    const updatedUser = Object.assign(user, { status });
+    const result = await this.userRepository.save(updatedUser);
+
+    return {
+      status: 'success',
+      status_code: HttpStatus.OK,
+      data: result,
+    };
+  }
 }

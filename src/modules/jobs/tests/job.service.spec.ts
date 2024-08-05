@@ -20,6 +20,7 @@ describe('JobsService', () => {
     email: 'john@example.com',
     password: 'hashedpassword',
     phone: '1234567890',
+    status: 'Hello there! This is what my new status looks like!',
     is_active: true,
     attempts_left: 3,
     time_left: null,

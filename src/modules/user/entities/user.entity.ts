@@ -26,6 +26,9 @@ export class User extends AbstractBaseEntity {
   @Column({ unique: true, nullable: false })
   email: string;
 
+  @Column({ unique: false, nullable: true })
+  status: string;
+
   @Column({ nullable: false })
   password: string;
 

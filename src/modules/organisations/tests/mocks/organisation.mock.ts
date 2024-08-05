@@ -62,6 +62,7 @@ export const createMockOrganisation = (): Organisation => {
     two_factor_secret: 'some-secret',
     backup_codes: [],
     jobs: [],
+    status: 'Hello from the children of planet Earth',
     phone: '+1234567890',
     hashPassword: async () => {},
     is_active: true,

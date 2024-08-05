@@ -1,9 +1,23 @@
-import { Body, Controller, Get, Param, Patch, Query, Req, Request } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiExcludeEndpoint,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import UserService from './user.service';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
+import { UpdateUserStatusResponseDto } from './dto/update-user-status-response.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -11,7 +25,7 @@ import UserService from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Patch('/deactivate')
+  @Patch('deactivate')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Deactivate a user account' })
   @ApiResponse({ status: 200, description: 'The account has been successfully deactivated.' })
@@ -64,5 +78,29 @@ export class UserController {
     @Query('limit') limit: number = 10
   ) {
     return this.userService.getUsersByAdmin(page, limit, req.user);
+  }
+
+  @Patch(':userId/status')
+  @ApiOperation({ summary: 'Update a user status (Super Admin only)' })
+  @ApiOkResponse({ description: 'Status updated successfully', type: UpdateUserStatusResponseDto })
+  @ApiUnauthorizedResponse({
+    description: 'User is not authorized',
+    type: 'object',
+    example: {
+      message: 'User is currently unauthorized, kindly authenticate to continue',
+      status: 401,
+    },
+  })
+  @ApiForbiddenResponse({
+    description: 'User is forbidden',
+    example: {
+      message: 'You dont have the permission to perform this action',
+      status: 403,
+    },
+  })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @UseGuards(SuperAdminGuard)
+  async updateUserStatus(@Param('userId') userId: string, @Body() { status }: UpdateUserStatusDto) {
+    return this.userService.updateUserStatus(userId, status);
   }
 }
