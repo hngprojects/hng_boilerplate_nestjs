@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcryptjs';
-import { BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
@@ -81,6 +81,7 @@ export class User extends AbstractBaseEntity {
   blogs: Blog[];
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
