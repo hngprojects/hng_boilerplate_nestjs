@@ -40,6 +40,7 @@ import { OrganisationRoleModule } from './modules/organisation-role/organisation
 import { FaqModule } from './modules/faq/faq.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
 import { TeamsModule } from './modules/teams/teams.module';
+import { BlogsModule } from './modules/blogs/blog.module';
 
 @Module({
   providers: [
@@ -113,6 +114,7 @@ import { TeamsModule } from './modules/teams/teams.module';
     WaitlistModule,
     NewsletterSubscriptionModule,
     TeamsModule,
+    BlogsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
