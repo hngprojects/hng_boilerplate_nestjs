@@ -1,6 +1,6 @@
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as SYS_MSG from '../../helpers/SystemMessages';
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get, Patch } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
@@ -18,6 +18,7 @@ import {
   SuccessCreateUserResponse,
 } from '../user/dto/user-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdatePasswordDto } from './dto/updatePasswordDto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -157,5 +158,17 @@ export default class RegistrationController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public async verifySignInToken(@Body() body: OtpDto) {
     return await this.authService.verifyToken(body);
+  }
+
+  @skipAuth()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Verify Otp and change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Patch('password-reset')
+  @HttpCode(200)
+  public async resetPassword(@Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.authService.updateForgotPassword(updatePasswordDto);
   }
 }
