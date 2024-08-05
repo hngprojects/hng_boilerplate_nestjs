@@ -13,6 +13,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -160,5 +161,52 @@ export class OrganisationRoleService {
 
     await this.rolesRepository.save(role);
     return role;
+  }
+
+  async removeRole(orgId: string, roleId: string) {
+    try {
+      const organisation = await this.organisationRepository.findOne({
+        where: {
+          id: orgId,
+        },
+      });
+
+      if (!organisation) {
+        throw new NotFoundException({
+          status_code: 404,
+          error: 'Not Found',
+          message: `The organisation with ID ${roleId} does not exist`,
+        });
+      }
+
+      const role = await this.rolesRepository.findOne({
+        where: {
+          id: roleId,
+          organisation: organisation,
+        },
+      });
+
+      if (!role) {
+        throw new NotFoundException({
+          status_code: 404,
+          error: 'Not Found',
+          message: `The role with ID ${roleId} does not exist`,
+        });
+      }
+
+      await this.rolesRepository.remove(role);
+
+      return {
+        status_code: 200,
+        message: 'Role successfully removed',
+      };
+    } catch (err) {
+      CustomExceptionHandler(err);
+
+      throw new InternalServerErrorException({
+        message: 'Something went wrong!',
+        status_code: 500,
+      });
+    }
   }
 }

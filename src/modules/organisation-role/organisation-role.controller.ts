@@ -133,6 +133,6 @@ export class OrganisationRoleController {
     description: 'The organisation with ID does not exist',
   })
   async removeRole(@Param('orgId') orgId: string, @Param('roleId') roleId: string) {
-    return 'will remove role from organisation';
+    return this.organisationRoleService.removeRole(orgId, roleId);
   }
 }
