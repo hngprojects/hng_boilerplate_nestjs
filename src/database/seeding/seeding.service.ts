@@ -58,6 +58,25 @@ export class SeedingService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
+      const existingTemplatesCount = await emailTemplatesRepository.count();
+      if (existingTemplatesCount <= 0) {
+        try {
+          const templatesDir = './src/modules/email/templates/';
+          const files = fs.readdirSync(templatesDir);
+          const templates = files.map(file => {
+            const content = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+            const name = path.parse(file).name;
+            return emailTemplatesRepository.create({ name, subject: `Boilerplate ${name}`, content });
+          });
+          await emailTemplatesRepository.save(templates);
+          Logger.log('Default email templates created in db successfully');
+        } catch (error) {
+          Logger.log('An error occurred while creating default email templates', error);
+        }
+      } else {
+        Logger.log('Default templates exist in DB');
+      }
+
       const existingUsers = await userRepository.count();
       if (existingUsers > 0) {
         Logger.log('Database is already populated. Skipping seeding.');
@@ -105,19 +124,6 @@ export class SeedingService {
         savedUsers[1].profile = savedProfiles[1];
 
         await userRepository.save(savedUsers);
-
-        const existingTemplatesCount = await emailTemplatesRepository.count();
-        if (existingTemplatesCount >= 0) {
-          const templatesDir = './src/modules/email/templates/';
-          const files = fs.readdirSync(templatesDir);
-          const templates = files.map(file => {
-            const content = fs.readFileSync(path.join(templatesDir, file), 'utf8');
-            const name = path.parse(file).name;
-            return emailTemplatesRepository.create({ name, subject: `Boilerplate ${name}`,content });
-          });
-      
-          await emailTemplatesRepository.save(templates);
-        }
 
         const or1 = organisationRepository.create({
           name: 'Org 1',
