@@ -16,7 +16,6 @@ import { OtpDto } from '../otp/dto/otp.dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
-import CustomExceptionHandler from '../../helpers/exceptionHandler';
 import { SendEmailDto } from '../email/dto/send-email.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 
@@ -48,7 +47,9 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
 
-    const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
+    await this.otpService.createOtp(user.id);
+
+    const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
 
     const responsePayload = {
       user: {
