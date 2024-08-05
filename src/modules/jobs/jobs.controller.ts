@@ -21,7 +21,6 @@ export class JobsController {
     return this.jobService.create(createJobDto, user.sub);
   }
 
-  @skipAuth()
   @Get('/')
   @ApiOperation({ summary: 'Gets all jobs' })
   @ApiResponse({ status: 200, description: 'Jobs returned successfully' })
