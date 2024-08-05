@@ -4,10 +4,13 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
+  InternalServerErrorException,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   Res,
@@ -19,6 +22,7 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
+import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -83,5 +87,44 @@ export class OrganisationsController {
   ): Promise<OrganisationMembersResponseDto> {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
+  }
+
+  @ApiOperation({ summary: 'Get members of an Organisation' })
+  @ApiResponse({
+    status: 200,
+    description: 'Assign roles to members of an organisation',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'object',
+          properties: {
+            user: { type: 'string' },
+            org: { type: 'string' },
+            role: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User not a member of the organisation',
+  })
+  @Put('members/:memberId/role')
+  async updateMemberRole(@Param('memberId') memberId: string, @Body() updateMemberRoleDto: UpdateMemberRoleDto) {
+    try {
+      return await this.organisationsService.updateMemberRole(memberId, updateMemberRoleDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw new InternalServerErrorException('An error occurred while updating the member role');
+    }
   }
 }
