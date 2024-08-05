@@ -1,9 +1,7 @@
 import { Controller, Post, Get, Body, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
-import { skipAuth } from '../../helpers/skipAuth';
 import { createTemplateDto, getTemplateDto } from './dto/email.dto';
-import { skip } from 'node:test';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @Controller('email')
