@@ -41,7 +41,7 @@ export class NewsletterSubscriptionController {
   async findAll(): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[] }> {
     const subscribers = await this.newsletterSubscriptionService.findAll();
     return {
-      message: 'Subscriber list fetched successfully',
+      message: 'Subscribers list fetched successfully',
       data: subscribers,
     };
   }
@@ -61,9 +61,27 @@ export class NewsletterSubscriptionController {
   @Get('deleted')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fetch all deleted subscribers' })
-  @ApiResponse({ status: 200, type: [Object] })
-  findSoftDeleted() {
-    return this.newsletterSubscriptionService.findSoftDeleted();
+  @ApiResponse({
+    status: 200,
+    description: 'Return all team members',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/NewsletterSubscriptionResponseDto' },
+        },
+      },
+    },
+  })
+  async findSoftDeleted(): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[] }> {
+    const deletedSubscribers = await this.newsletterSubscriptionService.findSoftDeleted();
+
+    return {
+      message: 'Deleted subscribers list fetched successfully',
+      data: deletedSubscribers,
+    };
   }
 
   @UseGuards(SuperAdminGuard)
