@@ -84,4 +84,10 @@ export class OrganisationsController {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
+
+  @Delete(':org_id/users/:user_id')
+  async removeMember(@Req() req, @Param('org_id') orgId: string, @Param('user_id') userId: string) {
+    const currentUserId = req.user.sub;
+    return this.organisationsService.removeMember(orgId, userId, currentUserId);
+  }
 }

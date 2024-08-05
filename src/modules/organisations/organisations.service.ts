@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -121,6 +122,95 @@ export class OrganisationsService {
         throw error;
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+  }
+
+  async removeMember(orgId: string, userId: string, currentUserId: string) {
+    try {
+      const org = await this.checkIfOrgExists(orgId);
+
+      if (userId !== currentUserId) {
+        this.verifyOwner(org, currentUserId);
+      }
+
+      const user = await this.checkIfUserExists(userId);
+
+      this.checkIfUserIsAMember(org, user);
+
+      org.organisationMembers = org.organisationMembers.filter(member => member.user_id.id != user.id);
+
+      await this.organisationRepository.save(org);
+
+      return {
+        status: 'success',
+        message: 'Member was removed successfully',
+        status_code: 200,
+      };
+    } catch (err) {
+      if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
+        throw err;
+      }
+      console.error(err);
+      throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
+    }
+  }
+
+  async checkIfOrgExists(orgId: string) {
+    const org = await this.organisationRepository.findOne({
+      where: {
+        id: orgId,
+      },
+      relations: ['organisationMembers', 'organisationMembers.user_id'],
+    });
+    if (!org) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'Organisation not found',
+        status_code: 404,
+      });
+    }
+
+    return org;
+  }
+
+  async checkIfUserExists(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'User not found',
+        status_code: 404,
+      });
+    }
+
+    return user;
+  }
+
+  verifyOwner(org: Organisation, ownerId: string) {
+    const isOwner = org.owner.id == ownerId;
+
+    if (!isOwner) {
+      throw new UnauthorizedException({
+        status: 'forbidden',
+        message: 'Only admins can remove users',
+        status_code: 403,
+      });
+    }
+  }
+
+  checkIfUserIsAMember(org: Organisation, user: User) {
+    const count = org.organisationMembers.filter(member => member.user_id.id == user.id).length;
+
+    if (count <= 0) {
+      throw new NotFoundException({
+        status: 'error',
+        message: 'User is not a member of this organization',
+        status_code: 404,
+      });
     }
   }
 }
