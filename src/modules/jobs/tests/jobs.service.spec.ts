@@ -7,6 +7,7 @@ import UserResponseDTO from '../../user/dto/user-response.dto';
 import { User } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { jobsMock } from './mocks/jobs.mock';
+import { NotFoundException } from '@nestjs/common';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -97,17 +98,17 @@ describe('JobsService', () => {
   });
 
   describe('updateJob', () => {
-    it('should update the job successfully', async () => {
+    it('should update the job successfully with partial data', async () => {
       const jobId = 'job-1';
-      const updateJobDto: JobDto = {
-        ...createJobDto,
+      const updateJobDto: Partial<JobDto> = {
         title: 'Updated Software Engineer II',
         salary_range: '80k_to_110k',
       };
 
-      const updatedJob = { ...updateJobDto, id: jobId, is_deleted: false, user: userDto };
+      const existingJob = { ...createJobDto, id: jobId, is_deleted: false, user: userDto };
+      const updatedJob = { ...existingJob, ...updateJobDto };
 
-      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(updatedJob as Job);
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(existingJob as Job);
       jest.spyOn(jobRepository, 'save').mockResolvedValue(updatedJob as Job);
 
       const result = await service.update(jobId, updateJobDto);
@@ -117,16 +118,36 @@ describe('JobsService', () => {
       expect(result.data).toEqual(updatedJob);
 
       expect(jobRepository.findOne).toHaveBeenCalledWith({ where: { id: jobId } });
-      expect(jobRepository.save).toHaveBeenCalledWith(updatedJob);
+      expect(jobRepository.save).toHaveBeenCalledWith(expect.objectContaining(updateJobDto));
     });
 
     it('should throw NotFoundException when job is not found', async () => {
       const jobId = 'non-existent-job';
-      const updateJobDto: JobDto = { ...createJobDto };
+      const updateJobDto: Partial<JobDto> = { title: 'Updated Title' };
 
       jest.spyOn(jobRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.update(jobId, updateJobDto)).rejects.toThrowError('Job not found');
+      await expect(service.update(jobId, updateJobDto)).rejects.toThrow(NotFoundException);
+      await expect(service.update(jobId, updateJobDto)).rejects.toThrow('Job not found');
+    });
+
+    it('should only update the provided fields', async () => {
+      const jobId = 'job-1';
+      const updateJobDto: Partial<JobDto> = {
+        title: 'Updated Software Engineer II',
+      };
+
+      const existingJob = { ...createJobDto, id: jobId, is_deleted: false, user: userDto };
+      const updatedJob = { ...existingJob, ...updateJobDto };
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(existingJob as Job);
+      jest.spyOn(jobRepository, 'save').mockResolvedValue(updatedJob as Job);
+
+      const result = await service.update(jobId, updateJobDto);
+
+      expect(result.data.title).toEqual(updateJobDto.title);
+      expect(result.data.salary_range).toEqual(createJobDto.salary_range);
+      expect(jobRepository.save).toHaveBeenCalledWith(expect.objectContaining(updateJobDto));
     });
   });
 

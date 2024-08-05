@@ -55,7 +55,7 @@ export class JobsController {
   @ApiResponse({ status: 200, description: 'Job updated successfully' })
   @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async update(@Param('id') id: string, @Body() updateJobDto: JobDto) {
+  async update(@Param('id') id: string, @Body() updateJobDto: Partial<JobDto>) {
     return this.jobService.update(id, updateJobDto);
   }
 }

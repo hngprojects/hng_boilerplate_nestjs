@@ -70,22 +70,26 @@ export class JobsService {
     };
   }
 
-  async update(id: string, updateJobDto: JobDto) {
+  async update(id: string, updateJobDto: Partial<JobDto>) {
     const job = await this.jobRepository.findOne({ where: { id } });
-    if (!job)
+    if (!job) {
       throw new NotFoundException({
         status_code: 404,
         status: 'Not found Exception',
         message: 'Job not found',
       });
+    }
+
     Object.assign(job, updateJobDto);
     const updatedJob = await this.jobRepository.save(job);
+
     return {
       data: updatedJob,
       message: 'Job details updated successfully',
       status_code: 200,
     };
   }
+
   async delete(jobId: string) {
     // Check if listing exists
     const job = await this.jobRepository.findOne({
