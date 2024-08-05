@@ -18,6 +18,8 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
+import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
 
 @Injectable()
 export class OrganisationsService {
@@ -27,7 +29,9 @@ export class OrganisationsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(OrganisationMember)
-    private readonly organisationMemberRepository: Repository<OrganisationMember>
+    private readonly organisationMemberRepository: Repository<OrganisationMember>,
+    @InjectRepository(OrganisationRole)
+    private readonly rolesRepository: Repository<OrganisationRole>
   ) {}
 
   async getOrganisationMembers(
@@ -98,6 +102,7 @@ export class OrganisationsService {
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
+
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
     return emailFound?.length ? true : false;
@@ -122,5 +127,43 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
+  }
+
+  async updateMemberRole(memberId: string, updateMemberRoleDto: UpdateMemberRoleDto) {
+    const member = await this.organisationMemberRepository.findOne({
+      where: { id: memberId },
+      relations: ['user_id', 'organisation_id', 'role'],
+    });
+
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+
+    const newRole = await this.rolesRepository.findOne({
+      where: {
+        name: updateMemberRoleDto.role,
+        organisation: { id: member.organisation_id.id },
+      },
+    });
+
+    if (!newRole) {
+      throw new NotFoundException('Role not found in the organization');
+    }
+
+    member.role = newRole;
+    await this.organisationMemberRepository.save(member);
+
+    // Log the role change (you might want to implement a separate logging service)
+    console.log(`Role changed for member ${memberId} to ${newRole.name}`);
+
+    return {
+      message: `${member.user_id.first_name} ${member.user_id.last_name} has successfully been added to the ${newRole.name} role`,
+      status_code: 201,
+      data: {
+        user: member.user_id,
+        org: member.organisation_id,
+        role: newRole,
+      },
+    };
   }
 }
