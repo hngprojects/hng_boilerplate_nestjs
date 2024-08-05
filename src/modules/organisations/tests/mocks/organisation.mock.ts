@@ -11,6 +11,8 @@ export enum UserType {
 }
 
 export const createMockOrganisation = (): Organisation => {
+  const orgId = uuidv4();
+  const userId = uuidv4();
   const profileMock: Profile = {
     id: 'some-uuid',
     username: 'mockuser',
@@ -28,7 +30,6 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
   };
 
-  // Create a mock object that matches the OrganisationRole interface
   const organisationRoleMock: OrganisationRole = {
     id: uuidv4(),
     name: 'Admin',
@@ -44,14 +45,14 @@ export const createMockOrganisation = (): Organisation => {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: null,
+    user_id: userId,
     role: organisationRoleMock,
-    organisation_id: null,
+    organisation_id: orgId,
     profile_id: profileMock,
   };
 
   const ownerAndCreator = {
-    id: uuidv4(),
+    id: userId,
     created_at: new Date(),
     updated_at: new Date(),
     first_name: 'John',
@@ -82,7 +83,7 @@ export const createMockOrganisation = (): Organisation => {
   };
 
   return {
-    id: uuidv4(),
+    id: orgId,
     name: 'John & Co',
     description: 'An imports organisation',
     email: 'johnCo@example.com',
@@ -92,7 +93,7 @@ export const createMockOrganisation = (): Organisation => {
     address: 'Street 101 Building 26',
     state: 'Lagos',
     owner: ownerAndCreator,
-    creator: { ...ownerAndCreator, user_type: UserType.USER },
+    creator: { ...ownerAndCreator, user_type: UserType.ADMIN },
     created_at: new Date(),
     updated_at: new Date(),
     isDeleted: false,

@@ -8,11 +8,12 @@ import { validate } from 'class-validator';
 import { orgMock } from '../tests/mocks/organisation.mock';
 import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
+import { newUser } from './mocks/new-user.mock';
 import {
-  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
+  UnauthorizedException,
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
@@ -219,6 +220,62 @@ describe('OrganisationsService', () => {
       expect(result.data).toEqual([
         { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
       ]);
+    });
+  });
+
+  describe('it should validate before removing a user', () => {
+    it("should throw error if organisation doesn't exist", async () => {
+      await jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.removeMember(orgMock.owner.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+        new NotFoundException({
+          status: 'error',
+          message: 'Organisation not found',
+          status_code: 404,
+        })
+      );
+    });
+    it("should throw if current user does't own the organisation", async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+
+      await expect(
+        service.removeMember(orgMock.id, orgMock.organisationMembers[0].user_id.id, newUser.id)
+      ).rejects.toThrow(
+        new UnauthorizedException({
+          status: 'Forbidden',
+          message: 'Only admins can remove users',
+          status_code: 403,
+        })
+      );
+    });
+    it('should throw an error if the specified user is not a member', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
+
+      await expect(service.removeMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
+        new NotFoundException({
+          status: 'error',
+          message: 'User is not a member of this organization',
+          status_code: 404,
+        })
+      );
+    });
+  });
+
+  describe('it should successfully remove a user', () => {
+    it('should successfully remove user', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(orgMock.organisationMembers[0].user_id);
+
+      const result = await service.removeMember(
+        orgMock.id,
+        orgMock.organisationMembers[0].user_id.id,
+        orgMock.owner.id
+      );
+
+      expect(result.status).toEqual('success');
+      expect(result.message).toEqual('Member was removed successfully');
+      expect(result.status_code).toEqual(200);
     });
   });
 });
