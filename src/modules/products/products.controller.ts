@@ -98,4 +98,15 @@ export class ProductsController {
     const user = req.user;
     return this.productsService.addCommentToProduct(productId, commentDto, user.sub);
   }
+
+  @Get(':productId/stock')
+  @ApiOperation({ summary: 'Gets a product stock details by id' })
+  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
+  @ApiParam({ name: 'productId', description: 'Product ID' })
+  @ApiResponse({ status: 200, description: 'Product stock retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getProductStock(@Param('productId') productId: string) {
+    return this.productsService.getProductStock(productId);
+  }
 }

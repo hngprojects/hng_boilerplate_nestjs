@@ -233,4 +233,19 @@ export class ProductsService {
       data: responsePayload,
     };
   }
+
+  async getProductStock(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new NotFoundException(`Product not found`);
+    }
+    return {
+      message: 'Product stock retrieved successfully',
+      data: {
+        product_id: product.id,
+        current_stock: product.quantity,
+        last_updated: product.updated_at,
+      },
+    };
+  }
 }
