@@ -35,9 +35,15 @@ export class UserController {
     type: GetUserStatsResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['active', 'inactive', 'deleted'],
+    description: 'Filter users by status',
+  })
   @UseGuards(SuperAdminGuard)
-  async getUserStats(): Promise<GetUserStatsResponseDto> {
-    return this.userService.getUserStats();
+  async getUserStats(@Query('status') status?: string): Promise<GetUserStatsResponseDto> {
+    return this.userService.getUserStats(status);
   }
 
   @ApiOperation({ summary: 'Update User' })

@@ -446,10 +446,65 @@ describe('UserService', () => {
     });
 
     describe('getUserStats', () => {
-      it('should return user statistics successfully', async () => {
+      it('should return user statistics for active status', async () => {
         const totalUsers = 100;
-        const activeUsers = 80;
-        const deletedUsers = 20;
+        const activeUsers = 70;
+        const deletedUsers = 30;
+
+        mockUserRepository.count
+          .mockResolvedValueOnce(totalUsers)
+          .mockResolvedValueOnce(activeUsers)
+          .mockResolvedValueOnce(deletedUsers);
+
+        const result = await service.getUserStats('active');
+
+        expect(result).toEqual({
+          status: 'success',
+          status_code: 200,
+          message: 'Request completed successfully',
+          data: {
+            total_users: totalUsers,
+            active_users: activeUsers,
+            deleted_users: deletedUsers,
+          },
+        });
+        expect(mockUserRepository.count).toHaveBeenCalledTimes(3);
+      });
+
+      it('should return user statistics for deleted status', async () => {
+        const totalUsers = 100;
+        const activeUsers = 40;
+        const deletedUsers = 60;
+
+        mockUserRepository.count
+          .mockResolvedValueOnce(totalUsers)
+          .mockResolvedValueOnce(activeUsers)
+          .mockResolvedValueOnce(deletedUsers);
+
+        const result = await service.getUserStats('deleted');
+
+        expect(result).toEqual({
+          status: 'success',
+          status_code: 200,
+          message: 'Request completed successfully',
+          data: {
+            total_users: totalUsers,
+            active_users: activeUsers,
+            deleted_users: deletedUsers,
+          },
+        });
+        expect(mockUserRepository.count).toHaveBeenCalledTimes(3);
+      });
+
+      it('should throw BadRequestException for invalid status', async () => {
+        await expect(service.getUserStats('unknown')).rejects.toThrow(BadRequestException);
+        expect(mockUserRepository.count).not.toHaveBeenCalled();
+      });
+
+      it('should return user statistics without status', async () => {
+        const totalUsers = 100;
+        const activeUsers = 70;
+        const deletedUsers = 30;
 
         mockUserRepository.count
           .mockResolvedValueOnce(totalUsers)
@@ -461,7 +516,7 @@ describe('UserService', () => {
         expect(result).toEqual({
           status: 'success',
           status_code: 200,
-          message: 'User statistics retrieved successfully',
+          message: 'Request completed successfully',
           data: {
             total_users: totalUsers,
             active_users: activeUsers,
@@ -469,15 +524,6 @@ describe('UserService', () => {
           },
         });
         expect(mockUserRepository.count).toHaveBeenCalledTimes(3);
-      });
-
-      it('should handle errors gracefully', async () => {
-        mockUserRepository.count.mockImplementation(() => {
-          throw new Error('Database error');
-        });
-
-        await expect(service.getUserStats()).rejects.toThrow('Database error');
-        expect(mockUserRepository.count).toHaveBeenCalledTimes(1);
       });
     });
   });

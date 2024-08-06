@@ -19,6 +19,7 @@ import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @Injectable()
 export default class UserService {
@@ -234,15 +235,37 @@ export default class UserService {
       },
     };
   }
-  async getUserStats(): Promise<GetUserStatsResponseDto> {
+  async getUserStats(status?: string): Promise<GetUserStatsResponseDto> {
+    const filters = {};
+
+    if (status) {
+      if (status === 'active') {
+        filters['is_active'] = true;
+      } else if (status === 'deleted') {
+        filters['is_active'] = false;
+      } else {
+        throw new BadRequestException({
+          error: 'Bad Request',
+          message: SYS_MSG.BAD_REQUEST,
+          status_code: HttpStatus.BAD_REQUEST,
+        });
+      }
+    }
+
     const totalUsers = await this.userRepository.count();
-    const activeUsers = await this.userRepository.count({ where: { is_active: true } });
-    const deletedUsers = await this.userRepository.count({ where: { is_active: false } });
+
+    const activeUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: true } })
+      : await this.userRepository.count({ where: { is_active: true } });
+
+    const deletedUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: false } })
+      : await this.userRepository.count({ where: { is_active: false } });
 
     return {
       status: 'success',
       status_code: 200,
-      message: 'User statistics retrieved successfully',
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
       data: {
         total_users: totalUsers,
         active_users: activeUsers,
