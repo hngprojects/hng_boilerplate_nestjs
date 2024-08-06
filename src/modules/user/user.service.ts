@@ -246,17 +246,9 @@ export default class UserService {
 
     if (!user) {
       CustomExceptionHandler(new NotFoundException('User not found'));
-      CustomExceptionHandler(new NotFoundException('User not found'));
     }
 
     if (user.id !== authenticatedUserId) {
-      CustomExceptionHandler(
-        new UnauthorizedException({
-          status: 'error',
-          message: 'You are not authorized to delete this user',
-          status_code: 401,
-        })
-      );
       CustomExceptionHandler(
         new UnauthorizedException({
           status: 'error',
