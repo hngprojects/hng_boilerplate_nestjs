@@ -22,7 +22,7 @@ export class ProfileService {
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new CustomHttpException('User not found', 404);
     }
 
     const userProfile = await this.userRepository.findOne({
@@ -32,7 +32,7 @@ export class ProfileService {
 
     const profile = userProfile.profile;
     if (!profile) {
-      throw new NotFoundException('Profile not found');
+      throw new CustomHttpException('Profile not found', 404);
     }
 
     const responseData = {
@@ -44,39 +44,32 @@ export class ProfileService {
   }
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
-    try {
-      const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      const profile = user.profile;
-      if (!profile) {
-        throw new NotFoundException('Profile not found');
-      }
-
-      await this.profileRepository.update(profile.id, updateProfileDto);
-
-      const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
-
-      const responseData = {
-        message: 'Profile successfully updated',
-        data: updatedProfile,
-      };
-
-      return responseData;
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(`Internal server error: ${error.message}`);
+    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
+    if (!user) {
+      throw new CustomHttpException('User not found', 404);
     }
+
+    const profile = user.profile;
+    if (!profile) {
+      throw new CustomHttpException('Profile not found', 404);
+    }
+
+    await this.profileRepository.update(profile.id, updateProfileDto);
+
+    const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
+
+    const responseData = {
+      message: 'Profile successfully updated',
+      data: updatedProfile,
+    };
+
+    return responseData;
   }
   async deleteUserProfile(userId: string) {
     const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
 
     if (!user || !user.profile) {
-      throw new NotFoundException('User profile not found');
+      throw new CustomHttpException('User profile not found', 404);
     }
 
     const userProfile = await this.profileRepository.findOne({
@@ -84,7 +77,7 @@ export class ProfileService {
     });
 
     if (!userProfile) {
-      throw new NotFoundException('Profile not found');
+      throw new CustomHttpException('Profile not found', 404);
     }
 
     await this.profileRepository.softDelete(userProfile.id);
