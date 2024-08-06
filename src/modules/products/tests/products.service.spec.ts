@@ -74,7 +74,6 @@ describe('ProductsService', () => {
 
       const products = await service.searchProducts(orgMock.id, searchCriteria);
 
-      console.log(products);
       expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
     });
 
