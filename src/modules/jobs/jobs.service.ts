@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
 import { JobDto } from './dto/job.dto';
 import { pick } from '../../helpers/pick';
-import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class JobsService {

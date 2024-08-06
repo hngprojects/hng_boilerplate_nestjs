@@ -15,7 +15,7 @@ export const jobsMock: Job[] = [
     job_mode: 'remote',
     company_name: 'Google',
     is_deleted: false,
-    user: orgMock.owner, // Ensure orgMock.owner is defined in your mock data
+    user: orgMock.owner,
     qualifications: [
       "Bachelor's Degree in Computer Science or related field",
       '5+ years of experience in software development',

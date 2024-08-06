@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { JobDto } from './dto/job.dto';
-import { PaginationDto } from './dto/pagination.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { skipAuth } from '../../helpers/skipAuth';
 import { JobIdDto } from './dto/delete-job.dto';
