@@ -44,7 +44,7 @@ export class JobsService {
   }
 
   async getJobs() {
-    const jobs = await this.jobRepository.find();
+    const jobs = await this.jobRepository.find({ where: { is_deleted: false } });
     return {
       message: 'Jobs listing fetched successfully',
       status_code: 200,
@@ -53,7 +53,7 @@ export class JobsService {
   }
 
   async getJob(id: string) {
-    const job = await this.jobRepository.findOne({ where: { id } });
+    const job = await this.jobRepository.findOne({ where: { id, is_deleted: false } });
     if (!job)
       throw new NotFoundException({
         status_code: 404,

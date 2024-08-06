@@ -37,7 +37,7 @@ export class JobsController {
   @ApiOperation({ summary: 'Gets a job by ID' })
   @ApiResponse({ status: 200, description: 'Job returned successfully' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async getJob(@Param('id') id: string) {
+  async getJob(@Param() { id }: JobIdDto) {
     return this.jobService.getJob(id);
   }
 
