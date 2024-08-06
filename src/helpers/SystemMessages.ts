@@ -38,3 +38,4 @@ export const ORG_NOT_FOUND = 'Organisation not found';
 export const NOT_ORG_OWNER = 'You do not have permission to update this organisation';
 export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
+export const NO_USER_ORGS = 'User has no organisations';

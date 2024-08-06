@@ -84,4 +84,10 @@ export class OrganisationsController {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
+
+  @Get('/')
+  async getUserOrganisations(@Req() req) {
+    const { sub } = req.user;
+    return this.organisationsService.getUserOrganisations(sub);
+  }
 }

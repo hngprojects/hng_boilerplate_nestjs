@@ -18,6 +18,10 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { MemberRoleMapper } from './mapper/member-role.mapper';
+import UserService from '../user/user.service';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class OrganisationsService {
@@ -27,7 +31,8 @@ export class OrganisationsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(OrganisationMember)
-    private readonly organisationMemberRepository: Repository<OrganisationMember>
+    private readonly organisationMemberRepository: Repository<OrganisationMember>,
+    private userService: UserService
   ) {}
 
   async getOrganisationMembers(
@@ -74,6 +79,7 @@ export class OrganisationsService {
     const newMember = new OrganisationMember();
     newMember.user_id = owner;
     newMember.organisation_id = newOrganisation;
+    console.log(newMember);
 
     await this.organisationMemberRepository.save(newMember);
 
@@ -122,5 +128,46 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
+  }
+
+  async getUserOrganisations(userId: string) {
+    const res = await this.userService.getUserDataWithoutPasswordById(userId);
+    const user = res.user as User;
+
+    const createdOrgs = user.created_organisations
+      ? user.created_organisations.map(org => OrganisationMapper.mapToResponseFormat(org))
+      : null;
+
+    const ownedOrgs = user.owned_organisations
+      ? user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org))
+      : null;
+
+    const memberOrgs = await this.organisationMemberRepository.find({
+      where: { user_id: { id: user.id } },
+      relations: ['organisation_id', 'user_id', 'role'],
+    });
+
+    const memberOrgsMapped = memberOrgs.map(org => {
+      const organisation = org.organisation_id && OrganisationMapper.mapToResponseFormat(org.organisation_id);
+      const role = org.role && MemberRoleMapper.mapToResponseFormat(org.role);
+      return {
+        organisation,
+        role,
+      };
+    });
+
+    if (!createdOrgs.length && !ownedOrgs.length && !memberOrgsMapped.length) {
+      throw new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST);
+    }
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Organisations retrieved successfully',
+      data: {
+        created_organisations: createdOrgs,
+        owned_organisations: ownedOrgs,
+        member_organisations: memberOrgsMapped,
+      },
+    };
   }
 }
