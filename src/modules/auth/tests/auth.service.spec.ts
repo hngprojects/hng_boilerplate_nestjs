@@ -336,7 +336,7 @@ describe('AuthenticationService', () => {
       subject: 'Reset Password',
       template: 'Password-Reset-Complete-Template',
       context: {
-        recoveryLink: 'http://example.com/auth/reset-password',
+        otp: '123456',
         name: email,
       },
     };
