@@ -49,6 +49,7 @@ describe('OrganisationsService', () => {
           provide: getRepositoryToken(OrganisationMember),
           useValue: {
             save: jest.fn(),
+            delete: jest.fn(),
           },
         },
         UserService,

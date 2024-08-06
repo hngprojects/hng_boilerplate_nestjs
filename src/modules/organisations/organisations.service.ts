@@ -131,13 +131,13 @@ export class OrganisationsService {
     const org = await this.getOrg(orgId);
     const user = await this.getUser(userId);
 
-    if (!org.organisationMembers.some(member => member.user_id.id === user.id)) {
+    const orgMember = org.organisationMembers.find(member => member.user_id.id === user.id);
+
+    if (!orgMember) {
       throw new CustomHttpException(SYS_MSG.NOT_A_MEMBER, HttpStatus.FORBIDDEN);
     }
 
-    org.organisationMembers = org.organisationMembers.filter(member => member.user_id.id !== user.id);
-
-    await this.organisationRepository.save(org);
+    await this.organisationMemberRepository.delete(orgMember.id);
 
     return {
       status: 'success',
