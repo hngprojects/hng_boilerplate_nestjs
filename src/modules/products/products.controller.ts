@@ -4,7 +4,6 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
-import { OrganisationGuard } from '../../guards/organisation.guard';
 
 @ApiTags('Products')
 @Controller('/organizations/:id/products')
@@ -83,7 +82,7 @@ export class ProductsController {
     return this.productsService.deleteProduct(id, productId);
   }
 
-  @UseGuards(OrganisationGuard)
+  @UseGuards(OwnershipGuard)
   @Get(':productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
@@ -92,6 +91,6 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async getProductStock(@Param('productId') productId: string) {
-    return this.getProductStock(productId);
+    return this.productsService.getProductStock(productId);
   }
 }
