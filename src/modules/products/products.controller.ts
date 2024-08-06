@@ -9,12 +9,12 @@ import { SuperAdminGuard } from 'src/guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Products')
-@Controller('/organizations/products')
+@Controller()
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @UseGuards(SuperAdminGuard)
-  @Get('total')
+  @Get('/products/total')
   @ApiOkResponse({ type: GetTotalProductsResponseDto, description: 'Total Products fetched successfully' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async getTotalProducts() {
@@ -22,7 +22,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Post(':orgId')
+  @Post('/organizations/products/:orgId')
   @ApiOperation({ summary: 'Creates a new product' })
   @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
@@ -33,7 +33,7 @@ export class ProductsController {
     return this.productsService.createProduct(orgId, createProductDto);
   }
 
-  @Get(':orgId/search')
+  @Get('/organizations/products/:orgId/search')
   @ApiOperation({ summary: 'Search for products' })
   @ApiParam({ name: 'orgId', description: 'organisation ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Products found successfully' })
@@ -51,7 +51,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Get(':orgId/:id')
+  @Get('/organizations/products/:orgId/:id')
   @ApiOperation({ summary: 'Gets a product by id' })
   @ApiParam({ name: 'orgId', description: 'Organization ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Product created successfully' })
@@ -63,7 +63,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Patch(':orgId/:productId')
+  @Patch('/organizations/products/:orgId/:productId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Update product' })
   @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
@@ -80,7 +80,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Delete(':orgId/:productId')
+  @Delete('/organizations/products/:orgId/:productId')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
