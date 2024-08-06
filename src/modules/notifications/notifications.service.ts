@@ -21,6 +21,7 @@ import UserService from '../user/user.service';
 import { CreateNotificationError } from './dtos/create-notification-error.dto';
 import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import { Notification } from './entities/notifications.entity';
 @Injectable()
@@ -40,12 +41,34 @@ export class NotificationsService {
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
-
   private getEmailTemplate(recipient_name: string, message: string): IMessageInterface {
     return {
       recipient_name,
       message,
       support_email: process.env.SUPPORT_EMAIL,
+    };
+  }
+
+  async createGlobalNotifications(dto: CreateNotificationForAllUsersDto) {
+    let page = 0;
+    const pageSize = 100;
+    const users = await this.userRepository.find({
+      select: ['id'],
+    });
+    do {
+      const notifications = users.map(user => {
+        return this.notificationRepository.create({
+          message: dto.message,
+          user,
+        });
+      });
+      await this.notificationRepository.save(notifications);
+      page++;
+    } while (users.length === pageSize);
+    return {
+      status: 'success',
+      message: 'Notification created successfully',
+      data: null,
     };
   }
 

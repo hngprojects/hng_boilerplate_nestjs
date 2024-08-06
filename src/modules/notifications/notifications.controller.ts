@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -11,10 +11,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
+import { CreateNotificationForAllUsersResDto } from './dtos/create-notification-all-users-res.dto';
 import { CreateNotificationError } from './dtos/create-notification-error.dto';
 import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
 import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
 import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
 import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
@@ -29,7 +32,23 @@ import { NotificationsService } from './notifications.service';
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
-  @Get()
+
+  @Post('/global')
+  @UseGuards(SuperAdminGuard)
+  @ApiResponse({
+    status: 201,
+    description: 'A new notification is created successfully',
+    type: CreateNotificationForAllUsersResDto,
+  })
+  @ApiInternalServerErrorResponse({
+    status: 500,
+    description: 'Failed to create the notification.',
+  })
+  async createNotificationsForAllUsers(@Body() dto: CreateNotificationForAllUsersDto) {
+    return this.notificationsService.createGlobalNotifications(dto);
+  }
+
+  @Get('/all')
   @ApiResponse({
     status: 200,
     description: 'Notifications retrieved successfully',
@@ -108,7 +127,7 @@ export class NotificationsController {
     return this.notificationsService.markAllNotificationsAsReadForUser(userId);
   }
 
-  @Get()
+  @Get('/unread')
   @ApiResponse({
     status: 200,
     description: 'Unread notifications retrieved successfully',

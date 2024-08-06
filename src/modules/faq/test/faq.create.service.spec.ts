@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FaqService } from './faq.service';
+import { FaqService } from '../faq.service';
 import { Repository } from 'typeorm';
-import { Faq } from './faq.entity';
-import { CreateFaqDto } from './create-faq.dto';
+import { Faq } from '../entities/faq.entity';
+import { CreateFaqDto } from '../dto/create-faq.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('FaqService', () => {
