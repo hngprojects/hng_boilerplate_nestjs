@@ -225,8 +225,6 @@ describe('ProductsService', () => {
       const result = await service.getTotalProducts();
 
       expect(result).toEqual({
-        status: 'success',
-        status_code: HttpStatus.OK,
         message: 'Total Products fetched successfully',
         data: {
           total_products: 20,
@@ -251,8 +249,6 @@ describe('ProductsService', () => {
       const result = await service.getTotalProducts();
 
       expect(result).toEqual({
-        status: 'success',
-        status_code: HttpStatus.OK,
         message: 'Total Products fetched successfully',
         data: {
           total_products: 20,
@@ -277,8 +273,6 @@ describe('ProductsService', () => {
       const result = await service.getTotalProducts();
 
       expect(result).toEqual({
-        status: 'success',
-        status_code: HttpStatus.OK,
         message: 'Total Products fetched successfully',
         data: {
           total_products: 5,

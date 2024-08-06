@@ -9,7 +9,7 @@ import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Products')
-@Controller()
+@Controller('organizations')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -22,7 +22,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Post('/organizations/:orgId/products')
+  @Post('/:orgId/products')
   @ApiOperation({ summary: 'Creates a new product' })
   @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
@@ -33,7 +33,7 @@ export class ProductsController {
     return this.productsService.createProduct(orgId, createProductDto);
   }
 
-  @Get('/organizations/:orgId/products/search')
+  @Get('/:orgId/products/search')
   @ApiOperation({ summary: 'Search for products' })
   @ApiParam({ name: 'orgId', description: 'organisation ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Products found successfully' })
@@ -51,7 +51,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Get('/organizations/:orgId/products/:productId')
+  @Get('/:orgId/products/:productId')
   @ApiOperation({ summary: 'Gets a product by id' })
   @ApiParam({ name: 'orgId', description: 'Organization ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Product created successfully' })
@@ -63,7 +63,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Patch('/organizations/:orgId/products/:productId')
+  @Patch('/:orgId/products/:productId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Update product' })
   @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
@@ -80,7 +80,7 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Delete('/organizations/:orgId/products/:productId')
+  @Delete('/:orgId/products/:productId')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
