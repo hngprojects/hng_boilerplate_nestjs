@@ -4,7 +4,7 @@ import { SuperAdminGuard } from 'src/guards/super-admin.guard';
 import { BlogCategoriesService } from './blog-categories.service';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
 import { User } from '../user/entities/user.entity';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { Messages } from '../blog-category/common/constants';
 
 @ApiTags('blog-categories')
 @Controller('api/v1/blog-categories')
@@ -15,16 +15,16 @@ export class BlogCategoriesController {
   @UseGuards(SuperAdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new blog category' })
-  @ApiResponse({ status: 201, description: 'Blog category created successfully.' })
-  @ApiResponse({ status: 400, description: 'Invalid request data. Please provide a valid category name.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized. Token is missing or invalid.' })
-  @ApiResponse({ status: 403, description: 'Forbidden. You do not have permission to create blog categories.' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error. Please try again later.' })
+  @ApiResponse({ status: 201, description: Messages.BLOG_CATEGORY_CREATED_SUCCESS })
+  @ApiResponse({ status: 400, description: Messages.INVALID_REQUEST_DATA })
+  @ApiResponse({ status: 401, description: Messages.UNAUTHORIZED })
+  @ApiResponse({ status: 403, description: Messages.FORBIDDEN })
+  @ApiResponse({ status: 500, description: Messages.INTERNAL_SERVER_ERROR })
   async create(@Body() createBlogCategoryDto: CreateBlogCategoryDto, @Request() req: { user: User }) {
     const blogCategory = await this.blogCategoriesService.create(createBlogCategoryDto);
     return {
       status: 'success',
-      message: 'Blog category created successfully.',
+      message: Messages.BLOG_CATEGORY_CREATED_SUCCESS,
       data: blogCategory,
       status_code: 201,
     };
