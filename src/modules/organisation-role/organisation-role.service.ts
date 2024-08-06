@@ -13,7 +13,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
-import CustomExceptionHandler from '../../helpers/exceptionHandler';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -171,11 +171,10 @@ export class OrganisationRoleService {
     });
 
     if (!organisation) {
-      throw new NotFoundException({
-        status_code: 404,
-        error: 'Not Found',
-        message: `The organisation with ID ${roleId} does not exist`,
-      });
+      throw new CustomHttpException(
+        { status_code: 404, error: 'Not Found', message: `The organisation with ID ${orgId} does not exist` },
+        HttpStatus.NOT_FOUND
+      );
     }
 
     const role = await this.rolesRepository.findOne({
@@ -186,11 +185,14 @@ export class OrganisationRoleService {
     });
 
     if (!role) {
-      throw new NotFoundException({
-        status_code: 404,
-        error: 'Not Found',
-        message: `The role with ID ${roleId} does not exist`,
-      });
+      throw new CustomHttpException(
+        {
+          status_code: 404,
+          error: 'Not Found',
+          message: `The role with ID ${roleId} does not exist`,
+        },
+        HttpStatus.NOT_FOUND
+      );
     }
 
     await this.rolesRepository.remove(role);
