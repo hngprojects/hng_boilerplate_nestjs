@@ -71,7 +71,6 @@ export class OrganisationsService {
   }
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
-    // Used Promise.all to reduce the time taken for the operation
     const [emailFound, owner, defaultRoles, defaultPermissions] = await Promise.all([
       this.emailExists(createOrganisationDto.email),
       this.userRepository.findOne({ where: { id: userId } }),
@@ -86,9 +85,7 @@ export class OrganisationsService {
       ...mapNewOrganisation,
     });
 
-    // Iterate over each default role
     for (const role of defaultRoles) {
-      // Create role-specific permissions
       const rolePermissions = defaultPermissions.map(defaultPerm => {
         const permission = new Permissions();
         permission.category = defaultPerm.category;
@@ -96,10 +93,8 @@ export class OrganisationsService {
         return permission;
       });
 
-      // Save role-specific permissions
       const savedPermissions = await this.permissionsRepository.save(rolePermissions);
 
-      // Create the role with its specific permissions
       const newRole = this.roleRepository.create({
         name: role.name,
         description: role.description,
@@ -107,10 +102,8 @@ export class OrganisationsService {
         organisation: newOrganisation,
       });
 
-      // Save the role
       const savedRole = await this.roleRepository.save(newRole);
 
-      // Add the saved role to the organisation's roles
       if (!newOrganisation.role) {
         newOrganisation.role = [];
       }
@@ -174,13 +167,11 @@ export class OrganisationsService {
   }
 
   async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
-    // implement logic to add organisation member
     const organisation = await this.organisationRepository.findOneBy({ id: org_id });
     if (!organisation) {
       throw new NotFoundException('Organisation not found');
     }
 
-    // Load user with profile
     const user = await this.userRepository.findOne({
       where: { id: addMemberDto.user_id },
       relations: ['profile'],
@@ -190,7 +181,6 @@ export class OrganisationsService {
       throw new NotFoundException('User not found');
     }
 
-    //check if user is already a member
     const existingMember = await this.organisationMemberRepository.findOneBy({
       user_id: { id: addMemberDto.user_id },
       organisation_id: { id: organisation.id },
