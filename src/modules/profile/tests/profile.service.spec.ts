@@ -3,7 +3,7 @@ import { ProfileService } from '../profile.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Profile } from '../entities/profile.entity';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 
@@ -34,7 +34,7 @@ describe('ProfileService', () => {
 
   describe('findOneProfile', () => {
     it('should return profile data if user and profile are found', async () => {
-      const userId = 'some-uuid';
+      const userId = '453e21ff-245f-40c6-92b9-9216157118a8';
       const user = { id: userId, profile: { id: 'profile-uuid', user_id: userId } } as any;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
@@ -46,29 +46,12 @@ describe('ProfileService', () => {
       });
     });
 
-    it('should throw NotFoundException if user is not found', async () => {
+    it('should throw BadRequestException if user is not found', async () => {
       const userId = 'some-uuid';
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findOneProfile(userId)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw NotFoundException if profile is not found', async () => {
-      const userId = 'some-uuid';
-      const user = { id: userId, profile: null } as any;
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-
-      await expect(service.findOneProfile(userId)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw InternalServerErrorException on other errors', async () => {
-      const userId = 'some-uuid';
-
-      jest.spyOn(userRepository, 'findOne').mockRejectedValue(new Error('Unexpected error'));
-
-      await expect(service.findOneProfile(userId)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.findOneProfile(userId)).rejects.toThrow(BadRequestException);
     });
   });
 

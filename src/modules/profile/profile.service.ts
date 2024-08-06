@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class ProfileService {
@@ -14,34 +15,31 @@ export class ProfileService {
   ) {}
 
   async findOneProfile(userId: string) {
-    try {
-      const user = await this.userRepository.findOne({ where: { id: userId } });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      const userProfile = await this.userRepository.findOne({
-        where: { id: userId },
-        relations: ['profile'],
-      });
-
-      const profile = userProfile.profile;
-      if (!profile) {
-        throw new NotFoundException('Profile not found');
-      }
-
-      const responseData = {
-        message: 'Successfully fetched profile',
-        data: profile,
-      };
-
-      return responseData;
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(`Internal server error: ${error.message}`);
+    if (!isUUID(userId, '4')) {
+      throw new BadRequestException('Invalid user ID');
     }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const userProfile = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile'],
+    });
+
+    const profile = userProfile.profile;
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const responseData = {
+      message: 'Successfully fetched profile',
+      data: profile,
+    };
+
+    return responseData;
   }
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
