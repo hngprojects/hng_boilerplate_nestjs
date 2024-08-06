@@ -2,9 +2,11 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Process, Processor } from '@nestjs/bull';
 import { MailInterface } from './interfaces/MailInterface';
 import { Job } from 'bull';
+import { Logger } from '@nestjs/common';
 
 @Processor('emailSending')
 export default class EmailQueueConsumer {
+  private logger = new Logger(EmailQueueConsumer.name);
   constructor(private readonly mailerService: MailerService) {}
 
   @Process('welcome')
@@ -19,7 +21,7 @@ export default class EmailQueueConsumer {
         template: 'welcome',
       });
     } catch (sendWelcomeEmailJobError) {
-      console.log('EmailQueueConsumer ~ sendWelcomeEmailJobError: ', sendWelcomeEmailJobError);
+      this.logger.error(`EmailQueueConsumer ~ sendWelcomeEmailJobError:  ${sendWelcomeEmailJobError}`);
     }
   }
 
@@ -36,7 +38,7 @@ export default class EmailQueueConsumer {
         template: 'waitlist',
       });
     } catch (sendWaitlistEmailJobError) {
-      console.log('EmailQueueConsumer ~ sendWaitlistEmailJobError: ', sendWaitlistEmailJobError);
+      this.logger.error(`EmailQueueConsumer ~ sendWaitlistEmailJobError: ${sendWaitlistEmailJobError}`);
     }
   }
 
@@ -52,7 +54,7 @@ export default class EmailQueueConsumer {
         template: 'reset-password',
       });
     } catch (sendResetPasswordEmailJobError) {
-      console.log('EmailQueueConsumer ~ sendResetPasswordEmailJobError: ', sendResetPasswordEmailJobError);
+      this.logger.error(`EmailQueueConsumer ~ sendResetPasswordEmailJobError: ${sendResetPasswordEmailJobError}`);
     }
   }
 
@@ -68,7 +70,7 @@ export default class EmailQueueConsumer {
         template: 'newsletter',
       });
     } catch (sendNewsletterEmailJobError) {
-      console.log('EmailQueueConsumer ~ sendNewsletterEmailJobError: ', sendNewsletterEmailJobError);
+      this.logger.error(`EmailQueueConsumer ~ sendNewsletterEmailJobError:   ${sendNewsletterEmailJobError}`);
     }
   }
 
@@ -84,7 +86,7 @@ export default class EmailQueueConsumer {
         template: 'register-otp',
       });
     } catch (sendTokenEmailJobError) {
-      console.log('EmailQueueConsumer ~ sendTokenEmailJobError: ', sendTokenEmailJobError);
+      this.logger.error(`EmailQueueConsumer ~ sendTokenEmailJobError:   ${sendTokenEmailJobError}`);
     }
   }
 
@@ -100,7 +102,23 @@ export default class EmailQueueConsumer {
         template: 'login-otp',
       });
     } catch (sendLoginOtpEmailJobError) {
-      console.log('EmailQueueConsumer ~ sendLoginOtpEmailJobError: ', sendLoginOtpEmailJobError);
+      this.logger.error(`EmailQueueConsumer ~ sendLoginOtpEmailJobError:   ${sendLoginOtpEmailJobError}`);
+    }
+  }
+
+  @Process('login-otp')
+  async sendNotificationMail(job: Job<MailInterface>) {
+    try {
+      const {
+        data: { mail },
+      } = job;
+      await this.mailerService.sendMail({
+        ...mail,
+        subject: 'In-App, Notification',
+        template: 'notification',
+      });
+    } catch (sendLoginOtpEmailJobError) {
+      this.logger.error(`EmailQueueConsumer ~ sendLoginOtpEmailJobError:   ${sendLoginOtpEmailJobError}`);
     }
   }
 }

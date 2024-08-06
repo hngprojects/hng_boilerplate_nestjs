@@ -1,10 +1,11 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpStatus } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserType } from '../modules/user/entities/user.entity';
+import * as SYS_MSG from '../helpers/SystemMessages';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
-import { Job } from '../modules/jobs/entities/job.entity';
+import { CustomHttpException } from '../helpers/custom-http-filter';
 
 @Injectable()
 export class OwnershipGuard implements CanActivate {
@@ -18,6 +19,7 @@ export class OwnershipGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const organisationId = request.params.id;
+
     if (user.user_type === UserType.SUPER_ADMIN) {
       return true;
     }
@@ -25,12 +27,18 @@ export class OwnershipGuard implements CanActivate {
       where: { id: organisationId },
       relations: ['owner', 'creator'],
     });
+
     if (!organisation) {
-      throw new NotFoundException('Organisation not found');
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-    if (organisation.owner.id === user.sub || organisation.creator.id === user.sub) {
+    if (
+      organisation.owner.id === user.sub ||
+      organisation.creator.id === user.sub ||
+      organisation.owner.id === user.id ||
+      organisation.creator.id === user.id
+    ) {
       return true;
     }
-    throw new ForbiddenException('You do not have permission to update this organisation');
+    throw new CustomHttpException(SYS_MSG.NOT_ORG_OWNER, HttpStatus.FORBIDDEN);
   }
 }
