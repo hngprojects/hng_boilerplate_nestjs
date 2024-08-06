@@ -1,6 +1,6 @@
 import { IsUUID } from 'class-validator';
 
-export class DeleteJobDto {
+export class JobIdDto {
   @IsUUID()
   id: string;
 }

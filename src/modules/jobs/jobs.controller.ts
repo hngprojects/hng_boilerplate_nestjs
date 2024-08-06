@@ -4,7 +4,7 @@ import { JobDto } from './dto/job.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { skipAuth } from '../../helpers/skipAuth';
-import { DeleteJobDto } from './dto/delete-job.dto';
+import { JobIdDto } from './dto/delete-job.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiTags('Jobs')
@@ -47,7 +47,7 @@ export class JobsController {
   @ApiResponse({ status: 200, description: 'Job deleted successfully' })
   @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async delete(@Param() { id }: DeleteJobDto) {
+  async delete(@Param() { id }: JobIdDto) {
     return this.jobService.delete(id);
   }
 }

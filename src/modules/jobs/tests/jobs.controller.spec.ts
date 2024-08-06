@@ -8,13 +8,13 @@ import { Job } from '../entities/job.entity';
 import { User } from '../../user/entities/user.entity';
 import { SuperAdminGuard } from '../../../guards/super-admin.guard';
 import { plainToInstance } from 'class-transformer';
-import { DeleteJobDto } from '../dto/delete-job.dto';
+import { JobIdDto } from '../dto/delete-job.dto';
 import { validate } from 'class-validator';
 
 describe('JobsController', () => {
   it('should throw a BadRequestException if the id is not a valid UUID', async () => {
     const dto = { id: 'xd' };
-    const invalidDtoObject = plainToInstance(DeleteJobDto, dto);
+    const invalidDtoObject = plainToInstance(JobIdDto, dto);
     const errors = await validate(invalidDtoObject);
     expect(errors[0].constraints.isUuid).toEqual('id must be a UUID');
   });
