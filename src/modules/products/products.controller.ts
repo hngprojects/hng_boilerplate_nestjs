@@ -1,18 +1,27 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
+import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
 
+@ApiBearerAuth()
 @ApiTags('Products')
 @Controller('/organizations/:id/products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @UseGuards(OwnershipGuard)
+  @Get('total')
+  @ApiOkResponse({ type: GetTotalProductsResponseDto, description: 'Total Products fetched successfully' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getTotalProducts(@Param('id') id: string) {
+    return await this.productsService.getTotalProducts();
+  }
+
+  @UseGuards(OwnershipGuard)
   @Post('')
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Creates a new product' })
   @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
@@ -44,7 +53,6 @@ export class ProductsController {
   @Get(':id')
   @ApiOperation({ summary: 'Gets a product by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
-  @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
   @ApiResponse({ status: 200, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Product not found' })

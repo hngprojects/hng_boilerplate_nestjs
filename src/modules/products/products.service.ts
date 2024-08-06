@@ -14,6 +14,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
+import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 
 interface SearchCriteria {
   name?: string;
@@ -212,6 +213,55 @@ export class ProductsService {
         product_id: product.id,
         current_stock: product.quantity,
         last_updated: product.updated_at,
+      },
+    };
+  }
+
+  private getDateRange(date: Date) {
+    const monthStarts = startOfMonth(new Date(date));
+    const monthEnds = endOfMonth(new Date(date));
+
+    return { monthStarts, monthEnds };
+  }
+
+  private async getTotalProductsForDateRange(startOfMonth: Date, endOfMonth: Date) {
+    const result = await this.productRepository
+      .createQueryBuilder('product')
+      .select('SUM(product.quantity)', 'total')
+      .where('product.created_at BETWEEN :startOfMonth AND :endOfMonth', { startOfMonth, endOfMonth })
+      .getRawOne();
+
+    return result && result.total ? parseInt(result.total, 10) : 0;
+  }
+
+  async getTotalProducts() {
+    const todaysDate = new Date();
+    const lastMonth = subMonths(todaysDate, 1);
+
+    const monthStarts = this.getDateRange(todaysDate).monthStarts;
+    const monthEnds = this.getDateRange(todaysDate).monthEnds;
+    const lastMonthStarts = this.getDateRange(lastMonth).monthStarts;
+    const lastMonthEnds = this.getDateRange(lastMonth).monthEnds;
+
+    const totalProductsThisMonth = await this.getTotalProductsForDateRange(monthStarts, monthEnds);
+
+    const totalProductsLastMonth = await this.getTotalProductsForDateRange(lastMonthStarts, lastMonthEnds);
+
+    let percentageChange = '0% from last month';
+    if (totalProductsLastMonth !== 0) {
+      const change = ((totalProductsThisMonth - totalProductsLastMonth) / totalProductsLastMonth) * 100;
+      percentageChange = `${change > 0 ? '+' : ''}${change.toFixed(2)}% from last month`;
+    } else if (totalProductsThisMonth > 0) {
+      percentageChange = `+100.00% from last month`;
+    }
+
+    return {
+      status: 'success',
+      status_code: HttpStatus.OK,
+      message: 'Total Products fetched successfully',
+      data: {
+        total_products: totalProductsThisMonth,
+        percentage_change: percentageChange,
       },
     };
   }
