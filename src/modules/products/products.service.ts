@@ -248,16 +248,20 @@ export class ProductsService {
     const totalProductsLastMonth = await this.getTotalProductsForDateRange(lastMonthStarts, lastMonthEnds);
 
     let percentageChange = '0% from last month';
-    if (totalProductsLastMonth !== 0) {
+    if (totalProductsLastMonth === totalProductsThisMonth) {
+      if (totalProductsLastMonth === 0) {
+        percentageChange = 'No products to compare from last month';
+      } else {
+        percentageChange = 'No change from last month';
+      }
+    } else if (totalProductsLastMonth !== 0) {
       const change = ((totalProductsThisMonth - totalProductsLastMonth) / totalProductsLastMonth) * 100;
       percentageChange = `${change > 0 ? '+' : ''}${change.toFixed(2)}% from last month`;
-    } else if (totalProductsThisMonth > 0) {
+    } else if (totalProductsLastMonth === 0 && totalProductsThisMonth > 0) {
       percentageChange = `+100.00% from last month`;
     }
 
     return {
-      status: 'success',
-      status_code: HttpStatus.OK,
       message: 'Total Products fetched successfully',
       data: {
         total_products: totalProductsThisMonth,
