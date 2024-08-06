@@ -21,6 +21,7 @@ import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import { pick } from '../../helpers/pick';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
 import * as SYS_MSG from '../../helpers/SystemMessages';
+import { CustomHttpException } from '../../../src/helpers/custom-http-filter';
 
 @Injectable()
 export default class UserService {
@@ -220,6 +221,30 @@ export default class UserService {
         users: formattedUsers,
         pagination,
       },
+    };
+  }
+
+  async softDeleteUser(userId: string, authenticatedUserId: string): Promise<any> {
+    const identifierOptions: UserIdentifierOptionsType = {
+      identifier: userId,
+      identifierType: 'id',
+    };
+
+    const user = await this.getUserRecord(identifierOptions);
+
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.id !== authenticatedUserId) {
+      throw new CustomHttpException('You are not authorized to delete this user', HttpStatus.UNAUTHORIZED);
+    }
+
+    await this.userRepository.softDelete(userId);
+
+    return {
+      status: 'success',
+      message: 'Deletion in progress',
     };
   }
 
