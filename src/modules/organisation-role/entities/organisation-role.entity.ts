@@ -1,5 +1,5 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Permissions } from '../../organisation-permissions/entities/permissions.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
@@ -20,6 +20,12 @@ export class OrganisationRole extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, organisation => organisation.role, { eager: false })
   organisation: Organisation;
+
+  @Column({ default: false })
+  isDeleted: boolean;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 
   @OneToMany(() => OrganisationMember, member => member.role)
   organisationMembers: OrganisationMember[];

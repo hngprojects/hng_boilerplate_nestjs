@@ -1,9 +1,12 @@
 import {
+  BadRequestException,
   ConflictException,
+  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +16,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
+import { OrganisationMember } from '../organisations/entities/org-members.entity';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -21,6 +25,8 @@ export class OrganisationRoleService {
     private rolesRepository: Repository<OrganisationRole>,
     @InjectRepository(Organisation)
     private organisationRepository: Repository<Organisation>,
+    @InjectRepository(OrganisationMember)
+    private organisationMemberRepository: Repository<OrganisationMember>,
     @InjectRepository(Permissions)
     private permissionRepository: Repository<Permissions>,
     @InjectRepository(DefaultPermissions)
@@ -124,6 +130,55 @@ export class OrganisationRoleService {
       }
       throw new Error(`Failed to fetch role: ${error.message}`);
     }
+  }
+
+  async removeRole(organisationId: string, roleId: string) {
+    const role = await this.rolesRepository.findOne({
+      where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
+    });
+    if (!role) {
+      throw new NotFoundException(`The role with ID ${roleId} does not exist`);
+    }
+    const usersWithRole = await this.organisationRepository.count({
+      where: {
+        id: organisationId,
+        organisationMembers: {
+          role: { id: roleId },
+        },
+      },
+      relations: ['organisationUsers', 'organisationUsers.role'],
+    });
+
+    if (usersWithRole > 0) {
+      throw new BadRequestException('Role is currently assigned to users');
+    }
+    try {
+      await this.rolesRepository.softDelete(roleId);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ status_code: 404, error: 'Not Found', message: error.message }, HttpStatus.NOT_FOUND);
+      }
+      if (error instanceof BadRequestException) {
+        throw new HttpException(
+          { status_code: 400, error: 'Bad Request', message: error.message },
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      if (error instanceof UnauthorizedException) {
+        throw new HttpException(
+          { status_code: 401, error: 'Unauthorized', message: error.message },
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+      throw new HttpException(
+        { status_code: 500, error: 'Internal Server Error', message: 'An unexpected error occurred' },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+    return {
+      status_code: 200,
+      message: 'Role successfully removed',
+    };
   }
 
   async updateRole(updateRoleDto: UpdateOrganisationRoleDto, orgId: string, roleId: string) {

@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,6 +7,8 @@ import { Permissions } from '../../organisation-permissions/entities/permissions
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { OrganisationRole } from '../entities/organisation-role.entity';
 import { OrganisationRoleService } from '../organisation-role.service';
+import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { organisationRoleMock } from '../../organisations/tests/mocks/organisation.mock';
 import { UpdateOrganisationRoleDto } from '../dto/update-organisation-role.dto';
 
 describe('OrganisationRoleService', () => {
@@ -14,6 +16,7 @@ describe('OrganisationRoleService', () => {
   let rolesRepository: Repository<OrganisationRole>;
   let organisationRepository: Repository<Organisation>;
   let permissionRepository: Repository<Permissions>;
+  let organisationMemberRepository: Repository<OrganisationMember>;
   let defaultPermissionRepository: Repository<DefaultPermissions>;
 
   beforeEach(async () => {
@@ -36,6 +39,10 @@ describe('OrganisationRoleService', () => {
           provide: getRepositoryToken(DefaultPermissions),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(OrganisationMember),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
@@ -43,6 +50,7 @@ describe('OrganisationRoleService', () => {
     rolesRepository = module.get<Repository<OrganisationRole>>(getRepositoryToken(OrganisationRole));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
     permissionRepository = module.get<Repository<Permissions>>(getRepositoryToken(Permissions));
+    organisationMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
   });
 
   describe('createOrgRoles', () => {
@@ -143,17 +151,53 @@ describe('OrganisationRoleService', () => {
       expect(result).toEqual(mockRole);
     });
 
-    it('should throw NotFoundException when organisation is not found', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+    it('should throw NotFoundException if the role does not exist', async () => {
+      const organisationId = 'org-id';
+      const roleId = 'role-id';
 
-      await expect(service.findSingleRole('role123', 'nonexistent')).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw NotFoundException when role is not found', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: 'org123' } as Organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findSingleRole('nonexistent', 'org123')).rejects.toThrow(NotFoundException);
+      await expect(service.removeRole(organisationId, roleId)).rejects.toThrow(
+        new NotFoundException(`The role with ID ${roleId} does not exist`)
+      );
+    });
+
+    it('should throw BadRequestException if the role is assigned to users', async () => {
+      const organisationId = 'org-id';
+      const roleId = 'role-id';
+      const role = organisationRoleMock;
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
+      jest.spyOn(organisationRepository, 'count').mockResolvedValue(1);
+
+      await expect(service.removeRole(organisationId, roleId)).rejects.toThrow(
+        new BadRequestException('Role is currently assigned to users')
+      );
+    });
+
+    it('should delete the role successfully', async () => {
+      const organisationId = 'org-id';
+      const roleId = 'role-id';
+      const role = organisationRoleMock;
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
+      jest.spyOn(organisationRepository, 'count').mockResolvedValue(0);
+      jest.spyOn(rolesRepository, 'softDelete').mockResolvedValue(null);
+
+      const result = await service.removeRole(organisationId, roleId);
+
+      expect(rolesRepository.findOne).toHaveBeenCalledWith({
+        where: { id: roleId, organisation: { id: organisationId }, isDeleted: false },
+      });
+      expect(organisationRepository.count).toHaveBeenCalledWith({
+        where: {
+          id: organisationId,
+          organisationMembers: {
+            role: { id: roleId },
+          },
+        },
+        relations: ['organisationUsers', 'organisationUsers.role'],
+      });
+      expect(rolesRepository.softDelete).toHaveBeenCalledWith(roleId);
+      expect(result).toEqual({ status_code: 200, message: 'Role successfully removed' });
     });
   });
 

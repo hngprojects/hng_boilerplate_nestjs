@@ -28,18 +28,6 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
   };
 
-  // Create a mock object that matches the OrganisationRole interface
-  const organisationRoleMock: OrganisationRole = {
-    id: uuidv4(),
-    name: 'Admin',
-    description: 'Administrator role with full permissions',
-    permissions: [],
-    organisation: null,
-    organisationMembers: [],
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
-
   const orgMemberMock: OrganisationMember = {
     id: uuidv4(),
     created_at: new Date(),
@@ -103,6 +91,19 @@ export const createMockOrganisation = (): Organisation => {
     organisationMembers: [orgMemberMock],
     products: [],
   };
+};
+
+export const organisationRoleMock: OrganisationRole = {
+  id: uuidv4(),
+  created_at: new Date(),
+  updated_at: new Date(),
+  name: 'Mock Role',
+  description: 'This is a mock role description',
+  organisation: null as unknown as Organisation,
+  isDeleted: false,
+  deletedAt: null,
+  permissions: [],
+  organisationMembers: [],
 };
 
 export const orgMock = createMockOrganisation();
