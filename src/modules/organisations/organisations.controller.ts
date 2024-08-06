@@ -89,7 +89,7 @@ export class OrganisationsController {
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
 
-  @ApiOperation({ summary: 'Get members of an Organisation' })
+  @ApiOperation({ summary: 'Assign roles to members of an organisation' })
   @ApiResponse({
     status: 200,
     description: 'Assign roles to members of an organisation',
@@ -122,13 +122,6 @@ export class OrganisationsController {
     @Param('orgId') orgId: string,
     @Body() updateMemberRoleDto: UpdateMemberRoleDto
   ) {
-    try {
-      return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
-      }
-      throw new InternalServerErrorException('An error occurred while updating the member role');
-    }
+    return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
   }
 }

@@ -20,6 +20,8 @@ import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationsService {
@@ -136,11 +138,11 @@ export class OrganisationsService {
     });
 
     if (!member) {
-      throw new NotFoundException('Member not found');
+      throw new CustomHttpException(ORG_MEMBER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     if (member.organisation_id.id !== orgId) {
-      throw new ForbiddenException('Member does not belong to the specified organisation');
+      throw new CustomHttpException(ORG_MEMBER_DOES_NOT_BELONG, HttpStatus.FORBIDDEN);
     }
 
     const newRole = await this.rolesRepository.findOne({
@@ -151,7 +153,7 @@ export class OrganisationsService {
     });
 
     if (!newRole) {
-      throw new NotFoundException('Role not found in the organization');
+      throw new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     member.role = newRole;
