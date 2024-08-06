@@ -32,9 +32,8 @@ export const jobApplicationMock: JobApplication[] = [
     email: 'johndoe@example.com',
     resume: 'https://example.com/resume.pdf',
     cover_letter: 'Cover letter text here',
-    job: jobsMock[0], // Reference the first job in the jobsMock array
+    job: jobsMock[0],
   },
 ];
 
-// Update jobsMock to include jobApplicationMock
 jobsMock[0].job_application = jobApplicationMock;

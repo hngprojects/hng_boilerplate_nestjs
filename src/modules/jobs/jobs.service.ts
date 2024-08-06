@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { pick } from '../../helpers/pick';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { User } from '../user/entities/user.entity';
 import { FindJobResponseDto } from './dto/find-job-response.dto';
 import { JobApplicationResponseDto } from './dto/job-application-response.dto';
@@ -33,7 +34,7 @@ export class JobsService {
     }
 
     if (isPassed(deadline)) {
-      throw new CustomHttpException('Job application deadline passed', HttpStatus.UNPROCESSABLE_ENTITY);
+      throw new CustomHttpException(SYS_MSG.DEADLINE_PASSED, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     const { resume, applicant_name, ...others } = jobApplicationDto;
