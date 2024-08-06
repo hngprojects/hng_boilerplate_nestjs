@@ -38,8 +38,6 @@ export class MembershipGuard implements CanActivate {
       throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    console.log(organisation);
-
     if (organisation.owner.id === currentUserId || organisation.creator.id === currentUserId) return true;
 
     const roles = await this.membersRepository.findOne({
