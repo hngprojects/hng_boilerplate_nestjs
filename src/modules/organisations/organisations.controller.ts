@@ -116,10 +116,14 @@ export class OrganisationsController {
     status: 403,
     description: 'User not a member of the organisation',
   })
-  @Put('members/:memberId/role')
-  async updateMemberRole(@Param('memberId') memberId: string, @Body() updateMemberRoleDto: UpdateMemberRoleDto) {
+  @Put(':orgId/members/:memberId/role')
+  async updateMemberRole(
+    @Param('memberId') memberId: string,
+    @Param('orgId') orgId: string,
+    @Body() updateMemberRoleDto: UpdateMemberRoleDto
+  ) {
     try {
-      return await this.organisationsService.updateMemberRole(memberId, updateMemberRoleDto);
+      return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);

@@ -234,12 +234,13 @@ describe('OrganisationsService', () => {
 
   describe('updateMemberRole', () => {
     it('should update member role successfully', async () => {
+      const orgId = 'orgId';
       const memberId = '1';
       const updateMemberRoleDto = { role: 'newRole' };
       const mockMember = {
         id: memberId,
         user_id: { id: 'userId', first_name: 'John', last_name: 'Doe' },
-        organisation_id: { id: 'orgId' },
+        organisation_id: { id: orgId },
         role: { name: 'oldRole' },
       };
       const mockNewRole = { name: 'newRole' };
@@ -250,7 +251,7 @@ describe('OrganisationsService', () => {
         .spyOn(organisationMemberRepository, 'save')
         .mockResolvedValue({ ...mockMember, role: mockNewRole } as OrganisationMember);
 
-      const result = await service.updateMemberRole(memberId, updateMemberRoleDto);
+      const result = await service.updateMemberRole(orgId, memberId, updateMemberRoleDto);
 
       expect(result).toEqual({
         message: 'John Doe has successfully been added to the newRole role',
@@ -264,28 +265,46 @@ describe('OrganisationsService', () => {
     });
 
     it('should throw NotFoundException if member is not found', async () => {
+      const orgId = 'orgId';
       const memberId = '1';
       const updateMemberRoleDto = { role: 'newRole' };
 
       jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateMemberRole(memberId, updateMemberRoleDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw NotFoundException if role is not found in the organization', async () => {
+    it('should throw ForbiddenException if member does not belong to the specified organisation', async () => {
+      const orgId = 'orgId';
       const memberId = '1';
       const updateMemberRoleDto = { role: 'newRole' };
       const mockMember = {
         id: memberId,
         user_id: { id: 'userId' },
-        organisation_id: { id: 'orgId' },
+        organisation_id: { id: 'differentOrgId' },
+        role: { name: 'oldRole' },
+      };
+
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(mockMember as OrganisationMember);
+
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw NotFoundException if role is not found in the organization', async () => {
+      const orgId = 'orgId';
+      const memberId = '1';
+      const updateMemberRoleDto = { role: 'newRole' };
+      const mockMember = {
+        id: memberId,
+        user_id: { id: 'userId' },
+        organisation_id: { id: orgId },
         role: { name: 'oldRole' },
       };
 
       jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(mockMember as OrganisationMember);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateMemberRole(memberId, updateMemberRoleDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -129,7 +129,7 @@ export class OrganisationsService {
     }
   }
 
-  async updateMemberRole(memberId: string, updateMemberRoleDto: UpdateMemberRoleDto) {
+  async updateMemberRole(orgId: string, memberId: string, updateMemberRoleDto: UpdateMemberRoleDto) {
     const member = await this.organisationMemberRepository.findOne({
       where: { id: memberId },
       relations: ['user_id', 'organisation_id', 'role'],
@@ -139,10 +139,14 @@ export class OrganisationsService {
       throw new NotFoundException('Member not found');
     }
 
+    if (member.organisation_id.id !== orgId) {
+      throw new ForbiddenException('Member does not belong to the specified organisation');
+    }
+
     const newRole = await this.rolesRepository.findOne({
       where: {
         name: updateMemberRoleDto.role,
-        organisation: { id: member.organisation_id.id },
+        organisation: { id: orgId },
       },
     });
 
