@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
 import { NewsletterSubscriptionService } from './newsletter-subscription.service';
 import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { skipAuth } from '../../helpers/skipAuth';
@@ -35,14 +35,32 @@ export class NewsletterSubscriptionController {
           type: 'array',
           items: { $ref: '#/components/schemas/NewsletterSubscriptionResponseDto' },
         },
+        meta: {
+          type: 'object',
+          properties: {
+            total: { type: 'number' },
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            totalPages: { type: 'number' },
+          },
+        },
       },
     },
   })
-  async findAll(): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[] }> {
-    const subscribers = await this.newsletterSubscriptionService.findAll();
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[]; meta: any }> {
+    const { subscribers, total } = await this.newsletterSubscriptionService.findAllSubscribers(page, limit);
     return {
       message: 'Subscribers list fetched successfully',
       data: subscribers,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -54,7 +72,7 @@ export class NewsletterSubscriptionController {
   @ApiResponse({ status: 200, description: 'Subscriber with ID {id} has been soft deleted' })
   @ApiResponse({ status: 404, description: 'Subscriber with ID ${id} not found' })
   remove(@Param('id') id: string) {
-    return this.newsletterSubscriptionService.remove(id);
+    return this.newsletterSubscriptionService.removeSubscriber(id);
   }
 
   @UseGuards(SuperAdminGuard)

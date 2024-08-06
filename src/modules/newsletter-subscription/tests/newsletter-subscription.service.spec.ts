@@ -25,6 +25,7 @@ describe('NewsletterService', () => {
             create: jest.fn(),
             save: jest.fn(),
             find: jest.fn(),
+            findAndCount: jest.fn(), // Add this line
             softDelete: jest.fn(),
             restore: jest.fn(),
           },
@@ -66,13 +67,38 @@ describe('NewsletterService', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('should return an array of subscribers', async () => {
-      const subscribers = [{ id: '1', email: 'test@example.com' }];
-      jest.spyOn(repository, 'find').mockResolvedValue(subscribers as NewsletterSubscription[]);
+  describe('findAllSubscribers', () => {
+    it('should return paginated subscribers and total count', async () => {
+      const subscribers = [
+        { id: '1', email: 'test1@example.com' },
+        { id: '2', email: 'test2@example.com' },
+      ];
+      const totalCount = 10;
 
-      const result = await service.findAll();
-      expect(result).toEqual(subscribers);
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([subscribers as NewsletterSubscription[], totalCount]);
+
+      const result = await service.findAllSubscribers(1, 2);
+      expect(result).toEqual({
+        subscribers: subscribers.map(service['mapSubscriberToResponseDto']),
+        total: totalCount,
+      });
+      expect(repository.findAndCount).toHaveBeenCalledWith({
+        skip: 0,
+        take: 2,
+      });
+    });
+
+    it('should use default pagination values if not provided', async () => {
+      const subscribers = [{ id: '1', email: 'test@example.com' }];
+      const totalCount = 1;
+
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([subscribers as NewsletterSubscription[], totalCount]);
+
+      await service.findAllSubscribers();
+      expect(repository.findAndCount).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+      });
     });
   });
 
@@ -82,7 +108,7 @@ describe('NewsletterService', () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue({ id, email: 'test@example.com' } as NewsletterSubscription);
       jest.spyOn(repository, 'softDelete').mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
 
-      const result = await service.remove(id);
+      const result = await service.removeSubscriber(id);
       expect(result).toEqual({ message: `Subscriber with ID ${id} has been soft deleted` });
     });
 
@@ -90,7 +116,7 @@ describe('NewsletterService', () => {
       const id = '1';
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.remove(id)).rejects.toThrow(NotFoundException);
+      await expect(service.removeSubscriber(id)).rejects.toThrow(NotFoundException);
     });
   });
 
