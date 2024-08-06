@@ -1,5 +1,5 @@
 import { UserPayload } from '../user/interfaces/user-payload.interface';
-import { Body, Controller, Param, Patch, Req, Request, Delete, Get, Query } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Req, Request, Delete, Get, Query, Post, UseGuards } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
@@ -20,12 +20,31 @@ import { ErrorDto } from './dtos/unread-response-error.dto';
 import { notificationPropDto } from './dtos/notification-prop.dto';
 import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
 import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
+import { CreateNotificationForAllUsersResDto } from './dtos/create-notification-all-users-res.dto';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
+
+  @Post('/global')
+  @UseGuards(SuperAdminGuard)
+  @ApiResponse({
+    status: 201,
+    description: 'A new notification is created successfully',
+    type: CreateNotificationForAllUsersResDto,
+  })
+  @ApiInternalServerErrorResponse({
+    status: 500,
+    description: 'Failed to create the notification.',
+  })
+  async createNotificationsForAllUsers(@Body() dto: CreateNotificationForAllUsersDto) {
+    return this.notificationsService.createGlobalNotifications(dto);
+  }
+
   @Get()
   @ApiResponse({
     status: 200,
