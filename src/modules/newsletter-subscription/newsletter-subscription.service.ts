@@ -25,13 +25,22 @@ export class NewsletterSubscriptionService {
     return response;
   }
 
-  async findAll(): Promise<NewsletterSubscriptionResponseDto[]> {
-    const subscribers = await this.newsletterSubscriptionRepository.find();
+  async findAllSubscribers(
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ subscribers: NewsletterSubscriptionResponseDto[]; total: number }> {
+    const [subscribers, total] = await this.newsletterSubscriptionRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
 
-    return subscribers.map(this.mapSubscriberToResponseDto);
+    return {
+      subscribers: subscribers.map(this.mapSubscriberToResponseDto),
+      total,
+    };
   }
 
-  async remove(id: string) {
+  async removeSubscriber(id: string) {
     const subscription = await this.newsletterSubscriptionRepository.findOne({ where: { id } });
     if (!subscription) {
       throw new NotFoundException(`Subscriber with ID ${id} not found`);
