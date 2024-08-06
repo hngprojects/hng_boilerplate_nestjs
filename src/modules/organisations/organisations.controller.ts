@@ -19,7 +19,7 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
-import { SearchMemberQueryDto, SearchMemberResponseDto } from './dto/search-member.dto';
+import { SearchMemberQueryDto, SearchMemberResponseDto, SearchMemberBodyDto } from './dto/search-member.dto';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -95,10 +95,11 @@ export class OrganisationsController {
   async searchMmebers(
     @Req() req,
     @Param('org_id') orgId: string,
-    @Body('search_term') searchTerm: string,
+    @Body() searchMemberBodyDto: SearchMemberBodyDto,
     @Query() searchMemberQueryDto: SearchMemberQueryDto
   ) {
     const userId = req.user.sub ?? req.user.id;
+    const searchTerm = searchMemberBodyDto.search_term;
     return this.organisationsService.searchOrganisationMember(userId, orgId, searchTerm, searchMemberQueryDto);
   }
 }

@@ -27,3 +27,9 @@ export class SearchMemberResponseDto {
     members: OrganisationMembersResponseFormat[];
   };
 }
+
+export class SearchMemberBodyDto {
+  @ApiProperty({ type: String })
+  @IsString()
+  search_term: string;
+}
