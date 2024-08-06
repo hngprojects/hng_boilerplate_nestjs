@@ -1,21 +1,38 @@
 name: CI/CD--Dev
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - dev
   push:
     branches:
       - dev
 
+env:
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_DATABASE: ${{ secrets.DB_DATABASE }}
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_PORT: ${{ secrets.DB_PORT }}
+  DB_ENTITIES: ${{ secrets.DB_ENTITIES }}
+  DB_MIGRATIONS: ${{ secrets.DB_MIGRATIONS }}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+  DB_TYPE: 'postgres'
+  PROFILE: 'staging'
+  NODE_ENV: 'development'
+  PORT: 3000
+
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
+    # environment: pr_environment
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -25,11 +42,43 @@ jobs:
       - name: Install dependencies
         run: npm install --include=dev
 
+      - name: Run tests
+        run: npm run test
+
       - name: Build project
         run: npm run build
 
-      - name: Run tests
-        run: npm run test
+      - name: Generate migrations
+        run: npm run migration:generate
+
+      - name: Run migrations
+        run: npm run migration:run
+
+      - name: Start application
+        run: |
+          npm run start:prod > app.log 2>&1 &
+          APP_PID=$!
+          echo $APP_PID
+          echo "Application started with PID $APP_PID"
+          sleep 30 # Wait for the application to start
+          tail -f app.log &
+          # Check application status with curl
+          if curl --retry 5 --retry-delay 5 --max-time 10 http://localhost:3000/health; then
+              echo "Application is up and running."
+          else
+              echo "Application failed to start. Logs:"
+              cat app.log
+              echo "Exiting workflow due to application failure."
+              kill $APP_PID
+              exit 1
+          fi
+
+          kill $APP_PID
+          echo "Application terminated Successfully."
+
+      - name: Revert Migrations
+        run: npm run migration:revert
+        if: always()
 
   deploy-push:
     runs-on: ubuntu-latest
@@ -58,7 +107,6 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          # key: ${{ secrets.SERVER_PRIVATE_KEY }}
           password: ${{ secrets.SERVER_PASSWORD }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
