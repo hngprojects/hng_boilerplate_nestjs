@@ -30,7 +30,7 @@ describe('HelpCenterController', () => {
   class MockSuperAdminGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
       const request = context.switchToHttp().getRequest();
-      request.user = { sub: '1', user_type: 'SUPER_ADMIN' }; // Default to SUPER_ADMIN for most tests
+      request.user = { sub: '1', user_type: 'SUPER_ADMIN' }; 
       return true;
     }
   }
@@ -55,7 +55,7 @@ describe('HelpCenterController', () => {
   describe('create', () => {
     it('should return 422 if the input data is invalid', async () => {
       const invalidCreateHelpCenterDto: CreateHelpCenterDto = {
-        title: '', // Invalid title
+        title: '', 
         content: 'Content',
       };
 
