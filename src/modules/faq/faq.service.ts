@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Faq } from './faq.entity';
-import { CreateFaqDto } from './create-faq.dto';
+import { Faq } from './entities/faq.entity';
+import { CreateFaqDto } from './dto/create-faq.dto';
 import { IFaq } from './faq.interface';
-import { UpdateFaqDto } from './update-faq.dto';
+import { UpdateFaqDto } from './dto/update-faq.dto';
 
 @Injectable()
 export class FaqService {
