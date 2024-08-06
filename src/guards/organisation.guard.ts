@@ -1,43 +1,43 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { User, UserType } from '../modules/user/entities/user.entity';
+import { CanActivate, ExecutionContext, HttpStatus, Injectable } from '@nestjs/common';
+import { User } from '../modules/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { OrganisationMember } from 'src/modules/organisations/entities/org-members.entity';
+import { Reflector } from '@nestjs/core';
+import { PermissionCategory } from 'src/modules/organisation-permissions/helpers/PermissionCategory';
+import { PERMISSIONS_KEY } from './permission.decorator';
+import * as SYS_MSG from '../helpers/SystemMessages';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 @Injectable()
 export class OrganisationGuard implements CanActivate {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(OrganisationMember)
+    private readonly membersRepository: Repository<OrganisationMember>,
+    private readonly reflector: Reflector
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredPermissions = this.reflector.getAllAndOverride<PermissionCategory[]>(PERMISSIONS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     const request = context.switchToHttp().getRequest();
-    const organisationId = request.params.id;
 
     const { sub } = context.switchToHttp().getRequest().user;
-    const user = await this.userRepository.findOne({
-      where: { id: sub },
-      relations: ['owned_organisations', 'created_organisations', 'organisationMembers'],
+    const roles = await this.membersRepository.findOne({
+      where: { user_id: sub },
+      relations: { role: true, organisation_id: true, user_id: true },
     });
-
-    if (!user) {
-      return false;
-    }
-    // check if user is admin or super admin
-    if (user.user_type === UserType.SUPER_ADMIN || user.user_type === UserType.ADMIN) {
+    const userHasPerms = roles.role.permissions.some(permission => {
+      return requiredPermissions.includes(permission.category);
+    });
+    if (userHasPerms) {
       return true;
+    } else {
+      throw new CustomHttpException(SYS_MSG.FORBIDDEN_ACTION, HttpStatus.FORBIDDEN);
     }
-
-    // check if user owns the organisation
-    const isOwner = user.owned_organisations.some(org => org.id === organisationId);
-    if (isOwner) return true;
-
-    // check if user is the creator of the organisation
-    const isCreator = user.created_organisations.some(org => org.id === organisationId);
-    if (isCreator) return true;
-
-    // check if user is a member of the organisation
-    const isMember = user.organisationMembers.some(org => org.id === organisationId);
-    return isMember;
   }
 }
