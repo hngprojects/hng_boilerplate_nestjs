@@ -2,6 +2,7 @@ import { Profile } from '../../../profile/entities/profile.entity';
 import { User, UserType } from '../../../user/entities/user.entity';
 
 export const mockNotificationRepository = {
+  create: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
   findOne: jest.fn().mockResolvedValue(null),
   save: jest.fn().mockResolvedValue({}),
@@ -28,7 +29,6 @@ const profileMock: Profile = {
   profile_pic_url: '',
   created_at: new Date(),
   updated_at: new Date(),
-  user_id: null,
 };
 
 export const mockUser: User = {
@@ -45,16 +45,16 @@ export const mockUser: User = {
   time_left: 3600,
   owned_organisations: [],
   created_organisations: [],
-  invites: [],
   testimonials: [],
   user_type: UserType.ADMIN,
   secret: 'secret',
   is_2fa_enabled: false,
   backup_codes: [],
   notifications: [],
+  notification_settings: [],
   organisationMembers: [],
   profile: profileMock,
   phone: '1234-887-09',
   jobs: [],
-  notifications_settings: [],
+  blogs: [],
 };

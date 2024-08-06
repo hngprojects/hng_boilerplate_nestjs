@@ -1,6 +1,27 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService } from './email.service';
-import { MailerService } from '@nestjs-modules/mailer';
+import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
+import * as Handlebars from 'handlebars';
+import * as htmlValidator from 'html-validator';
+import * as fs from 'fs';
+import { HttpStatus } from '@nestjs/common';
+
+// Mock module-level functions
+jest.mock('./email_storage.service', () => ({
+  createFile: jest.fn(),
+  deleteFile: jest.fn(),
+  getFile: jest.fn(),
+}));
+
+jest.mock('handlebars');
+jest.mock('html-validator');
+jest.mock('fs', () => ({
+  promises: {
+    readdir: jest.fn(),
+    readFile: jest.fn(),
+  },
+}));
 
 describe('EmailService', () => {
   let service: EmailService;
@@ -29,100 +50,155 @@ describe('EmailService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should send user confirmation email', async () => {
-    const email = 'test@example.com';
-    const url = 'http://example.com/confirm';
-    const token = 'mike';
-    const link = `${url}?token=${token}`;
+  it('should send email', async () => {
+    const emailData = new SendEmailDto();
+    emailData.to = 'test@example.com';
+    emailData.subject = 'Test Subject';
+    emailData.template = 'test-template';
+    emailData.context = { key: 'value' };
 
-    await service.sendUserConfirmationMail(email, url, token);
+    const result = await service.sendEmail(emailData);
 
-    expect(mailerService.sendMail).toHaveBeenCalledWith({
-      to: email,
-      subject: 'Welcome to My App! Confirm your Email',
-      template: 'confirmation',
-      context: {
-        link,
-        email,
-      },
+    expect(mailerService.sendMail).toHaveBeenCalledWith(emailData);
+    expect(result).toEqual({
+      status_code: HttpStatus.OK,
+      message: 'Email sent successfully',
     });
   });
 
-  it('should send forgot password email', async () => {
-    const email = 'test@example.com';
-    const url = 'http://example.com/reset';
-    const token = 'mike';
-    const link = `${url}?token=${token}`;
+  describe('createTemplate', () => {
+    it('should create a template if HTML is valid', async () => {
+      const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
+      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
+      (htmlValidator as jest.Mock).mockResolvedValue({ messages: [] });
+      (require('./email_storage.service').createFile as jest.Mock).mockResolvedValue(Promise.resolve());
 
-    await service.sendForgotPasswordMail(email, url, token);
+      const result = await service.createTemplate(templateInfo);
 
-    expect(mailerService.sendMail).toHaveBeenCalledWith({
-      to: email,
-      subject: 'Reset Password',
-      template: 'reset-password',
-      context: {
-        link,
-        email,
-      },
+      expect(result).toEqual({
+        status_code: HttpStatus.CREATED,
+        message: 'Template created successfully',
+        validation_errors: [],
+      });
+      expect(require('./email_storage.service').createFile).toHaveBeenCalledWith(
+        './src/modules/email/templates',
+        'test.hbs',
+        '<div></div>'
+      );
+    });
+
+    it('should return validation errors if HTML is invalid', async () => {
+      const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
+      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
+      (htmlValidator as jest.Mock).mockResolvedValue({ messages: [{ message: 'Invalid HTML', type: 'error' }] });
+      (require('./email_storage.service').createFile as jest.Mock).mockResolvedValue(Promise.resolve());
+
+      const result = await service.createTemplate(templateInfo);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.BAD_REQUEST,
+        message: 'Invalid HTML format',
+        validation_errors: ['Invalid HTML'],
+      });
+    });
+
+    it('should handle errors during template creation', async () => {
+      const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
+      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
+      (htmlValidator as jest.Mock).mockRejectedValue(new Error('Validation error'));
+
+      const result = await service.createTemplate(templateInfo);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong, please try again',
+      });
     });
   });
 
-  it('should send waitlist confirmation email', async () => {
-    const email = 'test@example.com';
-    const url = 'http://example.com/waitlist';
+  describe('getTemplate', () => {
+    it('should return the content of a template', async () => {
+      const templateInfo: getTemplateDto = { templateName: 'test' };
+      (require('./email_storage.service').getFile as jest.Mock).mockResolvedValue('template content');
 
-    await service.sendWaitListMail(email, url);
+      const result = await service.getTemplate(templateInfo);
 
-    expect(mailerService.sendMail).toHaveBeenCalledWith({
-      to: email,
-      subject: 'Waitlist Confirmation',
-      template: 'waitlist',
-      context: {
-        url,
-        email,
-      },
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: 'Template retrieved successfully',
+        template: 'template content',
+      });
+    });
+
+    it('should return NOT_FOUND if template does not exist', async () => {
+      const templateInfo: getTemplateDto = { templateName: 'test' };
+      (require('./email_storage.service').getFile as jest.Mock).mockRejectedValue(new Error('File not found'));
+
+      const result = await service.getTemplate(templateInfo);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.NOT_FOUND,
+        message: 'Template not found',
+      });
     });
   });
 
-  it('should send newsletter email', async () => {
-    const email = 'test@example.com';
-    const articles = [
-      {
-        title: 'Article Title 1',
-        description: 'Short description of the article.',
-        link: 'https://example.com/article1',
-      },
-      {
-        title: 'Article Title 2',
-        description: 'Short description of the article.',
-        link: 'https://example.com/article2',
-      },
-    ];
-    await service.sendNewsLetterMail(email, articles);
+  describe('deleteTemplate', () => {
+    it('should delete a template', async () => {
+      const templateInfo: getTemplateDto = { templateName: 'test' };
+      (require('./email_storage.service').deleteFile as jest.Mock).mockResolvedValue(Promise.resolve());
 
-    expect(mailerService.sendMail).toHaveBeenCalledWith({
-      to: email,
-      subject: 'Monthly Newsletter',
-      template: 'newsletter',
-      context: {
-        email,
-        articles,
-      },
+      const result = await service.deleteTemplate(templateInfo);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.OK,
+        message: 'Template deleted successfully',
+      });
+    });
+
+    it('should return NOT_FOUND if template does not exist', async () => {
+      const templateInfo: getTemplateDto = { templateName: 'test' };
+      (require('./email_storage.service').deleteFile as jest.Mock).mockRejectedValue(new Error('File not found'));
+
+      const result = await service.deleteTemplate(templateInfo);
+
+      expect(result).toEqual({
+        status_code: HttpStatus.NOT_FOUND,
+        message: 'Template not found',
+      });
     });
   });
 
-  it('should send otp email', async () => {
+  describe('getAllTemplates', () => {
+    it('should handle errors when retrieving templates', async () => {
+      (fs.promises.readdir as jest.Mock).mockRejectedValue(new Error('Error'));
+
+      const result = await service.getAllTemplates();
+
+      expect(result).toEqual({
+        status_code: HttpStatus.NOT_FOUND,
+        message: 'Template not found',
+      });
+    });
+  });
+
+  it('should send notification email', async () => {
     const email = 'test@example.com';
-    const token = '123456';
-    await service.sendLoginOtp(email, token);
+    const message = 'You have a new notification';
+    const support_email = 'support@remotebingo.com';
+    const recipient_name = 'John Doe';
+
+    await service.sendNotificationMail(email, { message, support_email, recipient_name });
 
     expect(mailerService.sendMail).toHaveBeenCalledWith({
       to: email,
-      subject: 'Login with OTP',
-      template: 'login-otp',
+      subject: 'In-App, Notification',
+      template: 'notification',
       context: {
         email,
-        token,
+        recipient_name,
+        message,
+        support_email,
       },
     });
   });

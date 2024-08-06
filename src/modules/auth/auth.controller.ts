@@ -1,7 +1,6 @@
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { INCORRECT_TOTP_CODE, TWO_FACTOR_VERIFIED_SUCCESSFULLY } from '../../helpers/SystemMessages';
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
-import { Response } from 'express';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get, Patch } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
@@ -9,7 +8,6 @@ import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-passw
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { Verify2FADto } from './dto/verify-2fa.dto';
-import { BAD_REQUEST, TWO_FA_INITIATED } from '../../helpers/SystemMessages';
 import { Enable2FADto } from './dto/enable-2fa.dto';
 import { OtpDto } from '../otp/dto/otp.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
@@ -19,6 +17,8 @@ import {
   RequestVerificationToken,
   SuccessCreateUserResponse,
 } from '../user/dto/user-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdatePasswordDto } from './dto/updatePasswordDto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -43,11 +43,11 @@ export default class RegistrationController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: TWO_FACTOR_VERIFIED_SUCCESSFULLY,
+    description: SYS_MSG.TWO_FACTOR_VERIFIED_SUCCESSFULLY,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: INCORRECT_TOTP_CODE,
+    description: SYS_MSG.INCORRECT_TOTP_CODE,
   })
   @Post('2fa/verify')
   verify2fa(@Body() verify2faDto: Verify2FADto, @Req() req) {
@@ -93,8 +93,8 @@ export default class RegistrationController {
     type: Enable2FADto,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: TWO_FA_INITIATED })
-  @ApiResponse({ status: 400, description: BAD_REQUEST })
+  @ApiResponse({ status: 200, description: SYS_MSG.TWO_FA_INITIATED })
+  @ApiResponse({ status: 400, description: SYS_MSG.BAD_REQUEST })
   @HttpCode(200)
   public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
     const { password } = body;
@@ -137,6 +137,19 @@ export default class RegistrationController {
     return await this.authService.requestSignInToken(body);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @HttpCode(200)
+  @Post('change-password')
+  public async changePassword(@Body() body: ChangePasswordDto, @Req() request: Request): Promise<any> {
+    const user = request['user'];
+    const userId = user.id;
+    return this.authService.changePassword(userId, body.oldPassword, body.newPassword);
+  }
+
   @skipAuth()
   @Post('magic-link/verify')
   @HttpCode(200)
@@ -145,5 +158,17 @@ export default class RegistrationController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public async verifySignInToken(@Body() body: OtpDto) {
     return await this.authService.verifyToken(body);
+  }
+
+  @skipAuth()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Verify Otp and change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Patch('password-reset')
+  @HttpCode(200)
+  public async resetPassword(@Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.authService.updateForgotPassword(updatePasswordDto);
   }
 }

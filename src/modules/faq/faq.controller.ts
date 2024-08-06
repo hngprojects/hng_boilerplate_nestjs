@@ -1,17 +1,19 @@
-import { Controller, Post, Body, UsePipes, ValidationPipe, Get, Put, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe, Get, Put, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { FaqService } from './faq.service';
-import { CreateFaqDto } from './create-faq.dto';
-import { Faq } from './faq.entity';
+import { CreateFaqDto } from './dto/create-faq.dto';
+import { Faq } from './entities/faq.entity';
 import { ICreateFaqResponse, IFaq } from './faq.interface';
 import { skipAuth } from '../../helpers/skipAuth';
-import { UpdateFaqDto } from './update-faq.dto';
+import { UpdateFaqDto } from './dto/update-faq.dto';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
-@ApiTags('faqs')
+@ApiTags('Faqs')
 @Controller('faqs')
 export class FaqController {
   constructor(private readonly faqService: FaqService) {}
 
+  @UseGuards(SuperAdminGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new FAQ' })
   @ApiResponse({
@@ -36,6 +38,7 @@ export class FaqController {
       data: faq,
     };
   }
+
   @skipAuth()
   @Get()
   @ApiOperation({ summary: 'Get all frequently asked questions' })
@@ -43,6 +46,7 @@ export class FaqController {
     return this.faqService.findAllFaq();
   }
 
+  @UseGuards(SuperAdminGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update an existing FAQ' })
   @ApiParam({ name: 'id', type: 'string' })
@@ -52,6 +56,7 @@ export class FaqController {
     return this.faqService.updateFaq(id, updateFaqDto);
   }
 
+  @UseGuards(SuperAdminGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an FAQ' })
   @ApiParam({ name: 'id', type: 'string' })
