@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Blog } from './entities/blog.entity';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 
 @Injectable()
 export class BlogsService {
@@ -21,7 +22,10 @@ export class BlogsService {
     });
 
     if (!fullUser) {
-      throw new Error('User not found');
+      CustomExceptionHandler({
+        response: 'User not found',
+        status: 404,
+      });
     }
 
     const blog = this.blogRepository.create({
