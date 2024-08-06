@@ -16,6 +16,7 @@ import { mockUser } from '../../../modules/user/tests/mocks/user.mock';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { mockComment } from './mocks/comment.mock';
 import { AddCommentDto } from 'src/modules/comments/dto/add-comment.dto';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -211,8 +212,6 @@ describe('ProductsService', () => {
       const result = await service.addCommentToProduct(productMock.id, addCommentDto, mockUser.id);
 
       expect(result.message).toEqual('Comment added successfully');
-      expect(result.status).toEqual('success');
-      expect(result.status_code).toEqual(201);
       expect(result.data).toBeDefined();
     });
 
@@ -227,7 +226,7 @@ describe('ProductsService', () => {
       jest.spyOn(commentRepository, 'save').mockResolvedValue(mockComment);
 
       await expect(service.addCommentToProduct(productMock.id, addCommentDto, mockUser.id)).rejects.toThrow(
-        NotFoundException
+        CustomHttpException
       );
     });
   });

@@ -16,6 +16,8 @@ import { UpdateProductDTO } from './dto/update-product.dto';
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { Comment } from '../comments/entities/comments.entity';
 import { User } from '../user/entities/user.entity';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 interface SearchCriteria {
   name?: string;
@@ -211,34 +213,24 @@ export class ProductsService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!product) {
-      throw new NotFoundException({
-        error: 'Product not found',
-        status_code: HttpStatus.NOT_FOUND,
-      });
-    }
-
-    if (!user) {
-      throw new NotFoundException({
-        error: 'User not found',
-        status_code: HttpStatus.NOT_FOUND,
-      });
+      throw new CustomHttpException(SYS_MSG.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const productComment = this.commentRepository.create({ comment, product, user });
 
     const saveComment = await this.commentRepository.save(productComment);
 
+    const responsePayload = {
+      id: saveComment.id,
+      product_id: product.id,
+      comment: saveComment.comment,
+      user_id: userId,
+      created_at: saveComment.created_at,
+    };
+
     return {
-      status: 'success',
-      message: 'Comment added successfully',
-      status_code: 201,
-      data: {
-        id: saveComment.id,
-        product_id: product.id,
-        comment: saveComment.comment,
-        user_id: userId,
-        created_at: saveComment.created_at,
-      },
+      message: SYS_MSG.COMMENT_CREATED,
+      data: responsePayload,
     };
   }
 }
