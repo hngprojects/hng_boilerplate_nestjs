@@ -204,24 +204,17 @@ export class ProductsService {
   }
 
   async getProductStock(productId: string) {
-    try {
-      const product = await this.productRepository.findOne({ where: { id: productId } });
-      if (!product) {
-        throw new NotFoundException(`Product not found`);
-      }
-      return {
-        message: 'Product stock retrieved successfully',
-        data: {
-          product_id: product.id,
-          current_stock: product.quantity,
-          last_updated: product.updated_at,
-        },
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new NotFoundException(`Product not found`);
     }
+    return {
+      message: 'Product stock retrieved successfully',
+      data: {
+        product_id: product.id,
+        current_stock: product.quantity,
+        last_updated: product.updated_at,
+      },
+    };
   }
 }
