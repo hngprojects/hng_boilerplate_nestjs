@@ -242,12 +242,7 @@ export default class UserService {
       identifierType: 'id',
     };
 
-    console.log(userId);
-    console.log('hello');
     const user = await this.getUserRecord(identifierOptions);
-
-    console.log(user);
-    console.log('here');
 
     if (!user) {
       throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
