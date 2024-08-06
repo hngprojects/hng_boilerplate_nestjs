@@ -19,6 +19,8 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class OrganisationsService {
@@ -125,92 +127,47 @@ export class OrganisationsService {
     }
   }
 
-  async removeMember(orgId: string, userId: string, currentUserId: string) {
-    try {
-      const org = await this.checkIfOrgExists(orgId);
+  async removeMember(orgId: string, userId: string) {
+    const org = await this.getOrg(orgId);
+    const user = await this.getUser(userId);
 
-      if (userId !== currentUserId) {
-        this.verifyOwner(org, currentUserId);
-      }
-
-      const user = await this.checkIfUserExists(userId);
-
-      this.checkIfUserIsAMember(org, user);
-
-      org.organisationMembers = org.organisationMembers.filter(member => member.user_id.id != user.id);
-
-      await this.organisationRepository.save(org);
-
-      return {
-        status: 'success',
-        message: 'Member was removed successfully',
-        status_code: 200,
-      };
-    } catch (err) {
-      if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
-        throw err;
-      }
-      console.error(err);
-      throw new InternalServerErrorException(`An internal server error occurred: ${err.message}`);
+    if (!org.organisationMembers.some(member => member.user_id.id === user.id)) {
+      throw new CustomHttpException(SYS_MSG.NOT_A_MEMBER, HttpStatus.FORBIDDEN);
     }
+
+    org.organisationMembers = org.organisationMembers.filter(member => member.user_id.id !== user.id);
+
+    await this.organisationRepository.save(org);
+
+    return {
+      status: 'success',
+      message: 'Member was removed successfully',
+      status_code: 200,
+    };
   }
 
-  async checkIfOrgExists(orgId: string) {
+  async getOrg(orgId: string) {
     const org = await this.organisationRepository.findOne({
       where: {
         id: orgId,
       },
       relations: ['organisationMembers', 'organisationMembers.user_id'],
     });
-    if (!org) {
-      throw new NotFoundException({
-        status: 'error',
-        message: 'Organisation not found',
-        status_code: 404,
-      });
-    }
+
+    if (!org) throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
 
     return org;
   }
 
-  async checkIfUserExists(userId: string) {
+  async getUser(userId: string) {
     const user = await this.userRepository.findOne({
       where: {
         id: userId,
       },
     });
-    if (!user) {
-      throw new NotFoundException({
-        status: 'error',
-        message: 'User not found',
-        status_code: 404,
-      });
-    }
+
+    if (!user) throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
 
     return user;
-  }
-
-  verifyOwner(org: Organisation, ownerId: string) {
-    const isOwner = org.owner.id == ownerId;
-
-    if (!isOwner) {
-      throw new UnauthorizedException({
-        status: 'forbidden',
-        message: 'Only admins can remove users',
-        status_code: 403,
-      });
-    }
-  }
-
-  checkIfUserIsAMember(org: Organisation, user: User) {
-    const count = org.organisationMembers.filter(member => member.user_id.id == user.id).length;
-
-    if (count <= 0) {
-      throw new NotFoundException({
-        status: 'error',
-        message: 'User is not a member of this organization',
-        status_code: 404,
-      });
-    }
   }
 }

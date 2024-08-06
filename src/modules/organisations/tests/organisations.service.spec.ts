@@ -16,9 +16,12 @@ import {
   UnauthorizedException,
   ForbiddenException,
   ConflictException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -224,58 +227,42 @@ describe('OrganisationsService', () => {
   });
 
   describe('it should validate before removing a user', () => {
+    const member = orgMock.organisationMembers[0].user_id.id;
+
     it("should throw error if organisation doesn't exist", async () => {
-      await jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.removeMember(orgMock.owner.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
-        new NotFoundException({
-          status: 'error',
-          message: 'Organisation not found',
-          status_code: 404,
-        })
+      await expect(service.removeMember(orgMock.owner.id, newUser.id)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND)
       );
     });
-    it("should throw if current user does't own the organisation", async () => {
+
+    it("should throw error if user doesn't exist", async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
 
-      await expect(
-        service.removeMember(orgMock.id, orgMock.organisationMembers[0].user_id.id, newUser.id)
-      ).rejects.toThrow(
-        new UnauthorizedException({
-          status: 'Forbidden',
-          message: 'Only admins can remove users',
-          status_code: 403,
-        })
+      await expect(service.removeMember(orgMock.id, member)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND)
       );
     });
-    it('should throw an error if the specified user is not a member', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
 
-      await expect(service.removeMember(orgMock.id, newUser.id, orgMock.owner.id)).rejects.toThrow(
-        new NotFoundException({
-          status: 'error',
-          message: 'User is not a member of this organization',
-          status_code: 404,
-        })
-      );
-    });
-  });
-
-  describe('it should successfully remove a user', () => {
     it('should successfully remove user', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(orgMock.organisationMembers[0].user_id);
 
-      const result = await service.removeMember(
-        orgMock.id,
-        orgMock.organisationMembers[0].user_id.id,
-        orgMock.owner.id
-      );
+      const result = await service.removeMember(orgMock.id, member);
 
       expect(result.status).toEqual('success');
       expect(result.message).toEqual('Member was removed successfully');
       expect(result.status_code).toEqual(200);
+    });
+
+    it('should throw an error if the specified user is not a member', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(newUser);
+
+      await expect(service.removeMember(orgMock.id, member)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.NOT_A_MEMBER, HttpStatus.FORBIDDEN)
+      );
     });
   });
 });
