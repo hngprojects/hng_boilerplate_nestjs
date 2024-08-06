@@ -72,9 +72,7 @@ export class ProductsService {
   }
 
   async searchProducts(orgId: string, criteria: SearchCriteria) {
-    console.log(orgId, 'orgId');
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
-    console.log(org, 'org');
     if (!org)
       throw new InternalServerErrorException({
         status: 'Unprocessable entity exception',
