@@ -18,6 +18,7 @@ import {
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
+import { organisationMembersMocks } from './mocks/organisation-members.mock';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -219,6 +220,70 @@ describe('OrganisationsService', () => {
       expect(result.data).toEqual([
         { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
       ]);
+    });
+  });
+
+  describe('search organisation members', () => {
+    const orgMembers = [...organisationMembersMocks];
+    const orgMock = { id: 'some-org-uuid', organisationMembers: orgMembers } as unknown as Organisation;
+
+    it('should throw ForbiddenException if user is not in the same organisation', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
+
+      await expect(
+        service.searchOrganisationMember('not-user-01-uuid', 'not-some-org-uuid', 'jane', { filter: 'active_member' })
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw BadRequestException if organisation does not exist', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        service.searchOrganisationMember('user-0-uuid', 'not-some-org-uuid', 'jane', { filter: 'active_member' })
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should verify that filtered request returns accurate data', async () => {
+      const generateMemberResponseFormat = member => {
+        return {
+          user_id: member.user_id.id,
+          username: member.profile_id.username,
+          email: member.user_id.email,
+          name: `${member.user_id.first_name} ${member.user_id.last_name}`,
+          phone_number: member.user_id.phone,
+          profile_pic_url: member.profile_id.profile_pic_url,
+        };
+      };
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
+
+      const result = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'Alice Johnson', {
+        filter: 'suspended',
+      });
+      const result2 = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'Jan', {
+        filter: 'active_member',
+      });
+      const result3 = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'bolu', {
+        filter: 'left_workspace',
+      });
+
+      const expectedMembers1 = [{ ...orgMembers[2] }].map(generateMemberResponseFormat);
+      const expectedMembers2 = [{ ...orgMembers[0] }, { ...orgMembers[4] }].map(generateMemberResponseFormat);
+      const expectedMembers3 = [{ ...orgMembers[1] }, { ...orgMembers[3] }].map(generateMemberResponseFormat);
+
+      expect(result.data.members).toEqual(expectedMembers1);
+      expect(result2.data.members).toEqual(expectedMembers2);
+      expect(result3.data.members).toEqual(expectedMembers3);
+    });
+
+    it('should return an empty array for members when no members are found', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
+
+      const result = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'JamesBondIsGood', {
+        filter: 'active_member',
+      });
+
+      expect(result).toEqual({ status: 200, message: 'User(s) found successfully', data: { members: [] } });
     });
   });
 });

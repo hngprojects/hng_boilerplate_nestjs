@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -18,6 +19,7 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { SearchMemberQueryDto } from './dto/search-member.dto';
 
 @Injectable()
 export class OrganisationsService {
@@ -121,6 +123,69 @@ export class OrganisationsService {
         throw error;
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    }
+  }
+
+  async searchOrganisationMember(
+    userId: string,
+    orgId: string,
+    searchTerm: string,
+    searchMemberQueryDto: SearchMemberQueryDto
+  ) {
+    try {
+      const organisation = await this.organisationRepository.findOne({
+        where: { id: orgId },
+        relations: ['organisationMembers', 'organisationMembers.user_id', 'organisationMembers.profile_id'],
+      });
+      if (!organisation)
+        throw new BadRequestException({ status: HttpStatus.BAD_REQUEST, message: 'Organisation does not exist' });
+      const { organisationMembers } = organisation;
+
+      const userIsMember = organisationMembers.find(member => member.user_id.id === userId);
+      if (!userIsMember)
+        throw new ForbiddenException({
+          status: HttpStatus.FORBIDDEN,
+          message: 'User does not have access to this organisation',
+        });
+
+      const searchedMembersResult = organisationMembers.filter(member => {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const { first_name, last_name, email } = member.user_id;
+        const memberFound =
+          member.profile_id.username.toLowerCase().includes(lowerCaseSearchTerm) ||
+          email.toLowerCase().includes(lowerCaseSearchTerm) ||
+          first_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+          last_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+          `${first_name} ${last_name}`.toLowerCase().includes(lowerCaseSearchTerm) ||
+          `${first_name}${last_name}`.toLowerCase().includes(lowerCaseSearchTerm);
+
+        if (!memberFound) return false;
+        if (searchMemberQueryDto.filter && member[searchMemberQueryDto.filter]) return true;
+        if (searchMemberQueryDto.filter) return false;
+        return true;
+      });
+
+      const searchedResultResponseFormat = searchedMembersResult.map(member => {
+        return {
+          user_id: member.user_id.id,
+          username: member.profile_id.username,
+          email: member.user_id.email,
+          name: `${member.user_id.first_name} ${member.user_id.last_name}`,
+          phone_number: member.user_id.phone,
+          profile_pic_url: member.profile_id.profile_pic_url,
+        };
+      });
+
+      return {
+        status: 200,
+        message: 'User(s) found successfully',
+        data: { members: searchedResultResponseFormat },
+      };
+    } catch (error) {
+      // console.log(error);
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException('An error occured internally');
     }
   }
 }

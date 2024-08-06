@@ -19,6 +19,7 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
+import { SearchMemberQueryDto, SearchMemberResponseDto } from './dto/search-member.dto';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -83,5 +84,21 @@ export class OrganisationsController {
   ): Promise<OrganisationMembersResponseDto> {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
+  }
+
+  @Get(':org_id/members/search')
+  @ApiOperation({ summary: 'Search for members within an organization' })
+  @ApiResponse({ status: 200, description: 'User(s) found successfully', type: SearchMemberResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 403, description: 'User does not have permission' })
+  @ApiResponse({ status: 500, description: 'An error occured internally' })
+  async searchMmebers(
+    @Req() req,
+    @Param('org_id') orgId: string,
+    @Body('search_term') searchTerm: string,
+    @Query() searchMemberQueryDto: SearchMemberQueryDto
+  ) {
+    const userId = req.user.sub ?? req.user.id;
+    return this.organisationsService.searchOrganisationMember(userId, orgId, searchTerm, searchMemberQueryDto);
   }
 }

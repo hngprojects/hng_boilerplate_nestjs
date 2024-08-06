@@ -18,4 +18,13 @@ export class OrganisationMember extends AbstractBaseEntity {
 
   @ManyToOne(() => Profile)
   profile_id: Profile;
+
+  @Column({ default: false })
+  suspended: boolean;
+
+  @Column({ default: true })
+  active_member: boolean;
+
+  @Column({ default: false })
+  left_workspace: boolean;
 }
