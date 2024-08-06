@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Query, Req, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import UserService from './user.service';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -64,5 +66,17 @@ export class UserController {
     @Query('limit') limit: number = 10
   ) {
     return this.userService.getUsersByAdmin(page, limit, req.user);
+  }
+
+  @Get('/stats')
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get User Statistics (Super Admin only)' })
+  @ApiResponse({ status: 200, description: 'User statistics retrieved successfully', type: GetUserStatsResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async getUserStats(@Req() req: Request) {
+    const user = req['user'];
+    return this.userService.getUserStatistics(user);
   }
 }
