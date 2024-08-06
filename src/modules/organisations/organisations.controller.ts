@@ -85,7 +85,25 @@ export class OrganisationsController {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
-  @UseGuards(OwnershipGuard, MembershipGuard)
+
+  @ApiOperation({ summary: 'Remove Member From Organization' })
+  @ApiResponse({
+    status: 200,
+    description: 'The member was successfully removed',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User is not a member of the organisation',
+  })
+  @UseGuards(MembershipGuard)
   @Delete(':org_id/users/:user_id')
   async removeMember(@Param('org_id') orgId: string, @Param('user_id') userId: string) {
     return this.organisationsService.removeMember(orgId, userId);
