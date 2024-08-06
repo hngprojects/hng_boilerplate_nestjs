@@ -185,6 +185,7 @@ export class OrganisationsController {
   }
 
   @ApiOperation({ summary: 'Export members of an Organisation to a CSV file' })
+  @UseGuards(OwnershipGuard)
   @Get(':org_id/members/export')
   async exportOrganisationMembers(@Param('org_id') orgId: string, @Req() req: Request, @Res() res: Response) {
     const userId = req['user'].id;
