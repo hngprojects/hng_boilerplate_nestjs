@@ -18,6 +18,7 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class OrganisationsService {
@@ -125,17 +126,15 @@ export class OrganisationsService {
   }
 
   async getOrganizationDetailsById(orgId: string) {
-    try {
-      const orgDetails = await this.organisationRepository.findOne({ where: { id: orgId } });
-      if (!orgId) {
-        throw new BadRequestException('Must Provide a valid organization Id');
-      }
-      return { message: 'Fetched Organization Details Successfully', data: orgDetails };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('An internal server error occured');
+    if (!isUUID(orgId)) {
+      throw new BadRequestException('Must Provide a valid organization Id');
     }
+
+    const orgDetails = await this.organisationRepository.findOne({ where: { id: orgId } });
+
+    if (!orgDetails) {
+      throw new NotFoundException('Organization Id Not Found');
+    }
+    return { message: 'Fetched Organization Details Successfully', data: orgDetails };
   }
 }
