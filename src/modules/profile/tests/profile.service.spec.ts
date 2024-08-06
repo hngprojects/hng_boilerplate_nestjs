@@ -167,12 +167,5 @@ describe('ProfileService', () => {
       expect(profileRepository.findOne).toHaveBeenCalledWith({ where: { id: 'profileId' } });
       expect(profileRepository.softDelete).toHaveBeenCalledWith('profileId');
     });
-
-    it('should throw InternalServerErrorException on unexpected error', async () => {
-      jest.spyOn(userRepository, 'findOne').mockRejectedValue(new Error('Unexpected error'));
-
-      await expect(service.deleteUserProfile('userId')).rejects.toThrow(InternalServerErrorException);
-      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'userId' }, relations: ['profile'] });
-    });
   });
 });

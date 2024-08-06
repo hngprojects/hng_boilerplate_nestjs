@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ResponseInterceptor } from 'src/shared/inteceptors/response.interceptor';
 
 @ApiBearerAuth()
 @ApiTags('Profile')
 @Controller('profile')
+@UseInterceptors(ResponseInterceptor)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
