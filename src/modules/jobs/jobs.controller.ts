@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { JobDto } from './dto/job.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -36,7 +48,7 @@ export class JobsController {
   @ApiOperation({ summary: 'Gets a job by ID' })
   @ApiResponse({ status: 200, description: 'Job returned successfully' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async getJob(@Param() { id }: JobIdDto) {
+  async getJob(@Param('id', ParseUUIDPipe) id) {
     return this.jobService.getJob(id);
   }
 
@@ -46,7 +58,7 @@ export class JobsController {
   @ApiResponse({ status: 200, description: 'Job deleted successfully' })
   @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async delete(@Param() { id }: JobIdDto) {
+  async delete(@Param('id', ParseUUIDPipe) id) {
     return this.jobService.delete(id);
   }
 }

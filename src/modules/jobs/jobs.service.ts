@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
 import { JobDto } from './dto/job.dto';
 import { pick } from '../../helpers/pick';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @Injectable()
 export class JobsService {
@@ -20,12 +22,7 @@ export class JobsService {
       where: { id: userId },
     });
 
-    if (!user)
-      throw new NotFoundException({
-        status_code: 404,
-        status: 'Not found Exception',
-        message: 'User not found',
-      });
+    if (!user) throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
 
     const newJob = this.jobRepository.create(Object.assign(new Job(), { ...createJobDto, user }));
 
@@ -34,7 +31,7 @@ export class JobsService {
     return {
       status: 'success',
       status_code: 201,
-      message: 'Job listing created successfully',
+      message: SYS_MSG.JOB_CREATION_SUCCESSFUL,
       data: pick(
         newJob,
         Object.keys(newJob).filter(x => !['user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
@@ -47,7 +44,7 @@ export class JobsService {
 
     jobs.map(x => delete x.is_deleted);
     return {
-      message: 'Jobs listing fetched successfully',
+      message: SYS_MSG.JOB_LISTING_RETRIEVAL_SUCCESSFUL,
       status_code: 200,
       data: jobs,
     };
@@ -55,12 +52,8 @@ export class JobsService {
 
   async getJob(id: string) {
     const job = await this.jobRepository.findOne({ where: { id, is_deleted: false } });
-    if (!job)
-      throw new NotFoundException({
-        status_code: 404,
-        status: 'Not found Exception',
-        message: 'Job not found',
-      });
+
+    if (!job) throw new CustomHttpException(SYS_MSG.JOB_NOT_FOUND, HttpStatus.NOT_FOUND);
 
     delete job.is_deleted;
     return {
@@ -81,7 +74,7 @@ export class JobsService {
 
     return {
       status: 'success',
-      message: 'Job details deleted successfully',
+      message: SYS_MSG.JOB_DELETION_SUCCESSFUL,
       status_code: 200,
     };
   }

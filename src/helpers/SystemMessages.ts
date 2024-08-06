@@ -38,3 +38,7 @@ export const ORG_NOT_FOUND = 'Organisation not found';
 export const NOT_ORG_OWNER = 'You do not have permission to update this organisation';
 export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
+export const JOB_NOT_FOUND = 'Job not found';
+export const JOB_DELETION_SUCCESSFUL = 'Job details deleted successfully';
+export const JOB_LISTING_RETRIEVAL_SUCCESSFUL = 'Jobs listing fetched successfully';
+export const JOB_CREATION_SUCCESSFUL = 'Job listing created successfully';
