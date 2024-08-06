@@ -16,18 +16,6 @@ export class BlogController {
   @ApiResponse({ status: 201, description: 'The blog has been successfully created.', type: BlogResponseDto })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<any> {
-    const blog = await this.blogService.createBlog(createBlogDto, req.user);
-    return {
-      message: 'Blog created successfully',
-      data: {
-        blog_id: blog.blog_id,
-        title: blog.title,
-        content: blog.content,
-        image_urls: blog.image_urls,
-        tags: blog.tags,
-        author: blog.author,
-        created_at: blog.created_at,
-      },
-    };
+    return await this.blogService.createBlog(createBlogDto, req.user);
   }
 }
