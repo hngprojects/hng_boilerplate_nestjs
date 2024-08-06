@@ -15,10 +15,13 @@ import {
   UnprocessableEntityException,
   ForbiddenException,
   ConflictException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
 import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../../helpers/SystemMessages';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -264,17 +267,19 @@ describe('OrganisationsService', () => {
       });
     });
 
-    it('should throw NotFoundException if member is not found', async () => {
+    it('should throw CustomHttpException if member is not found', async () => {
       const orgId = 'orgId';
       const memberId = '1';
       const updateMemberRoleDto = { role: 'newRole' };
 
       jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(
+        new CustomHttpException(ORG_MEMBER_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
 
-    it('should throw ForbiddenException if member does not belong to the specified organisation', async () => {
+    it('should throw CustomHttpException if member does not belong to the specified organisation', async () => {
       const orgId = 'orgId';
       const memberId = '1';
       const updateMemberRoleDto = { role: 'newRole' };
@@ -287,10 +292,12 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(mockMember as OrganisationMember);
 
-      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(ForbiddenException);
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(
+        new CustomHttpException(ORG_MEMBER_DOES_NOT_BELONG, HttpStatus.FORBIDDEN)
+      );
     });
 
-    it('should throw NotFoundException if role is not found in the organization', async () => {
+    it('should throw CustomHttpException if role is not found in the organization', async () => {
       const orgId = 'orgId';
       const memberId = '1';
       const updateMemberRoleDto = { role: 'newRole' };
@@ -304,7 +311,9 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(mockMember as OrganisationMember);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(
+        new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
   });
 });
