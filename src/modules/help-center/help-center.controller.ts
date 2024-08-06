@@ -6,6 +6,7 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
   Get,
   NotFoundException,
   Post,
@@ -18,7 +19,8 @@ import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { GetHelpCenterDto } from './dto/get-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { HelpCenter } from './interface/help-center.interface';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '../../helpers/skipAuth';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import {
   HelpCenterMultipleInstancResponseType,
   HelpCenterSingleInstancResponseType,
@@ -30,7 +32,8 @@ export class HelpCenterController {
   constructor(private readonly helpCenterService: HelpCenterService) {}
 
   @ApiBearerAuth()
-  @Post('help-center/topics')
+  @Post('topics')
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
   @ApiResponse({ status: 422, description: 'Invalid input data.' })
@@ -70,6 +73,7 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Patch('topics/:id')
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Update a help center topic by id' })
   @ApiResponse({ status: 200, description: 'Topic updated successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' })
@@ -127,7 +131,7 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Delete('topics/:id')
-  //@Roles('superadmin')
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Delete a help center topic by id' })
   @ApiResponse({ status: 200, description: 'Topic deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' })
