@@ -40,3 +40,4 @@ export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
 export const PRODUCT_NOT_FOUND = 'Product not found!';
 export const COMMENT_CREATED = 'Comment added successfully';
+export const ORG_UPDATE = 'Organisation updated successfully';

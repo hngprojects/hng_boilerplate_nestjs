@@ -12,12 +12,14 @@ import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
-import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationMember } from './entities/org-members.entity';
 import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 
 @Injectable()
 export class OrganisationsService {
@@ -103,24 +105,19 @@ export class OrganisationsService {
     return emailFound?.length ? true : false;
   }
 
-  async updateOrganisation(
-    id: string,
-    updateOrganisationDto: UpdateOrganisationDto
-  ): Promise<{ message: string; org: Organisation }> {
-    try {
-      const org = await this.organisationRepository.findOneBy({ id });
-      if (!org) {
-        throw new NotFoundException('organisation not found');
-      }
-      await this.organisationRepository.update(id, updateOrganisationDto);
-      const updatedOrg = await this.organisationRepository.findOneBy({ id });
+  async updateOrganisation(orgId: string, updateOrganisationDto: UpdateOrganisationDto) {
+    const organisation = await this.organisationRepository.findOne({ where: { id: orgId } });
 
-      return { message: 'Organisation successfully updated', org: updatedOrg };
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    if (!organisation) {
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
+
+    await this.organisationRepository.update(orgId, updateOrganisationDto);
+    const updatedOrg = await this.organisationRepository.findOne({ where: { id: orgId } });
+
+    return {
+      message: SYS_MSG.ORG_UPDATE,
+      data: updatedOrg,
+    };
   }
 }

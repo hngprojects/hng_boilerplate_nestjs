@@ -15,7 +15,7 @@ import { User } from '../../../modules/user/entities/user.entity';
 import { mockUser } from '../../../modules/user/tests/mocks/user.mock';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { mockComment } from './mocks/comment.mock';
-import { AddCommentDto } from 'src/modules/comments/dto/add-comment.dto';
+import { AddCommentDto } from '../../comments/dto/add-comment.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('ProductsService', () => {
