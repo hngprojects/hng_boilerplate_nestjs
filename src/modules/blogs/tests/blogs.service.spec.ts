@@ -84,7 +84,7 @@ describe('BlogsService', () => {
     });
 
     it('should handle internal server error', async () => {
-      jest.spyOn(repository, 'findAndCount').mockRejectedValue(new Error());
+      jest.spyOn(repository, 'findAndCount').mockRejectedValue(new InternalServerErrorException());
 
       await expect(service.findAll(1, 10)).rejects.toThrow(InternalServerErrorException);
     });
