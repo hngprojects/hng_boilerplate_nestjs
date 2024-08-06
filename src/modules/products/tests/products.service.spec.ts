@@ -15,7 +15,7 @@ import { User } from '../../../modules/user/entities/user.entity';
 import { mockUser } from '../../../modules/user/tests/mocks/user.mock';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { mockComment } from './mocks/comment.mock';
-import { AddCommentDto } from 'src/modules/comments/dto/add-comment.dto';
+import { AddCommentDto } from '../../comments/dto/add-comment.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('ProductsService', () => {
@@ -228,6 +228,38 @@ describe('ProductsService', () => {
       await expect(service.addCommentToProduct(productMock.id, addCommentDto, mockUser.id)).rejects.toThrow(
         CustomHttpException
       );
+    });
+  });
+
+  describe('getProductStock', () => {
+    it('should return product stock details if the product is found', async () => {
+      const productId = '123';
+      const productMock = {
+        id: productId,
+        quantity: 20,
+        updated_at: new Date(),
+      };
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(productMock as any);
+
+      const result = await service.getProductStock(productId);
+
+      expect(result).toEqual({
+        message: 'Product stock retrieved successfully',
+        data: {
+          product_id: productMock.id,
+          current_stock: productMock.quantity,
+          last_updated: productMock.updated_at,
+        },
+      });
+    });
+
+    it('should throw NotFoundException if the product is not found', async () => {
+      const productId = 'nonexistent';
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.getProductStock(productId)).rejects.toThrow(new NotFoundException('Product not found'));
     });
   });
 });
