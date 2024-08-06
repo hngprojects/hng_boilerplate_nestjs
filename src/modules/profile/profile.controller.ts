@@ -30,4 +30,14 @@ export class ProfileController {
     const updatedProfile = this.profileService.updateProfile(userId, body);
     return updatedProfile;
   }
+
+  @ApiOperation({ summary: 'Delete User Profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'The deleted record',
+  })
+  @Delete(':userId')
+  async deleteUserProfile(@Param('userId') userId: string) {
+    return await this.profileService.deleteUserProfile(userId);
+  }
 }

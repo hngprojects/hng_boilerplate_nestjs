@@ -73,4 +73,36 @@ export class ProfileService {
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);
     }
   }
+  async deleteUserProfile(userId: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
+
+      if (!user || !user.profile) {
+        throw new NotFoundException('User profile not found');
+      }
+
+      const userProfile = await this.profileRepository.findOne({
+        where: { id: user.profile.id },
+      });
+
+      console.log(userProfile, 'user profile');
+
+      if (!userProfile) {
+        throw new NotFoundException('Profile not found');
+      }
+
+      await this.profileRepository.softDelete(userProfile.id);
+
+      const responseData = {
+        message: 'Profile successfully deleted',
+      };
+
+      return responseData;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Internal server error: ${error.message}`);
+    }
+  }
 }
