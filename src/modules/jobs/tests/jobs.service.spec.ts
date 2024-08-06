@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobsService } from '../jobs.service';
 import { JobDto } from '../dto/job.dto';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Job } from '../entities/job.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { User } from '../../user/entities/user.entity';
