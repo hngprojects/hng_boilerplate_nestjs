@@ -18,6 +18,7 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 
 @Injectable()
 export class OrganisationsService {
@@ -122,5 +123,33 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
+  }
+
+  async removeOrganisationMember(createOrganisationMemberDto: RemoveOrganisationMemberDto) {
+    const { organisationId, userId } = createOrganisationMemberDto;
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('No user found with the provided id');
+    }
+
+    const org = await this.organisationRepository.findOne({ where: { id: organisationId } });
+    if (!org) {
+      throw new NotFoundException('No organisation found with the provided id');
+    }
+
+    const orgMember = await this.organisationMemberRepository.findOne({
+      where: {
+        organisation_id: { id: organisationId },
+        user_id: { id: userId },
+      },
+    });
+    if (!orgMember) {
+      throw new NotFoundException('No organisation member found with provided ids');
+    }
+
+    await this.organisationMemberRepository.softDelete(orgMember.id);
+
+    return { message: 'Member removed from organisation successfully' };
   }
 }
