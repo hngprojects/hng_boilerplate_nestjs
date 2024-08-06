@@ -41,30 +41,26 @@ export class BlogsService {
       throw new BadRequestException('Page size must be a positive integer');
     }
 
-    try {
-      const [blogs, total] = await this.blogRepository.findAndCount({
-        skip: (page - 1) * page_size,
-        take: page_size,
-        order: {
-          created_at: 'DESC',
-        },
-      });
+    const [blogs, total] = await this.blogRepository.findAndCount({
+      skip: (page - 1) * page_size,
+      take: page_size,
+      order: {
+        created_at: 'DESC',
+      },
+    });
 
-      const nextLink = `http://example.com/api/v1/blogs?page=${page + 1}&page_size=10`;
-      const previous = page <= 1 ? null : page - 1;
+    const nextLink = `http://example.com/api/v1/blogs?page=${page + 1}&page_size=10`;
+    const previous = page <= 1 ? null : page - 1;
 
-      return {
-        status_code: 200,
-        message: 'Blogs retrieved successfully',
-        count: total,
-        next: nextLink,
-        previous,
-        data: blogs,
-        page,
-        page_size,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve blogs');
-    }
+    return {
+      status_code: 200,
+      message: 'Blogs retrieved successfully',
+      count: total,
+      next: nextLink,
+      previous,
+      data: blogs,
+      page,
+      page_size,
+    };
   }
 }
