@@ -79,7 +79,7 @@ export class User extends AbstractBaseEntity {
   organisationMembers: OrganisationMember[];
 
   @OneToMany(() => Blog, blog => blog.author)
-  blogs: Blog[];
+  blogs?: Blog[];
 
   @BeforeInsert()
   @BeforeUpdate()
