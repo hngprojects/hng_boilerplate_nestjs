@@ -45,6 +45,8 @@ export class JobsService {
 
   async getJobs() {
     const jobs = await this.jobRepository.find({ where: { is_deleted: false } });
+
+    jobs.map(x => delete x.is_deleted);
     return {
       message: 'Jobs listing fetched successfully',
       status_code: 200,
@@ -60,6 +62,8 @@ export class JobsService {
         status: 'Not found Exception',
         message: 'Job not found',
       });
+
+    delete job.is_deleted;
     return {
       message: 'Job fetched successfully',
       status_code: 200,
