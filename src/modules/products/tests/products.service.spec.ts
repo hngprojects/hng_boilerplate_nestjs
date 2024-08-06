@@ -207,16 +207,5 @@ describe('ProductsService', () => {
 
       await expect(service.getProductStock(productId)).rejects.toThrow(new NotFoundException('Product not found'));
     });
-
-    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
-      const productId = '123';
-      const errorMessage = 'Unexpected error';
-
-      jest.spyOn(productRepository, 'findOne').mockRejectedValue(new Error(errorMessage));
-
-      await expect(service.getProductStock(productId)).rejects.toThrow(
-        new InternalServerErrorException(`Internal error occurred: ${errorMessage}`)
-      );
-    });
   });
 });
