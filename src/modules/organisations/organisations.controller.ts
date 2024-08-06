@@ -88,6 +88,23 @@ export class OrganisationsController {
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
 
+  @ApiOperation({ summary: 'Remove Member From Organization' })
+  @ApiResponse({
+    status: 200,
+    description: 'The member was successfully removed',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User is not a member of the organisation',
+  })
   @UseGuards(MembershipGuard)
   @Permissions(PermissionCategory.CanLeaveOrganisation, PermissionCategory.CanRemoveMembers)
   @Delete(':org_id/users/:user_id')
