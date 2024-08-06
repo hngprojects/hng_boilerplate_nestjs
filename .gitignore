@@ -393,3 +393,5 @@ dist
 *._local.ts
 
 # Migrations
+/db/migrations/*-migration.ts
+/db
