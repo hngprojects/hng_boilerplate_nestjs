@@ -15,9 +15,12 @@ import {
   UnprocessableEntityException,
   ForbiddenException,
   ConflictException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -45,6 +48,7 @@ describe('OrganisationsService', () => {
           provide: getRepositoryToken(OrganisationMember),
           useValue: {
             save: jest.fn(),
+            find: jest.fn(),
           },
         },
         UserService,
@@ -219,6 +223,39 @@ describe('OrganisationsService', () => {
       expect(result.data).toEqual([
         { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
       ]);
+    });
+  });
+
+  describe("get user's organization", () => {
+    it('should throw an error if the user has no organizations', async () => {
+      const mockUser = new User();
+      mockUser.id = 'sample-id-6789';
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue(null);
+
+      await expect(service.getUserOrganisations(mockUser.id)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST)
+      );
+    });
+
+    it('should return all the users organizations', async () => {
+      const mockUser = orgMock.creator;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([
+        {
+          ...mockUser.organisationMembers[0],
+          organisation_id: orgMock,
+        },
+      ]);
+
+      const res = await service.getUserOrganisations(mockUser.id);
+
+      expect(res.status_code).toEqual(HttpStatus.OK);
+      expect(res.data).toHaveProperty('created_organisations');
+      expect(res.data).toHaveProperty('owned_organisations');
+      expect(res.data).toHaveProperty('member_organisations');
+      expect(res.data.member_organisations[0]).toHaveProperty('role');
+      expect(res.data.member_organisations[0]).toHaveProperty('organisation');
     });
   });
 });

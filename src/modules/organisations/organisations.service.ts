@@ -134,29 +134,34 @@ export class OrganisationsService {
     const res = await this.userService.getUserDataWithoutPasswordById(userId);
     const user = res.user as User;
 
-    const createdOrgs = user.created_organisations
-      ? user.created_organisations.map(org => OrganisationMapper.mapToResponseFormat(org))
-      : null;
+    console.log(user);
 
-    const ownedOrgs = user.owned_organisations
-      ? user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org))
-      : null;
+    const createdOrgs =
+      user.created_organisations && user.created_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+
+    const ownedOrgs =
+      user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
 
     const memberOrgs = await this.organisationMemberRepository.find({
       where: { user_id: { id: user.id } },
       relations: ['organisation_id', 'user_id', 'role'],
     });
 
-    const memberOrgsMapped = memberOrgs.map(org => {
-      const organisation = org.organisation_id && OrganisationMapper.mapToResponseFormat(org.organisation_id);
-      const role = org.role && MemberRoleMapper.mapToResponseFormat(org.role);
-      return {
-        organisation,
-        role,
-      };
-    });
+    const memberOrgsMapped =
+      memberOrgs &&
+      memberOrgs.map(org => {
+        const organisation = org.organisation_id && OrganisationMapper.mapToResponseFormat(org.organisation_id);
+        const role = org.role && MemberRoleMapper.mapToResponseFormat(org.role);
+        return {
+          organisation,
+          role,
+        };
+      });
 
-    if (!createdOrgs.length && !ownedOrgs.length && !memberOrgsMapped.length) {
+    if (
+      (!createdOrgs && !ownedOrgs && !memberOrgsMapped) ||
+      (!createdOrgs.length && !ownedOrgs.length && !memberOrgsMapped.length)
+    ) {
       throw new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST);
     }
 

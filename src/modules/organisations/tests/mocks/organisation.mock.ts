@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Organisation } from '../../entities/organisations.entity';
+import { User } from '../../../user/entities/user.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
 import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
@@ -11,6 +12,11 @@ export enum UserType {
 }
 
 export const createMockOrganisation = (): Organisation => {
+  const user = new User();
+  user.id = uuidv4();
+  const org = new Organisation();
+  org.id = uuidv4();
+
   const profileMock: Profile = {
     id: 'some-uuid',
     username: 'mockuser',
@@ -28,13 +34,12 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
   };
 
-  // Create a mock object that matches the OrganisationRole interface
   const organisationRoleMock: OrganisationRole = {
     id: uuidv4(),
     name: 'Admin',
     description: 'Administrator role with full permissions',
     permissions: [],
-    organisation: null,
+    organisation: org,
     organisationMembers: [],
     created_at: new Date(),
     updated_at: new Date(),
@@ -44,14 +49,14 @@ export const createMockOrganisation = (): Organisation => {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: null,
+    user_id: user,
     role: organisationRoleMock,
-    organisation_id: null,
+    organisation_id: org,
     profile_id: profileMock,
   };
 
   const ownerAndCreator = {
-    id: uuidv4(),
+    ...user,
     created_at: new Date(),
     updated_at: new Date(),
     first_name: 'John',
@@ -82,7 +87,7 @@ export const createMockOrganisation = (): Organisation => {
   };
 
   return {
-    id: uuidv4(),
+    ...org,
     name: 'John & Co',
     description: 'An imports organisation',
     email: 'johnCo@example.com',
