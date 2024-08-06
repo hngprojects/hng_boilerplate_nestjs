@@ -12,7 +12,7 @@ export class BlogCategoriesController {
   constructor(private readonly blogCategoriesService: BlogCategoriesService) {}
 
   @Post()
-  @UseGuards(SuperAdminGuard, AuthGuard)
+  @UseGuards(SuperAdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new blog category' })
   @ApiResponse({ status: 201, description: 'Blog category created successfully.' })
