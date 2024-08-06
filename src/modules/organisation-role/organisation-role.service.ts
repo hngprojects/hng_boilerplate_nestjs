@@ -164,49 +164,40 @@ export class OrganisationRoleService {
   }
 
   async removeRole(orgId: string, roleId: string) {
-    try {
-      const organisation = await this.organisationRepository.findOne({
-        where: {
-          id: orgId,
-        },
-      });
+    const organisation = await this.organisationRepository.findOne({
+      where: {
+        id: orgId,
+      },
+    });
 
-      if (!organisation) {
-        throw new NotFoundException({
-          status_code: 404,
-          error: 'Not Found',
-          message: `The organisation with ID ${roleId} does not exist`,
-        });
-      }
-
-      const role = await this.rolesRepository.findOne({
-        where: {
-          id: roleId,
-          organisation: organisation,
-        },
-      });
-
-      if (!role) {
-        throw new NotFoundException({
-          status_code: 404,
-          error: 'Not Found',
-          message: `The role with ID ${roleId} does not exist`,
-        });
-      }
-
-      await this.rolesRepository.remove(role);
-
-      return {
-        status_code: 200,
-        message: 'Role successfully removed',
-      };
-    } catch (err) {
-      CustomExceptionHandler(err);
-
-      throw new InternalServerErrorException({
-        message: 'Something went wrong!',
-        status_code: 500,
+    if (!organisation) {
+      throw new NotFoundException({
+        status_code: 404,
+        error: 'Not Found',
+        message: `The organisation with ID ${roleId} does not exist`,
       });
     }
+
+    const role = await this.rolesRepository.findOne({
+      where: {
+        id: roleId,
+        organisation: organisation,
+      },
+    });
+
+    if (!role) {
+      throw new NotFoundException({
+        status_code: 404,
+        error: 'Not Found',
+        message: `The role with ID ${roleId} does not exist`,
+      });
+    }
+
+    await this.rolesRepository.remove(role);
+
+    return {
+      status_code: 200,
+      message: 'Role successfully removed',
+    };
   }
 }
