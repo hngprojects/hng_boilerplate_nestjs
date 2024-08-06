@@ -27,6 +27,8 @@ import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { UserOrganizationErrorResponseDto, UserOrganizationResponseDto } from './dto/user-orgs-response.dto';
 import { AddMemberDto } from './dto/add-member.dto';
+import { Response } from 'express';
+import { createReadStream, unlink } from 'fs';
 @ApiBearerAuth()
 @ApiTags('organization')
 @Controller('organizations')
@@ -180,5 +182,28 @@ export class OrganisationsController {
   @Get(':org_id')
   async getById(@Param('org_id') org_id: string) {
     return this.organisationsService.getOrganizationDetailsById(org_id);
+  }
+
+  @ApiOperation({ summary: 'Export members of an Organisation to a CSV file' })
+  @Get(':org_id/members/export')
+  async exportOrganisationMembers(@Param('org_id') orgId: string, @Req() req: Request, @Res() res: Response) {
+    const userId = req['user'].id;
+    const filePath = await this.organisationsService.exportOrganisationMembers(orgId, userId);
+    const fileStream = createReadStream(filePath);
+
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="organisation-members-${orgId}.csv"`,
+    });
+
+    fileStream.pipe(res);
+
+    fileStream.on('end', () => {
+      unlink(filePath, err => {
+        if (err) {
+          console.error('Failed to delete file:', err);
+        }
+      });
+    });
   }
 }

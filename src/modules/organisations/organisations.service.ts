@@ -32,6 +32,9 @@ import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import UserService from '../user/user.service';
 import { isUUID } from 'class-validator';
+import { createObjectCsvStringifier } from 'csv-writer';
+import { join } from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class OrganisationsService {
@@ -306,5 +309,25 @@ export class OrganisationsService {
       throw new CustomHttpException('Organization Id Not Found', HttpStatus.NOT_FOUND);
     }
     return { message: 'Fetched Organization Details Successfully', data: orgDetails };
+  }
+
+  async exportOrganisationMembers(orgId: string, userId: string): Promise<string> {
+    const membersResponse = await this.getOrganisationMembers(orgId, 1, Number.MAX_SAFE_INTEGER, userId);
+
+    const csvStringifier = createObjectCsvStringifier({
+      header: [
+        { id: 'id', title: 'ID' },
+        { id: 'name', title: 'Name' },
+        { id: 'email', title: 'Email' },
+        { id: 'role', title: 'Role' },
+      ],
+    });
+
+    const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(membersResponse.data);
+
+    const filePath = join(__dirname, `organisation-members-${orgId}.csv`);
+    fs.writeFileSync(filePath, csvData);
+
+    return filePath;
   }
 }
