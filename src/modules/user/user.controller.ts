@@ -27,6 +27,19 @@ export class UserController {
     return this.userService.deactivateUser(userId, deactivateAccountDto);
   }
 
+  @Get('stats')
+  @ApiOperation({ summary: 'Get user statistics (Super Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'User statistics retrieved successfully',
+    type: GetUserStatsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @UseGuards(SuperAdminGuard)
+  async getUserStats(): Promise<GetUserStatsResponseDto> {
+    return this.userService.getUserStats();
+  }
+
   @ApiOperation({ summary: 'Update User' })
   @ApiResponse({
     status: 200,
@@ -66,17 +79,5 @@ export class UserController {
     @Query('limit') limit: number = 10
   ) {
     return this.userService.getUsersByAdmin(page, limit, req.user);
-  }
-
-  @Get('/stats')
-  @UseGuards(SuperAdminGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get User Statistics (Super Admin only)' })
-  @ApiResponse({ status: 200, description: 'User statistics retrieved successfully', type: GetUserStatsResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  async getUserStats(@Req() req: Request) {
-    const user = req['user'];
-    return this.userService.getUserStatistics(user);
   }
 }

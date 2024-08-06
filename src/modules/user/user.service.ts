@@ -18,6 +18,7 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
+import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
 
 @Injectable()
 export default class UserService {
@@ -233,22 +234,20 @@ export default class UserService {
       },
     };
   }
-  async getUserStatistics(currentUser: UserPayload): Promise<any> {
-    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
-      throw new ForbiddenException({
-        error: 'Forbidden',
-        message: 'You are not authorized to access user statistics',
-      });
-    }
-
+  async getUserStats(): Promise<GetUserStatsResponseDto> {
     const totalUsers = await this.userRepository.count();
     const activeUsers = await this.userRepository.count({ where: { is_active: true } });
     const deletedUsers = await this.userRepository.count({ where: { is_active: false } });
 
     return {
-      total_users: totalUsers,
-      active_users: activeUsers,
-      deleted_users: deletedUsers,
+      status: 'success',
+      status_code: 200,
+      message: 'User statistics retrieved successfully',
+      data: {
+        total_users: totalUsers,
+        active_users: activeUsers,
+        deleted_users: deletedUsers,
+      },
     };
   }
 }
