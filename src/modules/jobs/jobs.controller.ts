@@ -4,7 +4,6 @@ import { JobDto } from './dto/job.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JobGuard } from './guards/job.guard';
-import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -21,7 +20,6 @@ export class JobsController {
     return this.jobService.create(createJobDto, user.sub);
   }
 
-  @skipAuth()
   @Get('/')
   @ApiOperation({ summary: 'Gets all jobs' })
   @ApiResponse({ status: 200, description: 'Jobs returned successfully' })
@@ -30,7 +28,6 @@ export class JobsController {
     return this.jobService.getJobs();
   }
 
-  @skipAuth()
   @Get('/:id')
   @ApiOperation({ summary: 'Gets a job by ID' })
   @ApiResponse({ status: 200, description: 'Job returned successfully' })

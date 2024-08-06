@@ -5,6 +5,7 @@ import { OrganisationRole } from '../organisation-role/entities/organisation-rol
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { Permissions } from './entities/permissions.entity';
+import { PermissionCategory } from './helpers/PermissionCategory';
 
 @Injectable()
 export class OrganisationPermissionsService {
@@ -56,8 +57,13 @@ export class OrganisationPermissionsService {
         throw new NotFoundException(`Permission not found in the specified role`);
       }
 
+      const permissionCategory = category as PermissionCategory;
+
       updatePromises.push(
-        this.permissionRepository.update({ role: { id: roleId }, category }, { permission_list: value })
+        this.permissionRepository.update(
+          { role: { id: roleId }, category: permissionCategory },
+          { permission_list: value }
+        )
       );
     }
 
