@@ -14,6 +14,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
+import { last } from 'rxjs';
 
 interface SearchCriteria {
   name?: string;
@@ -201,5 +202,27 @@ export class ProductsService {
       message: 'Product successfully deleted',
       data: {},
     };
+  }
+
+  async getProductStock(productId: string) {
+    try {
+      const product = await this.productRepository.findOne({ where: { id: productId } });
+      if (!product) {
+        throw new NotFoundException(`Product not found`);
+      }
+      return {
+        message: 'Product stock retrieved successfully',
+        data: {
+          product_id: product.id,
+          current_stock: product.quantity,
+          last_updated: product.updated_at,
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    }
   }
 }
