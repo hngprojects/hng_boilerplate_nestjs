@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InviteService } from './invite.service';
@@ -40,5 +41,10 @@ export class InviteController {
         throw new HttpException('An unexpected error occurred', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
+  }
+
+  @Post(':orgId/invite/:inviteId/refresh')
+  async refreshInvitation(@Param('orgId') orgId: string, @Param('inviteId') inviteId: string) {
+    return await this.inviteService.refreshInvite(orgId, inviteId);
   }
 }
