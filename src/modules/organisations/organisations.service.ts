@@ -191,7 +191,11 @@ export class OrganisationsService {
     }
 
     //check if user is already a member
-    const existingMember = await this.organisationMemberRepository.findOneBy({ user_id: { id: addMemberDto.user_id } });
+    const existingMember = await this.organisationMemberRepository.findOneBy({
+      user_id: { id: addMemberDto.user_id },
+      organisation_id: { id: organisation.id },
+    });
+
     if (existingMember) {
       throw new ConflictException('User already added to organization');
     }
