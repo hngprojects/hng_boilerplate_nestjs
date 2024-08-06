@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { isUUID } from 'class-validator';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class ProfileService {
@@ -16,7 +17,7 @@ export class ProfileService {
 
   async findOneProfile(userId: string) {
     if (!isUUID(userId, '4')) {
-      throw new BadRequestException('Invalid user ID');
+      throw new CustomHttpException('Invalid user ID', 400);
     }
 
     const user = await this.userRepository.findOne({ where: { id: userId } });

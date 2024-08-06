@@ -6,6 +6,7 @@ import { Profile } from '../entities/profile.entity';
 import { NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('ProfileService', () => {
   let service: ProfileService;
@@ -51,7 +52,7 @@ describe('ProfileService', () => {
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findOneProfile(userId)).rejects.toThrow(BadRequestException);
+      await expect(service.findOneProfile(userId)).rejects.toThrow(CustomHttpException);
     });
   });
 
