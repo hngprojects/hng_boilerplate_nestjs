@@ -19,7 +19,9 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
-import { MembershipGuard } from 'src/guards/member.guard';
+import { MembershipGuard } from '../../guards/member.guard';
+import { Permissions } from '../../guards/permission.decorator';
+import { PermissionCategory } from '../organisation-permissions/helpers/PermissionCategory';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -85,7 +87,9 @@ export class OrganisationsController {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
-  @UseGuards(OwnershipGuard, MembershipGuard)
+
+  @UseGuards(MembershipGuard)
+  @Permissions(PermissionCategory.CanLeaveOrganisation, PermissionCategory.CanRemoveMembers)
   @Delete(':org_id/users/:user_id')
   async removeMember(@Param('org_id') orgId: string, @Param('user_id') userId: string) {
     return this.organisationsService.removeMember(orgId, userId);

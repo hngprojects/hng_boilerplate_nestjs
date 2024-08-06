@@ -6,4 +6,6 @@ export enum PermissionCategory {
   CanCreateUsers = 'canCreateUsers',
   CanEditUsers = 'canEditUsers',
   CanBlacklistWhitelistUsers = 'canBlacklistWhitelistUsers',
+  CanRemoveMembers = 'canRemoveMembers',
+  CanLeaveOrganisation = 'canLeaveOrganisation',
 }
