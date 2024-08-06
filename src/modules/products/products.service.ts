@@ -15,6 +15,7 @@ import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
 import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
+import * as systemMessages from '../../helpers/SystemMessages';
 
 interface SearchCriteria {
   name?: string;
@@ -247,22 +248,20 @@ export class ProductsService {
 
     const totalProductsLastMonth = await this.getTotalProductsForDateRange(lastMonthStarts, lastMonthEnds);
 
-    let percentageChange = '0% from last month';
+    let percentageChange;
+
     if (totalProductsLastMonth === totalProductsThisMonth) {
-      if (totalProductsLastMonth === 0) {
-        percentageChange = 'No products to compare from last month';
-      } else {
-        percentageChange = 'No change from last month';
-      }
-    } else if (totalProductsLastMonth !== 0) {
-      const change = ((totalProductsThisMonth - totalProductsLastMonth) / totalProductsLastMonth) * 100;
-      percentageChange = `${change > 0 ? '+' : ''}${change.toFixed(2)}% from last month`;
+      percentageChange =
+        totalProductsLastMonth === 0 ? 'No products to compare from last month' : 'No change from last month';
     } else if (totalProductsLastMonth === 0 && totalProductsThisMonth > 0) {
       percentageChange = `+100.00% from last month`;
+    } else {
+      const change = ((totalProductsThisMonth - totalProductsLastMonth) / totalProductsLastMonth) * 100;
+      percentageChange = `${change > 0 ? '+' : ''}${change.toFixed(2)}% from last month`;
     }
 
     return {
-      message: 'Total Products fetched successfully',
+      message: systemMessages.TOTAL_PRODUCTS_FETCHED_SUCCESSFULLY,
       data: {
         total_products: totalProductsThisMonth,
         percentage_change: percentageChange,
