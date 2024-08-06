@@ -5,9 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as SYS_MSG from '../helpers/SystemMessages';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
 import { CustomHttpException } from '../helpers/custom-http-filter';
-import { PermissionCategory } from 'src/modules/organisation-permissions/helpers/PermissionCategory';
-import { PERMISSIONS_KEY } from './permission.decorator';
 import { OrganisationMember } from '../modules/organisations/entities/org-members.entity';
+import { PermissionCategory } from '../modules/organisation-permissions/helpers/PermissionCategory';
+import { PERMISSIONS_KEY } from './permission.decorator';
 
 @Injectable()
 export class MembershipGuard implements CanActivate {
