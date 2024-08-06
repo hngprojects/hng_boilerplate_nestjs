@@ -240,7 +240,7 @@ describe('OrganisationRoleService', () => {
 
       await expect(service.removeRole(orgId, roleId)).rejects.toThrow(HttpException);
       await expect(service.removeRole(orgId, roleId)).rejects.toThrow(
-        'The organisation with ID role-id does not exist'
+        `The organisation with ID ${orgId} does not exist`
       );
     });
 
@@ -255,9 +255,7 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.removeRole(orgId, roleId)).rejects.toThrow(HttpException);
-      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(
-        'The role with ID non-existent-role-id does not exist'
-      );
+      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(`The role with ID ${roleId} does not exist`);
     });
   });
 });
