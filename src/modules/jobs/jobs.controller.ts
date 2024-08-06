@@ -13,6 +13,7 @@ import { SuperAdminGuard } from '../../guards/super-admin.guard';
 export class JobsController {
   constructor(private readonly jobService: JobsService) {}
 
+  @UseGuards(SuperAdminGuard)
   @Post('/')
   @ApiOperation({ summary: 'Create a new job' })
   @ApiResponse({ status: 201, description: 'Job created successfully' })
