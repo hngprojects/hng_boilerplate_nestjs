@@ -14,7 +14,6 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
-import { last } from 'rxjs';
 
 interface SearchCriteria {
   name?: string;
