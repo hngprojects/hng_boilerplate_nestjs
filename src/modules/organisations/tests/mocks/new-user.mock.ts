@@ -36,4 +36,5 @@ export const newUser: User = {
   notifications: [],
   notification_settings: [],
   backup_codes: [],
+  blogs: [],
 };
