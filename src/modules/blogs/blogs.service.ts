@@ -1,35 +1,3 @@
-// import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { Blog } from './entities/blog.entity';
-// import { User } from '../user/entities/user.entity';
-
-// @Injectable()
-// export class BlogsService {
-//   constructor(
-//     @InjectRepository(Blog)
-//     private blogRepository: Repository<Blog>,
-//     @InjectRepository(User)
-//     private userRepository: Repository<User>
-//   ) {}
-
-//   // Other methods...
-
-//   async deleteBlogPost(id: string): Promise<void> {
-//     const blog = await this.blogRepository.findOne({ where: { id } });
-
-//     if (!blog) {
-//       throw new NotFoundException('Blog with the given Id does not exist');
-//     }
-
-//     try {
-//       await this.blogRepository.remove(blog);
-//     } catch (error) {
-//       throw new InternalServerErrorException('Internal server error');
-//     }
-//   }
-// }
-
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { InjectRepository } from '@nestjs/typeorm';

@@ -1,34 +1,3 @@
-// import { Controller, Delete, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-// import { BlogService } from './blogs.service';
-// import { SuperAdminGuard } from '../../guards/super-admin.guard';
-// import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
-// @ApiTags('blogs')
-// @Controller('/blogs')
-// export class BlogController {
-//   constructor(private readonly blogService: BlogService) {}
-
-//   // Other methods...
-
-//   @Delete(':id')
-//   @UseGuards(SuperAdminGuard)
-//   @HttpCode(HttpStatus.ACCEPTED)
-//   @ApiOperation({ summary: 'Delete a blog post' })
-//   @ApiResponse({ status: 202, description: 'Blog successfully deleted.' })
-//   @ApiResponse({ status: 404, description: 'Blog with the given Id does not exist.' })
-//   @ApiResponse({ status: 403, description: 'You are not authorized to perform this action.' })
-//   @ApiResponse({ status: 500, description: 'Internal server error.' })
-//   @ApiResponse({ status: 400, description: 'An invalid request was sent.' })
-//   @ApiResponse({ status: 405, description: 'This method is not allowed.' })
-//   async deleteBlog(@Param('id') id: string): Promise<any> {
-//     await this.blogService.deleteBlogPost(id);
-//     return {
-//       message: 'Blog successfully deleted',
-//       status_code: HttpStatus.ACCEPTED,
-//     };
-//   }
-// }
-
 import {
   Controller,
   Get,
