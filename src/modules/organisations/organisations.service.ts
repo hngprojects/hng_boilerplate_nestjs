@@ -18,6 +18,12 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { AddMemberDto } from './dto/add-member.dto';
+import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
+import { DefaultRole } from '../organisation-role/entities/role.entity';
+import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
+import { RoleCategory } from '../organisation-role/helpers/RoleCategory';
+import { Permissions } from '../organisation-permissions/entities/permissions.entity';
 
 @Injectable()
 export class OrganisationsService {
@@ -27,7 +33,15 @@ export class OrganisationsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(OrganisationMember)
-    private readonly organisationMemberRepository: Repository<OrganisationMember>
+    private readonly organisationMemberRepository: Repository<OrganisationMember>,
+    @InjectRepository(OrganisationRole)
+    private readonly roleRepository: Repository<OrganisationRole>,
+    @InjectRepository(DefaultRole)
+    private readonly defaultRoleRepository: Repository<DefaultRole>,
+    @InjectRepository(DefaultPermissions)
+    private readonly defaultPermissionsRepository: Repository<DefaultPermissions>,
+    @InjectRepository(Permissions)
+    private readonly permissionsRepository: Repository<Permissions>
   ) {}
 
   async getOrganisationMembers(
@@ -57,23 +71,58 @@ export class OrganisationsService {
   }
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
-    const emailFound = await this.emailExists(createOrganisationDto.email);
-    if (emailFound) throw new ConflictException('Organisation with this email already exists');
+    // Used Promise.all to reduce the time taken for the operation
+    const [emailFound, owner, defaultRoles, defaultPermissions] = await Promise.all([
+      this.emailExists(createOrganisationDto.email),
+      this.userRepository.findOne({ where: { id: userId } }),
+      this.defaultRoleRepository.find(),
+      this.defaultPermissionsRepository.find(),
+    ]);
 
-    const owner = await this.userRepository.findOne({
-      where: { id: userId },
-    });
+    if (emailFound) throw new ConflictException('Organisation with this email already exists');
 
     const mapNewOrganisation = CreateOrganisationMapper.mapToEntity(createOrganisationDto, owner);
     const newOrganisation = this.organisationRepository.create({
       ...mapNewOrganisation,
     });
 
-    await this.organisationRepository.save(newOrganisation);
+    // Iterate over each default role
+    for (const role of defaultRoles) {
+      // Create role-specific permissions
+      const rolePermissions = defaultPermissions.map(defaultPerm => {
+        const permission = new Permissions();
+        permission.category = defaultPerm.category;
+        permission.permission_list = defaultPerm.permission_list;
+        return permission;
+      });
 
+      // Save role-specific permissions
+      const savedPermissions = await this.permissionsRepository.save(rolePermissions);
+
+      // Create the role with its specific permissions
+      const newRole = this.roleRepository.create({
+        name: role.name,
+        description: role.description,
+        permissions: savedPermissions,
+        organisation: newOrganisation,
+      });
+
+      // Save the role
+      const savedRole = await this.roleRepository.save(newRole);
+
+      // Add the saved role to the organisation's roles
+      if (!newOrganisation.role) {
+        newOrganisation.role = [];
+      }
+      newOrganisation.role.push(savedRole);
+    }
+
+    await this.organisationRepository.save(newOrganisation);
+    const defaultAdminRole = newOrganisation.role.find(role => role.name === RoleCategory.Administrator);
     const newMember = new OrganisationMember();
     newMember.user_id = owner;
     newMember.organisation_id = newOrganisation;
+    newMember.role = defaultAdminRole;
 
     await this.organisationMemberRepository.save(newMember);
 
@@ -122,5 +171,42 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
+  }
+
+  async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
+    // implement logic to add organisation member
+    const organisation = await this.organisationRepository.findOneBy({ id: org_id });
+    if (!organisation) {
+      throw new NotFoundException('Organisation not found');
+    }
+
+    // Load user with profile
+    const user = await this.userRepository.findOne({
+      where: { id: addMemberDto.user_id },
+      relations: ['profile'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    //check if user is already a member
+    const existingMember = await this.organisationMemberRepository.findOneBy({ user_id: { id: addMemberDto.user_id } });
+    if (existingMember) {
+      throw new ConflictException('User already added to organization');
+    }
+
+    const getDefaultRole = await this.roleRepository.findOne({
+      where: { name: RoleCategory.User, organisation: { id: organisation.id } },
+    });
+
+    const newMember = this.organisationMemberRepository.create({
+      user_id: user,
+      role: getDefaultRole,
+      profile_id: user.profile,
+    });
+
+    await this.organisationMemberRepository.save(newMember);
+    return { status: 'success', message: 'Member added successfully', member: newMember };
   }
 }

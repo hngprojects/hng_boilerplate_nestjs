@@ -18,7 +18,7 @@ export class OwnershipGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    const organisationId = request.params.id;
+    const organisationId = request.params.id || request.params.org_id;
 
     if (user.user_type === UserType.SUPER_ADMIN) {
       return true;
