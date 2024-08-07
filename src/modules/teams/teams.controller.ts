@@ -25,17 +25,51 @@ export class TeamsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all team members' })
-  @ApiResponse({ status: 200, description: 'Return all team members', type: [TeamMemberResponseDto] })
-  findAll(): Promise<TeamMemberResponseDto[]> {
-    return this.teamsService.findAllTeamMembers();
+  @ApiResponse({
+    status: 200,
+    description: 'Return all team members',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/TeamMemberResponseDto' },
+        },
+      },
+    },
+  })
+  async findAll(): Promise<{ message: string; data: TeamMemberResponseDto[] }> {
+    const teamMembers = await this.teamsService.findAllTeamMembers();
+    return {
+      message: 'Team members retrieved successfully',
+      data: teamMembers,
+    };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a team member by id' })
   @ApiParam({ name: 'id', description: 'The id of the team member' })
-  @ApiResponse({ status: 200, description: 'Return the team member', type: TeamMemberResponseDto })
-  findOne(@Param('id') id: string): Promise<TeamMemberResponseDto> {
-    return this.teamsService.findOneTeamMember(id);
+  @ApiResponse({
+    status: 200,
+    description: 'Return the team member',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'object',
+          items: { $ref: '#/components/schemas/TeamMemberResponseDto' },
+        },
+      },
+    },
+  })
+  async findOne(@Param('id') id: string): Promise<{ message: string; data: TeamMemberResponseDto }> {
+    const teamMember = await this.teamsService.findOneTeamMember(id);
+    return {
+      message: 'Team member fetched successfully',
+      data: teamMember,
+    };
   }
 
   @UseGuards(SuperAdminGuard)

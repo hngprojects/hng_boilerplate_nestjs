@@ -9,7 +9,7 @@ export class OrganisationRole extends AbstractBaseEntity {
   @Column({ nullable: false })
   id: string;
 
-  @Column({ length: 50, unique: true, nullable: false })
+  @Column({ length: 50, nullable: false })
   name: string;
 
   @Column({ length: 200, nullable: true })

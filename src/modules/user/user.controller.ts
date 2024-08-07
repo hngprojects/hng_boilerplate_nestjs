@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Query, Req, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import UserService from './user.service';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -50,6 +51,7 @@ export class UserController {
     return this.userService.getUserDataWithoutPasswordById(id);
   }
 
+  @UseGuards(SuperAdminGuard)
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users (Super Admin only)' })

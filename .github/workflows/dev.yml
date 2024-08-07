@@ -23,6 +23,8 @@ env:
   PROFILE: 'staging'
   NODE_ENV: 'development'
   PORT: 3000
+  REDIS_HOST: 'localhost'
+  REDIS_PORT: 6379
 
 jobs:
   test-and-build-dev:
