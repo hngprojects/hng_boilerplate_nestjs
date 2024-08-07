@@ -8,5 +8,5 @@ export class MarkAllNotificationAsReadResponse {
     type: 'object',
     properties: { notifications: { type: 'array', items: { type: 'string' }, example: [] } },
   })
-  data: {};
+  data: Record<string, never>;
 }

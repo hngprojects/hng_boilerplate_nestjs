@@ -1,47 +1,55 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Notification } from './entities/notifications.entity';
-import { User } from '../user/entities/user.entity';
-import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import {
   BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
 import { IMessageInterface } from '../email/interface/message.interface';
 import { NotificationSettingsDto } from '../notification-settings/dto/notification-settings.dto';
 import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
 import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
+import { User } from '../user/entities/user.entity';
 import UserInterface from '../user/interfaces/UserInterface';
 import UserService from '../user/user.service';
 import { CreateNotificationError } from './dtos/create-notification-error.dto';
 import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
 import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
+import { Notification } from './entities/notifications.entity';
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
 
+    @InjectRepository(NotificationSettings)
+    private readonly notificationSettingsRepository: Repository<NotificationSettings>,
+    private readonly logger: Logger,
     private emailService: EmailService,
     private readonly userService: UserService,
     private readonly notificationSettingsService: NotificationSettingsService,
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
+  private getEmailTemplate(recipient_name: string, message: string): IMessageInterface {
+    return {
+      recipient_name,
+      message,
+      support_email: process.env.SUPPORT_EMAIL,
+    };
+  }
 
   async createGlobalNotifications(dto: CreateNotificationForAllUsersDto) {
-    /* Adding pagination for performance enhancement */
     let page = 0;
     const pageSize = 100;
-    /* Only selecting the id for performance enhancement */
     const users = await this.userRepository.find({
       select: ['id'],
     });
@@ -221,13 +229,16 @@ export class NotificationsService {
 
   async createNotification(
     user_id: string,
-    notification_content: CreateNotificationPropsDto
+    notification_content: Partial<CreateNotificationPropsDto>
   ): Promise<CreateNotificationResponseDto | CreateNotificationError> {
     const user = await this.getUser(user_id);
 
     const notification_settings = await this.getNotificationSettingsByUserId(user_id);
 
     await this.sendNotificationEmail(user, notification_content.message, notification_settings);
+
+    this.logger.log(`Notification created by ${notification_content.created_by} has been sent to ${user.email}.`);
+
     const notification = await this.saveNotification(user, notification_content);
 
     const { id: notification_id, message, is_read, created_at } = notification;
@@ -280,23 +291,12 @@ export class NotificationsService {
     message: string,
     notificationSettings: NotificationSettingsDto
   ): Promise<void> {
-    const { email, first_name, last_name } = user; // TODO: Implement mobile_push_notification using firebase
-    const {
-      mobile_push_notifications,
-      email_notification_activity_in_workspace,
-      email_notification_always_send_email_notifications,
-      email_notification_email_digest,
-      email_notification_announcement_and_update_emails,
-      slack_notifications_activity_on_your_workspace,
-      slack_notifications_always_send_email_notifications,
-      slack_notifications_announcement_and_update_emails,
-    } = notificationSettings;
+    const { email, first_name, last_name } = user;
+    // TODO: Implement mobile_push_notification using firebase after Mark's approval
+    const { email_notification_activity_in_workspace, email_notification_always_send_email_notifications } =
+      notificationSettings;
 
-    const notificationEmailProps: IMessageInterface = {
-      recipient_name: `${first_name} ${last_name}`,
-      message,
-      support_email: process.env.SUPPORT_EMAIL,
-    };
+    const notificationEmailProps = this.getEmailTemplate(`${first_name} ${last_name}`, message);
 
     if (email_notification_always_send_email_notifications || email_notification_activity_in_workspace) {
       try {
@@ -307,9 +307,63 @@ export class NotificationsService {
     }
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_8PM)
+  private async scheduleDailyEmailDigest(): Promise<any> {
+    try {
+      const emailDigestUsers: NotificationSettings[] = await this.notificationSettingsRepository.find({
+        where: { email_notification_email_digest: true },
+      });
+
+      const allUnreadNotifications: Notification[] = [];
+
+      for (const user of emailDigestUsers) {
+        const { user_id } = user;
+        const unreadNotifications: Notification[] = await this.notificationRepository.find({
+          where: {
+            user: {
+              id: user_id,
+            },
+            is_read: false,
+          },
+          relations: ['user'],
+        });
+
+        const selectedNotifications = unreadNotifications.slice(0, 2);
+
+        allUnreadNotifications.push(...selectedNotifications);
+      }
+
+      const flattenedUserUnreadNotifications = allUnreadNotifications.flat();
+
+      const parallelEmails = flattenedUserUnreadNotifications.map(async notification => {
+        const { email, first_name, last_name } = notification.user;
+
+        const notificationEmailProps: IMessageInterface = this.getEmailTemplate(
+          `${first_name} ${last_name}`,
+          notification.message
+        );
+
+        await this.emailService.sendNotificationMail(email, notificationEmailProps);
+
+        this.logger.log(`Notification created by ${notification.created_by} has been sent as digest to ${email}.`);
+
+        notification.is_read = true;
+
+        await this.notificationRepository.save(notification);
+      });
+
+      await Promise.all(parallelEmails);
+      this.logger.log('All email digest sent successfully.');
+    } catch (err) {
+      throw new InternalServerErrorException({
+        err: 'Could not send email digest.',
+      });
+    }
+  }
+
   private async saveNotification(
     user: Partial<UserInterface>,
-    notification_content: CreateNotificationPropsDto
+    notification_content: Partial<CreateNotificationPropsDto>
   ): Promise<Notification> {
     try {
       return await this.notificationRepository.save({

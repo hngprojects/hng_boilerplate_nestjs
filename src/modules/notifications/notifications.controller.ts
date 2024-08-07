@@ -1,13 +1,9 @@
-import { UserPayload } from '../user/interfaces/user-payload.interface';
-import { Body, Controller, Param, Patch, Req, Request, Delete, Get, Query, Post, UseGuards } from '@nestjs/common';
-import { NotificationsService } from './notifications.service';
-import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
-import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
-import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
@@ -15,14 +11,21 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { UserPayload } from '../user/interfaces/user-payload.interface';
+import { CreateNotificationForAllUsersResDto } from './dtos/create-notification-all-users-res.dto';
+import { CreateNotificationError } from './dtos/create-notification-error.dto';
+import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
+import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
+import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
+import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
+import { MarkNotificationAsReadErrorDto } from './dtos/mark-notification-as-read-error.dto';
+import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
+import { notificationPropDto } from './dtos/notification-prop.dto';
 import { UnreadNotificationsResponseDto } from './dtos/unread-notifications-response.dto';
 import { ErrorDto } from './dtos/unread-response-error.dto';
-import { notificationPropDto } from './dtos/notification-prop.dto';
-import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
-import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
-import { CreateNotificationForAllUsersResDto } from './dtos/create-notification-all-users-res.dto';
+import { NotificationsService } from './notifications.service';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
@@ -55,6 +58,7 @@ export class NotificationsController {
     status: 500,
     description: 'Failed to retrieve notifications.',
   })
+  @ApiOperation({ summary: 'Get notifications' })
   async getNotifications(@Req() req: { user: UserPayload }) {
     const userId = req.user.id;
     const notifications = await this.notificationsService.getNotificationsForUser(userId);
@@ -74,6 +78,22 @@ export class NotificationsController {
         })),
       },
     };
+  }
+
+  @Post()
+  @ApiBody({ type: CreateNotificationPropsDto, description: 'Message and creator of the notification' })
+  @ApiCreatedResponse({ type: CreateNotificationResponseDto, description: 'Notification created successfully' })
+  @ApiUnauthorizedResponse({ type: CreateNotificationError, description: 'Unauthorized' })
+  @ApiBadRequestResponse({ type: CreateNotificationError, description: 'Bad Request' })
+  @ApiInternalServerErrorResponse({ type: CreateNotificationError, description: 'Internal Server Error' })
+  @ApiOperation({ summary: 'Create notification' })
+  async CreateNotifications(
+    @Req() req: { user: Partial<UserPayload> },
+    @Body() createNotificationPropsDto: Partial<CreateNotificationPropsDto>
+  ) {
+    const user_id = req.user.id;
+
+    return await this.notificationsService.createNotification(user_id, createNotificationPropsDto);
   }
 
   @Patch('/:notificationId')
@@ -98,7 +118,7 @@ export class NotificationsController {
   @ApiOkResponse({ type: MarkAllNotificationAsReadResponse, description: 'Notifications cleared successfully.' })
   @ApiUnauthorizedResponse({ type: MarkAllNotificationAsReadError, description: 'Unauthorized' })
   @ApiInternalServerErrorResponse({ type: MarkAllNotificationAsReadError, description: 'Internal Server Error' })
-  @ApiOperation({ summary: 'Marks all notifications a read' })
+  @ApiOperation({ summary: 'Marks all notifications as read' })
   async markAllNotificationsAsRead(@Req() request: Request) {
     const user = request['user'];
 
