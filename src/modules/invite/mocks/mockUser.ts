@@ -25,4 +25,5 @@ export const mockUser: User = {
   organisationMembers: [],
   notification_settings: [],
   notifications: [],
+  blogs: [],
 };
