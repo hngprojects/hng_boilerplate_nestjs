@@ -17,8 +17,6 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthService } from './google-auth.service';
 import { Profile } from '../profile/entities/profile.entity';
 import QueueService from '../email/queue.service';
-// import QueueService from '../email/queue.service';
-// import { BullModule } from '@nestjs/bull';
 
 @Module({
   controllers: [RegistrationController],
