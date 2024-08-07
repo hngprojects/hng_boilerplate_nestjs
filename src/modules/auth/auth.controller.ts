@@ -32,6 +32,7 @@ export default class RegistrationController {
   @Post('register')
   @HttpCode(201)
   public async register(@Body() body: CreateUserDTO): Promise<any> {
+    console.log('received..................');
     return this.authService.createNewUser(body);
   }
 
