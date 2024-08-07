@@ -20,11 +20,12 @@ export class PaymentsController {
   async verifyPaystackPyament(
     @Query('trxref') trxref: string,
     @Query('subscriptionId') subscriptionId: string,
+    @Query('redirect_url') redirectURL: string,
     @Res() res: Response
   ) {
     const verificationResult = await this.paymentsService.verifyPayStackPayment(trxref, subscriptionId);
 
-    const redirectUrl = `${process.env.CLIENT_BASE_URL}/settings?success=${verificationResult.data.status}`;
+    const redirectUrl = `${redirectURL}?status=${verificationResult.data.status}`;
 
     return res.redirect(redirectUrl);
   }

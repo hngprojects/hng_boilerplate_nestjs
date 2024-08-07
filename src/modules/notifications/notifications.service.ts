@@ -22,18 +22,45 @@ import UserService from '../user/user.service';
 import { CreateNotificationError } from './dtos/create-notification-error.dto';
 import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
+import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
 
-    private readonly emailService: EmailService,
+    private emailService: EmailService,
     private readonly userService: UserService,
     private readonly notificationSettingsService: NotificationSettingsService,
     @InjectRepository(User)
     private userRepository: Repository<User>
   ) {}
+
+  async createGlobalNotifications(dto: CreateNotificationForAllUsersDto) {
+    /* Adding pagination for performance enhancement */
+    let page = 0;
+    const pageSize = 100;
+    /* Only selecting the id for performance enhancement */
+    const users = await this.userRepository.find({
+      select: ['id'],
+    });
+    do {
+      const notifications = users.map(user => {
+        return this.notificationRepository.create({
+          message: dto.message,
+          user,
+        });
+      });
+      await this.notificationRepository.save(notifications);
+      page++;
+    } while (users.length === pageSize);
+    return {
+      status: 'success',
+      message: 'Notification created successfully',
+      data: null,
+    };
+  }
 
   async getNotificationsForUser(userId: string) {
     try {

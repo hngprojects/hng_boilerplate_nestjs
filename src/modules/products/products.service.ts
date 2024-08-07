@@ -9,10 +9,18 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UpdateProductDTO } from './dto/update-product.dto';
-import { CreateProductRequestDto } from './dto/create-product.dto';
 import { Product, StockStatusType } from './entities/product.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
+import { CreateProductRequestDto } from './dto/create-product.dto';
+import { UpdateProductDTO } from './dto/update-product.dto';
+import { ProductVariant } from './entities/product-variant.entity';
+
+interface SearchCriteria {
+  name?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
 
 @Injectable()
 export class ProductsService {
@@ -57,6 +65,51 @@ export class ProductsService {
         updated_at: product.updated_at,
       },
     };
+  }
+
+  async searchProducts(orgId: string, criteria: SearchCriteria) {
+    const org = await this.organisationRepository.findOne({ where: { id: orgId } });
+    if (!org)
+      throw new InternalServerErrorException({
+        status: 'Unprocessable entity exception',
+        message: 'Invalid organisation credentials',
+        status_code: 422,
+      });
+
+    const { name, category, minPrice, maxPrice } = criteria;
+    const query = this.productRepository.createQueryBuilder('product').where('product.orgId = :orgId', { orgId });
+
+    if (name) {
+      query.andWhere('product.name ILIKE :name', { name: `%${name}%` });
+    }
+
+    if (minPrice) {
+      query.andWhere('product.price >= :minPrice', { minPrice });
+    }
+    if (maxPrice) {
+      query.andWhere('product.price <= :maxPrice', { maxPrice });
+    }
+
+    const products = await query.getMany();
+
+    if (!products.length) {
+      throw new NotFoundException({
+        status: 'No Content',
+        status_code: 204,
+        message: 'No products found',
+      });
+    }
+
+    return {
+      success: true,
+      statusCode: 200,
+      products,
+    };
+  }
+
+  async calculateProductStatus(quantity: number): Promise<StockStatusType> {
+    if (quantity === 0) return StockStatusType.OUT_STOCK;
+    return quantity >= 5 ? StockStatusType.IN_STOCK : StockStatusType.LOW_STOCK;
   }
 
   async updateProduct(id: string, productId: string, updateProductDto: UpdateProductDTO) {
@@ -148,8 +201,18 @@ export class ProductsService {
     };
   }
 
-  async calculateProductStatus(quantity: number): Promise<StockStatusType> {
-    if (quantity === 0) return StockStatusType.OUT_STOCK;
-    return quantity >= 5 ? StockStatusType.IN_STOCK : StockStatusType.LOW_STOCK;
+  async getProductStock(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new NotFoundException(`Product not found`);
+    }
+    return {
+      message: 'Product stock retrieved successfully',
+      data: {
+        product_id: product.id,
+        current_stock: product.quantity,
+        last_updated: product.updated_at,
+      },
+    };
   }
 }

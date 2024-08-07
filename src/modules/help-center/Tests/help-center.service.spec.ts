@@ -5,6 +5,7 @@ import { UpdateHelpCenterDto } from '../dto/update-help-center.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { HelpCenter } from '../interface/help-center.interface';
 import { HelpCenterEntity } from '../entities/help-center.entity';
+import { REQUEST_SUCCESSFUL } from '../../../helpers/SystemMessages';
 
 describe('HelpCenterService', () => {
   let service: HelpCenterService;
@@ -38,17 +39,22 @@ describe('HelpCenterService', () => {
   describe('updateTopic', () => {
     it('should update and return the help center topic', async () => {
       const id = '1';
-      const updateHelpCenterDto: UpdateHelpCenterDto = {
+      const updateHelpCenterDto = {
         title: 'Updated Title',
         content: 'Updated Content',
         author: 'Updated Author',
+      };
+      const responseBody = {
+        status_code: 200,
+        message: REQUEST_SUCCESSFUL,
+        data: { ...updateHelpCenterDto, id },
       };
       const updatedHelpCenter = { id, ...updateHelpCenterDto };
 
       jest.spyOn(repository, 'update').mockResolvedValue(undefined);
       jest.spyOn(repository, 'findOneBy').mockResolvedValue(updatedHelpCenter as any);
 
-      expect(await service.updateTopic(id, updateHelpCenterDto)).toEqual(updatedHelpCenter);
+      expect(await service.updateTopic(id, updateHelpCenterDto)).toEqual(responseBody);
     });
   });
 

@@ -23,11 +23,19 @@ describe('ProductsService', () => {
         ProductsService,
         {
           provide: getRepositoryToken(Product),
-          useClass: Repository,
+          useValue: {
+            createQueryBuilder: jest.fn(),
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(Organisation),
-          useClass: Repository,
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(ProductVariant),
@@ -50,6 +58,72 @@ describe('ProductsService', () => {
 
     expect(createdProduct.message).toEqual('Product created successfully');
     expect(createdProduct.status).toEqual('success');
+  });
+
+  describe('searchProducts', () => {
+    it('should return products based on name search', async () => {
+      orgMock.products = [productMock];
+      const searchCriteria = { name: 'Product 1' };
+      const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]),
+      };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const products = await service.searchProducts(orgMock.id, searchCriteria);
+
+      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
+    });
+
+    it('should return products based on price range search', async () => {
+      orgMock.products = [productMock];
+      const searchCriteria = { minPrice: 100, maxPrice: 200 };
+      const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]),
+      };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const products = await service.searchProducts(orgMock.id, searchCriteria);
+
+      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
+    });
+
+    it('should return products based on combined search criteria', async () => {
+      orgMock.products = [productMock];
+      const searchCriteria = { name: 'Product 1', minPrice: 100, maxPrice: 200 };
+      const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]),
+      };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const products = await service.searchProducts(orgMock.id, searchCriteria);
+
+      expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
+    });
+
+    it('should throw NotFoundException if no products match search criteria', async () => {
+      orgMock.products = [];
+      const searchCriteria = { name: 'nonexistent' };
+      const queryBuilderMock = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]),
+      };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      await expect(service.searchProducts(orgMock.id, searchCriteria)).rejects.toThrow(
+        new NotFoundException({ status: 'No Content', status_code: 204, message: 'No products found' })
+      );
+    });
   });
 
   describe('Update product', () => {
@@ -99,6 +173,38 @@ describe('ProductsService', () => {
 
       expect(result.message).toEqual('Product successfully deleted');
       expect(deletedProductMock.is_deleted).toBe(true);
+    });
+  });
+
+  describe('getProductStock', () => {
+    it('should return product stock details if the product is found', async () => {
+      const productId = '123';
+      const productMock = {
+        id: productId,
+        quantity: 20,
+        updated_at: new Date(),
+      };
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(productMock as any);
+
+      const result = await service.getProductStock(productId);
+
+      expect(result).toEqual({
+        message: 'Product stock retrieved successfully',
+        data: {
+          product_id: productMock.id,
+          current_stock: productMock.quantity,
+          last_updated: productMock.updated_at,
+        },
+      });
+    });
+
+    it('should throw NotFoundException if the product is not found', async () => {
+      const productId = 'nonexistent';
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.getProductStock(productId)).rejects.toThrow(new NotFoundException('Product not found'));
     });
   });
 });
