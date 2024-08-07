@@ -20,6 +20,8 @@ import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { SearchMemberQueryDto } from './dto/search-member.dto';
+import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class OrganisationsService {
@@ -180,5 +182,33 @@ export class OrganisationsService {
       message: 'User(s) found successfully',
       data: { members: searchedResultResponseFormat },
     };
+  }
+
+  async removeOrganisationMember(removeOrganisationMemberDto: RemoveOrganisationMemberDto) {
+    const { organisationId, userId } = removeOrganisationMemberDto;
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new CustomHttpException('No user found with the provided id', 404);
+    }
+
+    const org = await this.organisationRepository.findOne({ where: { id: organisationId } });
+    if (!org) {
+      throw new CustomHttpException('No organisation found with the provided id', 404);
+    }
+
+    const orgMember = await this.organisationMemberRepository.findOne({
+      where: {
+        organisation_id: { id: organisationId },
+        user_id: { id: userId },
+      },
+    });
+    if (!orgMember) {
+      throw new CustomHttpException('No organisation member found with provided ids', 404);
+    }
+
+    await this.organisationMemberRepository.softDelete(orgMember.id);
+
+    return { message: 'Member removed from organisation successfully' };
   }
 }
