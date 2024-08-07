@@ -7,6 +7,7 @@ import { User } from '../user/entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { isUUID } from 'class-validator';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { INVALID_CREDENTIALS, OK, REQUEST_SUCCESSFUL, USER_NOT_FOUND } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class ProfileService {
@@ -17,12 +18,12 @@ export class ProfileService {
 
   async findOneProfile(userId: string) {
     if (!isUUID(userId, '4')) {
-      throw new CustomHttpException('Invalid user ID', 400);
+      throw new CustomHttpException(INVALID_CREDENTIALS, 400);
     }
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new CustomHttpException('User not found', 404);
+      throw new CustomHttpException(USER_NOT_FOUND, 404);
     }
 
     const userProfile = await this.userRepository.findOne({
@@ -32,11 +33,11 @@ export class ProfileService {
 
     const profile = userProfile.profile;
     if (!profile) {
-      throw new CustomHttpException('Profile not found', 404);
+      throw new CustomHttpException(USER_NOT_FOUND, 404);
     }
 
     const responseData = {
-      message: 'Successfully fetched profile',
+      message: REQUEST_SUCCESSFUL,
       data: profile,
     };
 
@@ -46,12 +47,12 @@ export class ProfileService {
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
     if (!user) {
-      throw new CustomHttpException('User not found', 404);
+      throw new CustomHttpException(USER_NOT_FOUND, 404);
     }
 
     const profile = user.profile;
     if (!profile) {
-      throw new CustomHttpException('Profile not found', 404);
+      throw new CustomHttpException(USER_NOT_FOUND, 404);
     }
 
     await this.profileRepository.update(profile.id, updateProfileDto);
@@ -59,7 +60,7 @@ export class ProfileService {
     const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
 
     const responseData = {
-      message: 'Profile successfully updated',
+      message: OK,
       data: updatedProfile,
     };
 
@@ -69,7 +70,7 @@ export class ProfileService {
     const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
 
     if (!user || !user.profile) {
-      throw new CustomHttpException('User profile not found', 404);
+      throw new CustomHttpException(USER_NOT_FOUND, 404);
     }
 
     const userProfile = await this.profileRepository.findOne({
@@ -77,13 +78,13 @@ export class ProfileService {
     });
 
     if (!userProfile) {
-      throw new CustomHttpException('Profile not found', 404);
+      throw new CustomHttpException(USER_NOT_FOUND, 404);
     }
 
     await this.profileRepository.softDelete(userProfile.id);
 
     const responseData = {
-      message: 'Profile successfully deleted',
+      message: REQUEST_SUCCESSFUL,
     };
 
     return responseData;

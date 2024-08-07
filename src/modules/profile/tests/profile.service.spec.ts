@@ -42,7 +42,7 @@ describe('ProfileService', () => {
 
       const result = await service.findOneProfile(userId);
       expect(result).toEqual({
-        message: 'Successfully fetched profile',
+        message: 'Request completed successfully',
         data: user.profile,
       });
     });
@@ -70,7 +70,7 @@ describe('ProfileService', () => {
       const result = await service.updateProfile(userId, updateProfileDto);
 
       expect(result).toEqual({
-        message: 'Profile successfully updated',
+        message: 'Success',
         data: updatedProfile,
       });
     });
@@ -146,7 +146,7 @@ describe('ProfileService', () => {
 
       const result = await service.deleteUserProfile('existingUserId');
 
-      expect(result).toEqual({ message: 'Profile successfully deleted' });
+      expect(result).toEqual({ message: 'Request completed successfully' });
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'existingUserId' }, relations: ['profile'] });
       expect(profileRepository.findOne).toHaveBeenCalledWith({ where: { id: 'profileId' } });
       expect(profileRepository.softDelete).toHaveBeenCalledWith('profileId');
