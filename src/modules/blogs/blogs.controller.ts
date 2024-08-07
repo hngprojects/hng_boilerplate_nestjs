@@ -33,7 +33,7 @@ export class BlogController {
     @Request() req
   ): Promise<UpdateBlogResponseDto> {
     const updatedBlog = await this.blogService.updateBlog(id, updateBlogDto, req.user);
-    
+
     return {
       message: 'Blog post updated successfully',
       post: updatedBlog,

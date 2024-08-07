@@ -26,7 +26,6 @@ env:
   REDIS_HOST: 'localhost'
   REDIS_PORT: 6379
 
-
 jobs:
   test-and-build-dev:
     runs-on: ubuntu-latest
