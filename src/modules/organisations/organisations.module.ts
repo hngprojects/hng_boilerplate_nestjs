@@ -10,6 +10,8 @@ import { OrganisationRole } from '../organisation-role/entities/organisation-rol
 import { DefaultRole } from '../organisation-role/entities/role.entity';
 import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
 import { Permissions } from '../organisation-permissions/entities/permissions.entity';
+import UserService from '../user/user.service';
+import { InviteModule } from '../invite/invite.module';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { Permissions } from '../organisation-permissions/entities/permissions.en
       Permissions,
     ]),
     UserModule,
+    InviteModule,
   ],
   controllers: [OrganisationsController],
   providers: [OrganisationsService],
