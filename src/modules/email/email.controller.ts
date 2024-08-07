@@ -1,8 +1,8 @@
-import { Controller, Post, Get, Body, Res } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, Patch, Param } from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
 import { skipAuth } from '../../helpers/skipAuth';
-import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
+import { SendEmailDto, UpdateTemplateDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { skip } from 'node:test';
 
 @Controller('email')
@@ -12,6 +12,16 @@ export class EmailController {
   @Post('store-template')
   async storeTemplate(@Body() body: createTemplateDto, @Res() res: Response): Promise<any> {
     const response = await this.emailService.createTemplate(body);
+    res.status(response.status_code).send(response);
+  }
+
+  @Patch('update-template/:templateName')
+  async updateTemplate(
+    @Param('templateName') name: string,
+    @Body() body: UpdateTemplateDto,
+    @Res() res: Response
+  ): Promise<any> {
+    const response = await this.emailService.updateTemplate(name, body);
     res.status(response.status_code).send(response);
   }
 

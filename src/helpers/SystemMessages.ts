@@ -39,3 +39,8 @@ export const NOT_ORG_OWNER = 'You do not have permission to update this organisa
 export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
 export const DEADLINE_PASSED = 'Job application deadline passed';
+export const EMAIL_TEMPLATES = {
+  TEMPLATE_UPDATED_SUCCESSFULLY: 'Template updated successfully',
+  INVALID_HTML_FORMAT: 'Invalid HTML format',
+  TEMPLATE_NOT_FOUND: 'Template not found',
+};

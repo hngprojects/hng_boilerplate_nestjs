@@ -25,6 +25,12 @@ export class createTemplateDto {
   template: string;
 }
 
+export class UpdateTemplateDto {
+  @IsString()
+  @IsNotEmpty()
+  template: string;
+}
+
 export class getTemplateDto {
   @IsString()
   templateName: string;
