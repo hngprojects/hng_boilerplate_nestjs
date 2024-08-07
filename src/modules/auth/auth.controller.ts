@@ -54,6 +54,7 @@ export default class RegistrationController {
   @skipAuth()
   @HttpCode(200)
   @Post('forgot-password')
+  @ApiBody({ type: ForgotPasswordDto })
   @ApiOperation({ summary: 'Generate forgot password reset token' })
   @ApiResponse({
     status: 200,
