@@ -18,6 +18,7 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
+import { pick } from '../../helpers/pick';
 
 @Injectable()
 export default class UserService {
@@ -235,8 +236,10 @@ export default class UserService {
   }
 
   async updateUserStatus(userId: string, status: string) {
-    const user = await this.getUserById(userId);
-
+    const keepColumns = ['id', 'created_at', 'updated_at', 'first_name', 'last_name', 'email', 'status'];
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
     if (!user) {
       throw new NotFoundException({
         error: 'Not Found',
@@ -244,18 +247,13 @@ export default class UserService {
         status_code: HttpStatus.NOT_FOUND,
       });
     }
-
-    await this.userRepository.update(userId, { status });
-
-    const updatedUser = await this.userRepository.findOne({
-      where: { id: userId },
-      select: ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'updated_at'],
-    });
+    const updatedUser = Object.assign(user, { status });
+    const result = await this.userRepository.save(updatedUser);
 
     return {
       status: 'success',
       status_code: HttpStatus.OK,
-      data: updatedUser,
+      data: pick(result, keepColumns),
     };
   }
 }
