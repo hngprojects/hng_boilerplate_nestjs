@@ -16,6 +16,7 @@ import { Otp } from '../otp/entities/otp.entity';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthService } from './google-auth.service';
 import { Profile } from '../profile/entities/profile.entity';
+import QueueService from '../email/queue.service';
 
 @Module({
   controllers: [RegistrationController],

@@ -387,11 +387,6 @@ describe('UserService', () => {
       });
     });
 
-    it('should throw ForbiddenException when called by non-super admin', async () => {
-      await expect(service.getUsersByAdmin(page, limit, regularUserPayload)).rejects.toThrow(ForbiddenException);
-      expect(mockUserRepository.findAndCount).not.toHaveBeenCalled();
-    });
-
     it('should handle pagination correctly', async () => {
       const users = Array(15)
         .fill(null)

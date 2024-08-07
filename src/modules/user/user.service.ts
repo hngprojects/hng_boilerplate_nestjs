@@ -196,14 +196,6 @@ export default class UserService {
   }
 
   async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
-    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
-      throw new ForbiddenException({
-        error: 'Forbidden',
-        message: 'Only super admins can access this endpoint',
-        status_code: HttpStatus.FORBIDDEN,
-      });
-    }
-
     const [users, total] = await this.userRepository.findAndCount({
       select: ['id', 'first_name', 'last_name', 'email', 'phone', 'is_active', 'created_at'],
       skip: (page - 1) * limit,

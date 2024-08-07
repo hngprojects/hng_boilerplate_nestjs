@@ -71,6 +71,7 @@ export class UserController {
     return this.userService.getUserDataWithoutPasswordById(id);
   }
 
+  @UseGuards(SuperAdminGuard)
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users (Super Admin only)' })
