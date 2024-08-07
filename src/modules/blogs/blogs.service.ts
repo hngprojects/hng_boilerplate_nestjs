@@ -7,6 +7,7 @@ import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { BlogResponseDto } from './dtos/blog-response.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 
 @Injectable()
 export class BlogService {
