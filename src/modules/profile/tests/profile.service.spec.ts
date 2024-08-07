@@ -124,7 +124,8 @@ describe('ProfileService', () => {
       await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow(InternalServerErrorException);
     });
   });
-
+  
+  
   describe('deactivateProfile', () => {
     it('should deactivate and return the profile successfully', async () => {
       const userId = 'some-uuid';
@@ -202,7 +203,49 @@ describe('ProfileService', () => {
 
       await expect(service.deactivateProfile(userId, deactivateProfileDto)).rejects.toThrow(
         InternalServerErrorException
-      );
+     
+  describe('deleteProfile', () => {
+    it('should throw NotFoundException if user is not found', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.deleteUserProfile('nonexistentUserId')).rejects.toThrow(NotFoundException);
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'nonexistentUserId' },
+        relations: ['profile'],
+      });
+    });
+
+    it('should throw NotFoundException if user profile is not found', async () => {
+      const user = { id: 'existingUserId', profile: null } as any;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+
+      await expect(service.deleteUserProfile('existingUserId')).rejects.toThrow(NotFoundException);
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'existingUserId' }, relations: ['profile'] });
+    });
+
+    it('should throw NotFoundException if profile is not found in profileRepository', async () => {
+      const user = { id: 'existingUserId', profile: { id: 'profileId' } } as any;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.deleteUserProfile('existingUserId')).rejects.toThrow(NotFoundException);
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'existingUserId' }, relations: ['profile'] });
+      expect(profileRepository.findOne).toHaveBeenCalledWith({ where: { id: 'profileId' } });
+    });
+
+    it('should delete the profile successfully', async () => {
+      const user = { id: 'existingUserId', profile: { id: 'profileId' } } as any;
+      const profile = { id: 'profileId' } as any;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'findOne').mockResolvedValue(profile);
+      jest.spyOn(profileRepository, 'softDelete').mockResolvedValue(undefined);
+
+      const result = await service.deleteUserProfile('existingUserId');
+
+      expect(result).toEqual({ message: 'Profile successfully deleted' });
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'existingUserId' }, relations: ['profile'] });
+      expect(profileRepository.findOne).toHaveBeenCalledWith({ where: { id: 'profileId' } });
+      expect(profileRepository.softDelete).toHaveBeenCalledWith('profileId')
     });
   });
 });

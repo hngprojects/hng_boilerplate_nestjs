@@ -19,6 +19,7 @@ import { Request, Response } from 'express';
 @ApiBearerAuth()
 @ApiTags('Profile')
 @Controller('profile')
+@UseInterceptors(ResponseInterceptor)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
@@ -42,8 +43,7 @@ export class ProfileController {
   async updateProfile(@Param('userId') userId: string, @Body() body: UpdateProfileDto) {
     const updatedProfile = await this.profileService.updateProfile(userId, body);
     return updatedProfile;
-  }
-
+ 
   @ApiOperation({ summary: 'Deactivate User Profile' })
   @ApiResponse({
     status: 200,
@@ -71,5 +71,13 @@ export class ProfileController {
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Something went wrong' });
       }
     }
+  @ApiOperation({ summary: 'Delete User Profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'The deleted record',
+  })
+  @Delete(':userId')
+  async deleteUserProfile(@Param('userId') userId: string) {
+    return await this.profileService.deleteUserProfile(userId);
   }
 }
