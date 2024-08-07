@@ -336,7 +336,7 @@ describe('OrganisationsService', () => {
       const organisation = new Organisation();
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
-      jest.spyOn(organisationMemberRepository, 'findOneBy').mockResolvedValue(orgMemberMock);
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(orgMemberMock);
 
       await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(ConflictException);
     });

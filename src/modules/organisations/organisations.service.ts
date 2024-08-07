@@ -24,6 +24,8 @@ import { DefaultRole } from '../organisation-role/entities/role.entity';
 import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
 import { RoleCategory } from '../organisation-role/helpers/RoleCategory';
 import { Permissions } from '../organisation-permissions/entities/permissions.entity';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationsService {
@@ -169,7 +171,7 @@ export class OrganisationsService {
   async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
     const organisation = await this.organisationRepository.findOneBy({ id: org_id });
     if (!organisation) {
-      throw new NotFoundException('Organisation not found');
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const user = await this.userRepository.findOne({
@@ -178,16 +180,15 @@ export class OrganisationsService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const existingMember = await this.organisationMemberRepository.findOneBy({
-      user_id: { id: addMemberDto.user_id },
-      organisation_id: { id: organisation.id },
+    const existingMember = await this.organisationMemberRepository.findOne({
+      where: { user_id: { id: user.id }, organisation_id: { id: organisation.id } },
     });
 
     if (existingMember) {
-      throw new ConflictException('User already added to organization');
+      throw new CustomHttpException(SYS_MSG.MEMBER_ALREADY_EXISTS, HttpStatus.CONFLICT);
     }
 
     const getDefaultRole = await this.roleRepository.findOne({
@@ -198,9 +199,10 @@ export class OrganisationsService {
       user_id: user,
       role: getDefaultRole,
       profile_id: user.profile,
+      organisation_id: organisation,
     });
 
     await this.organisationMemberRepository.save(newMember);
-    return { status: 'success', message: 'Member added successfully', member: newMember };
+    return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_EXISTS, member: newMember };
   }
 }
