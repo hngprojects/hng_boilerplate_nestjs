@@ -24,7 +24,7 @@ export class FlutterwaveService {
     this.baseUrl = configService.get<string>('FLUTTERWAVE_BASE_URL');
   }
 
-  async initiatePayment(createFlutterwavePaymentDto: CreateFlutterwavePaymentDto): Promise<any> {
+  async initiatePayment(createFlutterwavePaymentDto: CreateFlutterwavePaymentDto, userId: string) {
     const headers = {
       Authorization: `Bearer ${this.secretkey}`,
       'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export class FlutterwaveService {
     };
     const response = await this.httpService.post(`${this.baseUrl}/payments`, paymentData, { headers }).toPromise();
     const createPaymentDto: CreatePaymentDto = {
-      user_id: '',
+      user_id: userId,
       transaction_id: uuid4(),
       gateway_id: '',
       amount: paymentData.amount,

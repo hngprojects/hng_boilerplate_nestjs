@@ -88,8 +88,8 @@ describe('FlutterwaveService', () => {
       organisation_id: 'org-id',
       billing_option: 'monthly',
     };
-
-    const result = await service.initiatePayment(createFlutterwavePaymentDto);
+    const userId = 'jjsjshshs';
+    const result = await service.initiatePayment(createFlutterwavePaymentDto, userId);
 
     expect(result).toEqual({
       status: 200,
