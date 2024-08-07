@@ -32,6 +32,7 @@ import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { UpdateUserPasswordResponseDTO } from './dto/update-user-password.dto';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -116,7 +117,7 @@ export default class RegistrationController {
   })
   @ApiOperation({ summary: 'Request Verification Token' })
   @ApiResponse({ status: 200, description: 'Verification Token sent to mail', type: GenericAuthResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 400, description: 'Bad request', type: CustomHttpException })
   @HttpCode(200)
   @Post('request/token')
   async requestVerificationToken(@Body() body: { email: string }) {
