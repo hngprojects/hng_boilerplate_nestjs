@@ -1,7 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEnum, IsBoolean, IsNotEmpty, IsOptional, IsDateString } from 'class-validator';
 
-// Enum definitions for clarity
 export enum SalaryRange {
   'below_30k' = 'below_30k',
   '30k_to_50k' = '30k_to_50k',

@@ -122,6 +122,8 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
         redis: {
           host: authConfig().redis.host,
           port: +authConfig().redis.port,
+          password: authConfig().redis.password,
+          username: authConfig().redis.username,
         },
       }),
     }),
