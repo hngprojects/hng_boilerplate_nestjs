@@ -1,4 +1,12 @@
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get, Patch } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -18,7 +26,13 @@ import {
   SuccessCreateUserResponse,
 } from '../user/dto/user-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { GoogleAuthPayloadDto } from './dto/google-auth.dto';
+import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
+import { UpdateUserPasswordResponseDTO } from './dto/update-user-password.dto';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -28,41 +42,29 @@ export default class RegistrationController {
   @skipAuth()
   @ApiOperation({ summary: 'User Registration' })
   @ApiResponse({ status: 201, description: 'Register a new user', type: SuccessCreateUserResponse })
-  @ApiResponse({ status: 400, description: 'Bad request', type: ErrorCreateUserResponse })
+  @ApiResponse({ status: 400, description: 'User already exists', type: ErrorCreateUserResponse })
   @Post('register')
   @HttpCode(201)
   public async register(@Body() body: CreateUserDTO): Promise<any> {
     return this.authService.createNewUser(body);
   }
 
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Verify two factor authentication code' })
-  @ApiBody({
-    description: 'Enable two factor authentication',
-    type: Verify2FADto,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: SYS_MSG.TWO_FACTOR_VERIFIED_SUCCESSFULLY,
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: SYS_MSG.INCORRECT_TOTP_CODE,
-  })
   @Post('2fa/verify')
   verify2fa(@Body() verify2faDto: Verify2FADto, @Req() req) {
     return this.authService.verify2fa(verify2faDto, req.user.sub);
   }
 
+  @skipAuth()
+  @HttpCode(200)
+  @Post('forgot-password')
+  @ApiBody({ type: ForgotPasswordDto })
   @ApiOperation({ summary: 'Generate forgot password reset token' })
   @ApiResponse({
     status: 200,
     description: 'The forgot password reset token generated successfully',
     type: ForgotPasswordResponseDto,
   })
-  @skipAuth()
-  @HttpCode(200)
-  @Post('forgot-password')
+  @ApiBadRequestResponse({ description: SYS_MSG.USER_ACCOUNT_DOES_NOT_EXIST })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<any> {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
@@ -70,17 +72,19 @@ export default class RegistrationController {
   @skipAuth()
   @Post('login')
   @ApiOperation({ summary: 'Login a user' })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials', type: LoginErrorResponseDto })
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     return this.authService.loginUser(loginDto);
   }
 
   @skipAuth()
-  @ApiOperation({ summary: 'Email verification' })
-  @ApiResponse({ status: 200, description: 'Verify token sent to the user mail', type: OtpDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiOperation({ summary: 'Verify magic link otp' })
+  @ApiBody({ type: AuthResponseDto })
+  @ApiResponse({ status: 200, description: 'successfully verifies otp and logs in user' })
+  @ApiResponse({ status: 401, description: SYS_MSG.UNAUTHORISED_TOKEN })
   @HttpCode(200)
   @Post('verify-otp')
   public async verifyEmail(@Body() body: OtpDto): Promise<any> {
@@ -88,13 +92,6 @@ export default class RegistrationController {
   }
 
   @Post('2fa/enable')
-  @ApiBody({
-    description: 'Enable two factor authentication',
-    type: Enable2FADto,
-  })
-  @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: SYS_MSG.TWO_FA_INITIATED })
-  @ApiResponse({ status: 400, description: SYS_MSG.BAD_REQUEST })
   @HttpCode(200)
   public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
     const { password } = body;
@@ -103,10 +100,11 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @ApiOperation({ summary: 'Google Authentication' })
-  @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: OtpDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
   @Post('google')
+  @ApiOperation({ summary: 'Google Authentication' })
+  @ApiBody({ type: GoogleAuthPayloadDto })
+  @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: AuthResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid Google token' })
   @HttpCode(200)
   async googleAuth(@Body() body: GoogleAuthPayload) {
     return this.authService.googleAuth(body);
@@ -118,8 +116,8 @@ export default class RegistrationController {
     type: RequestVerificationToken,
   })
   @ApiOperation({ summary: 'Request Verification Token' })
-  @ApiResponse({ status: 200, description: 'Verification Token sent to mail' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 200, description: 'Verification Token sent to mail', type: GenericAuthResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request', type: CustomHttpException })
   @HttpCode(200)
   @Post('request/token')
   async requestVerificationToken(@Body() body: { email: string }) {
@@ -131,13 +129,15 @@ export default class RegistrationController {
   @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })
-  @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: RequestSigninTokenDto })
+  @ApiBody({ type: RequestSigninTokenDto })
+  @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: GenericAuthResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signInToken(@Body() body: RequestSigninTokenDto) {
     return await this.authService.requestSignInToken(body);
   }
 
   @ApiBearerAuth()
+  @ApiBody({ type: ChangePasswordDto })
   @ApiOperation({ summary: 'Change user password' })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -154,6 +154,7 @@ export default class RegistrationController {
   @Post('magic-link/verify')
   @HttpCode(200)
   @ApiOperation({ summary: 'Verify Signin Token' })
+  @ApiBody({ type: OtpDto })
   @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public async verifySignInToken(@Body() body: OtpDto) {
@@ -163,7 +164,8 @@ export default class RegistrationController {
   @skipAuth()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Verify Otp and change user password' })
-  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiBody({ type: UpdatePasswordDto })
+  @ApiResponse({ status: 200, description: 'Password changed successfully', type: UpdateUserPasswordResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Patch('password-reset')
