@@ -230,7 +230,7 @@ export class ProductsService {
     };
 
     return {
-      message: SYS_MSG.COMMENT_CREATED,
+      message: systemMessages.COMMENT_CREATED,
       data: responsePayload,
     };
   }
