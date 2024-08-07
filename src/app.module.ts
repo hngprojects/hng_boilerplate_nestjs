@@ -33,6 +33,7 @@ import { OtpModule } from './modules/otp/otp.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
