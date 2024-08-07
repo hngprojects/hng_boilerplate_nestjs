@@ -135,6 +135,7 @@ export default class RegistrationController {
   }
 
   @ApiBearerAuth()
+  @ApiBody({ type: ChangePasswordDto })
   @ApiOperation({ summary: 'Change user password' })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -161,6 +162,7 @@ export default class RegistrationController {
   @skipAuth()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Verify Otp and change user password' })
+  @ApiBody({ type: UpdatePasswordDto })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
