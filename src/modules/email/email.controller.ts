@@ -4,7 +4,10 @@ import { EmailService } from './email.service';
 import { skipAuth } from '../../helpers/skipAuth';
 import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { skip } from 'node:test';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Emails')
+@ApiBearerAuth()
 @Controller('email')
 export class EmailController {
   constructor(private emailService: EmailService) {}
