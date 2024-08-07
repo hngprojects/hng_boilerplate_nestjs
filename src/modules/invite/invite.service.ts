@@ -11,6 +11,7 @@ import { Organisation } from '../../modules/organisations/entities/organisations
 import { Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class InviteService {
@@ -74,60 +75,62 @@ export class InviteService {
   }
 
   async refreshInvite(orgId: string, inviteId) {
-    try {
-      const organisation = await this.organisationRepository.findOne({ where: { id: orgId } });
+    const organisation = await this.organisationRepository.findOne({ where: { id: orgId } });
 
-      if (!organisation) {
-        throw new NotFoundException({
+    if (!organisation) {
+      throw new CustomHttpException(
+        {
           status_code: 404,
           error: 'Not Found',
           message: `The organization with ID ${orgId} does not exist`,
-        });
-      }
-
-      const invitation = await this.inviteRepository.findOne({
-        where: {
-          id: inviteId,
-          organisation: organisation,
         },
-      });
+        HttpStatus.NOT_FOUND
+      );
+    }
 
-      if (!invitation) {
-        throw new NotFoundException({
+    const invitation = await this.inviteRepository.findOne({
+      where: {
+        id: inviteId,
+        organisation: organisation,
+      },
+    });
+
+    if (!invitation) {
+      throw new CustomHttpException(
+        {
           status_code: 404,
           error: 'Not Found',
           message: `The invitation with ID ${inviteId} does not exist in this organization`,
-        });
-      }
+        },
+        HttpStatus.NOT_FOUND
+      );
+    }
 
-      if (invitation.isAccepted) {
-        throw new ForbiddenException({
+    if (invitation.isAccepted) {
+      throw new CustomHttpException(
+        {
           status_code: 403,
           message: `The invitation cannot be refreshed because it has been accepted`,
-        });
-      }
-
-      const newToken = uuidv4();
-
-      const updatedInvitation = this.inviteRepository.save({
-        ...invitation,
-        token: newToken,
-      });
-      const link = `${process.env.FRONTEND_URL}/invite?token=${newToken}`;
-
-      return {
-        status_code: 200,
-        data: {
-          ...updatedInvitation,
-          link,
         },
-        message: 'Invitation link refreshed successfully',
-      };
-    } catch (err) {
-      throw new InternalServerErrorException({
-        message: `Something went wrong: ${err.message}`,
-        status_code: 500,
-      });
+        HttpStatus.FORBIDDEN
+      );
     }
+
+    const newToken = uuidv4();
+
+    const updatedInvitation = this.inviteRepository.save({
+      ...invitation,
+      token: newToken,
+    });
+    const link = `${process.env.FRONTEND_URL}/invite?token=${newToken}`;
+
+    return {
+      status_code: 200,
+      data: {
+        ...updatedInvitation,
+        link,
+      },
+      message: 'Invitation link refreshed successfully',
+    };
   }
 }
