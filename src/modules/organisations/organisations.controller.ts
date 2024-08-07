@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -24,6 +25,7 @@ import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { MembershipGuard } from '../../guards/member.guard';
 import { SearchMemberResponseDto } from './dto/search-member-response.dto';
 import { SearchMemberBodyDto } from './dto/search-member-body.dto';
+import { AddMemberDto } from './dto/add-member.dto';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -116,5 +118,24 @@ export class OrganisationsController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async removeOrganisationMember(@Param() params: RemoveOrganisationMemberDto) {
     return this.organisationsService.removeOrganisationMember(params);
+  }
+
+  @UseGuards(OwnershipGuard)
+  @ApiOperation({ summary: 'Add member to an organization' })
+  @ApiResponse({
+    status: 201,
+    description: 'Member added successfully',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User already added to organization.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @Post(':org_id/users')
+  async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
+    return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
   }
 }
