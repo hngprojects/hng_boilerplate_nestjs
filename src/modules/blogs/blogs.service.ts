@@ -56,10 +56,7 @@ export class BlogService {
     const blog = await this.blogRepository.findOne({ where: { id } });
 
     if (!blog) {
-      CustomExceptionHandler({
-        response: 'Blog with this Id does not exist',
-        status: 404,
-      });
+     throw new CustomHttpException('Blog post not found.', HttpStatus.NOT_FOUND);
     } else await this.blogRepository.remove(blog);
   }
 
