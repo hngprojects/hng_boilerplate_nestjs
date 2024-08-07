@@ -9,12 +9,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { Testimonial } from './entities/testimonials.entity';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import UserService from '../user/user.service';
+import { TestimonialMapper } from './mappers/testimonial.mapper';
 
 @Injectable()
 export class TestimonialsService {
   constructor(
     @InjectRepository(Testimonial)
-    private readonly testimonialRepository: Repository<Testimonial>
+    private readonly testimonialRepository: Repository<Testimonial>,
+    private userService: UserService
   ) {}
   async createTestimonial(createTestimonialDto: CreateTestimonialDto, user) {
     try {
@@ -48,5 +53,45 @@ export class TestimonialsService {
         });
       }
     }
+  }
+
+  async getAllTestimonials(userId: string, page: number, pageSize: number) {
+    const user = await this.userService.getUserRecord({
+      identifier: userId,
+      identifierType: 'id',
+    });
+
+    if (!user) throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+    if (!page) page = 1;
+    if (!pageSize) pageSize = 3;
+
+    let testimonials = await this.testimonialRepository.find({
+      relations: ['user'],
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+
+    if (!testimonials.length) throw new CustomHttpException(SYS_MSG.NO_USER_TESTIMONIALS, HttpStatus.BAD_REQUEST);
+
+    testimonials = testimonials.slice((page - 1) * pageSize, page * pageSize);
+
+    const data = testimonials.map(testimonial => TestimonialMapper.mapToEntity(testimonial));
+
+    return {
+      message: SYS_MSG.USER_TESTIMONIALS_FETCHED,
+      data: {
+        user_id: userId,
+        testimonials: data,
+      },
+      pagination: {
+        page: page,
+        page_size: pageSize,
+        total_pages: Math.ceil(testimonials.length / pageSize),
+      },
+    };
   }
 }
