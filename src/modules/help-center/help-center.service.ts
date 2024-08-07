@@ -1,11 +1,11 @@
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { HelpCenterEntity } from '../help-center/entities/help-center.entity'; // Adjust the path as necessary
+import { HelpCenterEntity } from '../help-center/entities/help-center.entity';
 import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
-import { REQUEST_SUCCESSFUL } from '../../helpers/SystemMessages';
+import { REQUEST_SUCCESSFUL, QUESTION_ALREADY_EXISTS, USER_NOT_FOUND } from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { User } from '../user/entities/user.entity';
 
@@ -24,7 +24,7 @@ export class HelpCenterService {
     });
 
     if (existingTopic) {
-      throw new CustomHttpException('This question already exists.', HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(QUESTION_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
     }
 
     const fullUser = await this.userRepository.findOne({
@@ -33,7 +33,7 @@ export class HelpCenterService {
     });
 
     if (!fullUser) {
-      throw new CustomHttpException('User not found.', HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const helpCenter = this.helpCenterRepository.create({
