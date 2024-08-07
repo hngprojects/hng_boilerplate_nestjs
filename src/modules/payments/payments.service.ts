@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
@@ -64,12 +64,6 @@ export class PaymentsService {
       expiresAt = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
     }
 
-    const planCreationResponse = await this.createPaystackPlan({
-      name: billingPlan.name,
-      interval: createSubscriptionDto.billing_option,
-      amount: amount * 100,
-    });
-
     const subscriptionData = {
       billing_option: createSubscriptionDto.billing_option,
       plan_id: billingPlan.id,
@@ -77,6 +71,7 @@ export class PaymentsService {
       status: 'inactive',
       expiresAt,
       organisation_id: createSubscriptionDto.organization_id,
+      user_id: user.id,
     };
 
     const subscription = this.subscriptionRepository.create(Object.assign(new Subscription(), { ...subscriptionData }));
@@ -85,7 +80,6 @@ export class PaymentsService {
     const subscriptionResponse = await this.subscribeWithPaystack({
       email: user.email,
       amount: amount * 100,
-      plan: planCreationResponse?.data?.data?.plan_code,
       callback_url: `${process.env.SERVER_BASE_URL}/api/v1/payments/paystack/verify?subscriptionId=${subscription.id}&redirect_url=${createSubscriptionDto.redirect_url}`,
     });
 
@@ -97,19 +91,6 @@ export class PaymentsService {
         payment_url: subscriptionResponse.data?.data?.authorization_url,
       },
     };
-  }
-
-  private async createPaystackPlan(planDetails: any) {
-    const url = `${this.paystackBaseUrl}/plan`;
-
-    const response = await axios.post(url, planDetails, {
-      headers: {
-        Authorization: `Bearer ${this.paystackSecretKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return response;
   }
 
   private async subscribeWithPaystack(paymentDetails: any) {
@@ -125,7 +106,7 @@ export class PaymentsService {
 
       return response;
     } catch (error) {
-      throw new Error(error.response.data.message || 'An error occurred while initiating the payment');
+      throw new UnauthorizedException(error.response.data.message || 'An error occurred while initiating the payment');
     }
   }
 
@@ -137,23 +118,27 @@ export class PaymentsService {
           Authorization: `Bearer ${this.paystackSecretKey}`,
         },
       });
+      const subscription = await this.subscriptionRepository.findOne({
+        where: { id: subscriptionId },
+      });
+
+      subscription.transaction_ref = transactionReference;
 
       if (response?.data?.data?.status === 'success') {
-        const subscription = await this.subscriptionRepository.findOne({
-          where: { id: subscriptionId },
-        });
         subscription.status = 'active';
-        subscription.transactionRef = transactionReference;
         await this.subscriptionRepository.save(subscription);
 
         return {
           message: 'Payment successful',
-          data: response.data.data,
+          data: response?.data?.data,
         };
       } else {
+        await this.subscriptionRepository.save(subscription);
         return { message: 'Payment failed', data: { status: 'failed' } };
       }
     } catch (error) {
+      console.log({ error });
+
       return { message: 'Payment failed', data: { status: 'failed' } };
     }
   }

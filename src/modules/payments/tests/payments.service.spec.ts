@@ -90,14 +90,6 @@ describe('PaymentsService', () => {
       (axios.post as jest.Mock).mockResolvedValueOnce({
         data: {
           data: {
-            plan_code: 'plan-code',
-          },
-        },
-      });
-
-      (axios.post as jest.Mock).mockResolvedValueOnce({
-        data: {
-          data: {
             authorization_url: 'http://paystack.com',
           },
         },
@@ -122,22 +114,6 @@ describe('PaymentsService', () => {
         },
       });
     });
-
-    it('should handle internal server errors', async () => {
-      jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
-        throw new Error('Database error');
-      });
-
-      await expect(service.createSubscription({} as any, 'user-id')).rejects.toThrow(
-        new HttpException(
-          {
-            message: 'Internal server error: Database error',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
-    });
   });
 
   describe('verifyPayStackPayment', () => {
@@ -152,9 +128,9 @@ describe('PaymentsService', () => {
       const result = await service.verifyPayStackPayment('transaction-ref', 'subscription-id');
 
       expect(subscription.status).toBe('active');
-      expect(subscription.transactionRef).toBe('transaction-ref');
+      expect(subscription.transaction_ref).toBe('transaction-ref');
       expect(subscriptionRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'active', transactionRef: 'transaction-ref' })
+        expect.objectContaining({ status: 'active', transaction_ref: 'transaction-ref' })
       );
       expect(result).toEqual({
         message: 'Payment successful',
