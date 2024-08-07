@@ -17,6 +17,8 @@ describe('BlogService', () => {
   const mockBlogRepository = () => ({
     create: jest.fn(),
     save: jest.fn(),
+    findOne: jest.fn(),
+    remove: jest.fn(),
   });
 
   beforeEach(async () => {
@@ -101,6 +103,26 @@ describe('BlogService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.createBlog(createBlogDto, user)).rejects.toThrowError('User not found');
+    });
+  });
+  describe('deleteBlogPost', () => {
+    it('should successfully delete a blog post', async () => {
+      const blog = new Blog();
+      blog.id = 'blog-id';
+
+      jest.spyOn(blogRepository, 'findOne').mockResolvedValue(blog);
+      jest.spyOn(blogRepository, 'remove').mockResolvedValue(undefined);
+
+      await service.deleteBlogPost('blog-id');
+
+      expect(blogRepository.findOne).toHaveBeenCalledWith({ where: { id: 'blog-id' } });
+      expect(blogRepository.remove).toHaveBeenCalledWith(blog);
+    });
+
+    it('should throw a 404 error if blog not found', async () => {
+      jest.spyOn(blogRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.deleteBlogPost('blog-id')).rejects.toThrow('Blog with this Id does not exist');
     });
   });
 });

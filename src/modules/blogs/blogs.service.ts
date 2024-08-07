@@ -46,4 +46,14 @@ export class BlogService {
       created_at: savedBlog.created_at,
     };
   }
+  async deleteBlogPost(id: string): Promise<void> {
+    const blog = await this.blogRepository.findOne({ where: { id } });
+
+    if (!blog) {
+      CustomExceptionHandler({
+        response: 'Blog with this Id does not exist',
+        status: 404,
+      });
+    } else await this.blogRepository.remove(blog);
+  }
 }

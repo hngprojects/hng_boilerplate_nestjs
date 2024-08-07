@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Delete, Param, HttpCode, HttpStatus } from '@nestjs/common';
 import { BlogService } from './blogs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { CreateBlogDto } from './dtos/create-blog.dto';
@@ -17,5 +17,20 @@ export class BlogController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<any> {
     return await this.blogService.createBlog(createBlogDto, req.user);
+  }
+  @Delete(':id')
+  @UseGuards(SuperAdminGuard)
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({ summary: 'Delete a blog post' })
+  @ApiResponse({ status: 202, description: 'Blog successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Blog with the given Id does not exist.' })
+  @ApiResponse({ status: 403, description: 'You are not authorized to perform this action.' })
+  @ApiResponse({ status: 500, description: 'Internal server error.' })
+  async deleteBlog(@Param('id') id: string): Promise<any> {
+    await this.blogService.deleteBlogPost(id);
+    return {
+      message: 'Blog successfully deleted',
+      status_code: HttpStatus.ACCEPTED,
+    };
   }
 }
