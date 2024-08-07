@@ -51,7 +51,7 @@ export class BlogService {
     };
   }
 
-  async findAll(page = 1, page_size = 10) {
+  async getAllBlogs(page = 1, page_size = 10) {
     if (!Number.isInteger(page) || page < 1) {
       throw new BadRequestException('Page number must be a positive integer');
     }

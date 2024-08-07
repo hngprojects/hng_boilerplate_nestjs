@@ -47,7 +47,7 @@ export class BlogController {
   @ApiResponse({ status: 400, description: 'Page or Page_size must be a positive number' })
   @Get()
   async findAll(@Query('page') page: number = 1, @Query('page_size') page_size: number = 10) {
-    const result = await this.blogService.findAll(page, page_size);
+    const result = await this.blogService.getAllBlogs(page, page_size);
     return result;
   }
 }
