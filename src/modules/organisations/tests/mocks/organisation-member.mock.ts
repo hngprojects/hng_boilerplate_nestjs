@@ -15,4 +15,5 @@ export const orgMemberMock: OrganisationMember = {
   suspended: false,
   active_member: true,
   left_workspace: false,
+  beforeSoftDeleteMember: () => {},
 };

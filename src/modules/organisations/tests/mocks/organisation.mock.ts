@@ -52,6 +52,7 @@ export const createMockOrganisation = (): Organisation => {
     suspended: false,
     active_member: true,
     left_workspace: false,
+    beforeSoftDeleteMember: () => {},
   };
 
   const ownerAndCreator = {

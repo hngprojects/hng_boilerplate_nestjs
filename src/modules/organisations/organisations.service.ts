@@ -175,6 +175,7 @@ export class OrganisationsService {
     const organisationMembers = await this.organisationMemberRepository.find({
       where: { organisation_id: { id: orgId } },
       relations: ['user_id', 'profile_id'],
+      withDeleted: true,
     });
 
     const searchedMembersResult = organisationMembers.filter(member => {
