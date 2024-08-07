@@ -132,7 +132,7 @@ describe('BlogService', () => {
         status: 200,
         message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
         data: {
-          id: blog.id,
+          blog_id: blog.id,
           title: blog.title,
           content: blog.content,
           tags: blog.tags,

@@ -62,13 +62,13 @@ export class BlogService {
       });
     }
 
-    const { created_at, updated_at, ...rest } = singleBlog;
+    const { id, created_at, updated_at, ...rest } = singleBlog;
     const author = `${fullName.first_name} ${fullName.last_name}`;
 
     return {
       status: 200,
       message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
-      data: { ...rest, published_date: created_at, author },
+      data: { blog_id: id, ...rest, author, published_date: created_at },
     };
   }
 }

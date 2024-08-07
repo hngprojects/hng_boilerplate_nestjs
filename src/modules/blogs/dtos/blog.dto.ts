@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class BlogDto {
   @ApiProperty({ description: 'The ID of the blog' })
-  id: string;
+  blog_id: string;
 
   @ApiProperty({ description: 'The title of the blog' })
   title: string;
