@@ -10,6 +10,8 @@ import {
   NotFoundException,
   Post,
   Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
@@ -23,6 +25,8 @@ import {
   HelpCenterMultipleInstancResponseType,
   HelpCenterSingleInstancResponseType,
 } from './dto/help-center.response.dto';
+import { SuperAdminGuard } from 'src/guards/super-admin.guard';
+import { User } from '../user/entities/user.entity';
 
 @ApiTags('help-center')
 @Controller('help-center')
@@ -31,11 +35,17 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Post('topics')
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
-  @ApiResponse({ status: 422, description: 'Invalid input data.' })
-  async create(@Body() createHelpCenterDto: CreateHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
-    return this.helpCenterService.create(createHelpCenterDto);
+  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiResponse({ status: 400, description: 'This question already exists.' })
+  async create(
+    @Body() createHelpCenterDto: CreateHelpCenterDto,
+    @Req() req: { user: User }
+  ): Promise<HelpCenterSingleInstancResponseType> {
+    const user: User = req.user;
+    return this.helpCenterService.create(createHelpCenterDto, user);
   }
 
   @skipAuth()
