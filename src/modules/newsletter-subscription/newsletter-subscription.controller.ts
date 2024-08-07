@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
+import { NewsletterSubscriptionService } from './newsletter-subscription.service';
+import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
+import { skipAuth } from '../../helpers/skipAuth';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { skipAuth } from '../../helpers/skipAuth';
-import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
-import { NewsletterSubscriptionService } from './newsletter-subscription.service';
+import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 
 @ApiTags('Newsletter Subscription')
 @Controller('newsletter-subscription')
@@ -32,16 +33,34 @@ export class NewsletterSubscriptionController {
         message: { type: 'string' },
         data: {
           type: 'array',
-          items: { $ref: '#/components/schemas/any' },
+          items: { $ref: '#/components/schemas/NewsletterSubscriptionResponseDto' },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            total: { type: 'number' },
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            totalPages: { type: 'number' },
+          },
         },
       },
     },
   })
-  async findAllSubscriptions(): Promise<{ message: string; data: any[] }> {
-    const subscribers = await this.newsletterSubscriptionService.findAllSubscriptions();
+  async getAllSubscribers(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[]; meta: any }> {
+    const { subscribers, total } = await this.newsletterSubscriptionService.findAllSubscribers(page, limit);
     return {
       message: 'Subscribers list fetched successfully',
       data: subscribers,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -52,8 +71,8 @@ export class NewsletterSubscriptionController {
   @ApiOperation({ summary: 'Remove subscriber from newsletter' })
   @ApiResponse({ status: 200, description: 'Subscriber with ID {id} has been soft deleted' })
   @ApiResponse({ status: 404, description: 'Subscriber with ID ${id} not found' })
-  remove(@Param('id') id: string) {
-    return this.newsletterSubscriptionService.remove(id);
+  removeSubscriber(@Param('id') id: string) {
+    return this.newsletterSubscriptionService.removeSubscriber(id);
   }
 
   @UseGuards(SuperAdminGuard)
@@ -69,12 +88,12 @@ export class NewsletterSubscriptionController {
         message: { type: 'string' },
         data: {
           type: 'array',
-          items: { $ref: '#/components/schemas/any' },
+          items: { $ref: '#/components/schemas/NewsletterSubscriptionResponseDto' },
         },
       },
     },
   })
-  async findSoftDeleted(): Promise<{ message: string; data: any[] }> {
+  async findSoftDeleted(): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[] }> {
     const deletedSubscribers = await this.newsletterSubscriptionService.findSoftDeleted();
 
     return {
