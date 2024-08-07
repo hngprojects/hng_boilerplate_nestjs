@@ -151,7 +151,11 @@ describe('BlogService', () => {
     it('should throw an error if blog not found', async () => {
       const blogId = 'non-existent-blog-id';
       const user = new User();
+      user.id = 'user-id-is-here';
+      user.first_name = 'John';
+      user.last_name = 'Doe';
 
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(blogRepository, 'findOneBy').mockResolvedValue(null);
 
       await expect(service.getSingleBlog(blogId, user)).rejects.toThrowError(SYS_MSG.BLOG_NOT_FOUND);
