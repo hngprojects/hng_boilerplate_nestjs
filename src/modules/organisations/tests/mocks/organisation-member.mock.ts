@@ -12,4 +12,7 @@ export const orgMemberMock: OrganisationMember = {
   role: organisationRoleMock,
   organisation_id: orgMock,
   profile_id: profileMock,
+  suspended: false,
+  active_member: true,
+  left_workspace: false,
 };
