@@ -337,7 +337,7 @@ describe('OrganisationsService', () => {
 
       const res = await service.getUserOrganisations(mockUser.id);
 
-      expect(res.status_code).toEqual(HttpStatus.OK);
+      expect(res.status).toEqual(HttpStatus.OK);
       expect(res.data).toHaveProperty('created_organisations');
       expect(res.data).toHaveProperty('owned_organisations');
       expect(res.data).toHaveProperty('member_organisations');

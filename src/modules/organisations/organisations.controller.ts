@@ -20,6 +20,7 @@ import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
+import { UserOrganizationErrorResponseDto, UserOrganizationResponseDto } from './dto/user-orgs-response.dto';
 
 @ApiBearerAuth()
 @ApiTags('organization')
@@ -98,12 +99,20 @@ export class OrganisationsController {
     return this.organisationsService.removeOrganisationMember(params);
   }
   
-    @ApiOperation({ summary: "Gets a user's organizations" })
-    @ApiResponse({ status: 200, description: 'Organisations retrieved successfully' })
-    @ApiResponse({ status: 400, description: 'Bad request' })
-    @Get('/')
-    async getUserOrganisations(@Req() req) {
-      const { sub } = req.user;
-      return this.organisationsService.getUserOrganisations(sub);
-    }
+  @ApiOperation({ summary: "Gets a user's organizations" })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Organisations retrieved successfully', 
+    type: UserOrganizationResponseDto
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request',
+    type: UserOrganizationErrorResponseDto
+  })
+  @Get('/')
+  async getUserOrganisations(@Req() req) {
+    const { sub } = req.user;
+    return this.organisationsService.getUserOrganisations(sub);
+  }
 }

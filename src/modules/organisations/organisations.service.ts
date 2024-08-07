@@ -195,7 +195,6 @@ export class OrganisationsService {
     }
 
     return {
-      status_code: HttpStatus.OK,
       message: 'Organisations retrieved successfully',
       data: {
         created_organisations: createdOrgs,
