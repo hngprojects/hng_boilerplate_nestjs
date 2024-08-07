@@ -1,4 +1,4 @@
-import { AbstractBaseEntity } from 'src/entities/base.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Column, Entity } from 'typeorm';
 
 export enum PaymentStatus {

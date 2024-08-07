@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { CreateFlutterwavePaymentDto } from './dto/create-flutterwavePaymentDto';
 import { CreatePaymentDto } from './dto/create-paymentDto';
-import { UpdateFlutterwaveDto } from './dto/update-flutterwave.dto';
 import { ConfigService } from '@nestjs/config';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { v4 as uuid4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -81,6 +80,12 @@ export class FlutterwaveService {
     const response = await this.httpService
       .get(`${this.baseUrl}/transactions/${transactionId}/verify`, { headers })
       .toPromise();
-    return response.data;
+    return {
+      status: 200,
+      message: 'Payment verified successfully',
+      data: {
+        paymentStatus: response.data.data,
+      },
+    };
   }
 }
