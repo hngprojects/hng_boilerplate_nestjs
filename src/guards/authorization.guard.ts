@@ -6,6 +6,7 @@ import { UserType } from '../modules/user/entities/user.entity';
 import * as SYS_MSG from '../helpers/SystemMessages';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
 import { CustomHttpException } from '../helpers/custom-http-filter';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class OwnershipGuard implements CanActivate {
@@ -18,7 +19,11 @@ export class OwnershipGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    const organisationId = request.params.id;
+    const organisationId = request.params.id || request.params.org_id;
+
+    if (!isUUID(organisationId)) {
+      throw new CustomHttpException(SYS_MSG.INVALID_UUID_FORMAT, HttpStatus.BAD_REQUEST);
+    }
 
     if (user.user_type === UserType.SUPER_ADMIN) {
       return true;
