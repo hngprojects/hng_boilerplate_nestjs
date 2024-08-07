@@ -1,6 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EmailModule } from '../email/email.module';
 import { EmailService } from '../email/email.service';
 import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
 import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
