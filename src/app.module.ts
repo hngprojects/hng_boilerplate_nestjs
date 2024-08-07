@@ -40,7 +40,7 @@ import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/
 import { TeamsModule } from './modules/teams/teams.module';
 import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
-import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   providers: [
@@ -151,7 +151,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
     TeamsModule,
     FlutterwaveModule,
     BlogModule,
-    SubscriptionsModule,
+    CommentsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
