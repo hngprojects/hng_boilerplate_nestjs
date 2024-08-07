@@ -119,21 +119,39 @@ export class OrganisationsController {
   async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
     return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
   }
-  
+
   @ApiOperation({ summary: "Gets a user's organizations" })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Organisations retrieved successfully', 
-    type: UserOrganizationResponseDto
+  @ApiResponse({
+    status: 200,
+    description: 'Organisations retrieved successfully',
+    type: UserOrganizationResponseDto,
   })
-  @ApiResponse({ 
-    status: 400, 
+  @ApiResponse({
+    status: 400,
     description: 'Bad request',
-    type: UserOrganizationErrorResponseDto
+    type: UserOrganizationErrorResponseDto,
   })
   @Get('/')
   async getUserOrganisations(@Req() req) {
     const { sub } = req.user;
     return this.organisationsService.getUserOrganisations(sub);
+  }
+
+  @ApiOperation({ summary: 'Get Organization details by Id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Fetched Organization details',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Must provide a valid organization Id',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organization not found',
+  })
+  @Get(':org_id')
+  async getById(@Param('org_id') org_id: string) {
+    return this.organisationsService.getOrganizationDetailsById(org_id);
   }
 }
