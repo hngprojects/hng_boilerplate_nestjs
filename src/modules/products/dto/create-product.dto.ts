@@ -16,7 +16,7 @@ export class CreateProductRequestDto {
     minimum: 0,
     example: 10,
   })
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   quantity: number;
 
