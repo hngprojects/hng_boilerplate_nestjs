@@ -31,6 +31,7 @@ import { GoogleAuthPayloadDto } from './dto/google-auth.dto';
 import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
+import { UpdateUserPasswordResponseDTO } from './dto/update-user-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -102,7 +103,7 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'Google Authentication' })
   @ApiBody({ type: GoogleAuthPayloadDto })
   @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: AuthResponseDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiBadRequestResponse({ description: 'Invalid Google token' })
   @HttpCode(200)
   async googleAuth(@Body() body: GoogleAuthPayload) {
     return this.authService.googleAuth(body);
@@ -163,7 +164,7 @@ export default class RegistrationController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Verify Otp and change user password' })
   @ApiBody({ type: UpdatePasswordDto })
-  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully', type: UpdateUserPasswordResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Patch('password-reset')
