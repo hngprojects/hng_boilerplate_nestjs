@@ -40,3 +40,4 @@ export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
 export const BLOG_FETCHED_SUCCESSFUL = 'Blog fetched successfully';
 export const BLOG_NOT_FOUND = 'Blog not found';
+export const DEADLINE_PASSED = 'Job application deadline passed';
