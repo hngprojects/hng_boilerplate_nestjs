@@ -49,7 +49,7 @@ export class BlogController {
   async deleteBlog(@Param('id', ParseUUIDPipe) id: string): Promise<any> {
     await this.blogService.deleteBlogPost(id);
     return {
-      message: 'Blog successfully deleted',
+      message: 'Blog post successfully deleted',
       status_code: HttpStatus.ACCEPTED,
     };
   }
