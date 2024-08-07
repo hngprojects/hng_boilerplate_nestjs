@@ -7,6 +7,7 @@ import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { BlogResponseDto } from './dtos/blog-response.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { PAGE_SHOULD_BE_A_NUMBER, PAGE_SIZE_SHOULD_BE_A_NUMBER } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class BlogService {
@@ -53,11 +54,11 @@ export class BlogService {
 
   async getAllBlogs(page = 1, page_size = 10) {
     if (!Number.isInteger(page) || page < 1) {
-      throw new BadRequestException('Page number must be a positive integer');
+      throw new CustomHttpException(PAGE_SHOULD_BE_A_NUMBER, HttpStatus.BAD_REQUEST);
     }
 
     if (!Number.isInteger(page_size) || page_size < 1) {
-      throw new BadRequestException('Page size must be a positive integer');
+      throw new CustomHttpException(PAGE_SIZE_SHOULD_BE_A_NUMBER, HttpStatus.BAD_REQUEST);
     }
 
     const [blogs, total] = await this.blogRepository.findAndCount({

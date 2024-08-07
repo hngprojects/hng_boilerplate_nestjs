@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { BlogService } from '../blogs.service';
 import { Blog } from '../entities/blog.entity';
 import { User } from '../../user/entities/user.entity';
-import { BadRequestException } from '@nestjs/common';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('BlogService', () => {
   let service: BlogService;
@@ -132,7 +132,7 @@ describe('BlogService', () => {
 
       jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([[blog2, blog1], 2]);
 
-      const result = await service.findAll(1, 10);
+      const result = await service.getAllBlogs(1, 10);
 
       expect(result.status_code).toBe(200);
       expect(result.message).toBe('Blogs retrieved successfully');
@@ -146,7 +146,7 @@ describe('BlogService', () => {
     it('should return an empty list if no blog posts are present', async () => {
       jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([[], 0]);
 
-      const result = await service.findAll(1, 10);
+      const result = await service.getAllBlogs(1, 10);
 
       expect(result.status_code).toBe(200);
       expect(result.message).toBe('Blogs retrieved successfully');
@@ -156,8 +156,8 @@ describe('BlogService', () => {
     });
 
     it('should throw BadRequestException for invalid page parameters', async () => {
-      await expect(service.findAll(-1, 10)).rejects.toThrow(BadRequestException);
-      await expect(service.findAll(1, -10)).rejects.toThrow(BadRequestException);
+      await expect(service.getAllBlogs(-1, 10)).rejects.toThrow(CustomHttpException);
+      await expect(service.getAllBlogs(1, -10)).rejects.toThrow(CustomHttpException);
     });
   });
 });

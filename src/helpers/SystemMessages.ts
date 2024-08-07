@@ -48,3 +48,5 @@ export const USER_NOT_REGISTERED = 'User not found, register to continue';
 export const INVITE_ACCEPTED = 'Invite already accepted';
 export const INVALID_INVITE = 'Invalid invite link';
 export const INVITE_NOT_FOUND = 'Invite link not found';
+export const PAGE_SHOULD_BE_A_NUMBER = 'Page must be a positive integer';
+export const PAGE_SIZE_SHOULD_BE_A_NUMBER = 'Page size must be a positive integer';
