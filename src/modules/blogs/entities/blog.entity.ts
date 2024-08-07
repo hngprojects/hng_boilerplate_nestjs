@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, Column, ManyToOne } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 
@@ -16,6 +16,6 @@ export class Blog extends AbstractBaseEntity {
   @Column('simple-array', { nullable: true })
   image_urls?: string[];
 
-  @ManyToOne(() => User, user => user.blogs)
+  @ManyToOne(() => User, user => user.blogs, { eager: true })
   author: User;
 }

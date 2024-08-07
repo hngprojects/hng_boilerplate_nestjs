@@ -28,15 +28,15 @@ export class BlogController {
 
     return {
       status: 200,
-      currentPage: query.page || 1,
-      totalPages: totalPages,
-      totalResults: total,
+      current_page: query.page || 1,
+      total_pages: totalPages,
+      total_results: total,
       blogs: data,
       meta: {
-        hasNext: (query.page || 1) < totalPages,
+        has_next: (query.page || 1) < totalPages,
         total: total,
-        nextPage: (query.page || 1) < totalPages ? (query.page || 1) + 1 : null,
-        prevPage: (query.page || 1) > 1 ? (query.page || 1) - 1 : null,
+        next_page: (query.page || 1) < totalPages ? (query.page || 1) + 1 : null,
+        prev_page: (query.page || 1) > 1 ? (query.page || 1) - 1 : null,
       },
     };
   }
