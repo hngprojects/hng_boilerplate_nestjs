@@ -8,9 +8,13 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailController } from './email.controller';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../user/entities/user.entity';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  providers: [EmailService, QueueService, EmailQueueConsumer],
+  providers: [EmailService, QueueService, EmailQueueConsumer, SuperAdminGuard],
   exports: [EmailService, QueueService],
   imports: [
     BullModule.registerQueueAsync({
@@ -41,6 +45,7 @@ import { EmailController } from './email.controller';
       inject: [ConfigService],
     }),
     ConfigModule,
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [EmailController],
 })

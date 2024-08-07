@@ -1,11 +1,13 @@
-import { Controller, Post, Get, Body, Res, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, Patch, Param, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
 import { SendEmailDto, UpdateTemplateDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiTags('email')
 @Controller('email')
+@UseGuards(SuperAdminGuard)
 export class EmailController {
   constructor(private emailService: EmailService) {}
 
@@ -24,6 +26,7 @@ export class EmailController {
   @ApiResponse({ status: 404, description: 'Template not found' })
   @ApiParam({ name: 'templateName', required: true, description: 'The name of the template to update' })
   @Patch('update-template/:templateName')
+  @UseGuards(SuperAdminGuard)
   async updateTemplate(
     @Param('templateName') name: string,
     @Body() body: UpdateTemplateDto,
