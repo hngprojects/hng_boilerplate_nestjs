@@ -126,7 +126,6 @@ export default class UserService {
       });
     }
 
-    // Check if the current user is a super admin or the user being updated
     if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
       throw new ForbiddenException({
         error: 'Forbidden',
