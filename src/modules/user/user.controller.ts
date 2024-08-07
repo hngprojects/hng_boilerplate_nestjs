@@ -17,6 +17,7 @@ import UserService from './user.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserStatusResponseDto } from './dto/update-user-status-response.dto';
+import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -36,6 +37,25 @@ export class UserController {
     const userId = user.sub;
 
     return this.userService.deactivateUser(userId, deactivateAccountDto);
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Get user statistics (Super Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'User statistics retrieved successfully',
+    type: GetUserStatsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['active', 'inactive', 'deleted'],
+    description: 'Filter users by status',
+  })
+  @UseGuards(SuperAdminGuard)
+  async getUserStats(@Query('status') status?: string): Promise<GetUserStatsResponseDto> {
+    return this.userService.getUserStats(status);
   }
 
   @ApiOperation({ summary: 'Update User' })
