@@ -14,12 +14,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
+import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 
 @ApiBearerAuth()
@@ -85,6 +86,18 @@ export class OrganisationsController {
   ): Promise<OrganisationMembersResponseDto> {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
+  }
+
+  @UseGuards(OwnershipGuard)
+  @Delete(':organizatonId/members/:userId')
+  @ApiOperation({ summary: 'Gets a product by id' })
+  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
+  @ApiResponse({ status: 200, description: 'Member removed successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async removeOrganisationMember(@Param() params: RemoveOrganisationMemberDto) {
+    return this.organisationsService.removeOrganisationMember(params);
   }
 
   @UseGuards(OwnershipGuard)
