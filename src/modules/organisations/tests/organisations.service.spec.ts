@@ -8,10 +8,14 @@ import { validate } from 'class-validator';
 import { orgMock } from '../tests/mocks/organisation.mock';
 import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
-
-import { InternalServerErrorException, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+  HttpStatus,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
-import { OrganisationMember } from '../entities/org-members.entity';
 import { AddMemberDto } from '../dto/add-member.dto';
 import { OrganisationRole } from '../../../modules/organisation-role/entities/organisation-role.entity';
 import { DefaultRole } from '../../../modules/organisation-role/entities/role.entity';
@@ -22,6 +26,8 @@ import { organisationRoleMock } from './mocks/organisation-role.mock';
 import { defaultOrganisationRoleMocks } from './mocks/default-organisation-role.mock';
 import { defaultOrganisationPermissionMocks } from './mocks/default-organisation-permission.mock';
 import { Permissions } from '../../../modules/organisation-permissions/entities/permissions.entity';
+import { OrganisationMember } from '../entities/org-members.entity';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('OrganisationsService', () => {
@@ -422,6 +428,38 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(orgMemberMock);
 
       await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(CustomHttpException);
+    });
+  });
+
+  describe("get user's organization", () => {
+    it('should throw an error if the user has no organizations', async () => {
+      const mockUser = new User();
+      mockUser.id = 'sample-id-6789';
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue(null);
+
+      await expect(service.getUserOrganisations(mockUser.id)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST)
+      );
+    });
+
+    it('should return all the users organizations', async () => {
+      const mockUser = orgMock.creator;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([
+        {
+          ...mockUser.organisationMembers[0],
+          organisation_id: orgMock,
+        },
+      ]);
+
+      const res = await service.getUserOrganisations(mockUser.id);
+
+      expect(res.data).toHaveProperty('created_organisations');
+      expect(res.data).toHaveProperty('owned_organisations');
+      expect(res.data).toHaveProperty('member_organisations');
+      expect(res.data.member_organisations[0]).toHaveProperty('role');
+      expect(res.data.member_organisations[0]).toHaveProperty('organisation');
     });
   });
 });
