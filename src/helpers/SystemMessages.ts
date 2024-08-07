@@ -38,6 +38,10 @@ export const ORG_NOT_FOUND = 'Organisation not found';
 export const NOT_ORG_OWNER = 'You do not have permission to update this organisation';
 export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
+
 export const ORG_MEMBER_NOT_FOUND = 'Member not found';
 export const ORG_MEMBER_DOES_NOT_BELONG = 'Member does not belong to the specified organisation';
 export const ROLE_NOT_FOUND = 'Role not found in the organization';
+
+export const DEADLINE_PASSED = 'Job application deadline passed';
+

@@ -1,9 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { FaqService } from './faq.service';
-import { FaqController } from './faq.controller';
-import { CreateFaqDto } from './create-faq.dto';
-import { IFaq, ICreateFaqResponse } from './faq.interface';
+import { FaqService } from '../faq.service';
+import { FaqController } from '../faq.controller';
+import { CreateFaqDto } from '../dto/create-faq.dto';
+import { IFaq, ICreateFaqResponse } from '../faq.interface';
+import { User, UserType } from '../../user/entities/user.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { SuperAdminGuard } from '../../../guards/super-admin.guard';
 
 describe('FaqController (e2e)', () => {
   let app;
@@ -22,6 +25,23 @@ describe('FaqController (e2e)', () => {
     }),
   };
 
+  const mockUserRepository = {
+    findOne: jest.fn().mockImplementation(({ where: { id } }) => {
+      return Promise.resolve({
+        id,
+        user_type: UserType.SUPER_ADMIN,
+      });
+    }),
+  };
+
+  const mockUser = {
+    sub: 'user-id',
+  };
+
+  const mockSuperAdminGuard = {
+    canActivate: jest.fn().mockImplementation(() => true),
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [FaqController],
@@ -30,17 +50,32 @@ describe('FaqController (e2e)', () => {
           provide: FaqService,
           useValue: mockFaqService,
         },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepository,
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(SuperAdminGuard)
+      .useClass(SuperAdminGuard)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     faqService = moduleFixture.get<FaqService>(FaqService);
+
+    app.use((req, res, next) => {
+      req.user = mockUser;
+      next();
+    });
+
     await app.init();
     server = app.getHttpServer();
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   describe('POST /faqs', () => {
