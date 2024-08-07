@@ -30,6 +30,7 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { GoogleAuthPayloadDto } from './dto/google-auth.dto';
 import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
+import { LoginErrorResponseDto } from './dto/login-error-dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -71,8 +72,7 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'Login a user' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials', type: LoginErrorResponseDto })
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     return this.authService.loginUser(loginDto);
