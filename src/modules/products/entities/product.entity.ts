@@ -28,7 +28,7 @@ export class Product extends AbstractBaseEntity {
   @Column({ type: 'text', nullable: true })
   image: string;
 
-  @Column({ type: 'int', nullable: false, default: 0 })
+  @Column({ type: 'float', nullable: false, default: 0 })
   price: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })

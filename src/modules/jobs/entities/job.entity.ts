@@ -1,8 +1,9 @@
 import { AbstractBaseEntity } from './../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { JobMode, JobType, SalaryRange } from '../dto/job.dto';
+import { JobApplication } from './job-application.entity';
 
 @Entity()
 export class Job extends AbstractBaseEntity {
@@ -89,4 +90,6 @@ export class Job extends AbstractBaseEntity {
   })
   @Column('text', { nullable: true })
   experience_level: string;
+  @OneToMany(() => JobApplication, job_application => job_application.job)
+  job_application: JobApplication[];
 }

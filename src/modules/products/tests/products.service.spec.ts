@@ -74,7 +74,6 @@ describe('ProductsService', () => {
 
       const products = await service.searchProducts(orgMock.id, searchCriteria);
 
-      console.log(products);
       expect(products).toEqual({ success: true, statusCode: 200, products: [productMock] });
     });
 
@@ -174,6 +173,38 @@ describe('ProductsService', () => {
 
       expect(result.message).toEqual('Product successfully deleted');
       expect(deletedProductMock.is_deleted).toBe(true);
+    });
+  });
+
+  describe('getProductStock', () => {
+    it('should return product stock details if the product is found', async () => {
+      const productId = '123';
+      const productMock = {
+        id: productId,
+        quantity: 20,
+        updated_at: new Date(),
+      };
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(productMock as any);
+
+      const result = await service.getProductStock(productId);
+
+      expect(result).toEqual({
+        message: 'Product stock retrieved successfully',
+        data: {
+          product_id: productMock.id,
+          current_stock: productMock.quantity,
+          last_updated: productMock.updated_at,
+        },
+      });
+    });
+
+    it('should throw NotFoundException if the product is not found', async () => {
+      const productId = 'nonexistent';
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.getProductStock(productId)).rejects.toThrow(new NotFoundException('Product not found'));
     });
   });
 });
