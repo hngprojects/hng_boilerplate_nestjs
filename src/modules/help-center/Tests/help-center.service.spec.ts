@@ -25,39 +25,51 @@ describe('HelpCenterService', () => {
       content: 'Sample Content',
       author: 'ADMIN',
     }),
-    find: jest.fn().mockResolvedValue([{
-      id: '1234',
-      title: 'Sample Title',
-      content: 'Sample Content',
-      author: 'ADMIN',
-    }]),
-    findOne: jest.fn().mockImplementation(options => Promise.resolve(
-      options.where.title === 'Sample Title' ? {
+    find: jest.fn().mockResolvedValue([
+      {
         id: '1234',
         title: 'Sample Title',
         content: 'Sample Content',
         author: 'ADMIN',
-      } : null
-    )),
+      },
+    ]),
+    findOne: jest.fn().mockImplementation(options =>
+      Promise.resolve(
+        options.where.title === 'Sample Title'
+          ? {
+              id: '1234',
+              title: 'Sample Title',
+              content: 'Sample Content',
+              author: 'ADMIN',
+            }
+          : null
+      )
+    ),
     createQueryBuilder: jest.fn().mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockResolvedValue([{
-        id: '1234',
-        title: 'Sample Title',
-        content: 'Sample Content',
-        author: 'ADMIN',
-      }]),
+      getMany: jest.fn().mockResolvedValue([
+        {
+          id: '1234',
+          title: 'Sample Title',
+          content: 'Sample Content',
+          author: 'ADMIN',
+        },
+      ]),
     }),
   };
 
   const mockUserRepository = {
-    findOne: jest.fn().mockImplementation(options => Promise.resolve(
-      options.where.id === '123' ? {
-        id: '123',
-        first_name: 'John',
-        last_name: 'Doe',
-      } : null
-    )),
+    findOne: jest.fn().mockImplementation(options =>
+      Promise.resolve(
+        options.where.id === '123'
+          ? {
+              id: '123',
+              first_name: 'John',
+              last_name: 'Doe',
+            }
+          : null
+      )
+    ),
   };
 
   beforeEach(async () => {

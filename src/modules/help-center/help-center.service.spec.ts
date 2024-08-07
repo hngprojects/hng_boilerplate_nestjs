@@ -37,7 +37,11 @@ describe('HelpCenterService', () => {
     })),
     save: jest.fn().mockResolvedValue(mockHelpCenter),
     find: jest.fn().mockResolvedValue([mockHelpCenter]),
-    findOne: jest.fn().mockImplementation(options => Promise.resolve(options.where.title === mockHelpCenter.title ? mockHelpCenter : null)),
+    findOne: jest
+      .fn()
+      .mockImplementation(options =>
+        Promise.resolve(options.where.title === mockHelpCenter.title ? mockHelpCenter : null)
+      ),
     createQueryBuilder: jest.fn().mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue([mockHelpCenter]),
@@ -45,7 +49,9 @@ describe('HelpCenterService', () => {
   };
 
   const mockUserRepository = {
-    findOne: jest.fn().mockImplementation(options => Promise.resolve(options.where.id === mockUser.id ? mockUser : null)),
+    findOne: jest
+      .fn()
+      .mockImplementation(options => Promise.resolve(options.where.id === mockUser.id ? mockUser : null)),
   };
 
   beforeEach(async () => {

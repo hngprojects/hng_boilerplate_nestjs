@@ -21,8 +21,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
-import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
+import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { UserOrganizationErrorResponseDto, UserOrganizationResponseDto } from './dto/user-orgs-response.dto';
@@ -57,14 +57,28 @@ export class OrganisationsController {
   @ApiOperation({ summary: 'Update Organisation' })
   @ApiResponse({
     status: 200,
-    description: 'The found record',
-    type: UpdateOrganisationDto,
+    description: 'Organisation updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User is currently not authorized, kindly authenticate to continue',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'You do not have permission to update this organisation',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
   })
   @UseGuards(OwnershipGuard)
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateOrganisationDto: UpdateOrganisationDto) {
-    const updatedOrg = await this.organisationsService.updateOrganisation(id, updateOrganisationDto);
-    return { message: 'Organisation successfully updated', org: updatedOrg };
+  @Patch(':orgId')
+  async update(@Param('orgId') orgId: string, @Body() updateOrganisationDto: UpdateOrganisationDto) {
+    return await this.organisationsService.updateOrganisation(orgId, updateOrganisationDto);
   }
 
   @ApiOperation({ summary: 'Get members of an Organisation' })

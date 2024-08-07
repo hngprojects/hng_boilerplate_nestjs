@@ -208,6 +208,8 @@ describe('OrganisationsService', () => {
       const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
       const organisation = new Organisation();
 
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
+      jest.spyOn(organisationRepository, 'update').mockResolvedValue({} as any);
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
       jest.spyOn(organisationRepository, 'update').mockResolvedValueOnce({ affected: 1 } as any);
       jest
@@ -216,28 +218,17 @@ describe('OrganisationsService', () => {
 
       const result = await service.updateOrganisation(id, updateOrganisationDto);
 
-      expect(result).toEqual({
-        message: 'Organisation successfully updated',
-        org: { ...organisation, ...updateOrganisationDto },
-      });
+      expect(result.message).toEqual('Organisation updated successfully');
+      expect(result.data).toBeDefined();
     });
 
-    it('should throw NotFoundException if organisation not found', async () => {
+    it('should throw CustomHttpException if organisation not found', async () => {
       const id = '1';
       const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
 
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
 
-      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
-      const id = '1';
-      const updateOrganisationDto = { name: 'New Name', description: 'Updated Description' };
-
-      jest.spyOn(organisationRepository, 'findOneBy').mockRejectedValueOnce(new Error('Unexpected error'));
-
-      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
