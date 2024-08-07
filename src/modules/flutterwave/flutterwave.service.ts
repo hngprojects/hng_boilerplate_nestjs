@@ -8,7 +8,7 @@ import { v4 as uuid4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
-import { PAYMENT_NOTFOUND } from 'src/helpers/SystemMessages';
+import { PAYMENT_NOTFOUND } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class FlutterwaveService {
