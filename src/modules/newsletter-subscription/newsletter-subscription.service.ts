@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
+import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
+import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 import { NewsletterSubscription } from './entities/newsletter-subscription.entity';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class NewsletterSubscriptionService {
     private readonly newsletterSubscriptionRepository: Repository<NewsletterSubscription>
   ) {}
 
-  async newsletterSubcription(createNewsletterSubscriptionDto: CreateNewsletterSubscriptionDto) {
+  async newsletterSubscription(createNewsletterSubscriptionDto: CreateNewsletterSubscriptionDto) {
     const { email } = createNewsletterSubscriptionDto;
 
     const existingSubscription = await this.newsletterSubscriptionRepository.findOne({ where: { email: email } });
@@ -24,16 +25,22 @@ export class NewsletterSubscriptionService {
     return response;
   }
 
-  async findAll() {
-    const subscribers = await this.newsletterSubscriptionRepository.find();
+  async findAllSubscribers(
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ subscribers: NewsletterSubscriptionResponseDto[]; total: number }> {
+    const [subscribers, total] = await this.newsletterSubscriptionRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
 
-    return subscribers.map(newsletter => ({
-      id: newsletter.id,
-      email: newsletter.email,
-    }));
+    return {
+      subscribers: subscribers.map(this.mapSubscriberToResponseDto),
+      total,
+    };
   }
 
-  async remove(id: string) {
+  async removeSubscriber(id: string) {
     const subscription = await this.newsletterSubscriptionRepository.findOne({ where: { id } });
     if (!subscription) {
       throw new NotFoundException(`Subscriber with ID ${id} not found`);
@@ -55,5 +62,14 @@ export class NewsletterSubscriptionService {
       throw new NotFoundException(`Subscriber with ID ${id} not found or already restored`);
     }
     return { message: `Subscriber with ID ${id} has been restored` };
+  }
+
+  private mapSubscriberToResponseDto(
+    newsletterSubscription: NewsletterSubscription
+  ): NewsletterSubscriptionResponseDto {
+    return {
+      id: newsletterSubscription.id,
+      email: newsletterSubscription.email,
+    };
   }
 }
