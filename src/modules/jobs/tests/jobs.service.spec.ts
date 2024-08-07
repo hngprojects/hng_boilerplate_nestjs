@@ -222,10 +222,6 @@ describe('JobsService', () => {
       expect(result.status_code).toBe(200);
       expect(result.data).toHaveLength(1);
       expect(result.data[0]).toEqual(mockJob);
-      // expect(result).toEqual({
-      //   status_code: HttpStatus.OK,
-      //   data: [mockJob],
-      // });
     });
 
     it('should return empty array if no jobs match the criteria', async () => {
@@ -250,10 +246,6 @@ describe('JobsService', () => {
       });
 
       const result = await service.searchJobs(searchDto, searchDto.page, searchDto.limit);
-      // expect(result).toEqual({
-      //   status_code: HttpStatus.OK,
-      //   data: [],
-      // });
       expect(result.status_code).toBe(200);
       expect(result.data).toHaveLength(0);
     });
@@ -275,10 +267,6 @@ describe('JobsService', () => {
       });
 
       const result = await service.searchJobs(searchDto, page, limit);
-      // expect(result).toEqual({
-      //   status_code: HttpStatus.OK,
-      //   data: [mockJob, mockJob],
-      // });
       expect(result.status_code).toBe(200);
       expect(result.data).toHaveLength(2);
     });

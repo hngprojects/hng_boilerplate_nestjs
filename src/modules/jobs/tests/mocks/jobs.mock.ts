@@ -2,7 +2,6 @@ import { orgMock } from '../../../../modules/organisations/tests/mocks/organisat
 import { JobApplication } from '../../entities/job-application.entity';
 import { Job } from '../../entities/job.entity';
 
-// Initial definition of jobsMock without job_application
 export const jobsMock: Job[] = [
   {
     id: '6f33f664-cf5f-441e-a204-316682aef466',
@@ -18,11 +17,10 @@ export const jobsMock: Job[] = [
     company_name: 'google',
     is_deleted: false,
     user: orgMock.owner,
-    job_application: [], // Placeholder, will be updated later
+    job_application: [],
   },
 ];
 
-// Define jobApplicationMock with reference to jobsMock
 export const jobApplicationMock: JobApplication[] = [
   {
     id: '6f33g674-cf5f-346e-a204-316682aef466',

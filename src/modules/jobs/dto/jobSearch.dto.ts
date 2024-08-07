@@ -29,4 +29,3 @@ export class JobSearchDto {
   @Type(() => Number)
   limit?: number;
 }
-// export { JobMode };
