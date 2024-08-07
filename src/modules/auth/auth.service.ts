@@ -276,7 +276,7 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: {
+      data: {
         id: userExists.id,
         email: userExists.email,
         first_name: userExists.first_name,
@@ -367,7 +367,7 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: responsePayload,
+      data: responsePayload,
     };
   }
 }

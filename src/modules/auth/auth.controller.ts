@@ -1,4 +1,12 @@
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -18,6 +26,9 @@ import {
   SuccessCreateUserResponse,
 } from '../user/dto/user-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { GoogleAuthPayloadDto } from './dto/google-auth.dto';
+import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -27,7 +38,7 @@ export default class RegistrationController {
   @skipAuth()
   @ApiOperation({ summary: 'User Registration' })
   @ApiResponse({ status: 201, description: 'Register a new user', type: SuccessCreateUserResponse })
-  @ApiResponse({ status: 400, description: 'User already exists' })
+  @ApiResponse({ status: 400, description: 'User already exists', type: ErrorCreateUserResponse })
   @Post('register')
   @HttpCode(201)
   public async register(@Body() body: CreateUserDTO): Promise<any> {
@@ -39,16 +50,16 @@ export default class RegistrationController {
     return this.authService.verify2fa(verify2faDto, req.user.sub);
   }
 
+  @skipAuth()
+  @HttpCode(200)
+  @Post('forgot-password')
   @ApiOperation({ summary: 'Generate forgot password reset token' })
   @ApiResponse({
     status: 200,
     description: 'The forgot password reset token generated successfully',
     type: ForgotPasswordResponseDto,
   })
-  @ApiResponse({ status: 400, description: SYS_MSG.USER_ACCOUNT_DOES_NOT_EXIST })
-  @skipAuth()
-  @HttpCode(200)
-  @Post('forgot-password')
+  @ApiBadRequestResponse({ description: SYS_MSG.USER_ACCOUNT_DOES_NOT_EXIST })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<any> {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
@@ -56,17 +67,20 @@ export default class RegistrationController {
   @skipAuth()
   @Post('login')
   @ApiOperation({ summary: 'Login a user' })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
     return this.authService.loginUser(loginDto);
   }
 
   @skipAuth()
-  @ApiOperation({ summary: 'Email verification' })
-  @ApiResponse({ status: 200, description: 'Verify token sent to the user mail', type: OtpDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiOperation({ summary: 'Verify magic link otp' })
+  @ApiBody({ type: AuthResponseDto })
+  @ApiResponse({ status: 200, description: 'successfully verifies otp and logs in user' })
+  @ApiResponse({ status: 401, description: SYS_MSG.UNAUTHORISED_TOKEN })
   @HttpCode(200)
   @Post('verify-otp')
   public async verifyEmail(@Body() body: OtpDto): Promise<any> {
@@ -82,10 +96,11 @@ export default class RegistrationController {
   }
 
   @skipAuth()
-  @ApiOperation({ summary: 'Google Authentication' })
-  @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: OtpDto })
-  @ApiResponse({ status: 400, description: 'Bad request' })
   @Post('google')
+  @ApiOperation({ summary: 'Google Authentication' })
+  @ApiBody({ type: GoogleAuthPayloadDto })
+  @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: AuthResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @HttpCode(200)
   async googleAuth(@Body() body: GoogleAuthPayload) {
     return this.authService.googleAuth(body);
@@ -97,7 +112,7 @@ export default class RegistrationController {
     type: RequestVerificationToken,
   })
   @ApiOperation({ summary: 'Request Verification Token' })
-  @ApiResponse({ status: 200, description: 'Verification Token sent to mail' })
+  @ApiResponse({ status: 200, description: 'Verification Token sent to mail', type: GenericAuthResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @HttpCode(200)
   @Post('request/token')
@@ -110,7 +125,8 @@ export default class RegistrationController {
   @Post('magic-link')
   @HttpCode(200)
   @ApiOperation({ summary: 'Request Signin Token' })
-  @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: RequestSigninTokenDto })
+  @ApiBody({ type: RequestSigninTokenDto })
+  @ApiResponse({ status: 200, description: 'Sign-in token sent to email', type: GenericAuthResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   public async signInToken(@Body() body: RequestSigninTokenDto) {
     return await this.authService.requestSignInToken(body);
@@ -133,6 +149,7 @@ export default class RegistrationController {
   @Post('magic-link/verify')
   @HttpCode(200)
   @ApiOperation({ summary: 'Verify Signin Token' })
+  @ApiBody({ type: OtpDto })
   @ApiResponse({ status: 200, description: 'Sign-in successful', type: OtpDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public async verifySignInToken(@Body() body: OtpDto) {
