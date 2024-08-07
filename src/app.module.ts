@@ -38,6 +38,7 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
 import { TeamsModule } from './modules/teams/teams.module';
+import { BlogModule } from './modules/blogs/blogs.module';
 
 @Module({
   providers: [
@@ -144,6 +145,7 @@ import { TeamsModule } from './modules/teams/teams.module';
     WaitlistModule,
     NewsletterSubscriptionModule,
     TeamsModule,
+    BlogModule,
   ],
   controllers: [HealthController, ProbeController],
 })

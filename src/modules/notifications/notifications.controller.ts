@@ -45,7 +45,7 @@ export class NotificationsController {
     return this.notificationsService.createGlobalNotifications(dto);
   }
 
-  @Get()
+  @Get('/all')
   @ApiResponse({
     status: 200,
     description: 'Notifications retrieved successfully',
@@ -107,7 +107,7 @@ export class NotificationsController {
     return this.notificationsService.markAllNotificationsAsReadForUser(userId);
   }
 
-  @Get()
+  @Get('/unread')
   @ApiResponse({
     status: 200,
     description: 'Unread notifications retrieved successfully',
