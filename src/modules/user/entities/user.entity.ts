@@ -77,6 +77,9 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
 
+  @OneToMany(() => Blog, blog => blog.author)
+  blogs: Blog[];
+
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
@@ -88,7 +91,4 @@ export class User extends AbstractBaseEntity {
 
   @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
   notification_settings: NotificationSettings[];
-
-  @OneToMany(() => Blog, blog => blog.author)
-  blogs: Blog[];
 }
