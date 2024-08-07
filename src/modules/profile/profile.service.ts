@@ -73,27 +73,4 @@ export class ProfileService {
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);
     }
   }
-  async deleteUserProfile(userId: string) {
-    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
-
-    if (!user || !user.profile) {
-      throw new NotFoundException('User profile not found');
-    }
-
-    const userProfile = await this.profileRepository.findOne({
-      where: { id: user.profile.id },
-    });
-
-    if (!userProfile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    await this.profileRepository.softDelete(userProfile.id);
-
-    const responseData = {
-      message: 'Profile successfully deleted',
-    };
-
-    return responseData;
-  }
 }

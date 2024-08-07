@@ -16,6 +16,7 @@ import { OtpDto } from '../otp/dto/otp.dto';
 import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
+import { SendEmailDto } from '../email/dto/email.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
 
@@ -29,9 +30,9 @@ export default class AuthenticationService {
     private googleAuthService: GoogleAuthService
   ) {}
 
-  async createNewUser(createUserDto: CreateUserDTO) {
+  async createNewUser(creatUserDto: CreateUserDTO) {
     const userExists = await this.userService.getUserRecord({
-      identifier: createUserDto.email,
+      identifier: creatUserDto.email,
       identifierType: 'email',
     });
 
@@ -39,16 +40,15 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
     }
 
-    await this.userService.createUser(createUserDto);
+    await this.userService.createUser(creatUserDto);
 
-    const user = await this.userService.getUserRecord({ identifier: createUserDto.email, identifierType: 'email' });
+    const user = await this.userService.getUserRecord({ identifier: creatUserDto.email, identifierType: 'email' });
 
     if (!user) {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
 
-    const token = (await this.otpService.createOtp(user.id)).token;
-    await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
+    await this.otpService.createOtp(user.id);
 
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
 
@@ -77,7 +77,13 @@ export default class AuthenticationService {
     }
 
     const token = (await this.otpService.createOtp(user.id)).token;
-    await this.emailService.sendForgotPasswordMail(user.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+    const emailData = new SendEmailDto();
+    emailData.to = dto.email;
+    emailData.subject = 'Reset Password';
+    emailData.template = 'reset-password';
+    emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
+    await this.emailService.sendEmail(emailData);
+
     return {
       message: SYS_MSG.EMAIL_SENT,
     };
@@ -334,7 +340,12 @@ export default class AuthenticationService {
 
     const otp = await this.otpService.createOtp(user.id);
 
-    await this.emailService.sendLoginOtp(user.email, otp.token);
+    const emailData = new SendEmailDto();
+    emailData.to = user.email;
+    emailData.subject = 'Login with OTP';
+    emailData.template = 'login-otp';
+    emailData.context = { token: otp.token, email: user.email };
+    await this.emailService.sendEmail(emailData);
 
     return {
       message: SYS_MSG.SIGN_IN_OTP_SENT,

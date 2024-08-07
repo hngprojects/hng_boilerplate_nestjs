@@ -225,23 +225,4 @@ export default class UserService {
       },
     };
   }
-
-  async getUserStatistics(currentUser: UserPayload): Promise<any> {
-    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
-      throw new ForbiddenException({
-        error: 'Forbidden',
-        message: 'You are not authorized to access user statistics',
-      });
-    }
-
-    const totalUsers = await this.userRepository.count();
-    const activeUsers = await this.userRepository.count({ where: { is_active: true } });
-    const deletedUsers = await this.userRepository.count({ where: { is_active: false } });
-
-    return {
-      total_users: totalUsers,
-      active_users: activeUsers,
-      deleted_users: deletedUsers,
-    };
-  }
 }

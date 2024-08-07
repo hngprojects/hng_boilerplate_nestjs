@@ -1,9 +1,8 @@
-import { ApiHideProperty } from '@nestjs/swagger';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { JobMode, JobType, SalaryRange } from '../dto/job.dto';
 import { AbstractBaseEntity } from './../../../entities/base.entity';
-import { JobApplication } from './job-application.entity';
+import { User } from '../../user/entities/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { JobMode, JobType, SalaryRange } from '../dto/job.dto';
 
 @Entity()
 export class Job extends AbstractBaseEntity {
@@ -47,7 +46,4 @@ export class Job extends AbstractBaseEntity {
   @ApiHideProperty()
   @ManyToOne(() => User, user => user.jobs, { nullable: false })
   user: User;
-
-  @OneToMany(() => JobApplication, job_application => job_application.job)
-  job_application: JobApplication[];
 }

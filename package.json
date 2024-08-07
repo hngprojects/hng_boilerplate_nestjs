@@ -32,11 +32,10 @@
     "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
-    "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
     "@css-inline/css-inline": "^0.14.1",
     "@nestjs-modules/mailer": "^2.0.2",
-    "@faker-js/faker": "^8.4.1",
     "@nestjs/bull": "^10.2.0",
+    "@faker-js/faker": "^8.4.1",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
@@ -48,7 +47,7 @@
     "@types/speakeasy": "^2.0.10",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
-    "bull": "^4.16.0",
+    "bull": "^4.15.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "google-auth-library": "^9.12.0",

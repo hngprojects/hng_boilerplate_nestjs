@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 
@@ -36,7 +36,4 @@ export class Profile extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   profile_pic_url: string;
-
-  @DeleteDateColumn()
-  deletedAt?: Date;
 }

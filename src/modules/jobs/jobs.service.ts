@@ -1,17 +1,11 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { pick } from '../../helpers/pick';
-import * as SYS_MSG from '../../helpers/SystemMessages';
 import { User } from '../user/entities/user.entity';
-import { FindJobResponseDto } from './dto/find-job-response.dto';
-import { JobApplicationResponseDto } from './dto/job-application-response.dto';
-import { JobApplicationDto } from './dto/job-application.dto';
-import { JobDto } from './dto/job.dto';
-import { JobApplication } from './entities/job-application.entity';
+import { Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
-import { isPassed } from './utils/helpers';
+import { JobDto } from './dto/job.dto';
+import { pick } from '../../helpers/pick';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class JobsService {
@@ -19,45 +13,8 @@ export class JobsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Job)
-    private readonly jobRepository: Repository<Job>,
-    @InjectRepository(JobApplication)
-    private readonly jobApplicationRepository: Repository<JobApplication>
+    private readonly jobRepository: Repository<Job>
   ) {}
-
-  async applyForJob(jobId: string, jobApplicationDto: JobApplicationDto): Promise<JobApplicationResponseDto> {
-    const job: FindJobResponseDto = await this.getJob(jobId);
-
-    const { is_deleted, deadline } = job.data;
-
-    if (is_deleted) {
-      throw new CustomHttpException('Job deleted', HttpStatus.NOT_FOUND);
-    }
-
-    if (isPassed(deadline)) {
-      throw new CustomHttpException(SYS_MSG.DEADLINE_PASSED, HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
-    const { resume, applicant_name, ...others } = jobApplicationDto;
-
-    // TODO: Upload resume to the cloud and grab URL
-
-    const resumeUrl = `https://example.com/${applicant_name.split(' ').join('_')}.pdf`;
-
-    const createJobApplication = this.jobApplicationRepository.create({
-      ...others,
-      applicant_name,
-      resume: resumeUrl,
-      ...job,
-    });
-
-    await this.jobApplicationRepository.save(createJobApplication);
-
-    return {
-      status: 'success',
-      message: 'Application submitted successfully',
-      status_code: HttpStatus.CREATED,
-    };
-  }
 
   async create(createJobDto: JobDto, userId: string) {
     // Check if the user exists
