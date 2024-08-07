@@ -27,5 +27,5 @@ export const mockUser: User = {
   notification_settings: [],
   notifications: [],
   blogs: [],
-  cart: [],
+  comments: [],
 };
