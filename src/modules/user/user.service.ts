@@ -194,14 +194,6 @@ export default class UserService {
   }
 
   async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
-    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
-      throw new ForbiddenException({
-        error: 'Forbidden',
-        message: 'Only super admins can access this endpoint',
-        status_code: HttpStatus.FORBIDDEN,
-      });
-    }
-
     const [users, total] = await this.userRepository.findAndCount({
       select: ['id', 'first_name', 'last_name', 'email', 'phone', 'is_active', 'created_at'],
       skip: (page - 1) * limit,
@@ -231,6 +223,25 @@ export default class UserService {
         users: formattedUsers,
         pagination,
       },
+    };
+  }
+
+  async getUserStatistics(currentUser: UserPayload): Promise<any> {
+    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
+      throw new ForbiddenException({
+        error: 'Forbidden',
+        message: 'You are not authorized to access user statistics',
+      });
+    }
+
+    const totalUsers = await this.userRepository.count();
+    const activeUsers = await this.userRepository.count({ where: { is_active: true } });
+    const deletedUsers = await this.userRepository.count({ where: { is_active: false } });
+
+    return {
+      total_users: totalUsers,
+      active_users: activeUsers,
+      deleted_users: deletedUsers,
     };
   }
 }
