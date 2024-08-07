@@ -40,6 +40,7 @@ import { FaqModule } from './modules/faq/faq.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { BlogModule } from './modules/blogs/blogs.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 
 @Module({
   providers: [
@@ -122,6 +123,8 @@ import { BlogModule } from './modules/blogs/blogs.module';
         redis: {
           host: authConfig().redis.host,
           port: +authConfig().redis.port,
+          password: authConfig().redis.password,
+          username: authConfig().redis.username,
         },
       }),
     }),
@@ -148,6 +151,7 @@ import { BlogModule } from './modules/blogs/blogs.module';
     NewsletterSubscriptionModule,
     TeamsModule,
     BlogModule,
+    SubscriptionsModule,
   ],
   controllers: [HealthController, ProbeController],
 })

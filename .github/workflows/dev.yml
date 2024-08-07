@@ -19,10 +19,12 @@ env:
   GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+  REDIS_HOST: ${{ secrets.REDIS_HOST }}
   DB_TYPE: 'postgres'
   PROFILE: 'staging'
   NODE_ENV: 'development'
   PORT: 3000
+  REDIS_PORT: 6379
 
 jobs:
   test-and-build-dev:
