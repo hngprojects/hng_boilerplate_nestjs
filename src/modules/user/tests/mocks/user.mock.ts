@@ -11,6 +11,7 @@ export const mockUser: User = {
   attempts_left: 3,
   time_left: null,
   secret: 'secret',
+  status: 'active',
   is_2fa_enabled: false,
   user_type: UserType.USER,
   owned_organisations: [],
