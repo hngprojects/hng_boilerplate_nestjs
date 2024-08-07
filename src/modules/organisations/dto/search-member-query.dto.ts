@@ -8,7 +8,6 @@ enum Filter {
 }
 
 export class SearchMemberQueryDto {
-  @ApiProperty({ enum: Filter, isArray: false, example: 'active_member' })
-  @IsString()
+  @ApiProperty({ enum: Filter, isArray: false, required: false })
   filter?: 'suspended' | 'active_member' | 'left_workspace';
 }

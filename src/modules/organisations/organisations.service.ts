@@ -184,12 +184,12 @@ export class OrganisationsService {
         member.user_id.first_name,
         member.user_id.last_name,
         member.user_id.email,
-        member.profile_id.username,
+        member?.profile_id?.username,
         `${member.user_id.first_name} ${member.user_id.last_name}`,
         `${member.user_id.first_name}${member.user_id.last_name}`,
       ];
 
-      const memberFound = fieldsToSearch.some(field => field.toLowerCase().includes(lowerCaseSearchTerm));
+      const memberFound = fieldsToSearch.some(field => field?.toLowerCase()?.includes(lowerCaseSearchTerm));
 
       if (!memberFound) return false;
       if (searchMemberQueryDto.filter && member[searchMemberQueryDto.filter]) return true;
@@ -199,11 +199,11 @@ export class OrganisationsService {
 
     const searchedResultResponseFormat = searchedMembersResult.map(member => ({
       user_id: member.user_id.id,
-      username: member.profile_id.username,
+      username: member?.profile_id?.username,
       email: member.user_id.email,
       name: `${member.user_id.first_name} ${member.user_id.last_name}`,
-      phone_number: member.user_id.phone,
-      profile_pic_url: member.profile_id.profile_pic_url,
+      phone_number: member.user_id?.phone,
+      profile_pic_url: member?.profile_id?.profile_pic_url,
     }));
 
     return { message: 'User(s) found successfully', data: { members: searchedResultResponseFormat } };
