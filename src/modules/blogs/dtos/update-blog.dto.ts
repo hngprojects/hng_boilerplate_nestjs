@@ -6,7 +6,7 @@ export class UpdateBlogDto {
   @IsOptional()
   @IsString()
   @MinLength(5, { message: 'Title must be at least 5 characters long' })
-  title?: string;
+  title?: string
 
   @ApiProperty({ description: 'The content of the blog', required: false })
   @IsOptional()
