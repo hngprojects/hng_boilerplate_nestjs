@@ -214,7 +214,7 @@ export class ProductsService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!product) {
-      throw new CustomHttpException(SYS_MSG.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(systemMessages.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const productComment = this.commentRepository.create({ comment, product, user });
