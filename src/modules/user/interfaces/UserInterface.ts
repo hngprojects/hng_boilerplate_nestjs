@@ -1,4 +1,5 @@
-import { Profile } from 'src/modules/profile/entities/profile.entity';
+// import { Profile } from 'src/modules/profile/entities/profile.entity';
+import { Profile } from '../../../modules/profile/entities/profile.entity';
 import { UserType } from '../entities/user.entity';
 
 interface UserInterface {

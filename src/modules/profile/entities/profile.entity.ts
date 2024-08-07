@@ -36,4 +36,10 @@ export class Profile extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   profile_pic_url: string;
+
+  @Column({ default: false })
+  deactivated: boolean;
+
+  @Column({ nullable: true })
+  deactivation_reason: string;
 }
