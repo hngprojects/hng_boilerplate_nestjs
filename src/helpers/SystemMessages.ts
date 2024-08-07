@@ -60,6 +60,7 @@ export const USER_NOT_REGISTERED = 'User not found, register to continue';
 export const INVITE_ACCEPTED = 'Invite already accepted';
 export const INVALID_INVITE = 'Invalid invite link';
 export const INVITE_NOT_FOUND = 'Invite link not found';
+export const BLOG_DELETED = 'Blog post has been successfully deleted';
 export const NO_USER_TESTIMONIALS = 'User has no testimonials';
 export const USER_TESTIMONIALS_FETCHED = 'User testimonials retrieved successfully';
 export const QUESTION_ALREADY_EXISTS= 'This question already exists.';
