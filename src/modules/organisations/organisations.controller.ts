@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Put,
@@ -23,7 +24,8 @@ import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
-
+import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
+import { AddMemberDto } from './dto/add-member.dto';
 @ApiBearerAuth()
 @ApiTags('organization')
 @Controller('organizations')
@@ -123,5 +125,24 @@ export class OrganisationsController {
     @Body() updateMemberRoleDto: UpdateMemberRoleDto
   ) {
     return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
+  }
+
+  @UseGuards(OwnershipGuard)
+  @ApiOperation({ summary: 'Add member to an organization' })
+  @ApiResponse({
+    status: 201,
+    description: 'Member added successfully',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User already added to organization.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @Post(':org_id/users')
+  async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
+    return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
   }
 }

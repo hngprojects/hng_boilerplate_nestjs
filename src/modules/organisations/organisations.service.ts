@@ -20,8 +20,15 @@ import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../helpers/SystemMessages';
+import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
+import { AddMemberDto } from './dto/add-member.dto';
+import { DefaultRole } from '../organisation-role/entities/role.entity';
+import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
+import { RoleCategory } from '../organisation-role/helpers/RoleCategory';
+import { Permissions } from '../organisation-permissions/entities/permissions.entity';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationsService {
@@ -33,7 +40,13 @@ export class OrganisationsService {
     @InjectRepository(OrganisationMember)
     private readonly organisationMemberRepository: Repository<OrganisationMember>,
     @InjectRepository(OrganisationRole)
-    private readonly rolesRepository: Repository<OrganisationRole>
+    private readonly roleRepository: Repository<OrganisationRole>,
+    @InjectRepository(DefaultRole)
+    private readonly defaultRoleRepository: Repository<DefaultRole>,
+    @InjectRepository(DefaultPermissions)
+    private readonly defaultPermissionsRepository: Repository<DefaultPermissions>,
+    @InjectRepository(Permissions)
+    private readonly permissionsRepository: Repository<Permissions>
   ) {}
 
   async getOrganisationMembers(
@@ -63,23 +76,51 @@ export class OrganisationsService {
   }
 
   async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
-    const emailFound = await this.emailExists(createOrganisationDto.email);
-    if (emailFound) throw new ConflictException('Organisation with this email already exists');
+    const [emailFound, owner, defaultRoles, defaultPermissions] = await Promise.all([
+      this.emailExists(createOrganisationDto.email),
+      this.userRepository.findOne({ where: { id: userId } }),
+      this.defaultRoleRepository.find(),
+      this.defaultPermissionsRepository.find(),
+    ]);
 
-    const owner = await this.userRepository.findOne({
-      where: { id: userId },
-    });
+    if (emailFound) throw new ConflictException('Organisation with this email already exists');
 
     const mapNewOrganisation = CreateOrganisationMapper.mapToEntity(createOrganisationDto, owner);
     const newOrganisation = this.organisationRepository.create({
       ...mapNewOrganisation,
     });
 
-    await this.organisationRepository.save(newOrganisation);
+    for (const role of defaultRoles) {
+      const rolePermissions = defaultPermissions.map(defaultPerm => {
+        const permission = new Permissions();
+        permission.category = defaultPerm.category;
+        permission.permission_list = defaultPerm.permission_list;
+        return permission;
+      });
 
+      const savedPermissions = await this.permissionsRepository.save(rolePermissions);
+
+      const newRole = this.roleRepository.create({
+        name: role.name,
+        description: role.description,
+        permissions: savedPermissions,
+        organisation: newOrganisation,
+      });
+
+      const savedRole = await this.roleRepository.save(newRole);
+
+      if (!newOrganisation.role) {
+        newOrganisation.role = [];
+      }
+      newOrganisation.role.push(savedRole);
+    }
+
+    await this.organisationRepository.save(newOrganisation);
+    const defaultAdminRole = newOrganisation.role.find(role => role.name === RoleCategory.Administrator);
     const newMember = new OrganisationMember();
     newMember.user_id = owner;
     newMember.organisation_id = newOrganisation;
+    newMember.role = defaultAdminRole;
 
     await this.organisationMemberRepository.save(newMember);
 
@@ -145,7 +186,7 @@ export class OrganisationsService {
       throw new CustomHttpException(ORG_MEMBER_DOES_NOT_BELONG, HttpStatus.FORBIDDEN);
     }
 
-    const newRole = await this.rolesRepository.findOne({
+    const newRole = await this.roleRepository.findOne({
       where: {
         name: updateMemberRoleDto.role,
         organisation: { id: orgId },
@@ -168,5 +209,43 @@ export class OrganisationsService {
         role: newRole,
       },
     };
+  }
+
+  async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
+    const organisation = await this.organisationRepository.findOneBy({ id: org_id });
+    if (!organisation) {
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: addMemberDto.user_id },
+      relations: ['profile'],
+    });
+
+    if (!user) {
+      throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    const existingMember = await this.organisationMemberRepository.findOne({
+      where: { user_id: { id: user.id }, organisation_id: { id: organisation.id } },
+    });
+
+    if (existingMember) {
+      throw new CustomHttpException(SYS_MSG.MEMBER_ALREADY_EXISTS, HttpStatus.CONFLICT);
+    }
+
+    const getDefaultRole = await this.roleRepository.findOne({
+      where: { name: RoleCategory.User, organisation: { id: organisation.id } },
+    });
+
+    const newMember = this.organisationMemberRepository.create({
+      user_id: user,
+      role: getDefaultRole,
+      profile_id: user.profile,
+      organisation_id: organisation,
+    });
+
+    await this.organisationMemberRepository.save(newMember);
+    return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
   }
 }
