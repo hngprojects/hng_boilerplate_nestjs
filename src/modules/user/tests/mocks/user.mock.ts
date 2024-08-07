@@ -16,6 +16,7 @@ export const mockUser: User = {
   owned_organisations: [],
   created_organisations: [],
   profile: null,
+  status: 'active',
   testimonials: [],
   backup_codes: [],
   organisationMembers: [],
