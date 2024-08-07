@@ -17,11 +17,6 @@ const dataSource = new DataSource({
   synchronize: isDevelopment,
   migrationsTableName: 'migrations',
   ssl: process.env.DB_SSL === 'true',
-  extra: {
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  },
 });
 export async function initializeDataSource() {
   if (!dataSource.isInitialized) {
