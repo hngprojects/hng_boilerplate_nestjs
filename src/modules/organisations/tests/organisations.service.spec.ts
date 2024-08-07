@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrganisationsService } from '../organisations.service';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -47,8 +47,10 @@ describe('OrganisationsService', () => {
         {
           provide: getRepositoryToken(OrganisationMember),
           useValue: {
+            findOne: jest.fn(),
             save: jest.fn(),
             find: jest.fn(),
+            softDelete: jest.fn(),
           },
         },
         UserService,
@@ -90,14 +92,18 @@ describe('OrganisationsService', () => {
     });
 
     it('should create an organisation', async () => {
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue(null);
+      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([]);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue({
         ...orgMock.owner,
       } as User);
       jest.spyOn(organisationRepository, 'create').mockReturnValue(orgMock);
       jest.spyOn(organisationRepository, 'save').mockResolvedValue({
         ...orgMock,
-      });
+      } as Organisation);
+      jest.spyOn(organisationMemberRepository, 'save').mockResolvedValue({
+        user_id: { id: orgMock.owner.id },
+        organisation_id: orgMock.id,
+      } as any);
 
       const result = await service.create(createMockOrganisationRequestDto(), orgMock.owner.id);
       expect(result.status).toEqual('success');
@@ -119,7 +125,7 @@ describe('OrganisationsService', () => {
       const organisation = new Organisation();
 
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(organisation);
-      jest.spyOn(organisationRepository, 'update').mockResolvedValueOnce({ affected: 1 } as any);
+      jest.spyOn(organisationRepository, 'update').mockResolvedValueOnce({ affected: 1 } as UpdateResult);
       jest
         .spyOn(organisationRepository, 'findOneBy')
         .mockResolvedValueOnce({ ...organisation, ...updateOrganisationDto });
@@ -225,7 +231,88 @@ describe('OrganisationsService', () => {
       ]);
     });
   });
+  
+    describe('removeOrganisationMember', () => {
+    it('should throw CustomHttpException if user is not found', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
+      await expect(
+        service.removeOrganisationMember({
+          organisationId: 'org-id',
+          userId: 'user-id',
+        } as any)
+      ).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should throw CustomHttpException if organisation is not found', async () => {
+      const user: any = {
+        id: 'some-uuid-here',
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        service.removeOrganisationMember({
+          organisationId: 'org-id',
+          userId: 'user-id',
+        } as any)
+      ).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should throw CustomHttpException if organisation member is not found', async () => {
+      const user: any = {
+        id: 'some-uuid-here',
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({
+        id: 'org-id',
+        organisationMembers: [],
+      } as Organisation);
+
+      await expect(
+        service.removeOrganisationMember({
+          organisationId: 'org-id',
+          userId: 'user-id',
+        } as any)
+      ).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should remove an organisation member successfully', async () => {
+      const user: any = {
+        id: 'some-uuid-here',
+        email: 'test@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+
+      const organisation = {
+        id: 'org-id',
+        organisationMembers: [{ user_id: { id: 'user-id' } }],
+      } as any;
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(organisation.organisationMembers[0]);
+      jest.spyOn(organisationMemberRepository, 'softDelete').mockResolvedValue({ affected: 1 } as UpdateResult);
+
+      const result = await service.removeOrganisationMember({
+        organisationId: 'org-id',
+        userId: 'user-id',
+      } as any);
+
+      expect(result).toEqual({
+        message: 'Member removed from organisation successfully',
+      });
+    });
+  });     
+       
+  
   describe("get user's organization", () => {
     it('should throw an error if the user has no organizations', async () => {
       const mockUser = new User();
