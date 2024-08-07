@@ -70,10 +70,6 @@ export class JobsService {
     const newJob = this.jobRepository.create(Object.assign(new Job(), { ...createJobDto, user }));
 
     await this.jobRepository.save(newJob);
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
     return {
       status: 'success',
       status_code: 201,
@@ -115,13 +111,9 @@ export class JobsService {
 
     job.is_deleted = true;
     const deleteJobEntityInstance = this.jobRepository.create(job);
-<<<<<<< HEAD
-    await this.jobRepository.save(deleteJobEntityInstance);
-=======
 
     await this.jobRepository.save(deleteJobEntityInstance);
 
->>>>>>> dev
     return {
       status: 'success',
       message: SYS_MSG.JOB_DELETION_SUCCESSFUL,

@@ -17,9 +17,6 @@ export const jobsMock: Job[] = [
     company_name: 'Google',
     is_deleted: false,
     user: orgMock.owner,
-<<<<<<< HEAD
-    job_application: [],
-=======
     qualifications: [
       "Bachelor's Degree in Computer Science or related field",
       '5+ years of experience in software development',
@@ -33,7 +30,6 @@ export const jobsMock: Job[] = [
     benefits: ['Health insurance', '401(k) matching', 'Paid time off'],
     experience_level: 'Senior',
     job_application: [], // Placeholder, will be updated later
->>>>>>> dev
   },
 ];
 

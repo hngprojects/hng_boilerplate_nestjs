@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards, ValidationPipe } from '@nestjs/common';
-=======
 import {
   Body,
   Controller,
@@ -14,7 +11,6 @@ import {
   ValidationPipe,
   ParseUUIDPipe,
 } from '@nestjs/common';
->>>>>>> dev
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -33,10 +29,7 @@ import { JobApplicationResponseDto } from './dto/job-application-response.dto';
 import { JobApplicationDto } from './dto/job-application.dto';
 import { JobDto } from './dto/job.dto';
 import { JobsService } from './jobs.service';
-<<<<<<< HEAD
-=======
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
->>>>>>> dev
 import { JobSearchDto } from './dto/jobSearch.dto';
 
 @ApiTags('Jobs')
