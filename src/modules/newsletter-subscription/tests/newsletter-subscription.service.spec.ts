@@ -62,7 +62,7 @@ describe('NewsletterService', () => {
       jest.spyOn(repository, 'create').mockReturnValue(dto as NewsletterSubscription);
       jest.spyOn(repository, 'save').mockResolvedValue(dto as NewsletterSubscription);
 
-      const result = await service.newsletterSubcription(dto);
+      const result = await service.newsletterSubscription(dto);
       expect(result).toEqual({ status: 'success', message: 'Subscriber subscription successful' });
     });
   });

@@ -12,7 +12,7 @@ export class NewsletterSubscriptionService {
     private readonly newsletterSubscriptionRepository: Repository<NewsletterSubscription>
   ) {}
 
-  async newsletterSubcription(createNewsletterSubscriptionDto: CreateNewsletterSubscriptionDto) {
+  async newsletterSubscription(createNewsletterSubscriptionDto: CreateNewsletterSubscriptionDto) {
     const { email } = createNewsletterSubscriptionDto;
 
     const existingSubscription = await this.newsletterSubscriptionRepository.findOne({ where: { email: email } });

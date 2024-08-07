@@ -17,7 +17,7 @@ export class NewsletterSubscriptionController {
   @ApiOperation({ summary: 'Subscribe to newsletter' })
   @ApiResponse({ status: 201, description: 'Subscriber subscription successful.' })
   create(@Body() createNewsletterDto: CreateNewsletterSubscriptionDto) {
-    return this.newsletterSubscriptionService.newsletterSubcription(createNewsletterDto);
+    return this.newsletterSubscriptionService.newsletterSubscription(createNewsletterDto);
   }
 
   @UseGuards(SuperAdminGuard)
@@ -47,7 +47,7 @@ export class NewsletterSubscriptionController {
       },
     },
   })
-  async findAll(
+  async getAllSubscribers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10
   ): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[]; meta: any }> {
@@ -71,7 +71,7 @@ export class NewsletterSubscriptionController {
   @ApiOperation({ summary: 'Remove subscriber from newsletter' })
   @ApiResponse({ status: 200, description: 'Subscriber with ID {id} has been soft deleted' })
   @ApiResponse({ status: 404, description: 'Subscriber with ID ${id} not found' })
-  remove(@Param('id') id: string) {
+  removeSubscriber(@Param('id') id: string) {
     return this.newsletterSubscriptionService.removeSubscriber(id);
   }
 
