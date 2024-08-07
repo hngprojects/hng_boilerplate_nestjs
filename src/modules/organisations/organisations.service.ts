@@ -18,6 +18,7 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
 import { DefaultRole } from '../organisation-role/entities/role.entity';
@@ -166,6 +167,34 @@ export class OrganisationsService {
       }
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
+  }
+
+  async removeOrganisationMember(removeOrganisationMemberDto: RemoveOrganisationMemberDto) {
+    const { organisationId, userId } = removeOrganisationMemberDto;
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new CustomHttpException('No user found with the provided id', 404);
+    }
+
+    const org = await this.organisationRepository.findOne({ where: { id: organisationId } });
+    if (!org) {
+      throw new CustomHttpException('No organisation found with the provided id', 404);
+    }
+
+    const orgMember = await this.organisationMemberRepository.findOne({
+      where: {
+        organisation_id: { id: organisationId },
+        user_id: { id: userId },
+      },
+    });
+    if (!orgMember) {
+      throw new CustomHttpException('No organisation member found with provided ids', 404);
+    }
+
+    await this.organisationMemberRepository.softDelete(orgMember.id);
+
+    return { message: 'Member removed from organisation successfully' };
   }
 
   async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
