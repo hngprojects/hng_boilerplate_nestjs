@@ -18,7 +18,8 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
-import { OrganisationsService } from '../organisations/organisations.service';
+import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @Injectable()
 export default class UserService {
@@ -26,8 +27,7 @@ export default class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Profile)
-    private profileRepository: Repository<Profile>,
-    private organisationService: OrganisationsService
+    private profileRepository: Repository<Profile>
   ) {}
 
   async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
@@ -84,10 +84,10 @@ export default class UserService {
   }
 
   private async getUserById(identifier: string) {
-    const user = (await this.userRepository.findOne({
+    const user: UserResponseDTO = await this.userRepository.findOne({
       where: { id: identifier },
       relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
-    })) as User;
+    });
     return user;
   }
 
@@ -102,7 +102,11 @@ export default class UserService {
     return await GetRecord[identifierType]();
   }
 
-  async updateUser(userId: string, updateUserDto: UpdateUserDto, currentUser: UserPayload) {
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+    currentUser: UserPayload
+  ): Promise<UpdateUserResponseDTO> {
     if (!userId) {
       throw new BadRequestException({
         error: 'Bad Request',
@@ -124,7 +128,6 @@ export default class UserService {
       });
     }
 
-    // Check if the current user is a super admin or the user being updated
     if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
       throw new ForbiddenException({
         error: 'Forbidden',
@@ -150,6 +153,7 @@ export default class UserService {
       user: {
         id: user.id,
         name: `${user.first_name} ${user.last_name}`,
+        phone_number: user.phone_number,
       },
     };
   }
@@ -190,16 +194,6 @@ export default class UserService {
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
   }
 
-  async getUserOrganisations(userId: string) {
-    const user = await this.getUserById(userId);
-    const organisation = user.owned_organisations;
-    return {
-      status_code: HttpStatus.OK,
-      message: 'Organisations fetched successfully',
-      data: organisation,
-    };
-  }
-
   async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
     const [users, total] = await this.userRepository.findAndCount({
       select: ['id', 'first_name', 'last_name', 'email', 'phone', 'is_active', 'created_at'],
@@ -232,23 +226,42 @@ export default class UserService {
       },
     };
   }
+  async getUserStats(status?: string): Promise<GetUserStatsResponseDto> {
+    const filters = {};
 
-  async getUserStatistics(currentUser: UserPayload): Promise<any> {
-    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
-      throw new ForbiddenException({
-        error: 'Forbidden',
-        message: 'You are not authorized to access user statistics',
-      });
+    if (status) {
+      if (status === 'active') {
+        filters['is_active'] = true;
+      } else if (status === 'deleted') {
+        filters['is_active'] = false;
+      } else {
+        throw new BadRequestException({
+          error: 'Bad Request',
+          message: SYS_MSG.BAD_REQUEST,
+          status_code: HttpStatus.BAD_REQUEST,
+        });
+      }
     }
 
     const totalUsers = await this.userRepository.count();
-    const activeUsers = await this.userRepository.count({ where: { is_active: true } });
-    const deletedUsers = await this.userRepository.count({ where: { is_active: false } });
+
+    const activeUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: true } })
+      : await this.userRepository.count({ where: { is_active: true } });
+
+    const deletedUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: false } })
+      : await this.userRepository.count({ where: { is_active: false } });
 
     return {
-      total_users: totalUsers,
-      active_users: activeUsers,
-      deleted_users: deletedUsers,
+      status: 'success',
+      status_code: 200,
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
+      data: {
+        total_users: totalUsers,
+        active_users: activeUsers,
+        deleted_users: deletedUsers,
+      },
     };
   }
 }

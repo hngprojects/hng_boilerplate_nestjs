@@ -137,7 +137,6 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Delete('topics/:id')
-  //@Roles('superadmin')
   @ApiOperation({ summary: 'Delete a help center topic by id' })
   @ApiResponse({ status: 200, description: 'Topic deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' })
