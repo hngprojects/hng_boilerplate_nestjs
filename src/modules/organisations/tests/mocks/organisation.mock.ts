@@ -55,7 +55,7 @@ export const createMockOrganisation = (): Organisation => {
   };
 
   const ownerAndCreator = {
-    ...user,
+    id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
     first_name: 'John',

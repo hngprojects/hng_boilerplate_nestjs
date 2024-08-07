@@ -19,8 +19,6 @@ import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
 import { MemberRoleMapper } from './mapper/member-role.mapper';
-import UserService from '../user/user.service';
-import * as SYS_MSG from '../../helpers/SystemMessages';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
@@ -30,6 +28,7 @@ import { RoleCategory } from '../organisation-role/helpers/RoleCategory';
 import { Permissions } from '../organisation-permissions/entities/permissions.entity';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../helpers/SystemMessages';
+import UserService from '../user/user.service';
 
 @Injectable()
 export class OrganisationsService {
@@ -47,7 +46,8 @@ export class OrganisationsService {
     @InjectRepository(DefaultPermissions)
     private readonly defaultPermissionsRepository: Repository<DefaultPermissions>,
     @InjectRepository(Permissions)
-    private readonly permissionsRepository: Repository<Permissions>
+    private readonly permissionsRepository: Repository<Permissions>,
+    private readonly userService: UserService
   ) {}
 
   async getOrganisationMembers(
@@ -237,13 +237,10 @@ export class OrganisationsService {
     await this.organisationMemberRepository.save(newMember);
     return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
   }
-  
-  
+
   async getUserOrganisations(userId: string) {
     const res = await this.userService.getUserDataWithoutPasswordById(userId);
     const user = res.user as User;
-
-    console.log(user);
 
     const createdOrgs =
       user.created_organisations && user.created_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
@@ -282,4 +279,5 @@ export class OrganisationsService {
         member_organisations: memberOrgsMapped,
       },
     };
+  }
 }

@@ -43,7 +43,6 @@ export const DEADLINE_PASSED = 'Job application deadline passed';
 export const INVALID_UUID_FORMAT = 'Invalid UUID format';
 export const MEMBER_ALREADY_EXISTS = 'User already added to organization';
 export const MEMBER_ALREADY_SUCCESSFULLY = 'Member added successfully';
-export const DEADLINE_PASSED = 'Job application deadline passed';
 export const MEMBER_NOT_ADDED = 'Failed to add member to the organisation';
 export const USER_NOT_REGISTERED = 'User not found, register to continue';
 export const INVITE_ACCEPTED = 'Invite already accepted';

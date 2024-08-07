@@ -8,9 +8,14 @@ import { validate } from 'class-validator';
 import { orgMock } from '../tests/mocks/organisation.mock';
 import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
-import { InternalServerErrorException, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+  HttpStatus,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
-import { OrganisationMember } from '../entities/org-members.entity';
 import { AddMemberDto } from '../dto/add-member.dto';
 import { OrganisationRole } from '../../../modules/organisation-role/entities/organisation-role.entity';
 import { DefaultRole } from '../../../modules/organisation-role/entities/role.entity';
@@ -426,7 +431,7 @@ describe('OrganisationsService', () => {
     });
   });
 
-describe("get user's organization", () => {
+  describe("get user's organization", () => {
     it('should throw an error if the user has no organizations', async () => {
       const mockUser = new User();
       mockUser.id = 'sample-id-6789';
@@ -455,7 +460,6 @@ describe("get user's organization", () => {
       expect(res.data).toHaveProperty('member_organisations');
       expect(res.data.member_organisations[0]).toHaveProperty('role');
       expect(res.data.member_organisations[0]).toHaveProperty('organisation');
-      
     });
   });
 });
