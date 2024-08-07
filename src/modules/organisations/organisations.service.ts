@@ -203,6 +203,6 @@ export class OrganisationsService {
     });
 
     await this.organisationMemberRepository.save(newMember);
-    return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_EXISTS, member: newMember };
+    return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
   }
 }

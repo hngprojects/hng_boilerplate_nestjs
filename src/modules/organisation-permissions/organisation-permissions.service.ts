@@ -57,7 +57,6 @@ export class OrganisationPermissionsService {
         throw new NotFoundException(`Permission not found in the specified role`);
       }
 
-      // Convert category to PermissionCategory
       const permissionCategory = category as PermissionCategory;
 
       updatePromises.push(

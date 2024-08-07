@@ -31,4 +31,5 @@ export const mockUser = {
   products: [],
   profile: profileMock,
   organisationMembers: [orgMemberMock],
+  blogs: null,
 };

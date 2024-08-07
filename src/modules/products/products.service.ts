@@ -68,9 +68,7 @@ export class ProductsService {
   }
 
   async searchProducts(orgId: string, criteria: SearchCriteria) {
-    console.log(orgId, 'orgId');
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
-    console.log(org, 'org');
     if (!org)
       throw new InternalServerErrorException({
         status: 'Unprocessable entity exception',
@@ -200,6 +198,21 @@ export class ProductsService {
     return {
       message: 'Product successfully deleted',
       data: {},
+    };
+  }
+
+  async getProductStock(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new NotFoundException(`Product not found`);
+    }
+    return {
+      message: 'Product stock retrieved successfully',
+      data: {
+        product_id: product.id,
+        current_stock: product.quantity,
+        last_updated: product.updated_at,
+      },
     };
   }
 }
