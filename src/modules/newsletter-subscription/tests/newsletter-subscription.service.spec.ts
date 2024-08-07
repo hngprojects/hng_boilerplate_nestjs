@@ -25,7 +25,7 @@ describe('NewsletterService', () => {
             create: jest.fn(),
             save: jest.fn(),
             find: jest.fn(),
-            findAndCount: jest.fn(), // Add this line
+            findAndCount: jest.fn(),
             softDelete: jest.fn(),
             restore: jest.fn(),
           },
@@ -52,7 +52,7 @@ describe('NewsletterService', () => {
         .spyOn(repository, 'findOne')
         .mockResolvedValue({ id: '1', email: 'test@example.com' } as NewsletterSubscription);
 
-      const result = await service.newsletterSubcription(dto);
+      const result = await service.newsletterSubscription(dto);
       expect(result).toEqual({ message: 'Subscriber subscription successful' });
     });
 
