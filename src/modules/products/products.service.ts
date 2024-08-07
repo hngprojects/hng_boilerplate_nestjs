@@ -14,6 +14,8 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
+import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
+import * as systemMessages from '../../helpers/SystemMessages';
 
 interface SearchCriteria {
   name?: string;
@@ -68,9 +70,7 @@ export class ProductsService {
   }
 
   async searchProducts(orgId: string, criteria: SearchCriteria) {
-    console.log(orgId, 'orgId');
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
-    console.log(org, 'org');
     if (!org)
       throw new InternalServerErrorException({
         status: 'Unprocessable entity exception',
@@ -200,6 +200,72 @@ export class ProductsService {
     return {
       message: 'Product successfully deleted',
       data: {},
+    };
+  }
+
+  async getProductStock(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new NotFoundException(`Product not found`);
+    }
+    return {
+      message: 'Product stock retrieved successfully',
+      data: {
+        product_id: product.id,
+        current_stock: product.quantity,
+        last_updated: product.updated_at,
+      },
+    };
+  }
+
+  private getDateRange(date: Date) {
+    const monthStarts = startOfMonth(new Date(date));
+    const monthEnds = endOfMonth(new Date(date));
+
+    return { monthStarts, monthEnds };
+  }
+
+  private async getTotalProductsForDateRange(startOfMonth: Date, endOfMonth: Date) {
+    const result = await this.productRepository
+      .createQueryBuilder('product')
+      .select('SUM(product.quantity)', 'total')
+      .where('product.created_at BETWEEN :startOfMonth AND :endOfMonth', { startOfMonth, endOfMonth })
+      .getRawOne();
+
+    return result && result.total ? parseInt(result.total, 10) : 0;
+  }
+
+  async getTotalProducts() {
+    const todaysDate = new Date();
+    const lastMonth = subMonths(todaysDate, 1);
+
+    const monthStarts = this.getDateRange(todaysDate).monthStarts;
+    const monthEnds = this.getDateRange(todaysDate).monthEnds;
+    const lastMonthStarts = this.getDateRange(lastMonth).monthStarts;
+    const lastMonthEnds = this.getDateRange(lastMonth).monthEnds;
+
+    const totalProductsThisMonth = await this.getTotalProductsForDateRange(monthStarts, monthEnds);
+
+    const totalProductsLastMonth = await this.getTotalProductsForDateRange(lastMonthStarts, lastMonthEnds);
+
+    let percentageChange;
+
+    if (totalProductsLastMonth === totalProductsThisMonth) {
+      percentageChange =
+        totalProductsLastMonth === 0 ? 'No products to compare from last month' : 'No change from last month';
+    } else if (totalProductsLastMonth === 0 && totalProductsThisMonth > 0) {
+      percentageChange = `+100.00% from last month`;
+    } else {
+      const change = ((totalProductsThisMonth - totalProductsLastMonth) / totalProductsLastMonth) * 100;
+      percentageChange = `${change > 0 ? '+' : ''}${change.toFixed(2)}% from last month`;
+    }
+
+    return {
+      message: systemMessages.TOTAL_PRODUCTS_FETCHED_SUCCESSFULLY,
+      data: {
+        total_products: totalProductsThisMonth,
+        percentage_change: percentageChange,
+      },
     };
   }
 }
