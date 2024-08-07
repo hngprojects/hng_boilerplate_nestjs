@@ -7,7 +7,7 @@ import { Payment, PaymentStatus } from './entities/payment.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import { CreateFlutterwavePaymentDto } from './dto/create-flutterwavePaymentDto';
+import { CreateFlutterwavePaymentDto } from './dto/create-flutterwave-payment.dto';
 
 describe('FlutterwaveService', () => {
   let service: FlutterwaveService;
@@ -44,7 +44,6 @@ describe('FlutterwaveService', () => {
   });
 
   it('should initiate a payment successfully', async () => {
-    // Mocking the payment plan response
     const paymentPlanResponse: AxiosResponse = {
       data: {
         data: {
@@ -77,25 +76,21 @@ describe('FlutterwaveService', () => {
     };
 
     jest.spyOn(httpService, 'post').mockReturnValue(of(paymentInitResponse));
-
-    // Mocking the repository save
     jest.spyOn(paymentRepo, 'create').mockImplementation(dto => dto as Payment);
     jest.spyOn(paymentRepo, 'save').mockResolvedValue({} as Payment);
 
-    // Create a mock dto
     const createFlutterwavePaymentDto: CreateFlutterwavePaymentDto = {
       plan_id: 'plan-id',
       email: 'test@example.com',
-      full_name: 'Test User',
+      first_name: 'first',
+      last_name: 'last',
       redirect_url: 'http://redirect-url.com',
       organisation_id: 'org-id',
       billing_option: 'monthly',
     };
 
-    // Execute the service method
     const result = await service.initiatePayment(createFlutterwavePaymentDto);
 
-    // Assertions
     expect(result).toEqual({
       status: 200,
       message: 'Payment initiated successfully',

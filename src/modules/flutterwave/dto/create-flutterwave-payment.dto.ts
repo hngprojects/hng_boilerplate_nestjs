@@ -1,4 +1,4 @@
-import { IsEmail, IsEmpty, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEmail, IsEmpty, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreateFlutterwavePaymentDto {
   @IsNotEmpty()
@@ -6,7 +6,7 @@ export class CreateFlutterwavePaymentDto {
   email: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsUUID()
   organisation_id: string;
 
   @IsNotEmpty()
@@ -15,7 +15,11 @@ export class CreateFlutterwavePaymentDto {
 
   @IsNotEmpty()
   @IsString()
-  full_name: string;
+  first_name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  last_name: string;
 
   @IsNotEmpty()
   @IsString()

@@ -9,18 +9,18 @@ export enum PaymentStatus {
 
 @Entity()
 export class Payment extends AbstractBaseEntity {
-  @Column()
+  @Column({ nullable: false })
   user_id: string;
 
-  @Column()
+  @Column({ nullable: false })
   transaction_id: string;
 
-  @Column()
+  @Column({ nullable: true })
   gateway_id: string;
 
-  @Column()
+  @Column({ nullable: false })
   amount: number;
 
-  @Column()
+  @Column({ nullable: true })
   status: PaymentStatus;
 }

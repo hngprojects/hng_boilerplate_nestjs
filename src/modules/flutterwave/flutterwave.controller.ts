@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { FlutterwaveService } from './flutterwave.service';
-import { CreateFlutterwavePaymentDto } from './dto/create-flutterwavePaymentDto';
+import { CreateFlutterwavePaymentDto } from './dto/create-flutterwave-payment.dto';
 
 @Controller('payments/flutterwave')
 export class FlutterwaveController {

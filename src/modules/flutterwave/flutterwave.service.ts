@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { CreateFlutterwavePaymentDto } from './dto/create-flutterwavePaymentDto';
-import { CreatePaymentDto } from './dto/create-paymentDto';
+import { CreateFlutterwavePaymentDto } from './dto/create-flutterwave-payment.dto';
+import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ConfigService } from '@nestjs/config';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { v4 as uuid4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
+import { PAYMENT_NOTFOUND } from 'src/helpers/SystemMessages';
 
 @Injectable()
 export class FlutterwaveService {
@@ -32,16 +33,18 @@ export class FlutterwaveService {
       .get(`${this.baseUrl}/payment-plans/${createFlutterwavePaymentDto.plan_id}`, { headers })
       .toPromise();
     if (!payment_plan) {
-      return new CustomHttpException('Payment plan not found', 404).getResponse();
+      throw new CustomHttpException(PAYMENT_NOTFOUND, 404);
     }
+    const { amount, currency } = payment_plan.data.data;
+    const { email, first_name, last_name } = createFlutterwavePaymentDto;
     const paymentData = {
       tx_ref: uuid4(),
-      amount: payment_plan.data.data.amount,
-      currency: payment_plan.data.data.currency,
+      amount: amount,
+      currency: currency,
       redirect_url: createFlutterwavePaymentDto.redirect_url,
       customer: {
-        email: createFlutterwavePaymentDto.email,
-        name: createFlutterwavePaymentDto.full_name,
+        email: email,
+        name: `${first_name} ${last_name}`,
       },
       customizations: {
         title: 'Payment for Goods/Services',
@@ -80,6 +83,9 @@ export class FlutterwaveService {
     const response = await this.httpService
       .get(`${this.baseUrl}/transactions/${transactionId}/verify`, { headers })
       .toPromise();
+    const payment = await this.paymentRepo.findOne({ where: { transaction_id: transactionId } });
+    payment.status = PaymentStatus.APPROVED;
+    await this.paymentRepo.save(payment);
     return {
       status: 200,
       message: 'Payment verified successfully',
