@@ -20,7 +20,7 @@ import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 @ApiTags('organisation Settings')
 @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@Controller('organisations')
+@Controller('organizations')
 export class OrganisationRoleController {
   constructor(private readonly organisationRoleService: OrganisationRoleService) {}
 
