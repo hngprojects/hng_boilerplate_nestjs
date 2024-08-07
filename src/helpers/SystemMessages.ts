@@ -9,6 +9,7 @@ export const TWO_FACTOR_VERIFIED_SUCCESSFULLY = '2FA verified and enabled';
 export const INCORRECT_TOTP_CODE = 'Incorrect totp code';
 export const USER_NOT_ENABLED_2FA = 'Two factor Auth not initiated. Visit api/auth/2fa/enable';
 export const USER_NOT_FOUND = 'User not found!';
+export const TOTAL_PRODUCTS_FETCHED_SUCCESSFULLY = 'Total Products fetched successfully';
 export const INVALID_PASSWORD = 'Invalid password';
 export const TWO_FA_INITIATED = '2FA setup initiated';
 export const TWO_FA_ENABLED = '2FA is already enabled';
@@ -49,4 +50,3 @@ export const INVITE_ACCEPTED = 'Invite already accepted';
 export const INVALID_INVITE = 'Invalid invite link';
 export const INVITE_NOT_FOUND = 'Invite link not found';
 export const QUESTION_ALREADY_EXISTS= 'This question already exists.';
-
