@@ -122,8 +122,8 @@ describe('InviteService', () => {
     });
 
     it('should throw an exception if the invitation does not exist', async () => {
-      const orgId = 'some-org-id';
-      const inviteId = 'some-invite-id';
+      const orgId = uuidv4();
+      const inviteId = uuidv4();
       const organisation = { id: orgId };
 
       jest.spyOn(organisationRepo, 'findOne').mockResolvedValue(organisation as any);
@@ -133,8 +133,8 @@ describe('InviteService', () => {
     });
 
     it('should throw an exception if the invitation has already been accepted', async () => {
-      const orgId = 'some-org-id';
-      const inviteId = 'some-invite-id';
+      const orgId = uuidv4();
+      const inviteId = uuidv4();
       const organisation = { id: orgId };
       const invitation = { id: inviteId, isAccepted: true };
 
