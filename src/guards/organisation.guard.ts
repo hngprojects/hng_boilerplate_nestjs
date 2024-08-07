@@ -23,17 +23,23 @@ export class OrganisationGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-
     const request = context.switchToHttp().getRequest();
+    const { id } = context.switchToHttp().getRequest().user;
+    const org_id = request.params.id || request.params.org_id;
 
-    const { sub } = context.switchToHttp().getRequest().user;
     const roles = await this.membersRepository.findOne({
-      where: { user_id: sub },
-      relations: { role: true, organisation_id: true, user_id: true },
+      where: { user_id: { id: id }, organisation_id: { id: org_id } },
+      relations: { role: { permissions: true }, organisation_id: true, user_id: true },
     });
-    const userHasPerms = roles.role.permissions.some(permission => {
-      return requiredPermissions.includes(permission.category);
+    if (!roles) {
+      throw new CustomHttpException(SYS_MSG.FORBIDDEN_ACTION, HttpStatus.FORBIDDEN);
+    }
+    const userHasPerms = requiredPermissions.every(requiredPermission => {
+      return roles.role.permissions.some(permission => {
+        return permission.category === requiredPermission && permission.permission_list === true;
+      });
     });
+
     if (userHasPerms) {
       return true;
     } else {
