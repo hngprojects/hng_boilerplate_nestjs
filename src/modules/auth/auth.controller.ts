@@ -27,27 +27,13 @@ export default class RegistrationController {
   @skipAuth()
   @ApiOperation({ summary: 'User Registration' })
   @ApiResponse({ status: 201, description: 'Register a new user', type: SuccessCreateUserResponse })
-  @ApiResponse({ status: 400, description: 'Bad request', type: ErrorCreateUserResponse })
+  @ApiResponse({ status: 400, description: 'User already exists' })
   @Post('register')
   @HttpCode(201)
   public async register(@Body() body: CreateUserDTO): Promise<any> {
     return this.authService.createNewUser(body);
   }
 
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Verify two factor authentication code' })
-  @ApiBody({
-    description: 'Enable two factor authentication',
-    type: Verify2FADto,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: SYS_MSG.TWO_FACTOR_VERIFIED_SUCCESSFULLY,
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: SYS_MSG.INCORRECT_TOTP_CODE,
-  })
   @Post('2fa/verify')
   verify2fa(@Body() verify2faDto: Verify2FADto, @Req() req) {
     return this.authService.verify2fa(verify2faDto, req.user.sub);
@@ -59,6 +45,7 @@ export default class RegistrationController {
     description: 'The forgot password reset token generated successfully',
     type: ForgotPasswordResponseDto,
   })
+  @ApiResponse({ status: 400, description: SYS_MSG.USER_ACCOUNT_DOES_NOT_EXIST })
   @skipAuth()
   @HttpCode(200)
   @Post('forgot-password')
@@ -87,13 +74,6 @@ export default class RegistrationController {
   }
 
   @Post('2fa/enable')
-  @ApiBody({
-    description: 'Enable two factor authentication',
-    type: Enable2FADto,
-  })
-  @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: SYS_MSG.TWO_FA_INITIATED })
-  @ApiResponse({ status: 400, description: SYS_MSG.BAD_REQUEST })
   @HttpCode(200)
   public async enable2FA(@Body() body: Enable2FADto, @Req() request: Request): Promise<any> {
     const { password } = body;
