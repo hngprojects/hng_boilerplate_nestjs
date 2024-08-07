@@ -31,6 +31,7 @@ import { Permissions } from '../organisation-permissions/entities/permissions.en
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import UserService from '../user/user.service';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class OrganisationsService {
@@ -292,5 +293,18 @@ export class OrganisationsService {
         member_organisations: memberOrgsMapped,
       },
     };
+  }
+
+  async getOrganizationDetailsById(orgId: string) {
+    if (!isUUID(orgId)) {
+      throw new CustomHttpException('Must Provide a valid organization Id', HttpStatus.BAD_REQUEST);
+    }
+
+    const orgDetails = await this.organisationRepository.findOne({ where: { id: orgId } });
+
+    if (!orgDetails) {
+      throw new CustomHttpException('Organization Id Not Found', HttpStatus.NOT_FOUND);
+    }
+    return { message: 'Fetched Organization Details Successfully', data: orgDetails };
   }
 }

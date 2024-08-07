@@ -1,60 +1,69 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
+import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
+@ApiBearerAuth()
 @ApiTags('Products')
-@Controller('/organizations/:id/products')
+@Controller('organizations')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @UseGuards(SuperAdminGuard)
+  @Get('/products/total')
+  @ApiOkResponse({ type: GetTotalProductsResponseDto, description: 'Total Products fetched successfully' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getTotalProducts() {
+    return await this.productsService.getTotalProducts();
+  }
+
   @UseGuards(OwnershipGuard)
-  @Post('')
-  @ApiBearerAuth()
+  @Post('/:orgId/products')
   @ApiOperation({ summary: 'Creates a new product' })
   @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async createProduct(@Param('id') id: string, @Body() createProductDto: CreateProductRequestDto) {
-    return this.productsService.createProduct(id, createProductDto);
+  async createProduct(@Param('orgId') orgId: string, @Body() createProductDto: CreateProductRequestDto) {
+    return this.productsService.createProduct(orgId, createProductDto);
   }
 
-  @Get('search')
+  @Get('/:orgId/products/search')
   @ApiOperation({ summary: 'Search for products' })
-  @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
+  @ApiParam({ name: 'orgId', description: 'organisation ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Products found successfully' })
   @ApiResponse({ status: 204, description: 'No products found' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async searchProducts(
-    @Param('id') id: string,
+    @Param('orgId') orgId: string,
     @Query('name') name?: string,
     @Query('category') category?: string,
     @Query('minPrice') minPrice?: number,
     @Query('maxPrice') maxPrice?: number
   ) {
-    return this.productsService.searchProducts(id, { name, category, minPrice, maxPrice });
+    return this.productsService.searchProducts(orgId, { name, category, minPrice, maxPrice });
   }
 
   @UseGuards(OwnershipGuard)
-  @Get(':id')
+  @Get('/:orgId/products/:productId')
   @ApiOperation({ summary: 'Gets a product by id' })
-  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
-  @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
+  @ApiParam({ name: 'orgId', description: 'Organization ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async getById(@Param('orgId') id: string, @Param('id') productId: string) {
+  async getById(@Param('orgId') id: string, @Param('productId') productId: string) {
     return this.productsService.getProductById(productId);
   }
 
   @UseGuards(OwnershipGuard)
-  @Patch('/:productId')
+  @Patch('/:orgId/products/:productId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Update product' })
   @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
@@ -63,23 +72,23 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async updateProduct(
-    @Param('id') id: string,
+    @Param('orgId') orgId: string,
     @Param('productId') productId: string,
     @Body() updateProductDto: UpdateProductDTO
   ) {
-    return this.productsService.updateProduct(id, productId, updateProductDto);
+    return this.productsService.updateProduct(orgId, productId, updateProductDto);
   }
 
   @UseGuards(OwnershipGuard)
-  @Delete(':productId')
+  @Delete('/:orgId/products/:productId')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async deleteProduct(@Param('id') id: string, @Param('productId') productId: string) {
-    return this.productsService.deleteProduct(id, productId);
+  async deleteProduct(@Param('orgId') orgId: string, @Param('productId') productId: string) {
+    return this.productsService.deleteProduct(orgId, productId);
   }
 
   @UseGuards(OwnershipGuard)
