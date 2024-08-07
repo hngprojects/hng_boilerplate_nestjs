@@ -4,7 +4,8 @@ import { Repository } from 'typeorm';
 import { BlogService } from '../blogs.service';
 import { Blog } from '../entities/blog.entity';
 import { User } from '../../user/entities/user.entity';
-import { NotFoundException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('BlogService', () => {
   let service: BlogService;
@@ -98,7 +99,7 @@ describe('BlogService', () => {
       });
     });
 
-    it('should throw an error if blog not found', async () => {
+    it('should throw a custom error if blog not found', async () => {
       const updateBlogDto = {
         title: 'Updated Blog',
         content: 'Updated Content',
@@ -111,10 +112,12 @@ describe('BlogService', () => {
 
       jest.spyOn(blogRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateBlog('blog-id', updateBlogDto, user)).rejects.toThrowError(NotFoundException);
+      await expect(service.updateBlog('blog-id', updateBlogDto, user)).rejects.toThrowError(
+        new CustomHttpException('Blog post not found.', HttpStatus.NOT_FOUND)
+      );
     });
 
-    it('should throw an error if user not found', async () => {
+    it('should throw a custom error if user not found', async () => {
       const updateBlogDto = {
         title: 'Updated Blog',
         content: 'Updated Content',
@@ -138,7 +141,9 @@ describe('BlogService', () => {
       jest.spyOn(blogRepository, 'findOne').mockResolvedValue(blog);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateBlog('blog-id', updateBlogDto, user)).rejects.toThrowError(NotFoundException);
+      await expect(service.updateBlog('blog-id', updateBlogDto, user)).rejects.toThrowError(
+        new CustomHttpException('User not found.', HttpStatus.NOT_FOUND)
+      );
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
@@ -6,6 +6,7 @@ import { User } from '../user/entities/user.entity';
 import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { BlogResponseDto } from './dtos/blog-response.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class BlogService {
@@ -23,7 +24,7 @@ export class BlogService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new CustomHttpException('User not found.', HttpStatus.NOT_FOUND);
     }
 
     return user;
@@ -57,7 +58,7 @@ export class BlogService {
     });
 
     if (!blog) {
-      throw new NotFoundException('Blog post not found.');
+      throw new CustomHttpException('Blog post not found.', HttpStatus.NOT_FOUND);
     }
 
     const fullUser = await this.fetchUserById(user.id);
