@@ -11,6 +11,7 @@ import { UserPayload } from '../interfaces/user-payload.interface';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
 import UserService from '../user.service';
+import exp from 'constants';
 
 describe('UserService', () => {
   let service: UserService;
@@ -130,6 +131,16 @@ describe('UserService', () => {
       phone_number: '0987654321',
       user_type: UserType.USER,
     };
+    const updatedUserStatusResponse = {
+      id: '4a3731d6-8dfd-42b1-b572-96c7805f7586',
+      created_at: '2024-08-05T19:16:57.264Z',
+      updated_at: '2024-08-05T19:43:25.073Z',
+      first_name: 'John',
+      last_name: 'Smith',
+      email: 'john.smith@example.com',
+      status: 'Hello there! This is what my updated status looks like!',
+    };
+
     const updatedUser = { ...existingUser, ...updateOptions };
 
     const superAdminPayload: UserPayload = {
@@ -203,6 +214,13 @@ describe('UserService', () => {
         relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should update the user status successfully (super admin)', async () => {
+      mockUserRepository.findOne.mockResolvedValueOnce(existingUser);
+      mockUserRepository.save.mockResolvedValueOnce(updatedUserStatusResponse);
+      const result = await service.updateUserStatus(userId, 'Hello there! This is what my new status looks like!');
+      expect(result.data).toEqual(updatedUserStatusResponse);
     });
 
     it('should throw NotFoundException for invalid userId', async () => {

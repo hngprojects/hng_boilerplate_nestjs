@@ -130,10 +130,10 @@ describe('JobsService', () => {
       expect(result.data).toEqual(createJobDto);
     });
 
-    it('should throw NotFoundException if user is not found', async () => {
+    it('should throw CustomHttpException if user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.create({} as JobDto, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.create({} as JobDto, 'nonexistent')).rejects.toThrow(CustomHttpException);
     });
   });
 
