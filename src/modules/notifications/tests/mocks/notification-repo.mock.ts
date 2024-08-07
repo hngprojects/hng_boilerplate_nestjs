@@ -56,4 +56,5 @@ export const mockUser: User = {
   profile: profileMock,
   phone: '1234-887-09',
   jobs: [],
+  blogs: [],
 };

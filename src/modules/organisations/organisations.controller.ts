@@ -1,13 +1,9 @@
 import {
   Body,
-  ConflictException,
   Controller,
   DefaultValuePipe,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
@@ -107,6 +103,6 @@ export class OrganisationsController {
   })
   @Post(':org_id/users')
   async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
-    return await this.organisationsService.addOrganisationMember(org_id, addMemberDto);
+    return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
   }
 }

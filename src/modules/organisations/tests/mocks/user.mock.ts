@@ -25,10 +25,11 @@ export const mockUser = {
   testimonials: [],
   notifications: [],
   notification_settings: [],
-  user_type: UserType.ADMIN,
+  user_type: 'admin' as UserType,
   secret: 'secret',
   is_2fa_enabled: false,
   products: [],
   profile: profileMock,
   organisationMembers: [orgMemberMock],
+  blogs: null,
 };

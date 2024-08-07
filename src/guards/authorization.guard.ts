@@ -7,7 +7,6 @@ import * as SYS_MSG from '../helpers/SystemMessages';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
 import { CustomHttpException } from '../helpers/custom-http-filter';
 import { isUUID } from 'class-validator';
-import { BAD_REQUEST } from '../helpers/SystemMessages';
 
 @Injectable()
 export class OwnershipGuard implements CanActivate {
@@ -23,7 +22,7 @@ export class OwnershipGuard implements CanActivate {
     const organisationId = request.params.id || request.params.org_id;
 
     if (!isUUID(organisationId)) {
-      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(SYS_MSG.INVALID_UUID_FORMAT, HttpStatus.BAD_REQUEST);
     }
 
     if (user.user_type === UserType.SUPER_ADMIN) {

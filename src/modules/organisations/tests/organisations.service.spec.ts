@@ -21,6 +21,7 @@ import { organisationRoleMock } from './mocks/organisation-role.mock';
 import { defaultOrganisationRoleMocks } from './mocks/default-organisation-role.mock';
 import { defaultOrganisationPermissionMocks } from './mocks/default-organisation-permission.mock';
 import { Permissions } from '../../../modules/organisation-permissions/entities/permissions.entity';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -295,11 +296,11 @@ describe('OrganisationsService', () => {
 
   describe('addOrganisationMember', () => {
     it('should add a new member to the organisation', async () => {
-      const addMemberDto: AddMemberDto = { user_id: 'user123' };
+      const addMemberDto: AddMemberDto = { user_id: 'user1234' };
 
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValue(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
-      jest.spyOn(organisationMemberRepository, 'findOneBy').mockResolvedValue(null);
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(null);
       jest.spyOn(organisationRoleRepository, 'findOne').mockResolvedValue(organisationRoleMock);
       jest.spyOn(organisationMemberRepository, 'create').mockReturnValue(orgMemberMock);
       jest.spyOn(organisationMemberRepository, 'save').mockResolvedValue(orgMemberMock);
@@ -318,7 +319,7 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValue(null);
 
-      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(NotFoundException);
+      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw NotFoundException if user is not found', async () => {
@@ -327,7 +328,7 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(NotFoundException);
+      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw ConflictException if user is already a member', async () => {
@@ -336,9 +337,9 @@ describe('OrganisationsService', () => {
       const organisation = new Organisation();
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(orgMock);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
-      jest.spyOn(organisationMemberRepository, 'findOneBy').mockResolvedValue(orgMemberMock);
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(orgMemberMock);
 
-      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(ConflictException);
+      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(CustomHttpException);
     });
   });
 });
