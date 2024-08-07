@@ -32,10 +32,8 @@ export class NotificationsService {
 
     @InjectRepository(NotificationSettings)
     private readonly notificationSettingsRepository: Repository<NotificationSettings>,
-
     private readonly logger: Logger,
-
-    private readonly emailService: EmailService,
+    private emailService: EmailService,
     private readonly userService: UserService,
     private readonly notificationSettingsService: NotificationSettingsService,
     @InjectRepository(User)

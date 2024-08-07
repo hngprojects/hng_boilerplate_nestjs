@@ -12,7 +12,7 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification, User, Profile, NotificationSettings])],
+  imports: [TypeOrmModule.forFeature([Notification, User, Profile, NotificationSettings]), EmailModule],
   controllers: [NotificationsController],
   providers: [NotificationsService, Repository, UserService, NotificationSettingsService, EmailService, Logger],
 })

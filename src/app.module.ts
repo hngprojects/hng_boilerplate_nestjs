@@ -1,3 +1,6 @@
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { BullModule } from '@nestjs/bull';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -90,6 +93,39 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     TestimonialsModule,
     EmailModule,
     InviteModule,
+
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('SMTP_HOST'),
+          port: configService.get<number>('SMTP_PORT'),
+          auth: {
+            user: configService.get<string>('SMTP_USER'),
+            pass: configService.get<string>('SMTP_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"Team Remote Bingo" <${configService.get<string>('SMTP_USER')}>`,
+        },
+        template: {
+          dir: process.cwd() + '/src/modules/email/templates',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    BullModule.forRootAsync({
+      useFactory: () => ({
+        redis: {
+          host: authConfig().redis.host,
+          port: +authConfig().redis.port,
+        },
+      }),
+    }),
     OrganisationsModule,
     SqueezeModule,
     NotificationSettingsModule,
