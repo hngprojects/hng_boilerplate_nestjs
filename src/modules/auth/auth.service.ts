@@ -32,7 +32,6 @@ export default class AuthenticationService {
   ) {}
 
   async createNewUser(createUserDto: CreateUserDTO) {
-    console.log(createUserDto.email);
     const userExists = await this.userService.getUserRecord({
       identifier: createUserDto.email,
       identifierType: 'email',
@@ -63,7 +62,6 @@ export default class AuthenticationService {
       state: '',
     };
     const newOrganization = await this.organisationService.create(newOrganisationPaload, user.id);
-    console.log(newOrganization);
 
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
 
