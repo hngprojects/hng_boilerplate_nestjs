@@ -30,4 +30,8 @@ export class PermissionListDto {
   @ApiProperty({ enum: PermissionCategory, description: 'Permission category' })
   @IsBoolean()
   [PermissionCategory.CanBlacklistWhitelistUsers]?: boolean;
+
+  @ApiProperty({ enum: PermissionCategory, description: 'Permission category' })
+  @IsBoolean()
+  [PermissionCategory.CanGetProducts]?: boolean;
 }
