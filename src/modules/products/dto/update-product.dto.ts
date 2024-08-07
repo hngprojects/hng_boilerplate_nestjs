@@ -28,7 +28,7 @@ export class UpdateProductDTO {
     example: 99.99,
   })
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price: number;
 
