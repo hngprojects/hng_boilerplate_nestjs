@@ -20,6 +20,7 @@ import { BlogModule } from './modules/blogs/blogs.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { EmailModule } from './modules/email/email.module';
 import { FaqModule } from './modules/faq/faq.module';
+import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { InviteModule } from './modules/invite/invite.module';
 import { JobsModule } from './modules/jobs/jobs.module';
@@ -150,6 +151,7 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     WaitlistModule,
     NewsletterSubscriptionModule,
     TeamsModule,
+    FlutterwaveModule,
     BlogModule,
     SubscriptionsModule,
   ],
