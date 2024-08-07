@@ -73,6 +73,7 @@ export class BlogService {
       data: { blog_id: id, ...rest, author, published_date: created_at },
     };
   }
+
   async updateBlog(id: string, updateBlogDto: UpdateBlogDto, user: User): Promise<BlogResponseDto> {
     const blog = await this.blogRepository.findOne({
       where: { id },
