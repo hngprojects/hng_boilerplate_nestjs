@@ -70,7 +70,6 @@ export class JobsService {
     const newJob = this.jobRepository.create(Object.assign(new Job(), { ...createJobDto, user }));
 
     await this.jobRepository.save(newJob);
-
     return {
       status: 'success',
       status_code: 201,

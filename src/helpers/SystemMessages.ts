@@ -63,3 +63,4 @@ export const INVALID_INVITE = 'Invalid invite link';
 export const INVITE_NOT_FOUND = 'Invite link not found';
 export const NO_USER_TESTIMONIALS = 'User has no testimonials';
 export const USER_TESTIMONIALS_FETCHED = 'User testimonials retrieved successfully';
+export const QUESTION_ALREADY_EXISTS = 'This question already exists.';
