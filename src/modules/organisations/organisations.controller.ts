@@ -16,6 +16,7 @@ import {
   Req,
   Res,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
@@ -28,12 +29,15 @@ import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { UserOrganizationErrorResponseDto, UserOrganizationResponseDto } from './dto/user-orgs-response.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { Response } from 'express';
-import { createReadStream, unlink } from 'fs';
+import { createReadStream } from 'fs';
+import { pipeline } from 'stream/promises';
+import { unlink } from 'fs/promises';
 
 @ApiBearerAuth()
 @ApiTags('organization')
 @Controller('organizations')
 export class OrganisationsController {
+  private readonly logger = new Logger(OrganisationsController.name);
   constructor(private readonly organisationsService: OrganisationsService) {}
 
   @ApiOperation({ summary: 'Create new Organisation' })
@@ -211,24 +215,31 @@ export class OrganisationsController {
   })
   @UseGuards(OwnershipGuard)
   @Get(':org_id/members/export')
-  async exportOrganisationMembers(@Param('org_id') orgId: string, @Req() req: Request, @Res() res: Response) {
+  async exportOrganisationMembers(
+    @Param('org_id', ParseUUIDPipe) orgId: string,
+    @Req() req: Request,
+    @Res() res: Response
+  ) {
     const userId = req['user'].id;
     const filePath = await this.organisationsService.exportOrganisationMembers(orgId, userId);
-    const fileStream = createReadStream(filePath);
 
     res.set({
       'Content-Type': 'text/csv',
       'Content-Disposition': `attachment; filename="organisation-members-${orgId}.csv"`,
     });
 
-    fileStream.pipe(res);
+    const fileStream = createReadStream(filePath);
 
-    fileStream.on('end', () => {
-      unlink(filePath, err => {
-        if (err) {
-          console.error('Failed to delete file:', err);
+    pipeline(fileStream, res)
+      .then(() => unlink(filePath))
+      .catch(error => {
+        this.logger.error('Pipeline failed:', error.stack);
+        if (!res.headersSent) {
+          res.status(500).send('Internal Server Error');
         }
+        return unlink(filePath).catch(unlinkError => {
+          this.logger.error(`Failed to delete file: ${unlinkError.message}`, unlinkError.stack);
+        });
       });
-    });
   }
 }
