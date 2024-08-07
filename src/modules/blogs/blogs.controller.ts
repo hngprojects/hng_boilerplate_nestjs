@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Query } from '@nestjs/common';
 import { BlogService } from './blogs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { CreateBlogDto } from './dtos/create-blog.dto';
@@ -17,5 +17,27 @@ export class BlogController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<any> {
     return await this.blogService.createBlog(createBlogDto, req.user);
+  }
+
+  @Get('/search')
+  @ApiOperation({ summary: 'Search and filter blogs' })
+  @ApiResponse({ status: 200, description: 'Search results returned successfully.', type: [BlogResponseDto] })
+  async searchBlogs(@Query() query: any): Promise<any> {
+    const { data, total } = await this.blogService.searchBlogs(query);
+    const totalPages = Math.ceil(total / (query.pageSize || 10));
+
+    return {
+      status: 200,
+      currentPage: query.page || 1,
+      totalPages: totalPages,
+      totalResults: total,
+      blogs: data,
+      meta: {
+        hasNext: (query.page || 1) < totalPages,
+        total: total,
+        nextPage: (query.page || 1) < totalPages ? (query.page || 1) + 1 : null,
+        prevPage: (query.page || 1) > 1 ? (query.page || 1) - 1 : null,
+      },
+    };
   }
 }
