@@ -33,5 +33,5 @@ export const mockUser = {
   profile: profileMock,
   organisationMembers: [orgMemberMock],
   blogs: null,
-  comments: [],
+  comments: null,
 };
