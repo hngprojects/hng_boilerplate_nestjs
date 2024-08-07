@@ -21,6 +21,7 @@ import { OrganisationMapper } from './mapper/organisation.mapper';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
 import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../helpers/SystemMessages';
+import { MemberRoleMapper } from './mapper/member-role.mapper';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { DefaultRole } from '../organisation-role/entities/role.entity';
@@ -29,6 +30,7 @@ import { RoleCategory } from '../organisation-role/helpers/RoleCategory';
 import { Permissions } from '../organisation-permissions/entities/permissions.entity';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../helpers/SystemMessages';
+import UserService from '../user/user.service';
 
 @Injectable()
 export class OrganisationsService {
@@ -46,7 +48,8 @@ export class OrganisationsService {
     @InjectRepository(DefaultPermissions)
     private readonly defaultPermissionsRepository: Repository<DefaultPermissions>,
     @InjectRepository(Permissions)
-    private readonly permissionsRepository: Repository<Permissions>
+    private readonly permissionsRepository: Repository<Permissions>,
+    private readonly userService: UserService
   ) {}
 
   async getOrganisationMembers(
@@ -202,7 +205,6 @@ export class OrganisationsService {
 
     return {
       message: `${member.user_id.first_name} ${member.user_id.last_name} has successfully been added to the ${newRole.name} role`,
-      status_code: 201,
       data: {
         user: member.user_id,
         org: member.organisation_id,
@@ -247,5 +249,48 @@ export class OrganisationsService {
 
     await this.organisationMemberRepository.save(newMember);
     return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
+  }
+
+  async getUserOrganisations(userId: string) {
+    const res = await this.userService.getUserDataWithoutPasswordById(userId);
+    const user = res.user as User;
+
+    const createdOrgs =
+      user.created_organisations && user.created_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+
+    const ownedOrgs =
+      user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+
+    const memberOrgs = await this.organisationMemberRepository.find({
+      where: { user_id: { id: user.id } },
+      relations: ['organisation_id', 'user_id', 'role'],
+    });
+
+    const memberOrgsMapped =
+      memberOrgs &&
+      memberOrgs.map(org => {
+        const organisation = org.organisation_id && OrganisationMapper.mapToResponseFormat(org.organisation_id);
+        const role = org.role && MemberRoleMapper.mapToResponseFormat(org.role);
+        return {
+          organisation,
+          role,
+        };
+      });
+
+    if (
+      (!createdOrgs && !ownedOrgs && !memberOrgsMapped) ||
+      (!createdOrgs.length && !ownedOrgs.length && !memberOrgsMapped.length)
+    ) {
+      throw new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST);
+    }
+
+    return {
+      message: 'Organisations retrieved successfully',
+      data: {
+        created_organisations: createdOrgs,
+        owned_organisations: ownedOrgs,
+        member_organisations: memberOrgsMapped,
+      },
+    };
   }
 }
