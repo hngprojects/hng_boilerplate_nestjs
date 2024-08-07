@@ -10,7 +10,7 @@ import * as SYS_MSG from '../helpers/SystemMessages';
 import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 @Injectable()
-export class OrganisationGuard implements CanActivate {
+export class OrganisationPermissionsGuard implements CanActivate {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,

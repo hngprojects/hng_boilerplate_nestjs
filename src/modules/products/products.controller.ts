@@ -4,6 +4,9 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
+import { OrganisationPermissionsGuard } from '../../guards/organisation-permissions.guard';
+import { Permissions } from 'src/guards/permission.decorator';
+import { PermissionCategory } from '../organisation-permissions/helpers/PermissionCategory';
 
 @ApiTags('Products')
 @Controller('/organizations/:id/products')
@@ -80,5 +83,18 @@ export class ProductsController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async deleteProduct(@Param('id') id: string, @Param('productId') productId: string) {
     return this.productsService.deleteProduct(id, productId);
+  }
+
+  @UseGuards(OrganisationPermissionsGuard)
+  @Permissions(PermissionCategory.CanGetProducts)
+  @Get(':productId/stock')
+  @ApiOperation({ summary: 'Gets a product stock details by id' })
+  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
+  @ApiParam({ name: 'productId', description: 'Product ID' })
+  @ApiResponse({ status: 200, description: 'Product stock retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getProductStock(@Param('productId') productId: string) {
+    return this.productsService.getProductStock(productId);
   }
 }
