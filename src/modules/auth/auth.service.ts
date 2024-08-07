@@ -18,6 +18,7 @@ import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
+import { OrganisationsService } from '../organisations/organisations.service';
 
 @Injectable()
 export default class AuthenticationService {
@@ -26,7 +27,8 @@ export default class AuthenticationService {
     private jwtService: JwtService,
     private otpService: OtpService,
     private emailService: EmailService,
-    private googleAuthService: GoogleAuthService
+    private googleAuthService: GoogleAuthService,
+    private organisationService: OrganisationsService
   ) {}
 
   async createNewUser(createUserDto: CreateUserDTO) {
@@ -48,7 +50,18 @@ export default class AuthenticationService {
     }
 
     const token = (await this.otpService.createOtp(user.id)).token;
-    await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
+
+    const newOrganisationPaload = {
+      name: `${user.first_name}'s Organisation`,
+      description: '',
+      email: user.email,
+      industry: '',
+      type: '',
+      country: '',
+      address: '',
+      state: '',
+    };
+    const newOrganization = await this.organisationService.create(newOrganisationPaload, user.id);
 
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
 
