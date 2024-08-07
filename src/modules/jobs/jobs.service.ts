@@ -65,20 +65,19 @@ export class JobsService {
       where: { id: userId },
     });
 
-    if (!user)
-      throw new NotFoundException({
-        status_code: 404,
-        status: 'Not found Exception',
-        message: 'User not found',
-      });
+    if (!user) throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
 
     const newJob = this.jobRepository.create(Object.assign(new Job(), { ...createJobDto, user }));
 
     await this.jobRepository.save(newJob);
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev
     return {
       status: 'success',
       status_code: 201,
-      message: 'Job listing created successfully',
+      message: SYS_MSG.JOB_CREATION_SUCCESSFUL,
       data: pick(
         newJob,
         Object.keys(newJob).filter(x => !['user', 'created_at', 'updated_at', 'is_deleted'].includes(x))
@@ -87,22 +86,22 @@ export class JobsService {
   }
 
   async getJobs() {
-    const jobs = await this.jobRepository.find();
+    const jobs = await this.jobRepository.find({ where: { is_deleted: false } });
+
+    jobs.map(x => delete x.is_deleted);
     return {
-      message: 'Jobs listing fetched successfully',
+      message: SYS_MSG.JOB_LISTING_RETRIEVAL_SUCCESSFUL,
       status_code: 200,
       data: jobs,
     };
   }
 
   async getJob(id: string) {
-    const job = await this.jobRepository.findOne({ where: { id } });
-    if (!job)
-      throw new NotFoundException({
-        status_code: 404,
-        status: 'Not found Exception',
-        message: 'Job not found',
-      });
+    const job = await this.jobRepository.findOne({ where: { id, is_deleted: false } });
+
+    if (!job) throw new CustomHttpException(SYS_MSG.JOB_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+    delete job.is_deleted;
     return {
       message: 'Job fetched successfully',
       status_code: 200,
@@ -116,10 +115,16 @@ export class JobsService {
 
     job.is_deleted = true;
     const deleteJobEntityInstance = this.jobRepository.create(job);
+<<<<<<< HEAD
     await this.jobRepository.save(deleteJobEntityInstance);
+=======
+
+    await this.jobRepository.save(deleteJobEntityInstance);
+
+>>>>>>> dev
     return {
       status: 'success',
-      message: 'Job details deleted successfully',
+      message: SYS_MSG.JOB_DELETION_SUCCESSFUL,
       status_code: 200,
     };
   }

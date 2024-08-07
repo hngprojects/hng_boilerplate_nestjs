@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEnum, IsBoolean, IsNotEmpty, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsEnum, IsBoolean, IsNotEmpty, IsOptional, IsDateString, IsArray } from 'class-validator';
 
 export enum SalaryRange {
   'below_30k' = 'below_30k',
@@ -62,8 +62,8 @@ export class JobDto {
   @ApiProperty({
     description: 'The salary range for the job',
     enum: SalaryRange,
-    type: SalaryRange,
-    example: SalaryRange['30K_to_50K'],
+    type: String,
+    example: SalaryRange['30k_to_50k'],
     required: true,
   })
   @IsEnum(SalaryRange)
@@ -73,23 +73,23 @@ export class JobDto {
   @ApiProperty({
     description: 'The type of job',
     enum: JobType,
-    type: JobType,
-    example: JobType['full_time'],
+    type: String,
+    example: JobType.FullTime,
     required: true,
   })
   @IsEnum(JobType)
-  @IsOptional()
+  @IsNotEmpty()
   job_type: string;
 
   @ApiProperty({
     description: 'The mode of the job (e.g., remote, onsite)',
     enum: JobMode,
-    type: JobMode,
-    example: JobMode['remote'],
+    type: String,
+    example: JobMode.Remote,
     required: true,
   })
   @IsEnum(JobMode)
-  @IsOptional()
+  @IsNotEmpty()
   job_mode: string;
 
   @ApiProperty({
@@ -100,6 +100,45 @@ export class JobDto {
   @IsString()
   @IsNotEmpty()
   company_name: string;
+
+  @ApiProperty({
+    description: 'List of qualifications required for the job',
+    example: ["Bachelor's Degree in Computer Science", '5+ years of experience in software development'],
+    type: [String],
+    nullable: true,
+  })
+  @IsArray()
+  @IsOptional()
+  qualifications?: string[];
+
+  @ApiProperty({
+    description: 'List of key responsibilities for the job',
+    example: ['Develop and maintain web applications', 'Collaborate with cross-functional teams'],
+    type: [String],
+    nullable: true,
+  })
+  @IsArray()
+  @IsOptional()
+  key_responsibilities?: string[];
+
+  @ApiProperty({
+    description: 'List of benefits associated with the job',
+    example: ['Health insurance', '401(k) matching', 'Paid time off'],
+    type: [String],
+    nullable: true,
+  })
+  @IsArray()
+  @IsOptional()
+  benefits?: string[];
+
+  @ApiProperty({
+    description: 'Required or preferred experience level for the job',
+    example: 'Senior',
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  experience_level?: string;
 
   @ApiHideProperty()
   @IsBoolean()

@@ -1,4 +1,20 @@
+<<<<<<< HEAD
 import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards, ValidationPipe } from '@nestjs/common';
+=======
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+  ValidationPipe,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+>>>>>>> dev
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -16,8 +32,11 @@ import { JobApplicationErrorDto } from './dto/job-application-error.dto';
 import { JobApplicationResponseDto } from './dto/job-application-response.dto';
 import { JobApplicationDto } from './dto/job-application.dto';
 import { JobDto } from './dto/job.dto';
-import { JobGuard } from './guards/job.guard';
 import { JobsService } from './jobs.service';
+<<<<<<< HEAD
+=======
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+>>>>>>> dev
 import { JobSearchDto } from './dto/jobSearch.dto';
 
 @ApiTags('Jobs')
@@ -48,6 +67,7 @@ export class JobsController {
     return this.jobService.applyForJob(id, jobApplicationDto);
   }
 
+  @UseGuards(SuperAdminGuard)
   @Post('/')
   @ApiOperation({ summary: 'Create a new job' })
   @ApiResponse({ status: 201, description: 'Job created successfully' })
@@ -86,17 +106,17 @@ export class JobsController {
   @ApiOperation({ summary: 'Gets a job by ID' })
   @ApiResponse({ status: 200, description: 'Job returned successfully' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async getJob(@Param('id') id: string) {
+  async getJob(@Param('id', ParseUUIDPipe) id) {
     return this.jobService.getJob(id);
   }
 
-  @UseGuards(JobGuard)
+  @UseGuards(SuperAdminGuard)
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete a job' })
   @ApiResponse({ status: 200, description: 'Job deleted successfully' })
   @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ParseUUIDPipe) id) {
     return this.jobService.delete(id);
   }
 }
