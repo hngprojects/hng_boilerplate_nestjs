@@ -3,6 +3,7 @@ import { Organisation } from '../../entities/organisations.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
 import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
+import { mockUser } from './user.mock';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -44,7 +45,7 @@ export const createMockOrganisation = (): Organisation => {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: null,
+    user_id: mockUser,
     role: organisationRoleMock,
     organisation_id: null,
     profile_id: profileMock,
@@ -83,7 +84,7 @@ export const createMockOrganisation = (): Organisation => {
   };
 
   return {
-    id: uuidv4(),
+    id: 'some-id',
     name: 'John & Co',
     description: 'An imports organisation',
     email: 'johnCo@example.com',
