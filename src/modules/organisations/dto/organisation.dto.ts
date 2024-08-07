@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class OrganisationRequestDto {
   @ApiProperty({
@@ -12,6 +12,7 @@ export class OrganisationRequestDto {
     type: String,
   })
   @IsString()
+  @IsOptional()
   readonly description: string;
 
   @ApiProperty({
@@ -19,35 +20,41 @@ export class OrganisationRequestDto {
     description: 'Organisation email must be unique',
   })
   @IsEmail()
+  @IsOptional()
   readonly email: string;
 
   @ApiProperty({
     type: String,
   })
   @IsString()
+  @IsOptional()
   readonly industry: string;
 
   @ApiProperty({
     type: String,
   })
   @IsString()
+  @IsOptional()
   readonly type: string;
 
   @ApiProperty({
     type: String,
   })
   @IsString()
+  @IsOptional()
   readonly country: string;
 
   @ApiProperty({
     type: String,
   })
   @IsString()
+  @IsOptional()
   readonly address: string;
 
   @ApiProperty({
     type: String,
   })
   @IsString()
+  @IsOptional()
   readonly state: string;
 }

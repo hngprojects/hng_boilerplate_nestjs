@@ -12,8 +12,8 @@ import { Organisation } from '../../modules/organisations/entities/organisations
 import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
-import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
-import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
+import { DefaultPermissions } from '../../modules/permissions/entities/default-permissions.entity';
+import { PermissionCategory } from '../../modules/permissions/helpers/PermissionCategory';
 import { Profile } from '../../modules/profile/entities/profile.entity';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -112,7 +112,6 @@ export class SeedingService {
           state: 'state1',
           address: 'address1',
           owner: savedUsers[0],
-          creator: savedUsers[0],
           isDeleted: false,
         });
 
@@ -126,7 +125,6 @@ export class SeedingService {
           state: 'state2',
           address: 'address2',
           owner: savedUsers[0],
-          creator: savedUsers[0],
           isDeleted: false,
         });
 
@@ -274,7 +272,7 @@ export class SeedingService {
       const { ADMIN_SECRET } = process.env;
       if (secret !== ADMIN_SECRET) throw new UnauthorizedException(INVALID_ADMIN_SECRET);
 
-      user.user_type = UserType.SUPER_ADMIN;
+      // user.user_type = UserType.SUPER_ADMIN;
       const admin = await userRepository.save(user);
       return { status: 201, message: ADMIN_CREATED, data: admin };
     } catch (error) {

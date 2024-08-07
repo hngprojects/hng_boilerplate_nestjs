@@ -16,6 +16,7 @@ import { LoginDto } from '../dto/login.dto';
 import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { OrganisationsService } from '../../../modules/organisations/organisations.service';
 
 jest.mock('speakeasy');
 
@@ -26,6 +27,7 @@ describe('AuthenticationService', () => {
   let otpServiceMock: jest.Mocked<OtpService>;
   let emailServiceMock: jest.Mocked<EmailService>;
   let googleAuthServiceMock: jest.Mocked<GoogleAuthService>;
+  let organisationServiceMock: jest.Mocked<OrganisationsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,6 +61,12 @@ describe('AuthenticationService', () => {
           },
         },
         {
+          provide: OrganisationsService,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
           provide: EmailService,
           useValue: {
             sendForgotPasswordMail: jest.fn(),
@@ -75,6 +83,7 @@ describe('AuthenticationService', () => {
     otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
     googleAuthServiceMock = module.get(GoogleAuthService) as jest.Mocked<GoogleAuthService>;
+    organisationServiceMock = module.get(OrganisationsService) as jest.Mocked<OrganisationsService>;
   });
 
   afterEach(() => {
@@ -100,7 +109,6 @@ describe('AuthenticationService', () => {
       first_name: createUserDto.first_name,
       last_name: createUserDto.last_name,
       created_at: new Date(),
-      user_type: UserType.USER,
       is_active: true,
       attempts_left: 3,
       time_left: 0,
@@ -127,7 +135,6 @@ describe('AuthenticationService', () => {
             first_name: 'John',
             id: '1',
             last_name: 'Doe',
-            role: 'vendor',
           },
         },
       });
@@ -161,7 +168,6 @@ describe('AuthenticationService', () => {
         attempts_left: 2,
         created_at: new Date(),
         updated_at: new Date(),
-        user_type: UserType.USER,
         profile: {
           profile_pic_url: 'profile_url',
         } as Profile,
@@ -183,7 +189,6 @@ describe('AuthenticationService', () => {
             last_name: 'User',
             email: 'test@example.com',
             avatar_url: 'profile_url',
-            role: 'vendor',
           },
         },
       });

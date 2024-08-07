@@ -17,14 +17,16 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
-import { OrganisationMember } from '../entities/org-members.entity';
+import { OrganisationUserRole } from '../../../modules/role/entities/organisation-user-role.entity';
+import { Role } from '../../../modules/role/entities/role.entity';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
   let organisationRepository: Repository<Organisation>;
   let profileRepository: Repository<Profile>;
-  let organisationMemberRepository: Repository<OrganisationMember>;
+  let organisationUserRole: Repository<OrganisationUserRole>;
+  let roleRepository: Repository<Role>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,15 +43,26 @@ describe('OrganisationsService', () => {
             update: jest.fn(),
           },
         },
-        {
-          provide: getRepositoryToken(OrganisationMember),
-          useValue: {
-            save: jest.fn(),
-          },
-        },
+
         UserService,
         {
           provide: getRepositoryToken(User),
+          useValue: {
+            findBy: jest.fn(),
+            find: jest.fn(),
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(OrganisationUserRole),
+          useValue: {
+            findBy: jest.fn(),
+            find: jest.fn(),
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Role),
           useValue: {
             findBy: jest.fn(),
             find: jest.fn(),
@@ -71,40 +84,41 @@ describe('OrganisationsService', () => {
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
-    organisationMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
     profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
+    organisationUserRole = module.get(getRepositoryToken(OrganisationUserRole));
+    roleRepository = module.get(getRepositoryToken(Role));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+  describe('create', () => {
+    it('should create a new organisation', async () => {
+      const createOrganisationDto = { name: 'Test Org', email: 'test@example.com' };
+      const userId = 'user-id';
+      const user = { id: userId };
+      const superAdminRole = { id: 'role-id', name: 'super_admin' };
+      const newOrganisation = { ...createOrganisationDto, id: 'org-id', owner: user };
 
-  describe('create organisation', () => {
-    beforeEach(async () => {
-      const errors = await validate(createMockOrganisationRequestDto());
-      expect(errors).toHaveLength(0);
-    });
+      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([]);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user as User);
+      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(superAdminRole as Role);
+      jest.spyOn(organisationRepository, 'save').mockResolvedValue(newOrganisation as Organisation);
+      jest.spyOn(organisationUserRole, 'save').mockResolvedValue(undefined);
 
-    it('should create an organisation', async () => {
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue(null);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue({
-        ...orgMock.owner,
-      } as User);
-      jest.spyOn(organisationRepository, 'create').mockReturnValue(orgMock);
-      jest.spyOn(organisationRepository, 'save').mockResolvedValue({
-        ...orgMock,
-      });
+      const result = await service.create(createOrganisationDto, userId);
 
-      const result = await service.create(createMockOrganisationRequestDto(), orgMock.owner.id);
       expect(result.status).toEqual('success');
       expect(result.message).toEqual('organisation created successfully');
+      expect(result.data).toEqual(newOrganisation);
     });
 
-    it('should throw an error if the email already exists', async () => {
-      organisationRepository.findBy = jest.fn().mockResolvedValue([orgMock]);
-      await expect(service.create(createMockOrganisationRequestDto(), orgMock.owner.id)).rejects.toThrow(
-        new ConflictException('Organisation with this email already exists')
-      );
+    it('should throw ConflictException if email already exists', async () => {
+      const createOrganisationDto = { name: 'Test Org', email: 'test@example.com' };
+
+      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([]);
+
+      await expect(service.create(createOrganisationDto, 'user-id')).rejects.toThrow(ConflictException);
     });
   });
 

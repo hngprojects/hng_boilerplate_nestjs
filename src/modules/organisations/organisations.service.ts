@@ -13,11 +13,11 @@ import { User } from '../user/entities/user.entity';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
-import { OrganisationMember } from './entities/org-members.entity';
 import { Organisation } from './entities/organisations.entity';
-import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
-import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
+import { Role } from '../role/entities/role.entity';
+import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
+import CreateOrganisationType from './dto/create-organisation-options';
 
 @Injectable()
 export class OrganisationsService {
@@ -26,8 +26,12 @@ export class OrganisationsService {
     private readonly organisationRepository: Repository<Organisation>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(OrganisationMember)
-    private readonly organisationMemberRepository: Repository<OrganisationMember>
+
+    @InjectRepository(OrganisationUserRole)
+    private organisationUserRole: Repository<OrganisationUserRole>,
+
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>
   ) {}
 
   async getOrganisationMembers(
@@ -37,47 +41,50 @@ export class OrganisationsService {
     sub: string
   ): Promise<OrganisationMembersResponseDto> {
     const skip = (page - 1) * page_size;
-    const orgs = await this.organisationRepository.findOne({
+    const organisation = await this.organisationRepository.findOne({
       where: { id: orgId },
-      relations: ['organisationMembers', 'organisationMembers.user_id'],
+      relations: [''],
     });
 
-    if (!orgs) throw new NotFoundException('No organisation found');
+    if (!organisation) throw new NotFoundException('No organisation found');
 
-    let data = orgs.organisationMembers.map(member => {
-      return OrganisationMemberMapper.mapToResponseFormat(member.user_id);
-    });
+    const organisationMembers = (
+      await this.organisationUserRole.find({ where: { organisationId: organisation.id }, relations: ['user'] })
+    ).map(instance => instance.user);
 
-    const isMember = data.find(member => member.id === sub);
+    const isMember = organisationMembers.find(member => member.id === sub);
     if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
 
-    data = data.splice(skip, skip + page_size);
+    const data = organisationMembers.splice(skip, skip + page_size);
 
     return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
   }
 
-  async create(createOrganisationDto: OrganisationRequestDto, userId: string) {
-    const emailFound = await this.emailExists(createOrganisationDto.email);
-    if (emailFound) throw new ConflictException('Organisation with this email already exists');
+  async create(createOrganisationDto: CreateOrganisationType, userId: string) {
+    if (createOrganisationDto.email) {
+      const emailFound = await this.emailExists(createOrganisationDto.email);
+      if (emailFound) throw new ConflictException('Organisation with this email already exists');
+    }
 
     const owner = await this.userRepository.findOne({
       where: { id: userId },
     });
 
-    const mapNewOrganisation = CreateOrganisationMapper.mapToEntity(createOrganisationDto, owner);
-    const newOrganisation = this.organisationRepository.create({
-      ...mapNewOrganisation,
-    });
+    const superAdminRole = await this.roleRepository.findOne({ where: { name: 'super_admin' } });
 
-    await this.organisationRepository.save(newOrganisation);
+    const newOrganization = new Organisation();
+    Object.assign(newOrganization, createOrganisationDto);
+    newOrganization.owner = owner;
+    await this.organisationRepository.save(newOrganization);
 
-    const newMember = new OrganisationMember();
-    newMember.user_id = owner;
-    newMember.organisation_id = newOrganisation;
+    const adminRole = new OrganisationUserRole();
+    adminRole.userId = owner.id;
+    adminRole.organisationId = newOrganization.id;
+    adminRole.roleId = superAdminRole.id;
 
-    await this.organisationMemberRepository.save(newMember);
+    await this.organisationUserRole.save(adminRole);
 
-    const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
+    const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganization);
 
     return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
   }

@@ -27,6 +27,7 @@ export const LOGIN_SUCCESSFUL = 'Login successful';
 export const LOGIN_ERROR = 'An error occurred during login';
 export const EMAIL_SENT = 'Email sent successfully';
 export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
+export const ALREADY_ENABLED_2FA = '2FA already enabled on your account';
 export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
 export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
@@ -39,3 +40,11 @@ export const NOT_ORG_OWNER = 'You do not have permission to update this organisa
 export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
 export const DEADLINE_PASSED = 'Job application deadline passed';
+export const EXISTING_ROLE = 'A role with this name already exists in the organisation';
+export const ROLE_CREATION_FAILED = 'Failed to create organisation role';
+export const ROLE_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
+export const ROLE_CREATED_SUCCESSFULLY = 'Role created successfully';
+
+export const RESOURCE_NOT_FOUND = resource => {
+  return `${resource} does not exist`;
+};
