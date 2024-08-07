@@ -15,16 +15,35 @@ import {
   UnprocessableEntityException,
   ForbiddenException,
   ConflictException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
+import { AddMemberDto } from '../dto/add-member.dto';
+import { OrganisationRole } from '../../../modules/organisation-role/entities/organisation-role.entity';
+import { DefaultRole } from '../../../modules/organisation-role/entities/role.entity';
+import { DefaultPermissions } from '../../../modules/organisation-permissions/entities/default-permissions.entity';
+import { mockUser } from './mocks/user.mock';
+import { orgMemberMock } from './mocks/organisation-member.mock';
+import { organisationRoleMock } from './mocks/organisation-role.mock';
+import { defaultOrganisationRoleMocks } from './mocks/default-organisation-role.mock';
+import { defaultOrganisationPermissionMocks } from './mocks/default-organisation-permission.mock';
+import { Permissions } from '../../../modules/organisation-permissions/entities/permissions.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../../helpers/SystemMessages';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
   let organisationRepository: Repository<Organisation>;
+  let organisationRoleRepository: Repository<OrganisationRole>;
+  let defaultRoleRepository: Repository<DefaultRole>;
+  let defaultPermisssionsRepository: Repository<DefaultPermissions>;
+  let permisssionsRepository: Repository<Permissions>;
   let profileRepository: Repository<Profile>;
   let organisationMemberRepository: Repository<OrganisationMember>;
+  let rolesRepository: Repository<OrganisationRole>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,9 +61,73 @@ describe('OrganisationsService', () => {
           },
         },
         {
+          provide: getRepositoryToken(OrganisationRole),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(DefaultRole),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(DefaultPermissions),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Permissions),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
           provide: getRepositoryToken(OrganisationMember),
           useValue: {
             save: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(OrganisationRole),
+          useValue: {
+            findOne: jest.fn(),
+            findBy: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+            softDelete: jest.fn(),
           },
         },
         UserService,
@@ -71,8 +154,13 @@ describe('OrganisationsService', () => {
     service = module.get<OrganisationsService>(OrganisationsService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
+    organisationRoleRepository = module.get<Repository<OrganisationRole>>(getRepositoryToken(OrganisationRole));
+    defaultRoleRepository = module.get<Repository<DefaultRole>>(getRepositoryToken(DefaultRole));
+    defaultPermisssionsRepository = module.get<Repository<DefaultPermissions>>(getRepositoryToken(DefaultPermissions));
+    permisssionsRepository = module.get<Repository<Permissions>>(getRepositoryToken(Permissions));
     organisationMemberRepository = module.get<Repository<OrganisationMember>>(getRepositoryToken(OrganisationMember));
     profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
+    rolesRepository = module.get<Repository<OrganisationRole>>(getRepositoryToken(OrganisationRole));
   });
 
   it('should be defined', () => {
@@ -94,6 +182,12 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'save').mockResolvedValue({
         ...orgMock,
       });
+      jest.spyOn(defaultRoleRepository, 'find').mockResolvedValue(Promise.resolve(defaultOrganisationRoleMocks));
+      jest
+        .spyOn(defaultPermisssionsRepository, 'find')
+        .mockResolvedValue(Promise.resolve(defaultOrganisationPermissionMocks));
+      jest.spyOn(organisationRoleRepository, 'create').mockReturnValue(organisationRoleMock);
+      jest.spyOn(organisationRoleRepository, 'save').mockResolvedValue(organisationRoleMock);
 
       const result = await service.create(createMockOrganisationRequestDto(), orgMock.owner.id);
       expect(result.status).toEqual('success');
@@ -219,6 +313,168 @@ describe('OrganisationsService', () => {
       expect(result.data).toEqual([
         { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
       ]);
+    });
+  });
+
+  describe('updateMemberRole', () => {
+    it('should update member role successfully', async () => {
+      const orgId = 'orgId';
+      const memberId = '1';
+      const updateMemberRoleDto = { role: 'newRole' };
+      const mockMember = {
+        id: memberId,
+        user_id: { id: 'userId', first_name: 'John', last_name: 'Doe' },
+        organisation_id: { id: orgId },
+        role: { name: 'oldRole' },
+      };
+      const mockNewRole = { name: 'newRole' };
+
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(mockMember as OrganisationMember);
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(mockNewRole as OrganisationRole);
+      jest
+        .spyOn(organisationMemberRepository, 'save')
+        .mockResolvedValue({ ...mockMember, role: mockNewRole } as OrganisationMember);
+
+      const result = await service.updateMemberRole(orgId, memberId, updateMemberRoleDto);
+
+      expect(result).toEqual({
+        message: 'John Doe has successfully been added to the newRole role',
+        data: {
+          user: mockMember.user_id,
+          org: mockMember.organisation_id,
+          role: mockNewRole,
+        },
+      });
+    });
+
+    it('should throw CustomHttpException if member is not found', async () => {
+      const orgId = 'orgId';
+      const memberId = '1';
+      const updateMemberRoleDto = { role: 'newRole' };
+
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(
+        new CustomHttpException(ORG_MEMBER_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
+    });
+
+    it('should throw CustomHttpException if member does not belong to the specified organisation', async () => {
+      const orgId = 'orgId';
+      const memberId = '1';
+      const updateMemberRoleDto = { role: 'newRole' };
+      const mockMember = {
+        id: memberId,
+        user_id: { id: 'userId' },
+        organisation_id: { id: 'differentOrgId' },
+        role: { name: 'oldRole' },
+      };
+
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(mockMember as OrganisationMember);
+
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(
+        new CustomHttpException(ORG_MEMBER_DOES_NOT_BELONG, HttpStatus.FORBIDDEN)
+      );
+    });
+
+    it('should throw CustomHttpException if role is not found in the organization', async () => {
+      const orgId = 'orgId';
+      const memberId = '1';
+      const updateMemberRoleDto = { role: 'newRole' };
+      const mockMember = {
+        id: memberId,
+        user_id: { id: 'userId' },
+        organisation_id: { id: orgId },
+        role: { name: 'oldRole' },
+      };
+
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(mockMember as OrganisationMember);
+      jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(
+        new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
+    });
+  });
+
+  describe('addOrganisationMember', () => {
+    it('should add a new member to the organisation', async () => {
+      const addMemberDto: AddMemberDto = { user_id: 'user1234' };
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValue(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(organisationRoleRepository, 'findOne').mockResolvedValue(organisationRoleMock);
+      jest.spyOn(organisationMemberRepository, 'create').mockReturnValue(orgMemberMock);
+      jest.spyOn(organisationMemberRepository, 'save').mockResolvedValue(orgMemberMock);
+
+      const result = await service.addOrganisationMember(orgMock.id, addMemberDto);
+
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Member added successfully',
+        member: orgMemberMock,
+      });
+    });
+
+    it('should throw NotFoundException if organisation is not found', async () => {
+      const addMemberDto: AddMemberDto = { user_id: 'user123' };
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValue(null);
+
+      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should throw NotFoundException if user is not found', async () => {
+      const addMemberDto: AddMemberDto = { user_id: 'nonexistent' };
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should throw ConflictException if user is already a member', async () => {
+      const addMemberDto: AddMemberDto = { user_id: 'user123' };
+
+      const organisation = new Organisation();
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(orgMock);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'findOne').mockResolvedValue(orgMemberMock);
+
+      await expect(service.addOrganisationMember(orgMock.id, addMemberDto)).rejects.toThrow(CustomHttpException);
+    });
+  });
+
+  describe("get user's organization", () => {
+    it('should throw an error if the user has no organizations', async () => {
+      const mockUser = new User();
+      mockUser.id = 'sample-id-6789';
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue(null);
+
+      await expect(service.getUserOrganisations(mockUser.id)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST)
+      );
+    });
+
+    it('should return all the users organizations', async () => {
+      const mockUser = orgMock.creator;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([
+        {
+          ...mockUser.organisationMembers[0],
+          organisation_id: orgMock,
+        },
+      ]);
+
+      const res = await service.getUserOrganisations(mockUser.id);
+
+      expect(res.data).toHaveProperty('created_organisations');
+      expect(res.data).toHaveProperty('owned_organisations');
+      expect(res.data).toHaveProperty('member_organisations');
+      expect(res.data.member_organisations[0]).toHaveProperty('role');
+      expect(res.data.member_organisations[0]).toHaveProperty('organisation');
     });
   });
 });

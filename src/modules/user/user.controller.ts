@@ -1,9 +1,23 @@
-import { Body, Controller, Get, Param, Patch, Query, Req, Request } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import UserService from './user.service';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
+import { UpdateUserStatusResponseDto } from './dto/update-user-status-response.dto';
+import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -11,7 +25,7 @@ import UserService from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Patch('/deactivate')
+  @Patch('deactivate')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Deactivate a user account' })
   @ApiResponse({ status: 200, description: 'The account has been successfully deactivated.' })
@@ -23,6 +37,25 @@ export class UserController {
     const userId = user.sub;
 
     return this.userService.deactivateUser(userId, deactivateAccountDto);
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Get user statistics (Super Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'User statistics retrieved successfully',
+    type: GetUserStatsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['active', 'inactive', 'deleted'],
+    description: 'Filter users by status',
+  })
+  @UseGuards(SuperAdminGuard)
+  async getUserStats(@Query('status') status?: string): Promise<GetUserStatsResponseDto> {
+    return this.userService.getUserStats(status);
   }
 
   @ApiOperation({ summary: 'Update User' })
@@ -50,6 +83,7 @@ export class UserController {
     return this.userService.getUserDataWithoutPasswordById(id);
   }
 
+  @UseGuards(SuperAdminGuard)
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users (Super Admin only)' })
@@ -64,5 +98,29 @@ export class UserController {
     @Query('limit') limit: number = 10
   ) {
     return this.userService.getUsersByAdmin(page, limit, req.user);
+  }
+
+  @Patch(':userId/status')
+  @ApiOperation({ summary: 'Update a user status (Super Admin only)' })
+  @ApiOkResponse({ description: 'Status updated successfully', type: UpdateUserStatusResponseDto })
+  @ApiUnauthorizedResponse({
+    description: 'User is not authorized',
+    type: 'object',
+    example: {
+      message: 'User is currently unauthorized, kindly authenticate to continue',
+      status: 401,
+    },
+  })
+  @ApiForbiddenResponse({
+    description: 'User is forbidden',
+    example: {
+      message: 'You dont have the permission to perform this action',
+      status: 403,
+    },
+  })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @UseGuards(SuperAdminGuard)
+  async updateUserStatus(@Param('userId', ParseUUIDPipe) userId: string, @Body() { status }: UpdateUserStatusDto) {
+    return this.userService.updateUserStatus(userId, status);
   }
 }

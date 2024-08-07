@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FaqService } from './faq.service';
-import { Faq } from './faq.entity';
+import { FaqService } from '../faq.service';
+import { Faq } from '../entities/faq.entity';
 import { BadRequestException } from '@nestjs/common';
 
 describe('FaqService', () => {

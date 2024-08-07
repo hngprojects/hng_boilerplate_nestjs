@@ -2,6 +2,7 @@ import { Profile } from '../../../profile/entities/profile.entity';
 import { User, UserType } from '../../../user/entities/user.entity';
 
 export const mockNotificationRepository = {
+  create: jest.fn(),
   find: jest.fn().mockResolvedValue([]),
   findOne: jest.fn().mockResolvedValue(null),
   save: jest.fn().mockResolvedValue({}),
@@ -38,6 +39,7 @@ export const mockUser: User = {
   last_name: 'Smith',
   email: 'john.smith@example.com',
   password: 'pass123',
+  status: 'Hello from the children of planet Earth',
   hashPassword: async () => {},
   is_active: true,
   attempts_left: 3,
@@ -55,4 +57,5 @@ export const mockUser: User = {
   profile: profileMock,
   phone: '1234-887-09',
   jobs: [],
+  blogs: [],
 };

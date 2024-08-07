@@ -8,6 +8,7 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
+import { Blog } from '../../blogs/entities/blog.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -25,6 +26,9 @@ export class User extends AbstractBaseEntity {
 
   @Column({ unique: true, nullable: false })
   email: string;
+
+  @Column({ unique: false, nullable: true })
+  status: string;
 
   @Column({ nullable: false })
   password: string;
@@ -75,6 +79,9 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   organisationMembers: OrganisationMember[];
+
+  @OneToMany(() => Blog, blog => blog.author)
+  blogs: Blog[];
 
   @BeforeInsert()
   @BeforeUpdate()
