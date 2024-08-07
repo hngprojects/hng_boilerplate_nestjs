@@ -46,7 +46,6 @@ export class BlogController {
   @ApiResponse({ status: 202, description: 'Blog successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Blog with the given Id does not exist.' })
   @ApiResponse({ status: 403, description: 'You are not authorized to perform this action.' })
-  @ApiResponse({ status: 500, description: 'Internal server error.' })
   async deleteBlog(@Param('id', ParseUUIDPipe) id: string): Promise<any> {
     await this.blogService.deleteBlogPost(id);
     return {
