@@ -5,7 +5,7 @@ import { ProductsService } from '../products.service';
 import { Product, StockStatusType } from '../entities/product.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { ProductVariant } from '../entities/product-variant.entity';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException, InternalServerErrorException, HttpStatus } from '@nestjs/common';
 import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 import { productMock } from './mocks/product.mock';
@@ -173,6 +173,112 @@ describe('ProductsService', () => {
 
       expect(result.message).toEqual('Product successfully deleted');
       expect(deletedProductMock.is_deleted).toBe(true);
+    });
+  });
+
+  describe('getProductStock', () => {
+    it('should return product stock details if the product is found', async () => {
+      const productId = '123';
+      const productMock = {
+        id: productId,
+        quantity: 20,
+        updated_at: new Date(),
+      };
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(productMock as any);
+
+      const result = await service.getProductStock(productId);
+
+      expect(result).toEqual({
+        message: 'Product stock retrieved successfully',
+        data: {
+          product_id: productMock.id,
+          current_stock: productMock.quantity,
+          last_updated: productMock.updated_at,
+        },
+      });
+    });
+
+    it('should throw NotFoundException if the product is not found', async () => {
+      const productId = 'nonexistent';
+
+      jest.spyOn(productRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.getProductStock(productId)).rejects.toThrow(new NotFoundException('Product not found'));
+    });
+  });
+
+  describe('Get total products', () => {
+    it('should return the total number of products and the equivalent percentage change', async () => {
+      const mockMonthData = { total: '20' };
+      const mockLastMonthData = { total: '10' };
+
+      const queryBuilderMock = {
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValueOnce(mockMonthData).mockResolvedValueOnce(mockLastMonthData),
+      };
+
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const result = await service.getTotalProducts();
+
+      expect(result).toEqual({
+        message: 'Total Products fetched successfully',
+        data: {
+          total_products: 20,
+          percentage_change: '+100.00% from last month',
+        },
+      });
+    });
+
+    it('should return 100% change when there were no products last month', async () => {
+      const mockMonthData = { total: '20' };
+      const mockLastMonthData = { total: '0' };
+
+      const queryBuilderMock = {
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValueOnce(mockMonthData).mockResolvedValueOnce(mockLastMonthData),
+      };
+
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const result = await service.getTotalProducts();
+
+      expect(result).toEqual({
+        message: 'Total Products fetched successfully',
+        data: {
+          total_products: 20,
+          percentage_change: '+100.00% from last month',
+        },
+      });
+    });
+
+    it('should return negative percentage change if fewer products this month', async () => {
+      const mockMonthData = { total: '5' };
+      const mockLastMonthData = { total: '10' };
+
+      const queryBuilderMock = {
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValueOnce(mockMonthData).mockResolvedValueOnce(mockLastMonthData),
+      };
+
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const result = await service.getTotalProducts();
+
+      expect(result).toEqual({
+        message: 'Total Products fetched successfully',
+        data: {
+          total_products: 5,
+          percentage_change: '-50.00% from last month',
+        },
+      });
     });
   });
 });

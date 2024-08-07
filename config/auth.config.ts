@@ -9,4 +9,10 @@ export default registerAs('auth', () => ({
     clientID: process.env.GOOGLE_CLIENT_ID,
     callbackURL: process.env.GOOGLE_REDIRECT_URI,
   },
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT || 6379,
+    password: process.env.REDIS_PASSWORD,
+    username: process.env.REDIS_USERNAME,
+  },
 }));
