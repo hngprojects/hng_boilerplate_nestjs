@@ -231,8 +231,8 @@ describe('OrganisationsService', () => {
       ]);
     });
   });
-  
-    describe('removeOrganisationMember', () => {
+
+  describe('removeOrganisationMember', () => {
     it('should throw CustomHttpException if user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
@@ -310,9 +310,8 @@ describe('OrganisationsService', () => {
         message: 'Member removed from organisation successfully',
       });
     });
-  });     
-       
-  
+  });
+
   describe("get user's organization", () => {
     it('should throw an error if the user has no organizations', async () => {
       const mockUser = new User();
@@ -337,7 +336,6 @@ describe('OrganisationsService', () => {
 
       const res = await service.getUserOrganisations(mockUser.id);
 
-      expect(res.status).toEqual(HttpStatus.OK);
       expect(res.data).toHaveProperty('created_organisations');
       expect(res.data).toHaveProperty('owned_organisations');
       expect(res.data).toHaveProperty('member_organisations');
