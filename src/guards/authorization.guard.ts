@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, HttpStatus } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpStatus, BadRequestException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,8 @@ import { UserType } from '../modules/user/entities/user.entity';
 import * as SYS_MSG from '../helpers/SystemMessages';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
 import { CustomHttpException } from '../helpers/custom-http-filter';
+import { isUUID } from 'class-validator';
+import { BAD_REQUEST } from '../helpers/SystemMessages';
 
 @Injectable()
 export class OwnershipGuard implements CanActivate {
@@ -19,6 +21,10 @@ export class OwnershipGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const organisationId = request.params.id || request.params.org_id;
+
+    if (!isUUID(organisationId)) {
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.BAD_REQUEST);
+    }
 
     if (user.user_type === UserType.SUPER_ADMIN) {
       return true;

@@ -24,6 +24,7 @@ import { DefaultRole } from '../organisation-role/entities/role.entity';
 import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
 import { RoleCategory } from '../organisation-role/helpers/RoleCategory';
 import { Permissions } from '../organisation-permissions/entities/permissions.entity';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class OrganisationsService {
@@ -152,7 +153,7 @@ export class OrganisationsService {
     try {
       const org = await this.organisationRepository.findOneBy({ id });
       if (!org) {
-        throw new NotFoundException('organisation not found');
+        throw new CustomHttpException('organisation not found', HttpStatus.NOT_FOUND);
       }
       await this.organisationRepository.update(id, updateOrganisationDto);
       const updatedOrg = await this.organisationRepository.findOneBy({ id });
