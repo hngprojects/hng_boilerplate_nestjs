@@ -4,26 +4,29 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
+  InternalServerErrorException,
+  NotFoundException,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
+import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { UserOrganizationErrorResponseDto, UserOrganizationResponseDto } from './dto/user-orgs-response.dto';
 import { AddMemberDto } from './dto/add-member.dto';
-
 @ApiBearerAuth()
 @ApiTags('organization')
 @Controller('organizations')
@@ -89,16 +92,40 @@ export class OrganisationsController {
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
 
-  @UseGuards(OwnershipGuard)
-  @Delete(':organizatonId/members/:userId')
-  @ApiOperation({ summary: 'Gets a product by id' })
-  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
-  @ApiResponse({ status: 200, description: 'Member removed successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 404, description: 'Product not found' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
-  async removeOrganisationMember(@Param() params: RemoveOrganisationMemberDto) {
-    return this.organisationsService.removeOrganisationMember(params);
+  @ApiOperation({ summary: 'Assign roles to members of an organisation' })
+  @ApiResponse({
+    status: 200,
+    description: 'Assign roles to members of an organisation',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'object',
+          properties: {
+            user: { type: 'string' },
+            org: { type: 'string' },
+            role: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User not a member of the organisation',
+  })
+  @Put(':orgId/members/:memberId/role')
+  async updateMemberRole(
+    @Param('memberId') memberId: string,
+    @Param('orgId') orgId: string,
+    @Body() updateMemberRoleDto: UpdateMemberRoleDto
+  ) {
+    return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
   }
 
   @UseGuards(OwnershipGuard)
