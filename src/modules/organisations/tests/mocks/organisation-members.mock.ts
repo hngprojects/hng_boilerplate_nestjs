@@ -32,6 +32,7 @@ const createOrgMemberMock = (
   return {
     user_id: createUserMock(firstName, lastName),
     profile_id: createProfileMock(username),
+    organisation_id: { id: 'some-org-uuid' },
     suspended,
     active_member,
     left_workspace,
