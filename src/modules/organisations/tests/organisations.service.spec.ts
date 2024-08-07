@@ -18,6 +18,7 @@ import {
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../entities/org-members.entity';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -229,7 +230,7 @@ describe('OrganisationsService', () => {
   });
 
   describe('removeOrganisationMember', () => {
-    it('should throw NotFoundException if user is not found', async () => {
+    it('should throw CustomHttpException if user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       await expect(
@@ -237,10 +238,10 @@ describe('OrganisationsService', () => {
           organisationId: 'org-id',
           userId: 'user-id',
         } as any)
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(CustomHttpException);
     });
 
-    it('should throw NotFoundException if organisation is not found', async () => {
+    it('should throw CustomHttpException if organisation is not found', async () => {
       const user: any = {
         id: 'some-uuid-here',
         email: 'test@example.com',
@@ -255,10 +256,10 @@ describe('OrganisationsService', () => {
           organisationId: 'org-id',
           userId: 'user-id',
         } as any)
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(CustomHttpException);
     });
 
-    it('should throw NotFoundException if organisation member is not found', async () => {
+    it('should throw CustomHttpException if organisation member is not found', async () => {
       const user: any = {
         id: 'some-uuid-here',
         email: 'test@example.com',
@@ -276,7 +277,7 @@ describe('OrganisationsService', () => {
           organisationId: 'org-id',
           userId: 'user-id',
         } as any)
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(CustomHttpException);
     });
 
     it('should remove an organisation member successfully', async () => {

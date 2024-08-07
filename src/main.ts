@@ -8,7 +8,6 @@ import { AppModule } from './app.module';
 import { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
 import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
-import { HttpExceptionFilter } from './helpers/http-exception-filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -33,8 +32,6 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs', 'probe'] });
   app.useGlobalInterceptors(new ResponseInterceptor());
-  // Apply the global exception filter
-  app.useGlobalFilters(new HttpExceptionFilter());
 
   const options = new DocumentBuilder()
     .setTitle('HNG Boilerplate')

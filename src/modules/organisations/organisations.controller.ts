@@ -87,7 +87,7 @@ export class OrganisationsController {
   }
 
   @UseGuards(OwnershipGuard)
-  @Delete('/organisatonId/members/:userId')
+  @Delete(':organizatonId/members/:userId')
   @ApiOperation({ summary: 'Gets a product by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Member removed successfully' })
