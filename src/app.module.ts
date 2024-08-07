@@ -123,6 +123,8 @@ import { RunTestsModule } from './run-tests/run-tests.module';
         redis: {
           host: authConfig().redis.host,
           port: +authConfig().redis.port,
+          password: authConfig().redis.password,
+          username: authConfig().redis.username,
         },
       }),
     }),
@@ -148,6 +150,7 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     NewsletterSubscriptionModule,
     TeamsModule,
     BlogModule,
+    SubscriptionsModule,
   ],
   controllers: [HealthController, ProbeController],
 })
