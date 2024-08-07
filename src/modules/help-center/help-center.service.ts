@@ -6,23 +6,45 @@ import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { REQUEST_SUCCESSFUL } from '../../helpers/SystemMessages';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class HelpCenterService {
   constructor(
     @InjectRepository(HelpCenterEntity)
-    private readonly helpCenterRepository: Repository<HelpCenterEntity>
+    private readonly helpCenterRepository: Repository<HelpCenterEntity>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) {}
 
-  async create(createHelpCenterDto: CreateHelpCenterDto) {
-    let helpCenter = this.helpCenterRepository.create({
+  async create(createHelpCenterDto: CreateHelpCenterDto, user: User) {
+    const existingTopic = await this.helpCenterRepository.findOne({
+      where: { title: createHelpCenterDto.title },
+    });
+
+    if (existingTopic) {
+      throw new CustomHttpException('This question already exists.', HttpStatus.BAD_REQUEST);
+    }
+
+    const fullUser = await this.userRepository.findOne({
+      where: { id: user.id },
+      select: ['first_name', 'last_name'],
+    });
+
+    if (!fullUser) {
+      throw new CustomHttpException('User not found.', HttpStatus.NOT_FOUND);
+    }
+
+    const helpCenter = this.helpCenterRepository.create({
       ...createHelpCenterDto,
-      author: 'ADMIN',
+      author: `${fullUser.first_name} ${fullUser.last_name}`,
     });
     const newEntity = await this.helpCenterRepository.save(helpCenter);
+
     return {
       status_code: HttpStatus.CREATED,
-      message: REQUEST_SUCCESSFUL,
+      message: 'Request successful',
       data: newEntity,
     };
   }

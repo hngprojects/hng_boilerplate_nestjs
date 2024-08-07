@@ -1,21 +1,64 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
 import { HelpCenterService } from '../help-center.service';
-import { UpdateHelpCenterDto } from '../dto/update-help-center.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { HelpCenter } from '../interface/help-center.interface';
 import { HelpCenterEntity } from '../entities/help-center.entity';
+import { User } from '../../user/entities/user.entity';
 import { REQUEST_SUCCESSFUL } from '../../../helpers/SystemMessages';
 
 describe('HelpCenterService', () => {
   let service: HelpCenterService;
-  let repository: Repository<HelpCenterEntity>;
+  let helpCenterRepository: Repository<HelpCenterEntity>;
+  let userRepository: Repository<User>;
 
-  const mockHelpCenterRepository = () => ({
+  const mockHelpCenterRepository = {
     update: jest.fn(),
     findOneBy: jest.fn(),
     delete: jest.fn(),
-  });
+    create: jest.fn().mockImplementation(dto => ({
+      ...dto,
+      id: '1234',
+    })),
+    save: jest.fn().mockResolvedValue({
+      id: '1234',
+      title: 'Sample Title',
+      content: 'Sample Content',
+      author: 'ADMIN',
+    }),
+    find: jest.fn().mockResolvedValue([{
+      id: '1234',
+      title: 'Sample Title',
+      content: 'Sample Content',
+      author: 'ADMIN',
+    }]),
+    findOne: jest.fn().mockImplementation(options => Promise.resolve(
+      options.where.title === 'Sample Title' ? {
+        id: '1234',
+        title: 'Sample Title',
+        content: 'Sample Content',
+        author: 'ADMIN',
+      } : null
+    )),
+    createQueryBuilder: jest.fn().mockReturnValue({
+      andWhere: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([{
+        id: '1234',
+        title: 'Sample Title',
+        content: 'Sample Content',
+        author: 'ADMIN',
+      }]),
+    }),
+  };
+
+  const mockUserRepository = {
+    findOne: jest.fn().mockImplementation(options => Promise.resolve(
+      options.where.id === '123' ? {
+        id: '123',
+        first_name: 'John',
+        last_name: 'Doe',
+      } : null
+    )),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,13 +66,18 @@ describe('HelpCenterService', () => {
         HelpCenterService,
         {
           provide: getRepositoryToken(HelpCenterEntity),
-          useValue: mockHelpCenterRepository(),
+          useValue: mockHelpCenterRepository,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepository,
         },
       ],
     }).compile();
 
     service = module.get<HelpCenterService>(HelpCenterService);
-    repository = module.get<Repository<HelpCenter>>(getRepositoryToken(HelpCenterEntity));
+    helpCenterRepository = module.get<Repository<HelpCenterEntity>>(getRepositoryToken(HelpCenterEntity));
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -51,8 +99,8 @@ describe('HelpCenterService', () => {
       };
       const updatedHelpCenter = { id, ...updateHelpCenterDto };
 
-      jest.spyOn(repository, 'update').mockResolvedValue(undefined);
-      jest.spyOn(repository, 'findOneBy').mockResolvedValue(updatedHelpCenter as any);
+      jest.spyOn(helpCenterRepository, 'update').mockResolvedValue(undefined);
+      jest.spyOn(helpCenterRepository, 'findOneBy').mockResolvedValue(updatedHelpCenter as any);
 
       expect(await service.updateTopic(id, updateHelpCenterDto)).toEqual(responseBody);
     });
@@ -60,11 +108,11 @@ describe('HelpCenterService', () => {
 
   describe('removeTopic', () => {
     it('should remove a help center topic', async () => {
-      jest.spyOn(repository, 'delete').mockResolvedValue(undefined);
+      jest.spyOn(helpCenterRepository, 'delete').mockResolvedValue(undefined);
 
       await service.removeTopic('1');
 
-      expect(repository.delete).toHaveBeenCalledWith('1');
+      expect(helpCenterRepository.delete).toHaveBeenCalledWith('1');
     });
   });
 });

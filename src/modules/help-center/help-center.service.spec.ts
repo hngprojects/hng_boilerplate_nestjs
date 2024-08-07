@@ -2,19 +2,21 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HelpCenterService } from './help-center.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { HelpCenterEntity } from './entities/help-center.entity';
 import { REQUEST_SUCCESSFUL } from '../../helpers/SystemMessages';
+import { User } from '../user/entities/user.entity';
 
 describe('HelpCenterService', () => {
   let service: HelpCenterService;
-  let repository: Repository<HelpCenterEntity>;
+  let helpCenterRepository: Repository<HelpCenterEntity>;
+  let userRepository: Repository<User>;
 
   const mockHelpCenter = {
     id: '1234',
     title: 'Sample Title',
     content: 'Sample Content',
-    author: 'ADMIN',
+    author: 'John Doe',
   };
 
   const mockHelpCenterDto = {
@@ -22,20 +24,28 @@ describe('HelpCenterService', () => {
     content: 'Sample Content',
   };
 
-  const mockRepository = {
+  const mockUser = {
+    id: '123',
+    first_name: 'John',
+    last_name: 'Doe',
+  };
+
+  const mockHelpCenterRepository = {
     create: jest.fn().mockImplementation(dto => ({
       ...dto,
       id: '1234',
     })),
     save: jest.fn().mockResolvedValue(mockHelpCenter),
     find: jest.fn().mockResolvedValue([mockHelpCenter]),
-    findOne: jest
-      .fn()
-      .mockImplementation(options => Promise.resolve(options.where.id === '1234' ? mockHelpCenter : null)),
+    findOne: jest.fn().mockImplementation(options => Promise.resolve(options.where.title === mockHelpCenter.title ? mockHelpCenter : null)),
     createQueryBuilder: jest.fn().mockReturnValue({
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue([mockHelpCenter]),
     }),
+  };
+
+  const mockUserRepository = {
+    findOne: jest.fn().mockImplementation(options => Promise.resolve(options.where.id === mockUser.id ? mockUser : null)),
   };
 
   beforeEach(async () => {
@@ -44,13 +54,18 @@ describe('HelpCenterService', () => {
         HelpCenterService,
         {
           provide: getRepositoryToken(HelpCenterEntity),
-          useValue: mockRepository,
+          useValue: mockHelpCenterRepository,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepository,
         },
       ],
     }).compile();
 
     service = module.get<HelpCenterService>(HelpCenterService);
-    repository = module.get<Repository<HelpCenterEntity>>(getRepositoryToken(HelpCenterEntity));
+    helpCenterRepository = module.get<Repository<HelpCenterEntity>>(getRepositoryToken(HelpCenterEntity));
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -58,20 +73,35 @@ describe('HelpCenterService', () => {
   });
 
   describe('create', () => {
-    it('should create a new help center topic and set author to ADMIN', async () => {
-      const result = await service.create(mockHelpCenterDto);
+    it('should create a new help center topic with the user as author', async () => {
+      mockHelpCenterRepository.findOne.mockResolvedValueOnce(null);
+      mockUserRepository.findOne.mockResolvedValue(mockUser);
+
+      const result = await service.create(mockHelpCenterDto, mockUser as unknown as User);
       const responseBody = {
         status_code: 201,
-        message: REQUEST_SUCCESSFUL,
-        data: { ...mockHelpCenterDto, author: 'ADMIN', id: '1234' },
+        message: 'Request successful',
+        data: { ...mockHelpCenterDto, author: 'John Doe', id: '1234' },
       };
-      expect(result).toEqual(responseBody);
 
-      expect(repository.create).toHaveBeenCalledWith({
+      expect(result).toEqual(responseBody);
+      expect(helpCenterRepository.create).toHaveBeenCalledWith({
         ...mockHelpCenterDto,
-        author: 'ADMIN',
+        author: 'John Doe',
       });
-      expect(repository.save).toHaveBeenCalledWith({ ...mockHelpCenterDto, author: 'ADMIN', id: '1234' });
+      expect(helpCenterRepository.save).toHaveBeenCalledWith({
+        ...mockHelpCenterDto,
+        author: 'John Doe',
+        id: '1234',
+      });
+    });
+
+    it('should throw a BadRequestException if a topic with the same title already exists', async () => {
+      mockHelpCenterRepository.findOne.mockResolvedValue(mockHelpCenter);
+
+      await expect(service.create(mockHelpCenterDto, mockUser as unknown as User)).rejects.toThrow(
+        new BadRequestException('This question already exists.')
+      );
     });
   });
 
@@ -84,7 +114,7 @@ describe('HelpCenterService', () => {
         message: REQUEST_SUCCESSFUL,
       };
       expect(result).toEqual(responseBody);
-      expect(repository.find).toHaveBeenCalled();
+      expect(helpCenterRepository.find).toHaveBeenCalled();
     });
   });
 
@@ -97,10 +127,12 @@ describe('HelpCenterService', () => {
         message: REQUEST_SUCCESSFUL,
       };
       expect(result).toEqual(responseBody);
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: '1234' } });
+      expect(helpCenterRepository.findOne).toHaveBeenCalledWith({ where: { id: '1234' } });
     });
 
     it('should throw a NotFoundException if topic not found', async () => {
+      mockHelpCenterRepository.findOne.mockResolvedValueOnce(null);
+
       await expect(service.findOne('wrong-id')).rejects.toThrow(
         new NotFoundException('Help center topic with ID wrong-id not found')
       );
@@ -114,7 +146,7 @@ describe('HelpCenterService', () => {
         getMany: jest.fn().mockResolvedValue([mockHelpCenter]),
       };
 
-      jest.spyOn(repository, 'createQueryBuilder').mockReturnValue(mockQueryBuilder as any);
+      jest.spyOn(helpCenterRepository, 'createQueryBuilder').mockReturnValue(mockQueryBuilder as any);
 
       const result = await service.search({ title: 'Sample' });
       const responseBody = {
@@ -123,7 +155,7 @@ describe('HelpCenterService', () => {
         data: [mockHelpCenter],
       };
       expect(result).toEqual(responseBody);
-      expect(repository.createQueryBuilder).toHaveBeenCalledWith('help_center');
+      expect(helpCenterRepository.createQueryBuilder).toHaveBeenCalledWith('help_center');
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('help_center.title LIKE :title', { title: '%Sample%' });
     });
 
@@ -133,7 +165,7 @@ describe('HelpCenterService', () => {
         getMany: jest.fn().mockResolvedValue([mockHelpCenter]),
       };
 
-      jest.spyOn(repository, 'createQueryBuilder').mockReturnValue(mockQueryBuilder as any);
+      jest.spyOn(helpCenterRepository, 'createQueryBuilder').mockReturnValue(mockQueryBuilder as any);
 
       const result = await service.search({ title: 'Sample', content: 'Sample Content' });
       const responseBody = {
@@ -142,7 +174,7 @@ describe('HelpCenterService', () => {
         data: [mockHelpCenter],
       };
       expect(result).toEqual(responseBody);
-      expect(repository.createQueryBuilder).toHaveBeenCalledWith('help_center');
+      expect(helpCenterRepository.createQueryBuilder).toHaveBeenCalledWith('help_center');
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('help_center.title LIKE :title', { title: '%Sample%' });
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('help_center.content LIKE :content', {
         content: '%Sample Content%',
