@@ -1,10 +1,17 @@
-import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InviteDto } from './dto/invite.dto';
 import { Invite } from './entities/invite.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export class InviteService {
@@ -65,5 +72,65 @@ export class InviteService {
     };
 
     return responseData;
+  }
+
+  async refreshInvite(orgId: string, inviteId) {
+    const organisation = await this.organisationRepository.findOne({ where: { id: orgId } });
+
+    if (!organisation) {
+      throw new CustomHttpException(
+        {
+          status_code: 404,
+          error: 'Not Found',
+          message: `The organization with ID ${orgId} does not exist`,
+        },
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    const invitation = await this.inviteRepository.findOne({
+      where: {
+        id: inviteId,
+        organisation: organisation,
+      },
+    });
+
+    if (!invitation) {
+      throw new CustomHttpException(
+        {
+          status_code: 404,
+          error: 'Not Found',
+          message: `The invitation with ID ${inviteId} does not exist in this organization`,
+        },
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    if (invitation.isAccepted) {
+      throw new CustomHttpException(
+        {
+          status_code: 403,
+          message: `The invitation cannot be refreshed because it has been accepted`,
+        },
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const newToken = uuidv4();
+
+    const updatedInvitation = this.inviteRepository.save({
+      ...invitation,
+      token: newToken,
+    });
+    const link = `${process.env.FRONTEND_URL}/invite?token=${newToken}`;
+
+    return {
+      status_code: 200,
+      data: {
+        ...updatedInvitation,
+        link,
+      },
+      message: 'Invitation link refreshed successfully',
+    };
   }
 }

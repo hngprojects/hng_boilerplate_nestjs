@@ -1,4 +1,4 @@
-import { HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -90,6 +90,58 @@ describe('InviteService', () => {
       jest.spyOn(organisationRepo, 'findOne').mockResolvedValue(null);
 
       await expect(service.createInvite('1')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('refreshInvite', () => {
+    it('should refresh an invitation link successfully', async () => {
+      const orgId = uuidv4();
+      const inviteId = uuidv4();
+      const organisation = { id: orgId };
+      const invitation = { id: inviteId, isAccepted: false };
+      const newToken = uuidv4();
+      const updatedInvitation = { ...invitation, token: newToken };
+
+      jest.spyOn(organisationRepo, 'findOne').mockResolvedValue(organisation as any);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(invitation as any);
+      jest.spyOn(repository, 'save').mockResolvedValue(updatedInvitation as any);
+      (uuidv4 as jest.Mock).mockReturnValue(newToken);
+
+      const result = await service.refreshInvite(orgId, inviteId);
+
+      expect(result).toHaveProperty('data');
+    });
+
+    it('should throw an exception if the organisation does not exist', async () => {
+      const orgId = uuidv4();
+      const inviteId = uuidv4();
+
+      jest.spyOn(organisationRepo, 'findOne').mockResolvedValue(null);
+
+      await expect(service.refreshInvite(orgId, inviteId)).rejects.toThrow(HttpException);
+    });
+
+    it('should throw an exception if the invitation does not exist', async () => {
+      const orgId = uuidv4();
+      const inviteId = uuidv4();
+      const organisation = { id: orgId };
+
+      jest.spyOn(organisationRepo, 'findOne').mockResolvedValue(organisation as any);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.refreshInvite(orgId, inviteId)).rejects.toThrow(HttpException);
+    });
+
+    it('should throw an exception if the invitation has already been accepted', async () => {
+      const orgId = uuidv4();
+      const inviteId = uuidv4();
+      const organisation = { id: orgId };
+      const invitation = { id: inviteId, isAccepted: true };
+
+      jest.spyOn(organisationRepo, 'findOne').mockResolvedValue(organisation as any);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(invitation as any);
+
+      await expect(service.refreshInvite(orgId, inviteId)).rejects.toThrow(HttpException);
     });
   });
 });

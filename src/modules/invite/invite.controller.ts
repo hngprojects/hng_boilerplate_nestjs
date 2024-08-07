@@ -6,9 +6,12 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InviteService } from './invite.service';
+import { isUUID } from 'class-validator';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @ApiBearerAuth()
 @ApiTags('Organisation Invites')
@@ -40,5 +43,30 @@ export class InviteController {
         throw new HttpException('An unexpected error occurred', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
+  }
+
+  @Post(':orgId/invite/:inviteId/refresh')
+  async refreshInvitation(@Param('orgId') orgId: string, @Param('inviteId') inviteId: string) {
+    if (isUUID(orgId, 4)) {
+      throw new CustomHttpException(
+        {
+          status_code: 400,
+          error: 'Bad Request',
+          message: 'Invalid organisation ID format',
+        },
+        400
+      );
+    } else if (isUUID(inviteId, 4)) {
+      throw new CustomHttpException(
+        {
+          status_code: 400,
+          error: 'Bad Request',
+          message: 'Invalid organisation ID format',
+        },
+        400
+      );
+    }
+
+    return await this.inviteService.refreshInvite(orgId, inviteId);
   }
 }
