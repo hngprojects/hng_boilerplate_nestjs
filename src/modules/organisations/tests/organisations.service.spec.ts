@@ -46,6 +46,7 @@ describe('OrganisationsService', () => {
         {
           provide: getRepositoryToken(OrganisationMember),
           useValue: {
+            find: jest.fn(),
             findOne: jest.fn(),
             save: jest.fn(),
             softDelete: jest.fn(),
@@ -232,47 +233,21 @@ describe('OrganisationsService', () => {
 
   describe('search organisation members', () => {
     const orgMembers = [...organisationMembersMocks];
-    const orgMock = { id: 'some-org-uuid', organisationMembers: orgMembers } as unknown as Organisation;
-
-    it('should throw ForbiddenException if user is not in the same organisation', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
-
-      await expect(
-        service.searchOrganisationMember('not-user-01-uuid', 'not-some-org-uuid', 'jane', { filter: 'active_member' })
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('should throw BadRequestException if organisation does not exist', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(
-        service.searchOrganisationMember('user-0-uuid', 'not-some-org-uuid', 'jane', { filter: 'active_member' })
-      ).rejects.toThrow(BadRequestException);
-    });
 
     it('should verify that filtered request returns accurate data', async () => {
-      const generateMemberResponseFormat = member => {
-        return {
-          user_id: member.user_id.id,
-          username: member.profile_id.username,
-          email: member.user_id.email,
-          name: `${member.user_id.first_name} ${member.user_id.last_name}`,
-          phone_number: member.user_id.phone,
-          profile_pic_url: member.profile_id.profile_pic_url,
-        };
-      };
+      const generateMemberResponseFormat = member => ({
+        user_id: member.user_id.id,
+        username: member.profile_id.username,
+        email: member.user_id.email,
+        name: `${member.user_id.first_name} ${member.user_id.last_name}`,
+        phone_number: member.user_id.phone,
+        profile_pic_url: member.profile_id.profile_pic_url,
+      });
 
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
-
-      const result = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'Alice Johnson', {
-        filter: 'suspended',
-      });
-      const result2 = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'Jan', {
-        filter: 'active_member',
-      });
-      const result3 = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'bolu', {
-        filter: 'left_workspace',
-      });
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([...orgMembers]);
+      const result = await service.searchOrganisationMember('some-org-uuid', 'Alice Johnson', { filter: 'suspended' });
+      const result2 = await service.searchOrganisationMember('some-org-uuid', 'Jan', { filter: 'active_member' });
+      const result3 = await service.searchOrganisationMember('some-org-uuid', 'bolu', { filter: 'left_workspace' });
 
       const expectedMembers1 = [{ ...orgMembers[2] }].map(generateMemberResponseFormat);
       const expectedMembers2 = [{ ...orgMembers[0] }, { ...orgMembers[4] }].map(generateMemberResponseFormat);
@@ -284,13 +259,13 @@ describe('OrganisationsService', () => {
     });
 
     it('should return an empty array for members when no members are found', async () => {
-      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ ...orgMock });
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([...orgMembers]);
 
-      const result = await service.searchOrganisationMember('user-1-uuid', 'some-org-uuid', 'JamesBondIsGood', {
+      const result = await service.searchOrganisationMember('some-org-uuid', 'JamesBondIsGood', {
         filter: 'active_member',
       });
 
-      expect(result).toEqual({ status: 200, message: 'User(s) found successfully', data: { members: [] } });
+      expect(result).toEqual({ message: 'User(s) found successfully', data: { members: [] } });
     });
   });
 
