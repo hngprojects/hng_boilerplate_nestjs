@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService } from './email.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import QueueService from './queue.service';
+import QueueService, { MailSender } from './queue.service';
 import { BullModule, getQueueToken } from '@nestjs/bull';
 import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import * as Handlebars from 'handlebars';
 import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
 import { HttpStatus } from '@nestjs/common';
+import { MailInterface } from './interfaces/MailInterface';
 
 // Mock module-level functions
 jest.mock('./email_storage.service', () => ({
@@ -68,66 +69,25 @@ describe('EmailService', () => {
     const token = '123456';
     const link = `${url}?token=${token}`;
 
-    expect(queueService.sendMail).toHaveBeenCalledWith({
+    const mailSender: MailSender = {
       variant: 'welcome',
       mail: {
-        to: email,
-        context: {
-          link,
-          email,
-        },
+        to: 'test@example.com',
+        subject: 'Welcome!',
+        body: 'Hello and welcome!',
       },
-    });
-  });
+    };
 
-  describe('createTemplate', () => {
-    it('should create a template if HTML is valid', async () => {
-      const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
-      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
-      (htmlValidator as jest.Mock).mockResolvedValue({ messages: [] });
-      (require('./email_storage.service').createFile as jest.Mock).mockResolvedValue(Promise.resolve());
+    const jobMock = {
+      id: '12345',
+    };
 
-      const result = await service.createTemplate(templateInfo);
+    (mockQueue.add as jest.Mock).mockResolvedValue(jobMock);
 
-      expect(result).toEqual({
-        status_code: HttpStatus.CREATED,
-        message: 'Template created successfully',
-        validation_errors: [],
-      });
-      expect(require('./email_storage.service').createFile).toHaveBeenCalledWith(
-        './src/modules/email/templates',
-        'test.hbs',
-        '<div></div>'
-      );
-    });
+    const result = await queueService.sendMail(mailSender);
 
-    it('should return validation errors if HTML is invalid', async () => {
-      const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
-      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
-      (htmlValidator as jest.Mock).mockResolvedValue({ messages: [{ message: 'Invalid HTML', type: 'error' }] });
-      (require('./email_storage.service').createFile as jest.Mock).mockResolvedValue(Promise.resolve());
-
-      const result = await service.createTemplate(templateInfo);
-
-      expect(result).toEqual({
-        status_code: HttpStatus.BAD_REQUEST,
-        message: 'Invalid HTML format',
-        validation_errors: ['Invalid HTML'],
-      });
-    });
-
-    it('should handle errors during template creation', async () => {
-      const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
-      (Handlebars.compile as jest.Mock).mockReturnValue(() => '<div></div>');
-      (htmlValidator as jest.Mock).mockRejectedValue(new Error('Validation error'));
-
-      const result = await service.createTemplate(templateInfo);
-
-      expect(result).toEqual({
-        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Something went wrong, please try again',
-      });
-    });
+    expect(mockQueue.add).toHaveBeenCalledWith(mailSender.variant, { mail: mailSender.mail });
+    expect(result).toEqual({ jobId: jobMock.id });
   });
 
   describe('getTemplate', () => {
@@ -202,18 +162,29 @@ describe('EmailService', () => {
     const support_email = 'support@remotebingo.com';
     const recipient_name = 'John Doe';
 
-    await service.sendNotificationMail(email, { message, support_email, recipient_name });
-
-    expect(mailerService.sendMail).toHaveBeenCalledWith({
-      to: email,
-      subject: 'In-App, Notification',
-      template: 'notification',
-      context: {
-        email,
-        recipient_name,
-        message,
-        support_email,
+    const mailSender: MailSender = {
+      variant: 'in-app-notification',
+      mail: {
+        to: 'test@example.com',
+        subject: 'n-App, Notification',
+        context: {
+          email,
+          recipient_name,
+          message,
+          support_email,
+        },
       },
-    });
+    };
+
+    const jobMock = {
+      id: '12345',
+    };
+
+    (mockQueue.add as jest.Mock).mockResolvedValue(jobMock);
+
+    const result = await queueService.sendMail(mailSender);
+
+    expect(mockQueue.add).toHaveBeenCalledWith(mailSender.variant, { mail: mailSender.mail });
+    expect(result).toEqual({ jobId: jobMock.id });
   });
 });

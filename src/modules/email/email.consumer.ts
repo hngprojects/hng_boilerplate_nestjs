@@ -90,7 +90,7 @@ export default class EmailQueueConsumer {
     }
   }
 
-  @Process('login-otp')
+  @Process('in-app-notification')
   async sendLoginOtpEmailJob(job: Job<MailInterface>) {
     try {
       const {

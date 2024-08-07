@@ -16,7 +16,7 @@ export default class QueueService {
   }
 }
 
-interface MailSender {
+export interface MailSender {
   mail: MailInterface;
   variant:
     | 'welcome'
