@@ -1,3 +1,5 @@
+//////////////////
+
 import {
   Controller,
   Get,
@@ -9,6 +11,9 @@ import {
   Res,
   UnauthorizedException,
   ForbiddenException,
+  Delete,
+  InternalServerErrorException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -42,7 +47,7 @@ export class ProfileController {
   async updateProfile(@Param('userId') userId: string, @Body() body: UpdateProfileDto) {
     const updatedProfile = await this.profileService.updateProfile(userId, body);
     return updatedProfile;
-  }
+  } // <-- Added missing closing brace
 
   @ApiOperation({ summary: 'Deactivate User Profile' })
   @ApiResponse({
@@ -50,26 +55,31 @@ export class ProfileController {
     description: 'The profile has been deactivated',
   })
   @Patch('deactivate/:userId')
-  async deactivateProfile(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Body() deactivateProfileDto: DeactivateProfileDto
-  ) {
+  async deactivateProfile(@Req() req: Request, @Body() deactivateProfileDto: DeactivateProfileDto) {
     const user = req.user as { id: string };
     const userId = user.id;
 
     try {
       const updatedProfile = await this.profileService.deactivateProfile(userId, deactivateProfileDto);
-      res.status(HttpStatus.OK).json({
+      return {
         message: 'Profile successfully deactivated',
         data: updatedProfile,
-      });
+      };
     } catch (error) {
       if (error instanceof ForbiddenException) {
-        res.status(HttpStatus.FORBIDDEN).json({ message: 'Unauthorized access' });
-      } else {
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Something went wrong' });
+        throw new UnauthorizedException('Unauthorized access');
       }
+      throw new InternalServerErrorException('Something went wrong');
     }
+  }
+
+  @ApiOperation({ summary: 'Delete User Profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'The deleted record',
+  })
+  @Delete(':userId')
+  async deleteUserProfile(@Param('userId') userId: string) {
+    return await this.profileService.deleteUserProfile(userId);
   }
 }
