@@ -8,7 +8,6 @@ export class Permissions extends AbstractBaseEntity {
   @Column({
     type: 'enum',
     enum: PermissionCategory,
-    unique: true,
   })
   category: PermissionCategory;
 

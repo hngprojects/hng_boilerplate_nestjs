@@ -4,6 +4,7 @@ import { User } from '../../../user/entities/user.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
 import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
+import { mockUser } from './user.mock';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -12,8 +13,6 @@ export enum UserType {
 }
 
 export const createMockOrganisation = (): Organisation => {
-  const user = new User();
-  user.id = uuidv4();
   const org = new Organisation();
   org.id = uuidv4();
 
@@ -49,7 +48,7 @@ export const createMockOrganisation = (): Organisation => {
     id: uuidv4(),
     created_at: new Date(),
     updated_at: new Date(),
-    user_id: user,
+    user_id: mockUser,
     role: organisationRoleMock,
     organisation_id: org,
     profile_id: profileMock,
