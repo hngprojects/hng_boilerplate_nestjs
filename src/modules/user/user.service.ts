@@ -235,10 +235,8 @@ export default class UserService {
   }
 
   async updateUserStatus(userId: string, status: string) {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      select: ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'updated_at'],
-    });
+    const user = await this.getUserById(userId);
+
     if (!user) {
       throw new NotFoundException({
         error: 'Not Found',
@@ -246,13 +244,18 @@ export default class UserService {
         status_code: HttpStatus.NOT_FOUND,
       });
     }
-    const updatedUser = Object.assign(user, { status });
-    const result = await this.userRepository.save(updatedUser);
+
+    await this.userRepository.update(userId, { status });
+
+    const updatedUser = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'updated_at'],
+    });
 
     return {
       status: 'success',
       status_code: HttpStatus.OK,
-      data: result,
+      data: updatedUser,
     };
   }
 }

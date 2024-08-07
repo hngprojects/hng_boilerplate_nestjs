@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiExcludeEndpoint,
@@ -100,7 +100,7 @@ export class UserController {
   })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @UseGuards(SuperAdminGuard)
-  async updateUserStatus(@Param('userId') userId: string, @Body() { status }: UpdateUserStatusDto) {
+  async updateUserStatus(@Param('userId', ParseUUIDPipe) userId: string, @Body() { status }: UpdateUserStatusDto) {
     return this.userService.updateUserStatus(userId, status);
   }
 }
