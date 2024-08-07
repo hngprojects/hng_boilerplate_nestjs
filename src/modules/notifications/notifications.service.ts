@@ -235,9 +235,10 @@ export class NotificationsService {
 
     const notification_settings = await this.getNotificationSettingsByUserId(user_id);
 
-    // TODO: Add sendNotificationEmail(user, notification_content.message, notification_settings); when mail service is back
+    await this.sendNotificationEmail(user, notification_content.message, notification_settings);
 
     this.logger.log(`Notification created by ${notification_content.created_by} has been sent to ${user.email}.`);
+
     const notification = await this.saveNotification(user, notification_content);
 
     const { id: notification_id, message, is_read, created_at } = notification;
@@ -291,7 +292,7 @@ export class NotificationsService {
     notificationSettings: NotificationSettingsDto
   ): Promise<void> {
     const { email, first_name, last_name } = user;
-    // TODO: Implement mobile_push_notification using firebase
+    // TODO: Implement mobile_push_notification using firebase after Mark's approval
     const { email_notification_activity_in_workspace, email_notification_always_send_email_notifications } =
       notificationSettings;
 
@@ -342,7 +343,8 @@ export class NotificationsService {
           notification.message
         );
 
-        // TODO: await this.emailService.sendNotificationMail(email, notificationEmailProps);
+        await this.emailService.sendNotificationMail(email, notificationEmailProps);
+
         this.logger.log(`Notification created by ${notification.created_by} has been sent as digest to ${email}.`);
 
         notification.is_read = true;
