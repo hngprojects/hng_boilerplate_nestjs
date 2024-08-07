@@ -18,7 +18,7 @@ import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { GetHelpCenterDto } from './dto/get-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { HelpCenter } from './interface/help-center.interface';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '../../helpers/skipAuth';
 import {
   HelpCenterMultipleInstancResponseType,
   HelpCenterSingleInstancResponseType,
