@@ -225,12 +225,9 @@ export default class UserService {
   }
 
   async softDeleteUser(userId: string, authenticatedUserId: string): Promise<any> {
-    const identifierOptions: UserIdentifierOptionsType = {
-      identifier: userId,
-      identifierType: 'id',
-    };
-
-    const user = await this.getUserRecord(identifierOptions);
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
 
     if (!user) {
       throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
