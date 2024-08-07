@@ -20,6 +20,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateAdminDto } from './dto/admin.dto';
 import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
+import { RoleCategory, RoleCategoryDescriptions } from '../../modules/organisation-role/helpers/RoleCategory';
+import { DefaultRole } from '../../modules/organisation-role/entities/role.entity';
 
 @Injectable()
 export class SeedingService {
@@ -34,9 +36,10 @@ export class SeedingService {
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
     const notificationRepository = this.dataSource.getRepository(Notification);
-
+    const defaultRoleRepository = this.dataSource.getRepository(DefaultRole);
     try {
       const existingPermissions = await defaultPermissionRepository.count();
+      const existingRoles = await defaultRoleRepository.count();
 
       //Populate the database with default permissions if none exits else stop execution
       if (existingPermissions <= 0) {
@@ -48,6 +51,19 @@ export class SeedingService {
         );
 
         await defaultPermissionRepository.save(defaultPermissions);
+      }
+
+      //Populate the database with default Roles if none exits else stop execution
+      if (existingRoles <= 0) {
+        const defaultRoles = Object.values(RoleCategory).map(name =>
+          defaultRoleRepository.create({
+            name: name,
+            description: RoleCategoryDescriptions[name],
+          })
+        );
+
+        // Save all default roles to the database
+        await defaultRoleRepository.save(defaultRoles);
       }
 
       const queryRunner = this.dataSource.createQueryRunner();
