@@ -1,5 +1,5 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, ManyToOne } from 'typeorm';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 
 export enum StockStatusType {
@@ -53,4 +53,7 @@ export class Product extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, org => org.products)
   org: Organisation;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

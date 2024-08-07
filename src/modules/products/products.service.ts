@@ -14,6 +14,9 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
+import { DeleteProductDTO } from './dto/delete-product.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { ORG_NOT_FOUND, PRODUCT_NOT_FOUND } from '../../helpers/SystemMessages';
 
 interface SearchCriteria {
   name?: string;
@@ -173,28 +176,14 @@ export class ProductsService {
   async deleteProduct(orgId: string, productId: string) {
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
     if (!org) {
-      throw new InternalServerErrorException({
-        status: 'Unprocessable entity exception',
-        message: 'Invalid organisation credentials',
-        status_code: 422,
-      });
+      throw new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    try {
-      const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
-      if (product.org.id !== org.id) {
-        throw new ForbiddenException({
-          status: 'fail',
-          message: 'Not allowed to perform this action',
-        });
-      }
-      product.is_deleted = true;
-      await this.productRepository.save(product);
-    } catch (error) {
-      this.logger.log(error);
-      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
+    if (!product) {
+      throw new CustomHttpException(PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-
+    await this.productRepository.softDelete(product);
     return {
       message: 'Product successfully deleted',
       data: {},
