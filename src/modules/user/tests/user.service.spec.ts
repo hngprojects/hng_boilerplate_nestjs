@@ -562,7 +562,6 @@ describe('UserService', () => {
       expect(result.message).toBe('Deletion in progress');
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
       });
       expect(mockUserRepository.softDelete).toHaveBeenCalledWith(userId);
     });
@@ -579,7 +578,6 @@ describe('UserService', () => {
       );
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
       });
       expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
     });
@@ -606,7 +604,6 @@ describe('UserService', () => {
       );
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
       });
       expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
     });
