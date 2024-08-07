@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, MoreThanOrEqual, FindOptionsWhere } from 'typeorm';
 import { Blog } from './entities/blog.entity';
@@ -8,8 +8,6 @@ import { BlogResponseDto } from './dtos/blog-response.dto';
 
 @Injectable()
 export class BlogService {
-  private readonly logger = new Logger(BlogService.name);
-
   constructor(
     @InjectRepository(Blog)
     private blogRepository: Repository<Blog>,
@@ -24,7 +22,6 @@ export class BlogService {
     });
 
     if (!fullUser) {
-      this.logger.error('User not found');
       throw new Error('User not found');
     }
 
@@ -43,7 +40,7 @@ export class BlogService {
       tags: savedBlog.tags,
       image_urls: savedBlog.image_urls,
       author: author,
-      createdDate: savedBlog.created_at.toISOString(),
+      createdDate: savedBlog.created_at,
     };
   }
 
@@ -72,32 +69,26 @@ export class BlogService {
       where.created_at = MoreThanOrEqual(new Date(createdDate));
     }
 
-    this.logger.debug(`Search Criteria: ${JSON.stringify(where)}`);
+    const [result, total] = await this.blogRepository.findAndCount({
+      where: Object.keys(where).length ? where : undefined,
+      skip,
+      take: pageSize,
+      relations: ['author'],
+    });
 
-    try {
-      const [result, total] = await this.blogRepository.findAndCount({
-        where: Object.keys(where).length ? where : undefined,
-        skip,
-        take: pageSize,
-        relations: ['author'],
-      });
-
-      this.logger.debug(`Search Results: ${JSON.stringify(result)}`);
-
-      const data = result.map(blog => ({
+    const data = result.map(blog => {
+      const authorName = blog.author ? `${blog.author.first_name} ${blog.author.last_name}` : 'Unknown';
+      return {
         id: blog.id,
         title: blog.title,
         content: blog.content,
         tags: blog.tags,
         image_urls: blog.image_urls,
-        author: `${blog.author.first_name} ${blog.author.last_name}`,
-        createdDate: blog.created_at.toISOString(),
-      }));
+        author: authorName,
+        createdDate: blog.created_at,
+      };
+    });
 
-      return { data, total };
-    } catch (error) {
-      this.logger.error('Error executing search query', error.stack);
-      throw new Error('Error executing search query');
-    }
+    return { data, total };
   }
 }
