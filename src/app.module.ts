@@ -38,6 +38,7 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
 import { TeamsModule } from './modules/teams/teams.module';
+import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 
@@ -148,6 +149,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
     WaitlistModule,
     NewsletterSubscriptionModule,
     TeamsModule,
+    FlutterwaveModule,
     BlogModule,
     SubscriptionsModule,
   ],
