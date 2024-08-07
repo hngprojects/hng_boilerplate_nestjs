@@ -12,6 +12,7 @@ import { JobDto } from './dto/job.dto';
 import { JobApplication } from './entities/job-application.entity';
 import { Job } from './entities/job.entity';
 import { isPassed } from './utils/helpers';
+import { JobSearchDto } from './dto/jobSearch.dto';
 
 @Injectable()
 export class JobsService {
@@ -118,6 +119,37 @@ export class JobsService {
       status: 'success',
       message: SYS_MSG.JOB_DELETION_SUCCESSFUL,
       status_code: 200,
+    };
+  }
+
+  async searchJobs(searchDto: JobSearchDto, page: number, limit: number) {
+    const query = this.jobRepository.createQueryBuilder('job');
+    query.where('job.is_deleted = :isDeleted', { isDeleted: false });
+
+    if (searchDto.location) {
+      query.andWhere('job.location ILIKE :location', { location: `%${searchDto.location}%` });
+    }
+
+    if (searchDto.salary_range) {
+      query.andWhere('job.salary_range = :salaryRange', { salaryRange: searchDto.salary_range });
+    }
+
+    if (searchDto.job_type) {
+      query.andWhere('job.job_type = :jobType', { jobType: searchDto.job_type });
+    }
+
+    if (searchDto.job_mode) {
+      query.andWhere('job.job_mode = :jobMode', { jobMode: searchDto.job_mode });
+    }
+    page = Math.max(1, Math.floor(Number(page)));
+    limit = Math.max(1, Math.floor(Number(limit)));
+
+    query.skip((page - 1) * limit).take(limit);
+    const jobs = await query.getMany();
+
+    return {
+      status_code: HttpStatus.OK,
+      data: jobs,
     };
   }
 }

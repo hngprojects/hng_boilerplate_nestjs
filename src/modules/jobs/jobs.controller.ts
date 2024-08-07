@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+  ValidationPipe,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -6,6 +18,7 @@ import {
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnprocessableEntityResponse,
@@ -17,6 +30,8 @@ import { JobApplicationDto } from './dto/job-application.dto';
 import { JobDto } from './dto/job.dto';
 import { JobsService } from './jobs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { JobSearchDto } from './dto/jobSearch.dto';
+
 @ApiTags('Jobs')
 @ApiBearerAuth()
 @Controller('jobs')
@@ -53,6 +68,23 @@ export class JobsController {
   async createJob(@Body() createJobDto: JobDto, @Request() req: any) {
     const user = req.user;
     return this.jobService.create(createJobDto, user.sub);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search for job listings' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Successful response' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  async searchJobs(
+    @Query(new ValidationPipe({ transform: true, forbidNonWhitelisted: true }))
+    searchDto: JobSearchDto
+  ) {
+    const page = searchDto.page || 1;
+    const limit = searchDto.limit || 10;
+    const { page: _, limit: __, ...otherSearchParams } = searchDto;
+
+    return this.jobService.searchJobs(otherSearchParams, page, limit);
   }
 
   @Get('/')
