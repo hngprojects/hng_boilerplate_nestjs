@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
-import { NewsletterSubscription } from './entities/newsletter-subscription.entity';
+import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
+import { NewsletterSubscription } from './entities/newsletter-subscription.entity';
 
 @Injectable()
 export class NewsletterSubscriptionService {
