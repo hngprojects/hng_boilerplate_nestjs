@@ -24,7 +24,6 @@ import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
 import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../helpers/SystemMessages';
 import { MemberRoleMapper } from './mapper/member-role.mapper';
-import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { DefaultRole } from '../organisation-role/entities/role.entity';
 import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
