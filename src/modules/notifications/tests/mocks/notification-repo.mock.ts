@@ -39,6 +39,7 @@ export const mockUser: User = {
   last_name: 'Smith',
   email: 'john.smith@example.com',
   password: 'pass123',
+  status: 'Hello from the children of planet Earth',
   hashPassword: async () => {},
   is_active: true,
   attempts_left: 3,
