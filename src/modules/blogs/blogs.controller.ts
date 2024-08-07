@@ -1,4 +1,17 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Param, ParseUUIDPipe, Put } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Put,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { BlogService } from './blogs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { CreateBlogDto } from './dtos/create-blog.dto';
@@ -7,6 +20,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { BlogDto } from './dtos/blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { UpdateBlogResponseDto } from './dtos/update-blog-response.dto';
+import { BLOG_DELETED } from '../../helpers/SystemMessages';
 
 @ApiTags('blogs')
 @Controller('/blogs')
@@ -48,5 +62,19 @@ export class BlogController {
   @ApiResponse({ status: 500, description: 'Internal server error.' })
   async getSingleBlog(@Param('id', new ParseUUIDPipe()) id: string, @Request() req): Promise<BlogDto> {
     return await this.blogService.getSingleBlog(id, req.user);
+  }
+  @Delete(':id')
+  @UseGuards(SuperAdminGuard)
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({ summary: 'Delete a blog post' })
+  @ApiResponse({ status: 202, description: 'Blog successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Blog with the given Id does not exist.' })
+  @ApiResponse({ status: 403, description: 'You are not authorized to perform this action.' })
+  async deleteBlog(@Param('id', ParseUUIDPipe) id: string): Promise<any> {
+    await this.blogService.deleteBlogPost(id);
+    return {
+      message: BLOG_DELETED,
+      status_code: HttpStatus.ACCEPTED,
+    };
   }
 }
