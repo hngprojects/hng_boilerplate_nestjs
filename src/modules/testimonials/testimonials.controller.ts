@@ -5,7 +5,11 @@ import UserService from '../user/user.service';
 import { CreateTestimonialResponseDto } from './dto/create-testimonial-response.dto';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
-import { GetTestimonialsResponseDto, GetTestimonialsErrorResponseDto } from './dto/get-testimonials.dto';
+import {
+  GetTestimonialsResponseDto,
+  GetTestimonials400ErrorResponseDto,
+  GetTestimonials404ErrorResponseDto,
+} from './dto/get-testimonials.dto';
 
 @ApiBearerAuth()
 @ApiTags('Testimonials')
@@ -49,18 +53,18 @@ export class TestimonialsController {
   @ApiResponse({
     status: 404,
     description: 'User not found',
-    type: GetTestimonialsErrorResponseDto,
+    type: GetTestimonials404ErrorResponseDto,
   })
   @ApiResponse({
     status: 400,
     description: 'User has no testimonials',
-    type: GetTestimonialsErrorResponseDto,
+    type: GetTestimonials400ErrorResponseDto,
   })
   @Get('/:user_id')
   async getAllTestimonials(
     @Param('user_id') userId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('page_size', new DefaultValuePipe(1), ParseIntPipe) page_size: number
+    @Query('page_size', new DefaultValuePipe(3), ParseIntPipe) page_size: number
   ) {
     return this.testimonialsService.getAllTestimonials(userId, page, page_size);
   }

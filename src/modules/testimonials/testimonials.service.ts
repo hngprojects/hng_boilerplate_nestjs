@@ -63,9 +63,6 @@ export class TestimonialsService {
 
     if (!user) throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
 
-    if (!page) page = 1;
-    if (!pageSize) pageSize = 3;
-
     let testimonials = await this.testimonialRepository.find({
       relations: ['user'],
       where: {
