@@ -18,8 +18,10 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
-import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
+import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
+import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationsService {
@@ -29,7 +31,9 @@ export class OrganisationsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(OrganisationMember)
-    private readonly organisationMemberRepository: Repository<OrganisationMember>
+    private readonly organisationMemberRepository: Repository<OrganisationMember>,
+    @InjectRepository(OrganisationRole)
+    private readonly rolesRepository: Repository<OrganisationRole>
   ) {}
 
   async getOrganisationMembers(
@@ -100,6 +104,7 @@ export class OrganisationsService {
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
+
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
     return emailFound?.length ? true : false;
@@ -126,31 +131,42 @@ export class OrganisationsService {
     }
   }
 
-  async removeOrganisationMember(removeOrganisationMemberDto: RemoveOrganisationMemberDto) {
-    const { organisationId, userId } = removeOrganisationMemberDto;
+  async updateMemberRole(orgId: string, memberId: string, updateMemberRoleDto: UpdateMemberRoleDto) {
+    const member = await this.organisationMemberRepository.findOne({
+      where: { id: memberId },
+      relations: ['user_id', 'organisation_id', 'role'],
+    });
 
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new CustomHttpException('No user found with the provided id', 404);
+    if (!member) {
+      throw new CustomHttpException(ORG_MEMBER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const org = await this.organisationRepository.findOne({ where: { id: organisationId } });
-    if (!org) {
-      throw new CustomHttpException('No organisation found with the provided id', 404);
+    if (member.organisation_id.id !== orgId) {
+      throw new CustomHttpException(ORG_MEMBER_DOES_NOT_BELONG, HttpStatus.FORBIDDEN);
     }
 
-    const orgMember = await this.organisationMemberRepository.findOne({
+    const newRole = await this.rolesRepository.findOne({
       where: {
-        organisation_id: { id: organisationId },
-        user_id: { id: userId },
+        name: updateMemberRoleDto.role,
+        organisation: { id: orgId },
       },
     });
-    if (!orgMember) {
-      throw new CustomHttpException('No organisation member found with provided ids', 404);
+
+    if (!newRole) {
+      throw new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    await this.organisationMemberRepository.softDelete(orgMember.id);
+    member.role = newRole;
+    await this.organisationMemberRepository.save(member);
 
-    return { message: 'Member removed from organisation successfully' };
+    return {
+      message: `${member.user_id.first_name} ${member.user_id.last_name} has successfully been added to the ${newRole.name} role`,
+      status_code: 201,
+      data: {
+        user: member.user_id,
+        org: member.organisation_id,
+        role: newRole,
+      },
+    };
   }
 }

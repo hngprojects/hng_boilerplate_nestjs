@@ -6,9 +6,10 @@ import { Organisation } from './entities/organisations.entity';
 import { User } from '../user/entities/user.entity';
 import { UserModule } from '../user/user.module';
 import { OrganisationMember } from './entities/org-members.entity';
+import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Organisation, User, OrganisationMember]), UserModule],
+  imports: [TypeOrmModule.forFeature([Organisation, User, OrganisationMember, OrganisationRole]), UserModule],
   controllers: [OrganisationsController],
   providers: [OrganisationsService],
 })
