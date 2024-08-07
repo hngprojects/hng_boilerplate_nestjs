@@ -18,6 +18,7 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
+import { OrganisationsService } from '../organisations/organisations.service';
 
 @Injectable()
 export default class UserService {
@@ -25,7 +26,8 @@ export default class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Profile)
-    private profileRepository: Repository<Profile>
+    private profileRepository: Repository<Profile>,
+    private organisationService: OrganisationsService
   ) {}
 
   async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
@@ -82,10 +84,10 @@ export default class UserService {
   }
 
   private async getUserById(identifier: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({
+    const user = (await this.userRepository.findOne({
       where: { id: identifier },
       relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
-    });
+    })) as User;
     return user;
   }
 
@@ -100,11 +102,7 @@ export default class UserService {
     return await GetRecord[identifierType]();
   }
 
-  async updateUser(
-    userId: string,
-    updateUserDto: UpdateUserDto,
-    currentUser: UserPayload
-  ): Promise<UpdateUserResponseDTO> {
+  async updateUser(userId: string, updateUserDto: UpdateUserDto, currentUser: UserPayload) {
     if (!userId) {
       throw new BadRequestException({
         error: 'Bad Request',
@@ -152,7 +150,6 @@ export default class UserService {
       user: {
         id: user.id,
         name: `${user.first_name} ${user.last_name}`,
-        phone_number: user.phone_number,
       },
     };
   }
@@ -191,6 +188,16 @@ export default class UserService {
     await this.userRepository.save(user);
 
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
+  }
+
+  async getUserOrganisations(userId: string) {
+    const user = await this.getUserById(userId);
+    const organisation = user.owned_organisations;
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Organisations fetched successfully',
+      data: organisation,
+    };
   }
 
   async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {

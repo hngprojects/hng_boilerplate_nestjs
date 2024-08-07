@@ -143,6 +143,7 @@ export class OrganisationsService {
       throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
     }
   }
+
   async emailExists(email: string): Promise<boolean> {
     const emailFound = await this.organisationRepository.findBy({ email });
     return emailFound?.length ? true : false;
