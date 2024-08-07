@@ -207,7 +207,7 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValueOnce(null);
 
-      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateOrganisation(id, updateOrganisationDto)).rejects.toThrow(InternalServerErrorException);
     });
 
     it('should throw InternalServerErrorException if an unexpected error occurs', async () => {

@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,6 +19,7 @@ import { OrganisationsService } from '../../../modules/organisations/organisatio
 import { mockUser } from '../mocks/mockUser';
 import { orgMemberMock } from '../../../modules/organisations/tests/mocks/organisation-member.mock';
 import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 jest.mock('uuid');
 
 describe('InviteService', () => {
@@ -231,7 +232,7 @@ describe('InviteService', () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
 
       await expect(service.acceptInvite({ token: 'invalid-token', email: 'test@example.com' })).rejects.toThrow(
-        NotFoundException
+        CustomHttpException
       );
     });
 
@@ -250,7 +251,7 @@ describe('InviteService', () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockInvite);
 
       await expect(service.acceptInvite({ token: 'valid-token', email: 'wrong@example.com' })).rejects.toThrow(
-        BadRequestException
+        CustomHttpException
       );
     });
 
@@ -269,7 +270,7 @@ describe('InviteService', () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockInvite);
 
       await expect(service.acceptInvite({ token: 'valid-token', email: 'test@example.com' })).rejects.toThrow(
-        BadRequestException
+        CustomHttpException
       );
     });
 
@@ -278,7 +279,7 @@ describe('InviteService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.acceptInvite({ token: 'valid-token', email: 'test@example.com' })).rejects.toThrow(
-        NotFoundException
+        CustomHttpException
       );
     });
 
@@ -301,7 +302,7 @@ describe('InviteService', () => {
         .mockResolvedValue({ status: 'error', message: 'Member added', member: orgMemberMock });
 
       await expect(service.acceptInvite({ token: 'valid-token', email: 'test@example.com' })).rejects.toThrow(
-        InternalServerErrorException
+        CustomHttpException
       );
     });
   });

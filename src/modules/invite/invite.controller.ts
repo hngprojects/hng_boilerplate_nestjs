@@ -9,14 +9,12 @@ import {
   Post,
   Body,
   UseGuards,
-  ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InviteService } from './invite.service';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { OwnershipGuard } from '../../guards/authorization.guard';
-
+import * as SYS_MSG from '../../helpers/SystemMessages';
 @ApiBearerAuth()
 @ApiTags('Organisation Invites')
 @Controller('organizations')
@@ -53,15 +51,15 @@ export class InviteController {
   @ApiOperation({ summary: 'Accept Invite To Organisation' })
   @ApiResponse({
     status: 201,
-    description: 'Member added successfully',
+    description: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY,
   })
   @ApiResponse({
     status: 409,
-    description: 'User already added to organization.',
+    description: SYS_MSG.MEMBER_ALREADY_EXISTS,
   })
   @ApiResponse({
     status: 404,
-    description: 'Organisation not found',
+    description: SYS_MSG.ORG_NOT_FOUND,
   })
   @Post('accept-invite')
   async acceptInvite(@Body() acceptInviteDto: AcceptInviteDto): Promise<{

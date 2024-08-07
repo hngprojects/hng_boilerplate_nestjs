@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InviteDto } from './dto/invite.dto';
 import { Invite } from './entities/invite.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
@@ -15,7 +9,8 @@ import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { User } from '../user/entities/user.entity';
 import { OrganisationMember } from '../organisations/entities/org-members.entity';
 import { OrganisationsService } from '../organisations/organisations.service';
-
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 @Injectable()
 export class InviteService {
   constructor(
@@ -88,25 +83,21 @@ export class InviteService {
     const invite = await this.inviteRepository.findOne({ where: { token }, relations: ['organisation'] });
 
     if (!invite) {
-      throw new NotFoundException('Invite link not found');
+      throw new CustomHttpException(SYS_MSG.INVITE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     if (!invite.isGeneric && invite.email !== email) {
-      throw new BadRequestException('Invalid invite link');
+      throw new CustomHttpException(SYS_MSG.INVITE_ACCEPTED, HttpStatus.BAD_REQUEST);
     }
 
     if (invite.isAccepted) {
-      throw new BadRequestException('Invite already accepted');
+      throw new CustomHttpException(SYS_MSG.INVITE_ACCEPTED, HttpStatus.BAD_REQUEST);
     }
 
     const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
-      throw new NotFoundException({
-        error: 'Not Found',
-        message: 'User not found, register to continue',
-        status_code: HttpStatus.NOT_FOUND,
-      });
+      throw new CustomHttpException(SYS_MSG.USER_NOT_REGISTERED, HttpStatus.NOT_FOUND);
     }
 
     const response = await this.OrganisationService.addOrganisationMember(invite.organisation.id, {
@@ -118,7 +109,7 @@ export class InviteService {
       await this.inviteRepository.save(invite);
       return response;
     } else {
-      throw new InternalServerErrorException('Failed to add member to the organisation');
+      throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
