@@ -38,5 +38,9 @@ export const ORG_NOT_FOUND = 'Organisation not found';
 export const NOT_ORG_OWNER = 'You do not have permission to update this organisation';
 export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
+
 export const PRODUCT_NOT_FOUND = 'Product not found!';
 export const COMMENT_CREATED = 'Comment added successfully';
+
+export const DEADLINE_PASSED = 'Job application deadline passed';
+
