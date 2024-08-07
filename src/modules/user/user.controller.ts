@@ -46,19 +46,6 @@ export class UserController {
     return this.userService.getUserStats(status);
   }
 
-  @Get('/organisations')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all user organisations' })
-  @ApiResponse({ status: 200 })
-  @ApiResponse({ status: 400, description: 'Bad Request.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
-  async getUserOrganisations(@Req() request: Request) {
-    const user = request['user'];
-    const userId = user.sub;
-    return this.userService.getUserOrganisations(userId);
-  }
-
   @ApiOperation({ summary: 'Update User' })
   @ApiResponse({
     status: 200,

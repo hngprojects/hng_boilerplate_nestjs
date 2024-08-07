@@ -18,7 +18,6 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
-import { OrganisationsService } from '../organisations/organisations.service';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 
