@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { NewsletterSubscriptionService } from './newsletter-subscription.service';
-import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
-import { skipAuth } from '../../helpers/skipAuth';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { skipAuth } from '../../helpers/skipAuth';
+import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
+import { NewsletterSubscriptionService } from './newsletter-subscription.service';
 
 @ApiTags('Newsletter Subscription')
 @Controller('newsletter-subscription')
@@ -16,16 +16,33 @@ export class NewsletterSubscriptionController {
   @ApiOperation({ summary: 'Subscribe to newsletter' })
   @ApiResponse({ status: 201, description: 'Subscriber subscription successful.' })
   create(@Body() createNewsletterDto: CreateNewsletterSubscriptionDto) {
-    return this.newsletterSubscriptionService.newsletterSubcription(createNewsletterDto);
+    return this.newsletterSubscriptionService.newsletterSubscription(createNewsletterDto);
   }
 
   @UseGuards(SuperAdminGuard)
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fetch all subscribers to newsletter' })
-  @ApiResponse({ status: 200, type: [Object] })
-  findAll() {
-    return this.newsletterSubscriptionService.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'Return all team members',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/any' },
+        },
+      },
+    },
+  })
+  async findAllSubscriptions(): Promise<{ message: string; data: any[] }> {
+    const subscribers = await this.newsletterSubscriptionService.findAllSubscriptions();
+    return {
+      message: 'Subscribers list fetched successfully',
+      data: subscribers,
+    };
   }
 
   @UseGuards(SuperAdminGuard)
@@ -43,9 +60,27 @@ export class NewsletterSubscriptionController {
   @Get('deleted')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fetch all deleted subscribers' })
-  @ApiResponse({ status: 200, type: [Object] })
-  findSoftDeleted() {
-    return this.newsletterSubscriptionService.findSoftDeleted();
+  @ApiResponse({
+    status: 200,
+    description: 'Return all team members',
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        message: { type: 'string' },
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/any' },
+        },
+      },
+    },
+  })
+  async findSoftDeleted(): Promise<{ message: string; data: any[] }> {
+    const deletedSubscribers = await this.newsletterSubscriptionService.findSoftDeleted();
+
+    return {
+      message: 'Deleted subscribers list fetched successfully',
+      data: deletedSubscribers,
+    };
   }
 
   @UseGuards(SuperAdminGuard)

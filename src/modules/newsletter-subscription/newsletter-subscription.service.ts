@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
+import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { NewsletterSubscription } from './entities/newsletter-subscription.entity';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class NewsletterSubscriptionService {
     private readonly newsletterSubscriptionRepository: Repository<NewsletterSubscription>
   ) {}
 
-  async newsletterSubcription(createNewsletterSubscriptionDto: CreateNewsletterSubscriptionDto) {
+  async newsletterSubscription(createNewsletterSubscriptionDto: CreateNewsletterSubscriptionDto) {
     const { email } = createNewsletterSubscriptionDto;
 
     const existingSubscription = await this.newsletterSubscriptionRepository.findOne({ where: { email: email } });
@@ -24,7 +24,7 @@ export class NewsletterSubscriptionService {
     return response;
   }
 
-  async findAll() {
+  async findAllSubscriptions() {
     const subscribers = await this.newsletterSubscriptionRepository.find();
 
     return subscribers.map(newsletter => ({
