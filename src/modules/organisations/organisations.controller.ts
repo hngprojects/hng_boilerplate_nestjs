@@ -16,6 +16,7 @@ import {
   Req,
   Res,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
@@ -27,10 +28,16 @@ import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { UserOrganizationErrorResponseDto, UserOrganizationResponseDto } from './dto/user-orgs-response.dto';
 import { AddMemberDto } from './dto/add-member.dto';
+import { Response } from 'express';
+import { createReadStream } from 'fs';
+import { pipeline } from 'stream/promises';
+import { unlink } from 'fs/promises';
+
 @ApiBearerAuth()
 @ApiTags('organization')
 @Controller('organizations')
 export class OrganisationsController {
+  private readonly logger = new Logger(OrganisationsController.name);
   constructor(private readonly organisationsService: OrganisationsService) {}
 
   @ApiOperation({ summary: 'Create new Organisation' })
@@ -194,5 +201,59 @@ export class OrganisationsController {
   @Get(':org_id')
   async getById(@Param('org_id') org_id: string) {
     return this.organisationsService.getOrganizationDetailsById(org_id);
+  }
+
+  @ApiOperation({ summary: 'Export members of an Organisation to a CSV file' })
+  @ApiResponse({
+    status: 200,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The CSV file containing organisation members is returned.',
+    headers: {
+      'Content-Type': {
+        description: 'The content type of the response, which is text/csv.',
+        schema: {
+          type: 'string',
+          example: 'text/csv',
+        },
+      },
+      'Content-Disposition': {
+        description: 'Indicates that the content is an attachment with a filename.',
+        schema: {
+          type: 'string',
+          example: 'attachment; filename="organisation-members-{orgId}.csv"',
+        },
+      },
+    },
+  })
+  @UseGuards(OwnershipGuard)
+  @Get(':org_id/members/export')
+  async exportOrganisationMembers(
+    @Param('org_id', ParseUUIDPipe) orgId: string,
+    @Req() req: Request,
+    @Res() res: Response
+  ) {
+    const userId = req['user'].id;
+    const filePath = await this.organisationsService.exportOrganisationMembers(orgId, userId);
+
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="organisation-members-${orgId}.csv"`,
+    });
+
+    const fileStream = createReadStream(filePath);
+
+    pipeline(fileStream, res)
+      .then(() => unlink(filePath))
+      .catch(error => {
+        this.logger.error('Pipeline failed:', error.stack);
+        if (!res.headersSent) {
+          res.status(500).send('Internal Server Error');
+        }
+        return unlink(filePath).catch(unlinkError => {
+          this.logger.error(`Failed to delete file: ${unlinkError.message}`, unlinkError.stack);
+        });
+      });
   }
 }

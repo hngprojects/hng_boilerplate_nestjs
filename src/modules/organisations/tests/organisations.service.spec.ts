@@ -32,6 +32,11 @@ import { OrganisationMember } from '../entities/org-members.entity';
 import * as SYS_MSG from '../../../helpers/SystemMessages';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../../helpers/SystemMessages';
+import * as fs from 'fs';
+import * as path from 'path';
+import { createObjectCsvStringifier } from 'csv-writer';
+
+jest.mock('fs');
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
@@ -466,6 +471,68 @@ describe('OrganisationsService', () => {
       expect(res.data).toHaveProperty('member_organisations');
       expect(res.data.member_organisations[0]).toHaveProperty('role');
       expect(res.data.member_organisations[0]).toHaveProperty('organisation');
+    });
+  });
+
+  describe('exportOrganisationMembers', () => {
+    const orgId = 'orgId';
+    const userId = 'userId';
+    const basePath = path.resolve(__dirname, '../');
+    const filePath = path.join(basePath, `organisation-members-${orgId}.csv`);
+    afterEach(() => {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
+    it('should generate a CSV file and call fs.writeFileSync', async () => {
+      const membersResponse = {
+        status_code: 200,
+        message: 'Members retrieved successfully',
+        data: [
+          { id: '1', name: 'John Doe', email: 'john.doe@example.com', role: 'Admin' },
+          { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Member' },
+        ],
+      };
+
+      jest.spyOn(service, 'getOrganisationMembers').mockResolvedValue(membersResponse);
+
+      const csvStringifier = createObjectCsvStringifier({
+        header: [
+          { id: 'id', title: 'ID' },
+          { id: 'name', title: 'Name' },
+          { id: 'email', title: 'Email' },
+          { id: 'role', title: 'Role' },
+        ],
+      });
+
+      const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(membersResponse.data);
+
+      jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+
+      await service.exportOrganisationMembers(orgId, userId);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(filePath, csvData);
+    });
+
+    it('should return the correct file path', async () => {
+      const orgId = 'orgId';
+      const userId = 'userId';
+      const membersResponse = {
+        status_code: 200,
+        message: 'Members retrieved successfully',
+        data: [
+          { id: '1', name: 'John Doe', email: 'john.doe@example.com', role: 'Admin' },
+          { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Member' },
+        ],
+      };
+
+      jest.spyOn(service, 'getOrganisationMembers').mockResolvedValue(membersResponse);
+
+      const basePath = path.resolve(__dirname, '../');
+      const filePath = path.join(basePath, `organisation-members-${orgId}.csv`);
+      const result = await service.exportOrganisationMembers(orgId, userId);
+
+      expect(result).toBe(filePath);
     });
   });
 });
