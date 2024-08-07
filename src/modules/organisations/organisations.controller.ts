@@ -92,7 +92,7 @@ export class OrganisationsController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 403, description: 'User does not have permission' })
   @ApiResponse({ status: 500, description: 'An error occured internally' })
-  async searchMmebers(
+async searchMembers(
     @Req() req,
     @Param('org_id') orgId: string,
     @Body() searchMemberBodyDto: SearchMemberBodyDto,
