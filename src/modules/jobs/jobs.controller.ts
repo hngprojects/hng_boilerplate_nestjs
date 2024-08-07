@@ -1,24 +1,23 @@
+import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards, ValidationPipe } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  DefaultValuePipe,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-  Request,
-  UseGuards,
-  ValidationPipe,
-} from '@nestjs/common';
-import { JobsService } from './jobs.service';
-import { JobDto } from './dto/job.dto';
-import { PaginationDto } from './dto/pagination.dto';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JobGuard } from './guards/job.guard';
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 import { skipAuth } from '../../helpers/skipAuth';
+import { JobApplicationErrorDto } from './dto/job-application-error.dto';
+import { JobApplicationResponseDto } from './dto/job-application-response.dto';
+import { JobApplicationDto } from './dto/job-application.dto';
+import { JobDto } from './dto/job.dto';
+import { JobGuard } from './guards/job.guard';
+import { JobsService } from './jobs.service';
 import { JobSearchDto } from './dto/jobSearch.dto';
 
 @ApiTags('Jobs')
@@ -26,6 +25,28 @@ import { JobSearchDto } from './dto/jobSearch.dto';
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobService: JobsService) {}
+
+  @skipAuth()
+  @ApiOperation({ summary: 'Submit job application' })
+  @ApiBody({
+    type: JobApplicationDto,
+    description: 'Job application request body',
+  })
+  @ApiCreatedResponse({
+    status: 201,
+    description: 'Job application submitted successfully',
+    type: JobApplicationResponseDto,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Job application deadline passed',
+    status: 422,
+  })
+  @ApiBadRequestResponse({ status: 400, description: 'Invalid request body', type: JobApplicationErrorDto })
+  @ApiInternalServerErrorResponse({ status: 500, description: 'Internal server error', type: JobApplicationErrorDto })
+  @Post('/:id/applications')
+  async applyForJob(@Param('id') id: string, @Body() jobApplicationDto: JobApplicationDto) {
+    return this.jobService.applyForJob(id, jobApplicationDto);
+  }
 
   @Post('/')
   @ApiOperation({ summary: 'Create a new job' })
@@ -53,16 +74,14 @@ export class JobsController {
     return this.jobService.searchJobs(otherSearchParams, page, limit);
   }
 
-  @skipAuth()
   @Get('/')
   @ApiOperation({ summary: 'Gets all jobs' })
   @ApiResponse({ status: 200, description: 'Jobs returned successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 404, description: 'Job not found' })
   async getAllJobs() {
     return this.jobService.getJobs();
   }
 
-  @skipAuth()
   @Get('/:id')
   @ApiOperation({ summary: 'Gets a job by ID' })
   @ApiResponse({ status: 200, description: 'Job returned successfully' })
