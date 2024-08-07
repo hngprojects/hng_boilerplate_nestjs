@@ -100,4 +100,10 @@ export class BlogService {
       created_at: updatedBlog.created_at,
     };
   }
+  async deleteBlogPost(id: string): Promise<void> {
+    const blog = await this.blogRepository.findOne({ where: { id } });
+    if (!blog) {
+      throw new CustomHttpException('Blog post with this id does not exist.', HttpStatus.NOT_FOUND);
+    } else await this.blogRepository.remove(blog);
+  }
 }

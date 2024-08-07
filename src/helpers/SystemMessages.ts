@@ -55,3 +55,4 @@ export const USER_NOT_REGISTERED = 'User not found, register to continue';
 export const INVITE_ACCEPTED = 'Invite already accepted';
 export const INVALID_INVITE = 'Invalid invite link';
 export const INVITE_NOT_FOUND = 'Invite link not found';
+export const BLOG_DELETED = 'Blog post has been successfully deleted';
