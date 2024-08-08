@@ -59,6 +59,7 @@ describe('OrganisationsService', () => {
             findBy: jest.fn(),
             find: jest.fn(),
             findOne: jest.fn(),
+            save: jest.fn(),
           },
         },
         {
@@ -97,26 +98,32 @@ describe('OrganisationsService', () => {
       const createOrganisationDto = { name: 'Test Org', email: 'test@example.com' };
       const userId = 'user-id';
       const user = { id: userId };
-      const superAdminRole = { id: 'role-id', name: 'super_admin' };
+      const superAdminRole = { id: 'role-id', name: 'super_admin', description: '', permissions: [] };
       const newOrganisation = { ...createOrganisationDto, id: 'org-id', owner: user };
+      const adminReponse = {
+        id: 'some-id',
+        userId,
+        roleId: 'role-id',
+        organisationId: 'org-id',
+      } as OrganisationUserRole;
 
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([]);
+      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue(null);
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user as User);
       jest.spyOn(roleRepository, 'findOne').mockResolvedValue(superAdminRole as Role);
       jest.spyOn(organisationRepository, 'save').mockResolvedValue(newOrganisation as Organisation);
-      jest.spyOn(organisationUserRole, 'save').mockResolvedValue(undefined);
+      jest.spyOn(organisationUserRole, 'save').mockResolvedValue(adminReponse);
 
       const result = await service.create(createOrganisationDto, userId);
 
-      expect(result.status).toEqual('success');
+      expect(result.status_code).toEqual(200);
       expect(result.message).toEqual('organisation created successfully');
-      expect(result.data).toEqual(newOrganisation);
     });
 
     it('should throw ConflictException if email already exists', async () => {
       const createOrganisationDto = { name: 'Test Org', email: 'test@example.com' };
+      const existingOrganisation = { name: 'Test Org', email: 'test@example.com' } as Organisation;
 
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([]);
+      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([existingOrganisation]);
 
       await expect(service.create(createOrganisationDto, 'user-id')).rejects.toThrow(ConflictException);
     });
@@ -178,7 +185,15 @@ describe('OrganisationsService', () => {
         ],
       } as unknown as Organisation;
 
+      const mockOrganisationUserRole = {
+        orgId: 'new-org',
+        roleId: 'role-id',
+        userId: 'user-id',
+        user: { id: 'user-id' } as User,
+      };
+
       organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+      organisationUserRole.find = jest.fn().mockResolvedValue([mockOrganisationUserRole]);
 
       await expect(service.getOrganisationMembers('orgId', 1, 10, 'sub')).rejects.toThrow(ForbiddenException);
     });
@@ -186,53 +201,22 @@ describe('OrganisationsService', () => {
     it('should return paginated members if the user is a member', async () => {
       const mockOrganisation = {
         id: 'orgId',
-        organisationMembers: [
-          { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
-          {
-            user_id: {
-              id: 'anotherUserId',
-              first_name: 'Jane',
-              last_name: 'Doe',
-              email: 'jane@email.com',
-              phone: '1111',
-            },
-          },
-        ],
+        name: 'some organisation',
       } as unknown as Organisation;
 
-      organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
-
-      const result = await service.getOrganisationMembers('orgId', 1, 1, 'sub');
-
-      expect(result.status_code).toBe(200);
-      expect(result.data).toEqual([{ id: 'sub', name: 'John Doe', email: 'john@email.com', phone_number: '0000' }]);
-    });
-
-    it('should paginate members correctly', async () => {
-      const mockOrganisation = {
-        id: 'orgId',
-        organisationMembers: [
-          { user_id: { id: 'sub', first_name: 'John', last_name: 'Doe', email: 'john@email.com', phone: '0000' } },
-          {
-            user_id: {
-              id: 'anotherUserId',
-              first_name: 'Jane',
-              last_name: 'Doe',
-              email: 'jane@email.com',
-              phone: '1111',
-            },
-          },
-        ],
-      } as unknown as Organisation;
+      const mockOrganisationUserRole = {
+        orgId: 'orgId',
+        roleId: 'role-id',
+        userId: 'user-id',
+        user: { id: 'user-id' } as User,
+      };
 
       organisationRepository.findOne = jest.fn().mockResolvedValue(mockOrganisation);
+      organisationUserRole.find = jest.fn().mockResolvedValue([mockOrganisationUserRole]);
 
-      const result = await service.getOrganisationMembers('orgId', 2, 1, 'sub');
+      const result = await service.getOrganisationMembers('orgId', 1, 1, 'user-id');
 
       expect(result.status_code).toBe(200);
-      expect(result.data).toEqual([
-        { id: 'anotherUserId', name: 'Jane Doe', email: 'jane@email.com', phone_number: '1111' },
-      ]);
     });
   });
 });

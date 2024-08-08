@@ -17,8 +17,8 @@ export class OrganisationMapper {
       country: organisation.country,
       address: organisation.address,
       state: organisation.state,
-      created_at: organisation.created_at.toISOString(),
-      updated_at: organisation.updated_at.toISOString(),
+      created_at: organisation.created_at,
+      updated_at: organisation.updated_at,
     };
   }
 }

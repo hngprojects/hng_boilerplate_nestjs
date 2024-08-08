@@ -60,7 +60,6 @@ export class JobsService {
   }
 
   async create(createJobDto: JobDto, userId: string) {
-    // Check if the user exists
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -74,10 +73,8 @@ export class JobsService {
 
     const newJob = this.jobRepository.create(Object.assign(new Job(), { ...createJobDto, user }));
 
-    // Save the new Job entity to the database
     await this.jobRepository.save(newJob);
 
-    // Return a success response
     return {
       status: 'success',
       status_code: 201,
@@ -113,7 +110,6 @@ export class JobsService {
     };
   }
   async delete(jobId: string) {
-    // Check if listing exists
     const job = await this.jobRepository.findOne({
       where: { id: jobId },
     });
@@ -121,10 +117,8 @@ export class JobsService {
     job.is_deleted = true;
     const deleteJobEntityInstance = this.jobRepository.create(job);
 
-    // Save the new Job entity to the database
     await this.jobRepository.save(deleteJobEntityInstance);
 
-    // Return a success response
     return {
       status: 'success',
       message: 'Job details deleted successfully',

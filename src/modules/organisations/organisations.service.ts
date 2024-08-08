@@ -34,23 +34,23 @@ export class OrganisationsService {
     private roleRepository: Repository<Role>
   ) {}
 
-  async getOrganisationMembers(
-    orgId: string,
-    page: number,
-    page_size: number,
-    sub: string
-  ): Promise<OrganisationMembersResponseDto> {
+  async getOrganisationMembers(orgId: string, page: number, page_size: number, sub: string) {
     const skip = (page - 1) * page_size;
     const organisation = await this.organisationRepository.findOne({
       where: { id: orgId },
-      relations: [''],
     });
 
     if (!organisation) throw new NotFoundException('No organisation found');
 
-    const organisationMembers = (
-      await this.organisationUserRole.find({ where: { organisationId: organisation.id }, relations: ['user'] })
-    ).map(instance => instance.user);
+    const members = await this.organisationUserRole.find({
+      where: { organisationId: organisation.id },
+      relations: ['user'],
+    });
+
+    if (!members.length) {
+      return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data: [] };
+    }
+    const organisationMembers = members.map(instance => instance.user);
 
     const isMember = organisationMembers.find(member => member.id === sub);
     if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
@@ -72,21 +72,21 @@ export class OrganisationsService {
 
     const superAdminRole = await this.roleRepository.findOne({ where: { name: 'super_admin' } });
 
-    const newOrganization = new Organisation();
-    Object.assign(newOrganization, createOrganisationDto);
-    newOrganization.owner = owner;
-    await this.organisationRepository.save(newOrganization);
+    const organisationInstance = new Organisation();
+    Object.assign(organisationInstance, createOrganisationDto);
+    organisationInstance.owner = owner;
+    const newOrganisation = await this.organisationRepository.save(organisationInstance);
 
     const adminRole = new OrganisationUserRole();
     adminRole.userId = owner.id;
-    adminRole.organisationId = newOrganization.id;
+    adminRole.organisationId = newOrganisation.id;
     adminRole.roleId = superAdminRole.id;
 
     await this.organisationUserRole.save(adminRole);
 
-    const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganization);
+    const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
 
-    return { status: 'success', message: 'organisation created successfully', data: mappedResponse };
+    return { status_code: HttpStatus.OK, message: 'organisation created successfully', data: mappedResponse };
   }
 
   async deleteorganisation(id: string) {
