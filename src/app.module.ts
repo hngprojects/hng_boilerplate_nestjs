@@ -41,6 +41,7 @@ import { TeamsModule } from './modules/teams/teams.module';
 import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { RevenueModule } from './modules/revenue/revenue.module';
 
 @Module({
   providers: [
@@ -152,6 +153,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
     FlutterwaveModule,
     BlogModule,
     SubscriptionsModule,
+    RevenueModule,
   ],
   controllers: [HealthController, ProbeController],
 })
