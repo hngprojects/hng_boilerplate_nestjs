@@ -8,7 +8,7 @@ import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { BlogResponseDto } from './dtos/blog-response.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
-import CustomExceptionHandler from '../..//helpers/exceptionHandler';
+import CustomExceptionHandler from '../../helpers/exceptionHandler';
 
 @Injectable()
 export class BlogService {
@@ -99,5 +99,11 @@ export class BlogService {
       author: `${updatedBlog.author.first_name} ${updatedBlog.author.last_name}`,
       created_at: updatedBlog.created_at,
     };
+  }
+  async deleteBlogPost(id: string): Promise<void> {
+    const blog = await this.blogRepository.findOne({ where: { id } });
+    if (!blog) {
+      throw new CustomHttpException('Blog post with this id does not exist.', HttpStatus.NOT_FOUND);
+    } else await this.blogRepository.remove(blog);
   }
 }
