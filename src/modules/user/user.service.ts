@@ -18,6 +18,7 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
+import { ReactivateAccountDto } from './dto/reactivate-account.dto';
 
 @Injectable()
 export default class UserService {
@@ -191,6 +192,31 @@ export default class UserService {
     await this.userRepository.save(user);
 
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
+  }
+
+  async reactivateUser(email: string, reactivateAccountDto: ReactivateAccountDto) {
+    const identifierOptions: UserIdentifierOptionsType = {
+      identifier: email,
+      identifierType: 'email',
+    };
+
+    const user = await this.getUserRecord(identifierOptions);
+
+    user.is_active = true;
+    user.attempts_left = 5;
+    user.time_left = 30 * 60 * 1000; // 30 minutes
+
+    await this.userRepository.save(user);
+
+    return {
+      status: 'success',
+      message: 'User Reactivated Successfully',
+      user: {
+        id: user.id,
+        name: `${user.first_name} ${user.last_name}`,
+        phone_number: user.phone_number,
+      },
+    };
   }
 
   async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
