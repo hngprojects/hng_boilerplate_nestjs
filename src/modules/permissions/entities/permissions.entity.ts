@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Role } from 'src/modules/role/entities/role.entity';
+import { Role } from '../../../modules/role/entities/role.entity';
 
 @Entity()
 export class Permissions extends AbstractBaseEntity {
