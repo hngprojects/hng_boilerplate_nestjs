@@ -137,16 +137,37 @@ export class OrganisationsService {
   }
 
   async getUserOrganisations(userId: string) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new CustomHttpException('Invalid Request', HttpStatus.BAD_REQUEST);
+    const res = await this.userService.getUserDataWithoutPasswordById(userId);
+    const user = res.user as User;
+
+    const ownedOrgs =
+      user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+
+    const memberOrgs = await this.organisationUserRole.find({
+      relations: ['user', 'role', 'organisation', 'role.permissions'],
+      where: {
+        user: { id: userId },
+      },
+    });
+
+    const memberOrgsData = memberOrgs.map(data => {
+      const org = OrganisationMapper.mapToResponseFormat(data.organisation);
+      return {
+        organisation: org,
+        role: data.role,
+      };
+    });
+
+    if ((!ownedOrgs && !memberOrgs) || (!ownedOrgs.length && !memberOrgs.length)) {
+      throw new CustomHttpException(NO_USER_ORGS, HttpStatus.BAD_REQUEST);
     }
-    const userOrganisations = await this.organisationUserRole.find({ where: { userId } });
 
     return {
-      status_code: HttpStatus.OK,
       message: 'Organisations retrieved successfully',
-      data: userOrganisations,
+      data: {
+        owned_organisations: ownedOrgs,
+        member_organisations: memberOrgsData,
+      },
     };
   }
 
@@ -225,41 +246,6 @@ export class OrganisationsService {
   //   await this.organisationMemberRepository.save(newMember);
   //   return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
   // }
-
-  async getUserOrganisations(userId: string) {
-    const res = await this.userService.getUserDataWithoutPasswordById(userId);
-    const user = res.user as User;
-
-    const ownedOrgs =
-      user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
-
-    const memberOrgs = await this.organisationUserRole.find({
-      relations: ['user', 'role', 'organisation', 'role.permissions'],
-      where: {
-        user: { id: userId },
-      },
-    });
-
-    const memberOrgsData = memberOrgs.map(data => {
-      const org = OrganisationMapper.mapToResponseFormat(data.organisation);
-      return {
-        organisation: org,
-        role: data.role,
-      };
-    });
-
-    if ((!ownedOrgs && !memberOrgs) || (!ownedOrgs.length && !memberOrgs.length)) {
-      throw new CustomHttpException(NO_USER_ORGS, HttpStatus.BAD_REQUEST);
-    }
-
-    return {
-      message: 'Organisations retrieved successfully',
-      data: {
-        owned_organisations: ownedOrgs,
-        member_organisations: memberOrgsData,
-      },
-    };
-  }
 
   // async getOrganizationDetailsById(orgId: string) {
   //   if (!isUUID(orgId)) {
