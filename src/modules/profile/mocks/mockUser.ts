@@ -3,6 +3,7 @@ import { User, UserType } from '../../user/entities/user.entity';
 
 const profile = new Profile();
 export const mockUserWithProfile: User = {
+  cart: null,
   email: 'tester@example.com',
   status: null,
   first_name: 'John',
