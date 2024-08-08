@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { orgMock } from '../../../../modules/organisations/tests/mocks/organisation.mock';
+import { orgMock } from '../../../organisations/tests/mocks/organisation.mock';
 import { Product, StockStatusType } from '../../entities/product.entity';
 
 enum ProductSizeType {
@@ -18,6 +18,9 @@ export const deletedProductMock: Product = {
   price: 12,
   category: 'Fashion',
   quantity: 7,
+  cost_price: 10,
+  orderItems: [],
+  cart: [],
   size: ProductSizeType.SMALL,
   org: orgMock,
   created_at: new Date(),
