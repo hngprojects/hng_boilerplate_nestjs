@@ -107,7 +107,14 @@ export class BlogService {
     } else await this.blogRepository.remove(blog);
   }
 
-  async getAllBlogs(page: number, pageSize: number): Promise<{ data: BlogResponseDto[]; total: number }> {
+  async getAllBlogs(
+    page: number,
+    pageSize: number
+  ): Promise<{
+    status_code: number;
+    message: string;
+    data: { currentPage: number; totalPages: number; totalResults: number; blogs: BlogResponseDto[]; meta: any };
+  }> {
     const skip = (page - 1) * pageSize;
 
     const [result, total] = await this.blogRepository.findAndCount({
@@ -117,7 +124,24 @@ export class BlogService {
     });
 
     const data = this.mapBlogResults(result);
-    return { data, total };
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      status_code: HttpStatus.OK,
+      message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
+      data: {
+        currentPage: page,
+        totalPages,
+        totalResults: total,
+        blogs: data,
+        meta: {
+          hasNext: page < totalPages,
+          total,
+          nextPage: page < totalPages ? page + 1 : null,
+          prevPage: page > 1 ? page - 1 : null,
+        },
+      },
+    };
   }
 
   async searchBlogs(query: any): Promise<{ data: BlogResponseDto[]; total: number }> {
