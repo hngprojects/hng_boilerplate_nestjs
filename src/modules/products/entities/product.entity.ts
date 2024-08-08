@@ -1,6 +1,7 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, DeleteDateColumn, Entity, ManyToOne } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Comment } from '../../../modules/comments/entities/comments.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',
@@ -34,9 +35,6 @@ export class Product extends AbstractBaseEntity {
   @Column({ type: 'int', nullable: false, default: 0 })
   quantity: number;
 
-  @Column({ nullable: true, default: false })
-  is_deleted: boolean;
-
   @Column({
     type: 'enum',
     enum: ProductSizeType,
@@ -56,4 +54,7 @@ export class Product extends AbstractBaseEntity {
 
   @DeleteDateColumn()
   deletedAt?: Date;
+
+  @OneToMany(() => Comment, comment => comment.product)
+  comments?: Comment[];
 }

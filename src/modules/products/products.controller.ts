@@ -10,6 +10,7 @@ import {
   UseGuards,
   Query,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
@@ -20,6 +21,7 @@ import { DeleteProductDTO } from './dto/delete-product.dto';
 import { isUUID } from 'class-validator';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '../../helpers/SystemMessages';
+import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
@@ -114,6 +116,21 @@ export class ProductsController {
   }
 
   @UseGuards(OwnershipGuard)
+  @Post('/:productId/comments')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Creates a comment for a product' })
+  @ApiParam({ name: 'id', description: 'organisation ID', example: '870ccb14-d6b0-4a50-b459-9895af803i89' })
+  @ApiParam({ name: 'productId', description: 'product ID', example: '126ccb14-d6b0-4a50-b459-9895af803h6y' })
+  @ApiBody({ type: AddCommentDto, description: 'Comment to be added' })
+  @ApiResponse({ status: 201, description: 'Comment added successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async addCommentToProduct(@Param('productId') productId: string, @Body() commentDto: AddCommentDto, @Req() req: any) {
+    const user = req.user;
+    return this.productsService.addCommentToProduct(productId, commentDto, user.sub);
+  }
+
   @Get(':productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
