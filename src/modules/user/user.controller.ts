@@ -143,7 +143,7 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async softDeleteUser(@Param('userId') userId: string, @Req() req) {
+  async softDeleteUser(@Param('userId', ParseUUIDPipe) userId: string, @Req() req) {
     const authenticatedUserId = req['user'].id;
 
     return this.userService.softDeleteUser(userId, authenticatedUserId);
