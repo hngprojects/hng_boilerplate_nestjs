@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, DeleteDateColumn } from 'typeorm';
 import { AbstractBaseEntity } from './../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from './organisations.entity';
@@ -18,4 +18,16 @@ export class OrganisationMember extends AbstractBaseEntity {
 
   @ManyToOne(() => Profile)
   profile_id: Profile;
+
+  @Column({ default: false })
+  suspended: boolean;
+
+  @Column({ default: true })
+  active_member: boolean;
+
+  @Column({ default: false })
+  left_workspace: boolean;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

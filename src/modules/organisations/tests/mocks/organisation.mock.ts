@@ -52,6 +52,9 @@ export const createMockOrganisation = (): Organisation => {
     role: organisationRoleMock,
     organisation_id: org,
     profile_id: profileMock,
+    suspended: false,
+    active_member: true,
+    left_workspace: false,
   };
 
   const ownerAndCreator = {

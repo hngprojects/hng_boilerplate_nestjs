@@ -18,11 +18,15 @@ import {
   UseGuards,
   Logger,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { OrganisationsService } from './organisations.service';
+import { Filter } from './dto/search-member-query.dto';
+import { MembershipGuard } from '../../guards/member.guard';
+import { SearchMemberResponseDto } from './dto/search-member-response.dto';
+import { SearchMemberBodyDto } from './dto/search-member-body.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
@@ -111,6 +115,24 @@ export class OrganisationsController {
   ): Promise<OrganisationMembersResponseDto> {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
+  }
+
+  @UseGuards(MembershipGuard)
+  @Get(':org_id/members/search')
+  @ApiQuery({ name: 'filter', required: false, enum: Filter })
+  @ApiOperation({ summary: 'Search for members within an organization' })
+  @ApiResponse({ status: 200, description: 'User(s) found successfully', type: SearchMemberResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 403, description: 'User does not have permission' })
+  @ApiResponse({ status: 404, description: 'Organisation Not Found' })
+  @ApiResponse({ status: 500, description: 'An error occured internally' })
+  async searchMembers(
+    @Param('org_id') orgId: string,
+    @Body() searchMemberBodyDto: SearchMemberBodyDto,
+    @Query() query?: any
+  ) {
+    const searchTerm = searchMemberBodyDto.search_term;
+    return this.organisationsService.searchOrganisationMember(orgId, searchTerm, query?.filter);
   }
 
   @ApiOperation({ summary: 'Assign roles to members of an organisation' })

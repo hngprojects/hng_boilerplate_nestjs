@@ -18,6 +18,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
+import { organisationMembersMocks } from './mocks/organisation-members.mock';
 import { AddMemberDto } from '../dto/add-member.dto';
 import { OrganisationRole } from '../../../modules/organisation-role/entities/organisation-role.entity';
 import { DefaultRole } from '../../../modules/organisation-role/entities/role.entity';
@@ -312,6 +313,43 @@ describe('OrganisationsService', () => {
     });
   });
 
+  describe('search organisation members', () => {
+    const orgMembers = [...organisationMembersMocks];
+
+    it('should verify that filtered request returns accurate data', async () => {
+      const generateMemberResponseFormat = member => ({
+        user_id: member.user_id.id,
+        username: member.profile_id.username,
+        email: member.user_id.email,
+        name: `${member.user_id.first_name} ${member.user_id.last_name}`,
+        phone_number: member.user_id.phone,
+        profile_pic_url: member.profile_id.profile_pic_url,
+      });
+
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([...orgMembers]);
+      const result = await service.searchOrganisationMember('some-org-uuid', 'Alice Johnson', 'suspended');
+      const result2 = await service.searchOrganisationMember('some-org-uuid', 'Jan', 'active_member');
+      const result3 = await service.searchOrganisationMember('some-org-uuid', 'bolu', 'left_workspace');
+
+      const expectedMembers1 = [{ ...orgMembers[2] }].map(generateMemberResponseFormat);
+      const expectedMembers2 = [{ ...orgMembers[0] }, { ...orgMembers[4] }].map(generateMemberResponseFormat);
+      const expectedMembers3 = [{ ...orgMembers[1] }, { ...orgMembers[3] }].map(generateMemberResponseFormat);
+
+      expect(result.data.members).toEqual(expectedMembers1);
+      expect(result2.data.members).toEqual(expectedMembers2);
+      expect(result3.data.members).toEqual(expectedMembers3);
+    });
+
+    it('should return an empty array for members when no members are found', async () => {
+      jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([...orgMembers]);
+
+      const result = await service.searchOrganisationMember('some-org-uuid', 'JamesBondIsGood', 'active_member');
+
+      expect(result).toEqual({ message: 'User(s) found successfully', data: { members: [] } });
+    });
+  });
+
+  
   describe('updateMemberRole', () => {
     it('should update member role successfully', async () => {
       const orgId = 'orgId';

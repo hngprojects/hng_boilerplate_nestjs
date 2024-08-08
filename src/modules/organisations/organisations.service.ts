@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -171,6 +172,51 @@ export class OrganisationsService {
       message: SYS_MSG.ORG_UPDATE,
       data: updatedOrg,
     };
+  }
+
+  async searchOrganisationMember(orgId: string, searchTerm: string, filter: string | null) {
+    const filterValues = ['suspended', 'active_member', 'left_workspace'];
+    if (filter != null && !filterValues.includes(filter)) {
+      throw new CustomHttpException(SYS_MSG.BAD_REQUEST, HttpStatus.BAD_REQUEST);
+    }
+    const organisationMembers = await this.organisationMemberRepository.find({
+      where: { organisation_id: { id: orgId } },
+      relations: ['user_id', 'profile_id'],
+      withDeleted: true,
+    });
+
+    const searchedMembersResult = organisationMembers.filter(member => {
+      const lowerCaseSearchTerm = searchTerm.toLowerCase();
+      const fieldsToSearch = [
+        member.user_id.first_name,
+        member.user_id.last_name,
+        member.user_id.email,
+        member?.profile_id?.username,
+        `${member.user_id.first_name} ${member.user_id.last_name}`,
+        `${member.user_id.first_name}${member.user_id.last_name}`,
+      ];
+
+      const memberFound = fieldsToSearch.some(field => field?.toLowerCase()?.includes(lowerCaseSearchTerm));
+
+      if (!memberFound) return false;
+
+      if (filter === 'left_workspace' && member[filter]) return true;
+      if (filter === 'active_member' && member[filter] && !member.deletedAt) return true;
+      if ((member[filter] || member.deletedAt) && filter === 'suspended') return true;
+      if (filter) return false;
+      return true;
+    });
+
+    const searchedResultResponseFormat = searchedMembersResult.map(member => ({
+      user_id: member.user_id.id,
+      username: member?.profile_id?.username,
+      email: member.user_id.email,
+      name: `${member.user_id.first_name} ${member.user_id.last_name}`,
+      phone_number: member.user_id?.phone,
+      profile_pic_url: member?.profile_id?.profile_pic_url,
+    }));
+
+    return { message: 'User(s) found successfully', data: { members: searchedResultResponseFormat } };
   }
 
   async updateMemberRole(orgId: string, memberId: string, updateMemberRoleDto: UpdateMemberRoleDto) {
