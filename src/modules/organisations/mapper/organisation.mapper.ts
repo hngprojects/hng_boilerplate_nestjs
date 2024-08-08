@@ -10,7 +10,6 @@ export class OrganisationMapper {
       id: organisation.id,
       name: organisation.name,
       description: organisation.description,
-      owner_id: organisation.creator.id,
       email: organisation.email,
       industry: organisation.industry,
       type: organisation.type,

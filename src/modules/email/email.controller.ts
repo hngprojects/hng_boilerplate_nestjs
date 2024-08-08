@@ -1,9 +1,14 @@
 import { Controller, Post, Get, Body, Res, UseGuards, Query, Delete } from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
-import { createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
+import { skip } from 'node:test';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags('Emails')
+@ApiBearerAuth()
 @Controller('email')
 export class EmailController {
   constructor(private emailService: EmailService) {}

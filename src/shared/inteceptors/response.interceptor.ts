@@ -1,11 +1,11 @@
 import {
-  Logger,
   CallHandler,
   ExecutionContext,
   HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
@@ -36,14 +36,14 @@ export class ResponseInterceptor implements NestInterceptor {
   responseHandler(res: any, context: ExecutionContext) {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse();
-    const status = response.statusCode;
+    const status_code = response.statusCode;
 
     response.setHeader('Content-Type', 'application/json');
     if (typeof res === 'object') {
-      const { message, staus_code, ...data } = res;
+      const { message, ...data } = res;
 
       return {
-        status,
+        status_code,
         message,
         ...data,
       };

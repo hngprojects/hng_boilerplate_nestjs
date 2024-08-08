@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { EmailService } from './email.service';
+import QueueService from './queue.service';
+import authConfig from 'config/auth.config';
+import EmailQueueConsumer from './email.consumer';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -8,8 +11,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 
 @Module({
+  providers: [EmailService, QueueService, EmailQueueConsumer],
+  exports: [EmailService, QueueService],
   imports: [
     TypeOrmModule.forFeature([User]),
+    BullModule.registerQueueAsync({
+      name: 'emailSending',
+    }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -36,8 +44,6 @@ import { User } from '../user/entities/user.entity';
     }),
     ConfigModule,
   ],
-  providers: [EmailService],
   controllers: [EmailController],
-  exports: [EmailService],
 })
 export class EmailModule {}

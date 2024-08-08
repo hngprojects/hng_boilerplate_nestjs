@@ -7,28 +7,104 @@ import * as fs from 'fs';
 import { promisify } from 'util';
 import * as path from 'path';
 import { MailerService } from '@nestjs-modules/mailer';
+import { MailInterface } from './interfaces/MailInterface';
+import QueueService from './queue.service';
 import { ArticleInterface } from './interface/article.interface';
 import { IMessageInterface } from './interface/message.interface';
 import { getFile, createFile, deleteFile } from '../../helpers/fileHelpers';
 
+
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: QueueService) {}
 
-  async sendEmail(emailData: SendEmailDto) {
-    await validateOrReject(emailData);
-    try {
-      await this.mailerService.sendMail(emailData);
-      return {
-        status_code: HttpStatus.OK,
-        message: 'Email sent successfully',
-      };
-    } catch (error) {
-      return {
-        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'There was an error sending the email, please try again',
-      };
-    }
+  async sendUserConfirmationMail(email: string, url: string, token: string) {
+    const link = `${url}?token=${token}`;
+    const mailPayload: MailInterface = {
+      to: email,
+      context: {
+        link,
+        email,
+      },
+    };
+
+    this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
+  }
+
+  async sendUserEmailConfirmationOtp(email: string, otp: string) {
+    const mailPayload: MailInterface = {
+      to: email,
+      context: {
+        otp,
+        email,
+      },
+    };
+
+    this.mailerService.sendMail({ variant: 'register-otp', mail: mailPayload });
+  }
+
+  async sendForgotPasswordMail(email: string, url: string, token: string) {
+    const link = `${url}?token=${token}`;
+    const mailPayload: MailInterface = {
+      to: email,
+      context: {
+        link,
+        email,
+      },
+    };
+
+    await this.mailerService.sendMail({ variant: 'reset-password', mail: mailPayload });
+  }
+
+  async sendWaitListMail(email: string, url: string) {
+    const mailPayload: MailInterface = {
+      to: email,
+      context: {
+        url,
+        email,
+      },
+    };
+
+    await this.mailerService.sendMail({ variant: 'waitlist', mail: mailPayload });
+  }
+
+  async sendNewsLetterMail(email: string, articles: ArticleInterface[]) {
+    const mailPayload: MailInterface = {
+      to: email,
+      context: {
+        email,
+        articles,
+      },
+    };
+
+    await this.mailerService.sendMail({ variant: 'newsletter', mail: mailPayload });
+  }
+
+  async sendLoginOtp(email: string, token: string) {
+    const mailPayload: MailInterface = {
+      to: email,
+      context: {
+        email,
+        token,
+      },
+    };
+
+    await this.mailerService.sendMail({ variant: 'login-otp', mail: mailPayload });
+  }
+
+  async sendNotificationMail(email: string, notificationMail: IMessageInterface) {
+    const { recipient_name, message, support_email } = notificationMail;
+    const mailPayload: MailInterface = {
+      to: email,
+      context: {
+        email,
+        recipient_name,
+        message,
+        support_email,
+      },
+    };
+
+    await this.mailerService.sendMail({ variant: 'in-app-notification', mail: mailPayload });
   }
 
   async createTemplate(templateInfo: createTemplateDto) {
@@ -135,20 +211,5 @@ export class EmailService {
         message: 'Template not found',
       };
     }
-  }
-
-  async sendNotificationMail(email: string, notificationMail: IMessageInterface) {
-    const { recipient_name, message, support_email } = notificationMail;
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'In-App, Notification',
-      template: 'notification',
-      context: {
-        email,
-        recipient_name,
-        message,
-        support_email,
-      },
-    });
   }
 }
