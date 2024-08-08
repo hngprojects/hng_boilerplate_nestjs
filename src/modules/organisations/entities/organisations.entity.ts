@@ -1,9 +1,11 @@
-import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Invite } from '../../invite/entities/invite.entity';
-import { Product } from '../../../modules/products/entities/product.entity';
+import { Product } from '../../products/entities/product.entity';
+import { Role } from 'src/modules/role/entities/role.entity';
+import { OrganisationUserRole } from 'src/modules/role/entities/organisation-user-role.entity';
 
 @Entity()
 export class Organisation extends AbstractBaseEntity {
@@ -45,6 +47,17 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => Invite, invite => invite.organisation.id)
   invites: Invite[];
+
+  @ManyToMany(() => User, user => user.organisations)
+  @JoinTable({
+    name: 'organisation_members',
+    joinColumn: { name: 'user_id' },
+    inverseJoinColumn: { name: 'department_id' },
+  })
+  members: User[];
+
+  @OneToMany(() => OrganisationUserRole, userRole => userRole.organisation)
+  roles: OrganisationUserRole[];
 
   // @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
   // organisationMembers: OrganisationMember[];

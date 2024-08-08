@@ -81,8 +81,8 @@ export class RoleService {
       throw new NotFoundException('Organisation not found');
     }
 
-    const query = (await this.organisationUserRole.find({ where: { organisationId: organisation.id } })).map(
-      organisationRole => organisationRole.roleId
+    const query = (await this.organisationUserRole.find({ where: { organisation: { id: organisation.id } } })).map(
+      organisationRole => organisationRole.role.id
     );
     return query;
   }

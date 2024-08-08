@@ -40,7 +40,7 @@ export class OwnershipGuard implements CanActivate {
 
     const userRole = (
       await this.organisationMembersRole.findOne({
-        where: { userId, organisationId: organisation.id },
+        where: { user: { id: userId }, organisation: { id: organisation.id } },
         relations: ['role'],
       })
     ).role;

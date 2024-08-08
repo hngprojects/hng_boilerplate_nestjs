@@ -45,7 +45,7 @@ export class MembershipGuard implements CanActivate {
 
     const userRole = (
       await this.organisationMembersRole.findOne({
-        where: { organisationId: organisation.id, userId: currentUserId },
+        where: { organisation: { id: organisation.id }, user: { id: currentUserId } },
         relations: ['role', 'role.permissions'],
       })
     ).role;

@@ -10,8 +10,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
-import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
-import { OrganisationRequestDto } from './dto/organisation.dto';
+import UserService from '../user/user.service';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { Organisation } from './entities/organisations.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
@@ -19,7 +18,7 @@ import { Role } from '../role/entities/role.entity';
 import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
 import CreateOrganisationType from './dto/create-organisation-options';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { ORG_NOT_FOUND, ORG_UPDATE } from '../../helpers/SystemMessages';
+import { ORG_NOT_FOUND, ORG_UPDATE, NO_USER_ORGS } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationsService {
@@ -33,7 +32,9 @@ export class OrganisationsService {
     private organisationUserRole: Repository<OrganisationUserRole>,
 
     @InjectRepository(Role)
-    private roleRepository: Repository<Role>
+    private roleRepository: Repository<Role>,
+
+    private userService: UserService
   ) {}
 
   async getOrganisationMembers(orgId: string, page: number, page_size: number, sub: string) {
@@ -45,7 +46,7 @@ export class OrganisationsService {
     if (!organisation) throw new NotFoundException('No organisation found');
 
     const members = await this.organisationUserRole.find({
-      where: { organisationId: organisation.id },
+      where: { organisation: { id: organisation.id } },
       relations: ['user'],
     });
 
@@ -81,9 +82,9 @@ export class OrganisationsService {
       const newOrganisation = await this.organisationRepository.save(organisationInstance);
 
       const adminRole = new OrganisationUserRole();
-      adminRole.userId = owner.id;
-      adminRole.organisationId = newOrganisation.id;
-      adminRole.roleId = superAdminRole.id;
+      adminRole.user.id = owner.id;
+      adminRole.organisation.id = newOrganisation.id;
+      adminRole.role.id = superAdminRole.id;
 
       await this.organisationUserRole.save(adminRole);
 
@@ -210,48 +211,39 @@ export class OrganisationsService {
   //   return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
   // }
 
-  // async getUserOrganisations(userId: string) {
-  //   const res = await this.userService.getUserDataWithoutPasswordById(userId);
-  //   const user = res.user as User;
+  async getUserOrganisations(userId: string) {
+    const res = await this.userService.getUserDataWithoutPasswordById(userId);
+    const user = res.user as User;
 
-  //   const createdOrgs =
-  //     user.created_organisations && user.created_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+    const ownedOrgs =
+      user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
 
-  //   const ownedOrgs =
-  //     user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+    const memberOrgs = await this.organisationUserRole.find({
+      relations: ['user', 'role', 'organisation'],
+      where: {
+        user: { id: user.id },
+      },
+    });
 
-  //   const memberOrgs = await this.organisationMemberRepository.find({
-  //     where: { user_id: { id: user.id } },
-  //     relations: ['organisation_id', 'user_id', 'role'],
-  //   });
+    const memberOrgsData = memberOrgs.map(org => {
+      return {
+        organisation: org.organisation,
+        role: org.role,
+      };
+    });
 
-  //   const memberOrgsMapped =
-  //     memberOrgs &&
-  //     memberOrgs.map(org => {
-  //       const organisation = org.organisation_id && OrganisationMapper.mapToResponseFormat(org.organisation_id);
-  //       const role = org.role && MemberRoleMapper.mapToResponseFormat(org.role);
-  //       return {
-  //         organisation,
-  //         role,
-  //       };
-  //     });
+    if ((!ownedOrgs && !memberOrgs) || (!ownedOrgs.length && !memberOrgs.length)) {
+      throw new CustomHttpException(NO_USER_ORGS, HttpStatus.BAD_REQUEST);
+    }
 
-  //   if (
-  //     (!createdOrgs && !ownedOrgs && !memberOrgsMapped) ||
-  //     (!createdOrgs.length && !ownedOrgs.length && !memberOrgsMapped.length)
-  //   ) {
-  //     throw new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST);
-  //   }
-
-  //   return {
-  //     message: 'Organisations retrieved successfully',
-  //     data: {
-  //       created_organisations: createdOrgs,
-  //       owned_organisations: ownedOrgs,
-  //       member_organisations: memberOrgsMapped,
-  //     },
-  //   };
-  // }
+    return {
+      message: 'Organisations retrieved successfully',
+      data: {
+        owned_organisations: ownedOrgs,
+        member_organisations: memberOrgsData,
+      },
+    };
+  }
 
   // async getOrganizationDetailsById(orgId: string) {
   //   if (!isUUID(orgId)) {

@@ -25,4 +25,6 @@ export const mockUser: User = {
   notifications: [],
   blogs: [],
   cart: [],
+  organisations: [],
+  roles: [],
 };

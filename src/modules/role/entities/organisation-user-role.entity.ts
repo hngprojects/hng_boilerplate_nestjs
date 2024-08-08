@@ -6,21 +6,12 @@ import { Organisation } from '../../organisations/entities/organisations.entity'
 
 @Entity('organization_user_role')
 export class OrganisationUserRole extends AbstractBaseEntity {
-  @Column()
-  userId: string;
-
-  @Column()
-  roleId: string;
-
-  @Column()
-  organisationId: string;
-
-  @ManyToOne(() => Role)
+  @OneToMany(() => Role, role => role.user_roles)
   role: Role;
 
-  @ManyToOne(() => User)
+  @OneToMany(() => User, user => user.roles)
   user: User;
 
-  @ManyToOne(() => Organisation)
+  @OneToMany(() => Organisation, organisation => organisation.roles)
   organisation: Organisation;
 }
