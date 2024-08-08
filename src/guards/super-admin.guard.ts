@@ -30,6 +30,8 @@ export class SuperAdminGuard implements CanActivate {
       relations: ['permissions'],
     });
 
+    console.log(adminRole);
+
     const userRole = await this.organisationMembersRole.find({
       where: { userId: currentUserId, roleId: adminRole.id },
     });
