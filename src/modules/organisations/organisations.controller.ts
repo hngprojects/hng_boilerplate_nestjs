@@ -229,33 +229,33 @@ export class OrganisationsController {
   //   },
   // })
 
-  // @UseGuards(OwnershipGuard)
-  // @Get(':org_id/members/export')
-  // async exportOrganisationMembers(
-  //   @Param('org_id', ParseUUIDPipe) orgId: string,
-  //   @Req() req: Request,
-  //   @Res() res: Response
-  // ) {
-  //   const userId = req['user'].id;
-  //   const filePath = await this.organisationsService.exportOrganisationMembers(orgId, userId);
+  @UseGuards(OwnershipGuard)
+  @Get(':org_id/members/export')
+  async exportOrganisationMembers(
+    @Param('org_id', ParseUUIDPipe) orgId: string,
+    @Req() req: Request,
+    @Res() res: Response
+  ) {
+    const userId = req['user'].id;
+    const filePath = await this.organisationsService.exportOrganisationMembers(orgId, userId);
 
-  //   res.set({
-  //     'Content-Type': 'text/csv',
-  //     'Content-Disposition': `attachment; filename="organisation-members-${orgId}.csv"`,
-  //   });
+    res.set({
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="organisation-members-${orgId}.csv"`,
+    });
 
-  //   const fileStream = createReadStream(filePath);
+    const fileStream = createReadStream(filePath);
 
-  //   pipeline(fileStream, res)
-  //     .then(() => unlink(filePath))
-  //     .catch(error => {
-  //       this.logger.error('Pipeline failed:', error.stack);
-  //       if (!res.headersSent) {
-  //         res.status(500).send('Internal Server Error');
-  //       }
-  //       return unlink(filePath).catch(unlinkError => {
-  //         this.logger.error(`Failed to delete file: ${unlinkError.message}`, unlinkError.stack);
-  //       });
-  //     });
-  // }
+    pipeline(fileStream, res)
+      .then(() => unlink(filePath))
+      .catch(error => {
+        this.logger.error('Pipeline failed:', error.stack);
+        if (!res.headersSent) {
+          res.status(500).send('Internal Server Error');
+        }
+        return unlink(filePath).catch(unlinkError => {
+          this.logger.error(`Failed to delete file: ${unlinkError.message}`, unlinkError.stack);
+        });
+      });
+  }
 }
