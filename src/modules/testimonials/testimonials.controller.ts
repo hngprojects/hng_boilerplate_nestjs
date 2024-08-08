@@ -9,6 +9,7 @@ import {
   Query,
   ParseIntPipe,
   ParseUUIDPipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
@@ -95,6 +96,11 @@ export class TestimonialsController {
     description: 'Unauthorized',
   })
   async getTestimonialById(@Param('testimonial_id', ParseUUIDPipe) testimonialId: string) {
-    return this.testimonialsService.getTestimonialById(testimonialId);
+    const testimonial = await this.testimonialsService.getTestimonialById(testimonialId);
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Testimonial fetched successfully',
+      data: testimonial,
+    };
   }
 }
