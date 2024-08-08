@@ -1,11 +1,13 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import smsConfig from 'config/sms.config';
 import { Twilio } from 'twilio';
 import { CreateSmsDto } from './dto/create-sms.dto';
 import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { VALID_PHONE_NUMBER_REQUIRED } from 'src/helpers/SystemMessages';
 
 @Injectable()
 export class SmsService {
+  private logger = new Logger(SmsService.name);
   private twilioClient: Twilio;
   constructor() {
     const accountSid = smsConfig().acountSid;
@@ -28,7 +30,9 @@ export class SmsService {
         },
       };
     } catch (error) {
-      console.error(error);
+      if (error.status === 400) {
+        throw new CustomHttpException(VALID_PHONE_NUMBER_REQUIRED, HttpStatus.BAD_REQUEST);
+      }
     }
   }
 }
