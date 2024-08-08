@@ -13,6 +13,8 @@ import * as SYS_MSG from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import UserService from '../user/user.service';
 import { TestimonialMapper } from './mappers/testimonial.mapper';
+import { TestimonialResponseMapper } from './mappers/testimonial-response.mapper';
+import { TestimonialResponse } from './interfaces/testimonial-response.interface';
 
 @Injectable()
 export class TestimonialsService {
@@ -33,13 +35,14 @@ export class TestimonialsService {
         });
       }
 
-      await this.testimonialRepository.save({
+      const newTestimonial = await this.testimonialRepository.save({
         user,
         name,
         content,
       });
 
       return {
+        id: newTestimonial.id,
         user_id: user.id,
         ...createTestimonialDto,
         created_at: new Date(),
@@ -90,5 +93,17 @@ export class TestimonialsService {
         total_pages: Math.ceil(testimonials.length / pageSize),
       },
     };
+  }
+  async getTestimonialById(testimonialId: string): Promise<TestimonialResponse> {
+    const testimonial = await this.testimonialRepository.findOne({
+      where: { id: testimonialId },
+      relations: ['user'],
+    });
+
+    if (!testimonial) {
+      throw new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND);
+    }
+
+    return TestimonialResponseMapper.mapToEntity(testimonial);
   }
 }
