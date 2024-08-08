@@ -34,8 +34,8 @@ import { pipeline } from 'stream/promises';
 import { unlink } from 'fs/promises';
 
 @ApiBearerAuth()
-@ApiTags('organization')
-@Controller('organizations')
+@ApiTags('organisation')
+@Controller('organisations')
 export class OrganisationsController {
   private readonly logger = new Logger(OrganisationsController.name);
   constructor(private readonly organisationsService: OrganisationsService) {}
