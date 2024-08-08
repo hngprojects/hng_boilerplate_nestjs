@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import UserService from '../user.service';
 import { Profile } from '../../profile/entities/profile.entity';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('UserService', () => {
   let service: UserService;
@@ -20,11 +21,18 @@ describe('UserService', () => {
           provide: getRepositoryToken(User),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(Profile),
+          useClass: Repository,
+        },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    profileRepository = module.get<Repository<Profile>>(getRepositoryToken(Profile));
+
+    userRepository.save = jest.fn();
   });
 
   describe('reactivateUser', () => {
@@ -69,10 +77,10 @@ describe('UserService', () => {
       });
     });
 
-    it('should throw a NotFoundException if user is not found', async () => {
+    it('should throw a CustomHTTPException if user is not found', async () => {
       jest.spyOn(service, 'getUserRecord').mockResolvedValue(null);
 
-      await expect(service.reactivateUser(mockEmail, reactivateAccountDto)).rejects.toThrow(NotFoundException);
+      await expect(service.reactivateUser(mockEmail, reactivateAccountDto)).rejects.toThrow(CustomHttpException);
       expect(service.getUserRecord).toHaveBeenCalledWith({
         identifier: mockEmail,
         identifierType: 'email',
