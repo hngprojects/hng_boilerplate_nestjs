@@ -32,8 +32,8 @@
     "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
-    "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
     "@css-inline/css-inline": "^0.14.1",
+    "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
     "@faker-js/faker": "^8.4.1",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^3.0.2",
@@ -53,8 +53,8 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "csv-writer": "^1.6.0",
-    "google-auth-library": "^9.13.0",
     "date-fns": "^3.6.0",
+    "google-auth-library": "^9.13.0",
     "handlebars": "^4.7.8",
     "html-validator": "^6.0.1",
     "ioredis": "^5.4.1",
@@ -72,7 +72,8 @@
     "typeorm": "^0.3.20",
     "typeorm-extension": "^3.5.1",
     "types-joi": "^2.1.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",

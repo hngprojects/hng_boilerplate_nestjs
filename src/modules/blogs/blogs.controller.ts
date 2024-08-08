@@ -11,6 +11,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { BlogService } from './blogs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
@@ -34,6 +35,22 @@ export class BlogController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<BlogResponseDto> {
     return this.blogService.createBlog(createBlogDto, req.user);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all blogs' })
+  @ApiResponse({ status: 200, description: 'All blogs fetched successfully.', type: [BlogResponseDto] })
+  async getAllBlogs(@Query('page') page: number = 1, @Query('pageSize') pageSize: number = 10): Promise<any> {
+    const result = await this.blogService.getAllBlogs(page, pageSize);
+    return result;
+  }
+
+  @Get('/search')
+  @ApiOperation({ summary: 'Search and filter blogs' })
+  @ApiResponse({ status: 200, description: 'Search results returned successfully.', type: [BlogResponseDto] })
+  async searchBlogs(@Query() query: any): Promise<any> {
+    const result = await this.blogService.searchBlogs(query);
+    return result;
   }
 
   @Put(':id')
@@ -63,6 +80,7 @@ export class BlogController {
   async getSingleBlog(@Param('id', new ParseUUIDPipe()) id: string, @Request() req): Promise<BlogDto> {
     return await this.blogService.getSingleBlog(id, req.user);
   }
+
   @Delete(':id')
   @UseGuards(SuperAdminGuard)
   @HttpCode(HttpStatus.ACCEPTED)

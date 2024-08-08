@@ -6,6 +6,8 @@ export const USER_ACCOUNT_EXIST = 'Account with the specified email exists';
 export const USER_ACCOUNT_DOES_NOT_EXIST = "Account with the specified email doesn't exist";
 export const UNAUTHENTICATED_MESSAGE = 'User is currently unauthorized, kindly authenticate to continue';
 export const TWO_FACTOR_VERIFIED_SUCCESSFULLY = '2FA verified and enabled';
+export const ANALYTICS_FETCHED_SUCCESSFULLY = 'Admin Analytics fetched successfully';
+export const DASHBOARD_FETCHED_SUCCESSFULLY = 'Admin Dashboard retrieved successfully';
 export const INCORRECT_TOTP_CODE = 'Incorrect totp code';
 export const USER_NOT_ENABLED_2FA = 'Two factor Auth not initiated. Visit api/auth/2fa/enable';
 export const USER_NOT_FOUND = 'User not found!';
@@ -17,6 +19,7 @@ export const BAD_REQUEST = 'Bad Request';
 export const LANGUAGE_CREATED_SUCCESSFULLY = 'Language Created Successfully';
 export const OK = 'Success';
 export const LANGUAGE_ALREADY_EXISTS = 'Language already exits';
+export const WORK_IN_PROGRESS = 'Work in progress';
 export const FETCH_LANGUAGE_FAILURE = 'Failed to fetch language';
 export const UNAUTHORISED_TOKEN = 'Invalid token or email';
 export const TIMEZONE_CREATED_SUCCESSFULLY = 'Timezone created Successfully';
@@ -55,6 +58,11 @@ export const JOB_LISTING_RETRIEVAL_SUCCESSFUL = 'Jobs listing fetched successful
 export const JOB_CREATION_SUCCESSFUL = 'Job listing created successfully';
 export const NO_USER_ORGS = 'User has no organisations';
 export const DEADLINE_PASSED = 'Job application deadline passed';
+export const EMAIL_TEMPLATES = {
+  TEMPLATE_UPDATED_SUCCESSFULLY: 'Template updated successfully',
+  INVALID_HTML_FORMAT: 'Invalid HTML format',
+  TEMPLATE_NOT_FOUND: 'Template not found',
+};
 export const EXISTING_ROLE = 'A role with this name already exists in the organisation';
 export const ROLE_CREATION_FAILED = 'Failed to create organisation role';
 export const ROLE_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
@@ -74,5 +82,8 @@ export const INVITE_NOT_FOUND = 'Invite link not found';
 export const BLOG_DELETED = 'Blog post has been successfully deleted';
 export const NO_USER_TESTIMONIALS = 'User has no testimonials';
 export const USER_TESTIMONIALS_FETCHED = 'User testimonials retrieved successfully';
+export const INVALID_ORG_ID = 'Provide a valid organization Id';
+export const INVALID_USER_ID = 'Provide a valid user Id';
+export const INVALID_PRODUCT_ID = 'Provide a valid user Id';
 export const REVENUE_FETCHED_SUCCESSFULLY = 'Revenue Fetched';
 export const QUESTION_ALREADY_EXISTS = 'This question already exists.';
