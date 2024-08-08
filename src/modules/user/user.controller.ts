@@ -1,4 +1,19 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Query,
+  Req,
+  Request,
+  UseGuards,
+  Res,
+  StreamableFile,
+  Header,
+  ParseEnumPipe,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -18,6 +33,10 @@ import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserStatusResponseDto } from './dto/update-user-status-response.dto';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
+import { skipAuth } from '../../helpers/skipAuth';
+import { Response } from 'express';
+import * as path from 'path';
+import { UserDataExportDto } from './dto/user-data-export.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -71,6 +90,16 @@ export class UserController {
     @Body() updatedUserDto: UpdateUserDto
   ) {
     return this.userService.updateUser(userId, updatedUserDto, req.user);
+  }
+
+  @Get('export')
+  async exportUserData(
+    @Query() { format }: UserDataExportDto,
+    @Res({ passthrough: false }) res: Response,
+    @Req() { user }
+  ) {
+    const file = await this.userService.exportUserDataAsJsonOrExcelFile(format, user.id, res);
+    file.getStream().pipe(res);
   }
 
   @ApiBearerAuth()
