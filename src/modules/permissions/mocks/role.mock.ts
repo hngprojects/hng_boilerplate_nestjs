@@ -1,5 +1,3 @@
-import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
-
 export const mockRole = {
   id: 'role_456',
   name: 'Admin',
@@ -12,4 +10,5 @@ export const mockRole = {
     { id: 'perm_6', category: 'canEditUsers', permission_list: true },
     { id: 'perm_7', category: 'canBlacklistWhitelistUsers', permission_list: true },
   ],
-} as OrganisationRole;
+};
+// as OrganisationRole;
