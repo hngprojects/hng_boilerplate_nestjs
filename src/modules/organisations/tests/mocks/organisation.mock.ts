@@ -58,6 +58,7 @@ export const createMockOrganisation = (): Organisation => {
     products: [],
     profile: profileMock,
     blogs: [],
+    comments: [],
     cart: [],
     organisations: [],
     roles: [],

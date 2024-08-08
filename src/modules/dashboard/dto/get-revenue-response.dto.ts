@@ -5,5 +5,6 @@ export class GetRevenueResponseDto {
 
 interface IResponseData {
   totalRevenueCurrentMonth: number;
+  totalRevenuePreviousMonth: number;
   revenuePercentChange: string;
 }

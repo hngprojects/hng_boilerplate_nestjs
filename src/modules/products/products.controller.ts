@@ -1,9 +1,26 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  Query,
+  HttpStatus,
+  Req,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
+import { DeleteProductDTO } from './dto/delete-product.dto';
+import { isUUID } from 'class-validator';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '../../helpers/SystemMessages';
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
@@ -89,6 +106,12 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async deleteProduct(@Param('orgId') orgId: string, @Param('productId') productId: string) {
+    if (!isUUID(orgId)) {
+      throw new CustomHttpException(INVALID_ORG_ID, HttpStatus.BAD_REQUEST);
+    }
+    if (!isUUID(productId)) {
+      throw new CustomHttpException(INVALID_PRODUCT_ID, HttpStatus.BAD_REQUEST);
+    }
     return this.productsService.deleteProduct(orgId, productId);
   }
 

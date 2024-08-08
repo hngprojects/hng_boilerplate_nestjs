@@ -25,7 +25,7 @@ import {
   HelpCenterMultipleInstancResponseType,
   HelpCenterSingleInstancResponseType,
 } from './dto/help-center.response.dto';
-import { SuperAdminGuard } from 'src/guards/super-admin.guard';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { User } from '../user/entities/user.entity';
 
 @ApiTags('help-center')
