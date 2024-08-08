@@ -30,6 +30,7 @@ export const mockUser = {
   products: [],
   profile: mockProfile,
   blogs: null,
+  comments: null,
   cart: [],
   organisations: null,
 };

@@ -4,7 +4,7 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
-import { SuperAdminGuard } from 'src/guards/super-admin.guard';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiTags('add-Product-superAdmin')
 @Controller('admin/products/:id')
