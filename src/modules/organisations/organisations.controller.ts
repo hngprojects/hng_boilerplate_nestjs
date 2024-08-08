@@ -24,7 +24,6 @@ import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { OrganisationsService } from './organisations.service';
 import { Filter } from './dto/search-member-query.dto';
-import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { MembershipGuard } from '../../guards/member.guard';
 import { SearchMemberResponseDto } from './dto/search-member-response.dto';
 import { SearchMemberBodyDto } from './dto/search-member-body.dto';
