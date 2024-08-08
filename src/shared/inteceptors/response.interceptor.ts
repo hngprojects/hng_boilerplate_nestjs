@@ -28,7 +28,7 @@ export class ResponseInterceptor implements NestInterceptor {
       `Error processing request for ${req.method} ${req.url}, Message: ${exception['message']}, Stack: ${exception['stack']}`
     );
     return new InternalServerErrorException({
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      status_code: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Internal server error',
     });
   }
