@@ -13,6 +13,7 @@ import {
   StreamableFile,
   Header,
   ParseEnumPipe,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
