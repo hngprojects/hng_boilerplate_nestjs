@@ -118,18 +118,15 @@ describe('OrganisationsService', () => {
 
       const result = await service.create(createOrganisationDto, userId);
 
-      expect(result.status_code).toEqual(200);
-      expect(result.message).toEqual('organisation created successfully');
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'org-id',
+          name: 'Test Org',
+          email: 'test@example.com',
+          owner_id: 'user-id', // Matching the owner_id instead of nested owner object
+        })
+      );
     });
-
-    // it('should throw ConflictException if email already exists', async () => {
-    //   const createOrganisationDto = { name: 'Test Org', email: 'test@example.com', description: "" };
-    //   const existingOrganisation = { name: 'Test Org', email: 'test@example.com' } as Organisation;
-
-    //   jest.spyOn(organisationRepository, 'findBy').mockResolvedValue([existingOrganisation]);
-
-    //   await expect(service.create(createOrganisationDto, 'user-id')).rejects.toThrow(ConflictException);
-    // });
   });
 
   describe('update organisation', () => {

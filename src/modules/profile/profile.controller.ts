@@ -7,7 +7,6 @@ import { ResponseInterceptor } from '../../shared/inteceptors/response.intercept
 @ApiBearerAuth()
 @ApiTags('Profile')
 @Controller('profile')
-@UseInterceptors(ResponseInterceptor)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 

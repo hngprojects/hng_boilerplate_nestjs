@@ -89,7 +89,7 @@ export class OrganisationsService {
 
       const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
 
-      return { status_code: HttpStatus.OK, message: 'organisation created successfully', data: mappedResponse };
+      return mappedResponse;
     } catch (error) {
       console.log(error);
     }
@@ -131,6 +131,20 @@ export class OrganisationsService {
     return {
       message: ORG_UPDATE,
       data: updatedOrg,
+    };
+  }
+
+  async getUserOrganisations(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new CustomHttpException('Invalid Request', HttpStatus.BAD_REQUEST);
+    }
+    const userOrganisations = await this.organisationUserRole.find({ where: { userId } });
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Organisations retrieved successfully',
+      data: userOrganisations,
     };
   }
 

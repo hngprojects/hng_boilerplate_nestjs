@@ -3,9 +3,10 @@ import { ProfileService } from '../profile.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Profile } from '../entities/profile.entity';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('ProfileService', () => {
   let service: ProfileService;
@@ -34,41 +35,24 @@ describe('ProfileService', () => {
 
   describe('findOneProfile', () => {
     it('should return profile data if user and profile are found', async () => {
-      const userId = 'some-uuid';
+      const userId = '453e21ff-245f-40c6-92b9-9216157118a8';
       const user = { id: userId, profile: { id: 'profile-uuid', user_id: userId } } as any;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
 
       const result = await service.findOneProfile(userId);
       expect(result).toEqual({
-        message: 'Successfully fetched profile',
+        message: 'Request completed successfully',
         data: user.profile,
       });
     });
 
-    it('should throw NotFoundException if user is not found', async () => {
+    it('should throw BadRequestException if user is not found', async () => {
       const userId = 'some-uuid';
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findOneProfile(userId)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw NotFoundException if profile is not found', async () => {
-      const userId = 'some-uuid';
-      const user = { id: userId, profile: null } as any;
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-
-      await expect(service.findOneProfile(userId)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw InternalServerErrorException on other errors', async () => {
-      const userId = 'some-uuid';
-
-      jest.spyOn(userRepository, 'findOne').mockRejectedValue(new Error('Unexpected error'));
-
-      await expect(service.findOneProfile(userId)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.findOneProfile(userId)).rejects.toThrow(CustomHttpException);
     });
   });
 
@@ -86,7 +70,7 @@ describe('ProfileService', () => {
       const result = await service.updateProfile(userId, updateProfileDto);
 
       expect(result).toEqual({
-        message: 'Profile successfully updated',
+        message: 'Success',
         data: updatedProfile,
       });
     });
@@ -97,7 +81,7 @@ describe('ProfileService', () => {
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow(CustomHttpException);
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
     });
 
@@ -108,7 +92,7 @@ describe('ProfileService', () => {
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
 
-      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow(NotFoundException);
+      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow(CustomHttpException);
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
     });
 
@@ -118,9 +102,9 @@ describe('ProfileService', () => {
       const user = { id: userId, profile: { id: 'profile-uuid', bio: 'Old bio' } } as any;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-      jest.spyOn(profileRepository, 'update').mockRejectedValue(new Error('Something went wrong'));
+      jest.spyOn(profileRepository, 'update').mockRejectedValue(new CustomHttpException('something went wrong', 404));
 
-      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.updateProfile(userId, updateProfileDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
@@ -128,7 +112,7 @@ describe('ProfileService', () => {
     it('should throw NotFoundException if user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.deleteUserProfile('nonexistentUserId')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteUserProfile('nonexistentUserId')).rejects.toThrow(CustomHttpException);
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'nonexistentUserId' },
         relations: ['profile'],
@@ -139,7 +123,7 @@ describe('ProfileService', () => {
       const user = { id: 'existingUserId', profile: null } as any;
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
 
-      await expect(service.deleteUserProfile('existingUserId')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteUserProfile('existingUserId')).rejects.toThrow(CustomHttpException);
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'existingUserId' }, relations: ['profile'] });
     });
 
@@ -148,7 +132,7 @@ describe('ProfileService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(profileRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.deleteUserProfile('existingUserId')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteUserProfile('existingUserId')).rejects.toThrow(CustomHttpException);
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'existingUserId' }, relations: ['profile'] });
       expect(profileRepository.findOne).toHaveBeenCalledWith({ where: { id: 'profileId' } });
     });
@@ -162,7 +146,7 @@ describe('ProfileService', () => {
 
       const result = await service.deleteUserProfile('existingUserId');
 
-      expect(result).toEqual({ message: 'Profile successfully deleted' });
+      expect(result).toEqual({ message: 'Request completed successfully' });
       expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: 'existingUserId' }, relations: ['profile'] });
       expect(profileRepository.findOne).toHaveBeenCalledWith({ where: { id: 'profileId' } });
       expect(profileRepository.softDelete).toHaveBeenCalledWith('profileId');

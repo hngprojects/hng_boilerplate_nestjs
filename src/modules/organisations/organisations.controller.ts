@@ -54,6 +54,7 @@ export class OrganisationsController {
     const user = req['user'];
     return this.organisationsService.create(createOrganisationDto, user.sub);
   }
+
   @UseGuards(OwnershipGuard)
   @Delete(':org_id')
   async delete(@Param('org_id') id: string, @Res() response: Response) {
@@ -113,6 +114,23 @@ export class OrganisationsController {
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
   }
 
+  @ApiOperation({ summary: "Gets a user's organizations" })
+  @ApiResponse({
+    status: 200,
+    description: 'Organisations retrieved successfully',
+    type: UserOrganizationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request',
+    type: UserOrganizationErrorResponseDto,
+  })
+  @Get('/')
+  async getUserOrganisations(@Req() req) {
+    const { sub } = req.user;
+    return this.organisationsService.getUserOrganisations(sub);
+  }
+
   // @ApiOperation({ summary: 'Assign roles to members of an organisation' })
   // @ApiResponse({
   //   status: 200,
@@ -167,22 +185,7 @@ export class OrganisationsController {
   // async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
   //   return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
   // }
-  // @ApiOperation({ summary: "Gets a user's organizations" })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Organisations retrieved successfully',
-  //   type: UserOrganizationResponseDto,
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Bad request',
-  //   type: UserOrganizationErrorResponseDto,
-  // })
-  // @Get('/')
-  // async getUserOrganisations(@Req() req) {
-  //   const { sub } = req.user;
-  //   return this.organisationsService.getUserOrganisations(sub);
-  // }
+
   // @ApiOperation({ summary: 'Get Organization details by Id' })
   // @ApiResponse({
   //   status: 200,
