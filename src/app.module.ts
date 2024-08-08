@@ -42,6 +42,8 @@ import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { RevenueModule } from './modules/revenue/revenue.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   providers: [
@@ -154,6 +156,13 @@ import { RevenueModule } from './modules/revenue/revenue.module';
     BlogModule,
     SubscriptionsModule,
     RevenueModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'uploads'),
+      serveRoot: '/uploads',
+      serveStaticOptions: {
+        index: false,
+      },
+    }),
   ],
   controllers: [HealthController, ProbeController],
 })
