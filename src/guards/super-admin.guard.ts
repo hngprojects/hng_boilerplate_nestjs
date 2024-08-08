@@ -26,9 +26,13 @@ export class SuperAdminGuard implements CanActivate {
     const currentUserId = request.user.sub;
 
     const adminRole = await this.userRoleManager.findOne({
-      where: { name: 'super-admin' },
+      where: { name: 'admin' },
       relations: ['permissions'],
     });
+
+    if (!adminRole) {
+      throw new CustomHttpException('Admin Role does not exist', HttpStatus.BAD_REQUEST);
+    }
 
     const userRole = await this.organisationMembersRole.find({
       where: { userId: currentUserId, roleId: adminRole.id },
