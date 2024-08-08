@@ -7,19 +7,19 @@ export class CustomHttpException extends HttpException {
 
   getResponse(): any {
     const response = super.getResponse();
-    const status = this.getStatus();
+    const status_code = this.getStatus();
 
     if (typeof response === 'object' && response !== null) {
       const res = response as Record<string, any>;
       return {
         message: res.message || 'An error occurred',
-        status,
+        status_code,
       };
     }
 
     return {
       message: response,
-      status,
+      status_code,
     };
   }
 }

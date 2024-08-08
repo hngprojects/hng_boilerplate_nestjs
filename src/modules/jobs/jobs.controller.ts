@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+  ValidationPipe,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -6,6 +18,7 @@ import {
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnprocessableEntityResponse,
@@ -15,8 +28,9 @@ import { JobApplicationErrorDto } from './dto/job-application-error.dto';
 import { JobApplicationResponseDto } from './dto/job-application-response.dto';
 import { JobApplicationDto } from './dto/job-application.dto';
 import { JobDto } from './dto/job.dto';
-import { JobGuard } from './guards/job.guard';
 import { JobsService } from './jobs.service';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { JobSearchDto } from './dto/jobSearch.dto';
 
 @ApiTags('Jobs')
 @ApiBearerAuth()
@@ -46,6 +60,7 @@ export class JobsController {
     return this.jobService.applyForJob(id, jobApplicationDto);
   }
 
+  @UseGuards(SuperAdminGuard)
   @Post('/')
   @ApiOperation({ summary: 'Create a new job' })
   @ApiResponse({ status: 201, description: 'Job created successfully' })
@@ -53,6 +68,23 @@ export class JobsController {
   async createJob(@Body() createJobDto: JobDto, @Request() req: any) {
     const user = req.user;
     return this.jobService.create(createJobDto, user.sub);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search for job listings' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'Successful response' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  async searchJobs(
+    @Query(new ValidationPipe({ transform: true, forbidNonWhitelisted: true }))
+    searchDto: JobSearchDto
+  ) {
+    const page = searchDto.page || 1;
+    const limit = searchDto.limit || 10;
+    const { page: _, limit: __, ...otherSearchParams } = searchDto;
+
+    return this.jobService.searchJobs(otherSearchParams, page, limit);
   }
 
   @Get('/')
@@ -67,17 +99,17 @@ export class JobsController {
   @ApiOperation({ summary: 'Gets a job by ID' })
   @ApiResponse({ status: 200, description: 'Job returned successfully' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async getJob(@Param('id') id: string) {
+  async getJob(@Param('id', ParseUUIDPipe) id) {
     return this.jobService.getJob(id);
   }
 
-  @UseGuards(JobGuard)
+  @UseGuards(SuperAdminGuard)
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete a job' })
   @ApiResponse({ status: 200, description: 'Job deleted successfully' })
   @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
   @ApiResponse({ status: 404, description: 'Job not found' })
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ParseUUIDPipe) id) {
     return this.jobService.delete(id);
   }
 }

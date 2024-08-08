@@ -15,10 +15,7 @@ export const mockOrg: Organisation = {
   state: 'state1',
   isDeleted: false,
   owner: mockUser,
-  creator: mockUser,
   preferences: [],
   invites: [],
-  role: [],
-  organisationMembers: [],
   products: [],
 };

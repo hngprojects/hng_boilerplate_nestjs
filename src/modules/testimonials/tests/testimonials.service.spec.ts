@@ -1,4 +1,4 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,6 +8,10 @@ import UserService from '../../user/user.service';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { Testimonial } from '../entities/testimonials.entity';
 import { TestimonialsService } from '../testimonials.service';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { mockUser } from '../../organisations/tests/mocks/user.mock';
+import { testimonialsMock } from './mocks/testimonials.mock';
 
 describe('TestimonialsService', () => {
   let service: TestimonialsService;
@@ -50,13 +54,19 @@ describe('TestimonialsService', () => {
         content: 'Great service!',
       };
       const user = { id: 'user_id' } as User;
+      const testimonial = {
+        id: 'test_id',
+        ...createTestimonialDto,
+        created_at: new Date(),
+      } as Testimonial;
 
       jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
-      jest.spyOn(testimonialRepository, 'save').mockResolvedValue(undefined);
+      jest.spyOn(testimonialRepository, 'save').mockResolvedValue(testimonial);
 
       const result = await service.createTestimonial(createTestimonialDto, user);
 
       expect(result).toEqual({
+        id: 'test_id',
         user_id: 'user_id',
         ...createTestimonialDto,
         created_at: expect.any(Date),
@@ -97,6 +107,70 @@ describe('TestimonialsService', () => {
           status_code: 500,
         })
       );
+    });
+  });
+
+  describe("retrieve all user's testimonials", () => {
+    it('should validate the user id', async () => {
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(null);
+
+      await expect(service.getAllTestimonials('user_id', 1, 10)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
+    });
+
+    it('should throw an error if the user has no testimonials', async () => {
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(mockUser);
+      jest.spyOn(testimonialRepository, 'find').mockResolvedValue([]);
+
+      await expect(service.getAllTestimonials('user_id', 1, 10)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.NO_USER_TESTIMONIALS, HttpStatus.BAD_REQUEST)
+      );
+    });
+
+    it('should return all testimonials for a user', async () => {
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(mockUser);
+      jest.spyOn(testimonialRepository, 'find').mockResolvedValue(testimonialsMock);
+
+      const res = await service.getAllTestimonials(mockUser.id, 1, 5);
+
+      expect(res.message).toEqual(SYS_MSG.USER_TESTIMONIALS_FETCHED);
+      expect(res.data.testimonials.length).toEqual(testimonialsMock.length);
+      expect(res.data.user_id).toEqual(mockUser.id);
+    });
+  });
+
+  describe('deleteTestimonial', () => {
+    it('should successfully delete a testimonial', async () => {
+      const testimonialId = 'test_id';
+      const mockTestimonial = new Testimonial();
+      mockTestimonial.id = testimonialId;
+
+      jest.spyOn(testimonialRepository, 'findOne').mockResolvedValue(mockTestimonial);
+      jest.spyOn(testimonialRepository, 'remove').mockResolvedValue(undefined);
+
+      const result = await service.deleteTestimonial(testimonialId);
+
+      expect(testimonialRepository.findOne).toHaveBeenCalledWith({ where: { id: testimonialId } });
+      expect(testimonialRepository.remove).toHaveBeenCalledWith(mockTestimonial);
+      expect(result).toEqual({
+        message: 'Testimonial deleted successfully',
+        status_code: HttpStatus.OK,
+      });
+    });
+
+    it('should throw CustomHttpException when testimonial is not found', async () => {
+      const id = 'non_existent_id';
+
+      jest.spyOn(testimonialRepository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(testimonialRepository, 'remove').mockImplementation(jest.fn());
+
+      await expect(service.deleteTestimonial(id)).rejects.toThrow(
+        new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND)
+      );
+
+      expect(testimonialRepository.findOne).toHaveBeenCalledWith({ where: { id } });
+      expect(testimonialRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

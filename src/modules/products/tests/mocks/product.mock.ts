@@ -12,7 +12,6 @@ export const productMock: Product = {
   id: randomUUID(),
   name: 'TV',
   description: '',
-  is_deleted: false,
   stock_status: StockStatusType.LOW_STOCK,
   image: '',
   price: 12,
@@ -22,4 +21,7 @@ export const productMock: Product = {
   org: orgMock,
   created_at: new Date(),
   updated_at: new Date(),
+  cost_price: 10,
+  cart: [],
+  orderItems: [],
 };

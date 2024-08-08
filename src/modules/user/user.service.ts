@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,6 +19,16 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
+import { ReactivateAccountDto } from './dto/reactivate-account.dto';
+import { pick } from '../../helpers/pick';
+import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { Readable, Writable } from 'stream';
+import * as xlsx from 'xlsx';
+import * as path from 'path';
+import { Response } from 'express';
+import { FileFormat, UserDataExportDto } from './dto/user-data-export.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export default class UserService {
@@ -33,11 +44,6 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
-    if (createUserPayload.admin_secret == process.env.ADMIN_SECRET_KEY) {
-      newUser.user_type = UserType.SUPER_ADMIN;
-    } else {
-      newUser.user_type = UserType.USER;
-    }
     newUser.profile = profile;
     return await this.userRepository.save(newUser);
   }
@@ -76,7 +82,7 @@ export default class UserService {
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { email: email },
-      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+      relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
@@ -84,7 +90,7 @@ export default class UserService {
   private async getUserById(identifier: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { id: identifier },
-      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+      relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
@@ -125,9 +131,8 @@ export default class UserService {
         status_code: HttpStatus.NOT_FOUND,
       });
     }
-
-    // Check if the current user is a super admin or the user being updated
-    if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
+    // TODO: CHECK IF USER IS AN ADMIN
+    if (currentUser.id !== userId) {
       throw new ForbiddenException({
         error: 'Forbidden',
         message: 'You are not authorized to update this user',
@@ -193,6 +198,35 @@ export default class UserService {
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
   }
 
+  async reactivateUser(email: string, reactivateAccountDto: ReactivateAccountDto) {
+    const identifierOptions: UserIdentifierOptionsType = {
+      identifier: email,
+      identifierType: 'email',
+    };
+
+    const user = await this.getUserRecord(identifierOptions);
+
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    user.is_active = true;
+    user.attempts_left = 5;
+    user.time_left = 30 * 60 * 1000;
+
+    await this.userRepository.save(user);
+
+    return {
+      status: 'success',
+      message: 'User Reactivated Successfully',
+      user: {
+        id: user.id,
+        name: `${user.first_name} ${user.last_name}`,
+        phone_number: user.phone_number,
+      },
+    };
+  }
+
   async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
     const [users, total] = await this.userRepository.findAndCount({
       select: ['id', 'first_name', 'last_name', 'email', 'phone', 'is_active', 'created_at'],
@@ -226,22 +260,155 @@ export default class UserService {
     };
   }
 
-  async getUserStatistics(currentUser: UserPayload): Promise<any> {
-    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
-      throw new ForbiddenException({
-        error: 'Forbidden',
-        message: 'You are not authorized to access user statistics',
+  async softDeleteUser(userId: string, authenticatedUserId: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.id !== authenticatedUserId) {
+      throw new CustomHttpException('You are not authorized to delete this user', HttpStatus.UNAUTHORIZED);
+    }
+
+    await this.userRepository.softDelete(userId);
+
+    return {
+      status: 'success',
+      message: 'Deletion in progress',
+    };
+  }
+
+  // async getUserStatistics(currentUser: UserPayload): Promise<any> {
+  // if (currentUser.user_type !== UserType.SUPER_ADMIN) {
+  //   throw new ForbiddenException({
+  //     error: 'Forbidden',
+  //     message: 'You are not authorized to access user statistics',
+  //   });
+  // }
+  async updateUserStatus(userId: string, status: string) {
+    const keepColumns = ['id', 'created_at', 'updated_at', 'first_name', 'last_name', 'email', 'status'];
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException({
+        error: 'Not Found',
+        message: 'User not found',
+        status_code: HttpStatus.NOT_FOUND,
       });
+    }
+    const updatedUser = Object.assign(user, { status });
+    const result = await this.userRepository.save(updatedUser);
+
+    return {
+      status: 'success',
+      status_code: HttpStatus.OK,
+      data: pick(result, keepColumns),
+    };
+  }
+
+  async getUserStats(status?: string): Promise<GetUserStatsResponseDto> {
+    const filters = {};
+
+    if (status) {
+      if (status === 'active') {
+        filters['is_active'] = true;
+      } else if (status === 'deleted') {
+        filters['is_active'] = false;
+      } else {
+        throw new BadRequestException({
+          error: 'Bad Request',
+          message: SYS_MSG.BAD_REQUEST,
+          status_code: HttpStatus.BAD_REQUEST,
+        });
+      }
     }
 
     const totalUsers = await this.userRepository.count();
-    const activeUsers = await this.userRepository.count({ where: { is_active: true } });
-    const deletedUsers = await this.userRepository.count({ where: { is_active: false } });
+
+    const activeUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: true } })
+      : await this.userRepository.count({ where: { is_active: true } });
+
+    const deletedUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: false } })
+      : await this.userRepository.count({ where: { is_active: false } });
 
     return {
-      total_users: totalUsers,
-      active_users: activeUsers,
-      deleted_users: deletedUsers,
+      status: 'success',
+      status_code: 200,
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
+      data: {
+        total_users: totalUsers,
+        active_users: activeUsers,
+        deleted_users: deletedUsers,
+      },
     };
+  }
+
+  async exportUserDataAsJsonOrExcelFile(format: FileFormat, userId: string, res: Response) {
+    const stream = new Readable();
+    const jsonData = { user: {} };
+    const omitColumns: Array<keyof User> = ['password'];
+    const relations = [
+      'profile',
+      'organisationMembers',
+      'created_organisations',
+      'owned_organisations',
+      'blogs',
+      'notifications',
+      'testimonials',
+    ];
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations,
+    });
+
+    for (const i in user) {
+      if (omitColumns.includes(i as keyof User)) delete user[i];
+      if (!relations.includes(i)) jsonData.user[i] = user[i];
+      else jsonData[i] = user[i];
+    }
+
+    if (format === 'xlsx') {
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${userId}-data.xlsx"`);
+      stream.push(this.generateExcelExportFile(jsonData));
+      stream.push(null);
+    } else if (format === 'json') {
+      res.setHeader('Content-Disposition', `attachment; filename="${userId}-data.json"`);
+      res.setHeader('Content-Type', 'application/json');
+      stream.push(JSON.stringify(jsonData));
+      stream.push(null);
+    }
+
+    const result = new StreamableFile(stream);
+    return result;
+  }
+
+  private generateExcelExportFile(jsonData): Buffer {
+    const workbook = xlsx.utils.book_new();
+
+    function generateColumnsAndContents(data: object[], columnName: string) {
+      const worksheet = xlsx.utils.json_to_sheet(data);
+      xlsx.utils.book_append_sheet(workbook, worksheet, columnName);
+    }
+
+    for (const i in jsonData) {
+      if (jsonData[i] === null) {
+        generateColumnsAndContents([{ no: null, data: null, found: null }], i);
+      } else if (!Array.isArray(jsonData[i])) {
+        generateColumnsAndContents([jsonData[i]], i);
+      } else if (Array.isArray(jsonData[i])) {
+        if (jsonData[i].length === 0) {
+          jsonData[i][0] = { no: null, data: null, found: null };
+        }
+        jsonData[i].forEach(entry => generateColumnsAndContents([entry], i));
+      }
+    }
+    return xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
   }
 }

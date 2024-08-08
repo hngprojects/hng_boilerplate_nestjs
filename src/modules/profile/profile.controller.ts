@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } fr
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ResponseInterceptor } from '../../shared/inteceptors/response.interceptor';
 
 @ApiBearerAuth()
 @ApiTags('Profile')

@@ -5,9 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as SYS_MSG from '../helpers/SystemMessages';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
 import { CustomHttpException } from '../helpers/custom-http-filter';
-import { OrganisationMember } from '../modules/organisations/entities/org-members.entity';
-import { PermissionCategory } from '../modules/organisation-permissions/helpers/PermissionCategory';
+import { PermissionCategory } from '../modules/permissions/helpers/PermissionCategory';
 import { PERMISSIONS_KEY } from './permission.decorator';
+import { OrganisationUserRole } from '../modules/role/entities/organisation-user-role.entity';
+import { Role } from '../modules/role/entities/role.entity';
 
 @Injectable()
 export class MembershipGuard implements CanActivate {
@@ -15,36 +16,43 @@ export class MembershipGuard implements CanActivate {
     private reflector: Reflector,
     @InjectRepository(Organisation)
     private readonly organisationRepository: Repository<Organisation>,
-    @InjectRepository(OrganisationMember)
-    private readonly membersRepository: Repository<OrganisationMember>
+    @InjectRepository(OrganisationUserRole)
+    private readonly organisationMembersRole: Repository<OrganisationUserRole>,
+    @InjectRepository(Role)
+    private readonly userRoleManager: Repository<Role>
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const currentUserId = request.user.sub;
+
     const organisationId = request.params.org_id;
-    const requiredPermissions = this.reflector.getAllAndOverride<PermissionCategory[]>(PERMISSIONS_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const adminRole = await this.userRoleManager.findOne({
+      where: { name: 'member' },
+      relations: ['permissions'],
+    });
+    const requiredPermissions = adminRole.permissions.map(permission => permission.title);
 
     const organisation = await this.organisationRepository.findOne({
       where: { id: organisationId },
-      relations: ['owner', 'creator', 'organisationMembers', 'organisationMembers.user_id'],
+      relations: ['owner'],
     });
 
     if (!organisation) {
       throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    if (organisation.owner.id === currentUserId || organisation.creator.id === currentUserId) return true;
-    const roles = await this.membersRepository.findOne({
-      where: { user_id: currentUserId },
-      relations: { role: true, organisation_id: true, user_id: true },
-    });
+    if (organisation.owner.id === currentUserId) return true;
 
-    const userHasPerms = roles.role.permissions.some(permission => {
-      return requiredPermissions.includes(permission.category);
+    const userRole = (
+      await this.organisationMembersRole.findOne({
+        where: { organisationId: organisation.id, userId: currentUserId },
+        relations: ['role', 'role.permissions'],
+      })
+    ).role;
+
+    const userHasPerms = userRole.permissions.some(permission => {
+      return requiredPermissions.includes(permission.title);
     });
 
     if (userHasPerms) {
