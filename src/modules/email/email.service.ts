@@ -13,7 +13,6 @@ import { ArticleInterface } from './interface/article.interface';
 import { IMessageInterface } from './interface/message.interface';
 import { getFile, createFile, deleteFile } from '../../helpers/fileHelpers';
 
-
 @Injectable()
 export class EmailService {
   constructor(private readonly mailerService: QueueService) {}

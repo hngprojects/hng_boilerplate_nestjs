@@ -9,7 +9,6 @@ export const createOrganisationResponseDtoMock = (overrides?: Partial<typeof Oga
       name: orgMock.name,
       description: orgMock.description,
       owner: orgMock.owner,
-      creator: orgMock.creator,
       email: orgMock.email,
       industry: orgMock.industry,
       type: orgMock.type,
