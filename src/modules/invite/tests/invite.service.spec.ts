@@ -15,6 +15,11 @@ import { EmailService } from '../../../modules/email/email.service';
 import { CreateInvitationDto } from '../dto/create-invite.dto';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
+import { OrganisationsService } from '../../../modules/organisations/organisations.service';
+import { mockUser } from '../mocks/mockUser';
+import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
+import { Role } from '../../../modules/role/entities/role.entity';
+import { Permissions } from '../../../modules/permissions/entities/permissions.entity';
 jest.mock('uuid');
 
 describe('InviteService', () => {
@@ -23,22 +28,109 @@ describe('InviteService', () => {
   let organisationRepo: Repository<Organisation>;
   let emailService: EmailService;
   let mailerService: MailerService;
+  let userRepository: Repository<User>;
+  let permissionRepository: Repository<Permissions>;
+  let organisationService: OrganisationsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InviteService,
+        OrganisationsService,
         {
           provide: getRepositoryToken(Invite),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(Organisation),
-          useClass: Repository,
+          useValue: {
+            find: jest.fn(),
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Organisation),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+          },
+        },
+
+        {
+          provide: getRepositoryToken(Role),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Permissions),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Permissions),
+          useValue: {
+            findBy: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+            find: jest.fn(),
+          },
+        },
+        // {
+        //   provide: getRepositoryToken(OrganisationMember),
+        //   useValue: {
+        //     findBy: jest.fn(),
+        //     findOne: jest.fn(),
+        //     create: jest.fn(),
+        //     save: jest.fn(),
+        //     findOneBy: jest.fn(),
+        //     update: jest.fn(),
+        //     find: jest.fn(),
+        //   },
+        // },
+        {
+          provide: getRepositoryToken(User),
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: OrganisationsService,
+          useValue: {
+            addOrganisationMember: jest.fn(),
+          },
         },
         {
           provide: EmailService,
@@ -60,6 +152,21 @@ describe('InviteService', () => {
     organisationRepo = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
     emailService = module.get<EmailService>(EmailService);
     mailerService = module.get<MailerService>(MailerService);
+    service = module.get<InviteService>(InviteService);
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    organisationService = module.get<OrganisationsService>(OrganisationsService);
+  });
+
+  it('should fetch all invites', async () => {
+    jest.spyOn(repository, 'find').mockResolvedValue(mockInvites);
+
+    const result = await service.findAllInvitations();
+
+    expect(result).toEqual({
+      status_code: 200,
+      message: 'Successfully fetched invites',
+      data: mockInvitesResponse,
+    });
   });
 
   it('should throw an internal server error if an exception occurs', async () => {

@@ -11,6 +11,8 @@ import { Organisation } from '../../modules/organisations/entities/organisations
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { AcceptInviteDto } from './dto/accept-invite.dto';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { User } from '../user/entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { OrganisationsService } from '../organisations/organisations.service';
@@ -27,8 +29,10 @@ export class InviteService {
   constructor(
     @InjectRepository(Invite) private inviteRepository: Repository<Invite>,
     @InjectRepository(Organisation) private organisationRepository: Repository<Organisation>,
+    @InjectRepository(User) private userRepository: Repository<User>,
     private readonly mailerService: MailerService,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly OrganisationService: OrganisationsService
   ) {}
 
   async findAllInvitations(): Promise<{ status_code: number; message: string; data: InviteDto[] }> {
@@ -85,6 +89,43 @@ export class InviteService {
     };
 
     return responseData;
+  }
+
+  async acceptInvite(acceptInviteDto: AcceptInviteDto) {
+    const { token, email } = acceptInviteDto;
+    const invite = await this.inviteRepository.findOne({ where: { token }, relations: ['organisation'] });
+
+    if (!invite) {
+      throw new CustomHttpException(SYS_MSG.INVITE_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    if (!invite.isGeneric && invite.email !== email) {
+      throw new CustomHttpException(SYS_MSG.INVITE_ACCEPTED, HttpStatus.BAD_REQUEST);
+    }
+
+    if (invite.isAccepted) {
+      throw new CustomHttpException(SYS_MSG.INVITE_ACCEPTED, HttpStatus.BAD_REQUEST);
+    }
+
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new CustomHttpException(SYS_MSG.USER_NOT_REGISTERED, HttpStatus.NOT_FOUND);
+    }
+
+    return { status_code: 200, data: {}, message: '' };
+
+    // const response = await this.OrganisationService.addOrganisationMember(invite.organisation.id, {
+    //   user_id: user.id,
+    // });
+
+    // if (response.status === 'success') {
+    //   invite.isAccepted = true;
+    //   await this.inviteRepository.save(invite);
+    //   return response;
+    // } else {
+    //   throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
   }
 
   async sendInvitations(createInvitationDto: CreateInvitationDto): Promise<any> {

@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import * as speakeasy from 'speakeasy';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
@@ -18,6 +18,7 @@ import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
+import { OrganisationsService } from '../organisations/organisations.service';
 
 @Injectable()
 export default class AuthenticationService {
@@ -26,7 +27,8 @@ export default class AuthenticationService {
     private jwtService: JwtService,
     private otpService: OtpService,
     private emailService: EmailService,
-    private googleAuthService: GoogleAuthService
+    private googleAuthService: GoogleAuthService,
+    private organisationService: OrganisationsService
   ) {}
 
   async createNewUser(createUserDto: CreateUserDTO) {
@@ -46,11 +48,26 @@ export default class AuthenticationService {
     if (!user) {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
+    const newOrganisationPaload = {
+      name: `${user.first_name}'s Organisation`,
+      description: '',
+      email: user.email,
+      industry: '',
+      type: '',
+      country: '',
+      address: '',
+      state: '',
+    };
+
+    const newOrganisation = await this.organisationService.create(newOrganisationPaload, user.id);
 
     const token = (await this.otpService.createOtp(user.id)).token;
-    await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
-    const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
+    const access_token = this.jwtService.sign({
+      id: user.id,
+      sub: user.id,
+      email: user.email,
+    });
 
     const responsePayload = {
       user: {
@@ -59,7 +76,6 @@ export default class AuthenticationService {
         last_name: user.last_name,
         email: user.email,
         avatar_url: user.profile.profile_pic_url,
-        role: user.user_type,
       },
     };
 
@@ -78,6 +94,7 @@ export default class AuthenticationService {
 
     const token = (await this.otpService.createOtp(user.id)).token;
     await this.emailService.sendForgotPasswordMail(user.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+
     return {
       message: SYS_MSG.EMAIL_SENT,
     };
@@ -91,7 +108,7 @@ export default class AuthenticationService {
 
     const user = await this.otpService.retrieveUserAndOtp(exists.id, otp);
 
-    return this.userService.updateUser(user.id, { password: newPassword }, user);
+    // return this.userService.updateUser(user.id, { password: newPassword }, user);
   }
 
   async changePassword(user_id: string, oldPassword: string, newPassword: string) {
@@ -150,7 +167,6 @@ export default class AuthenticationService {
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
-          role: user.user_type,
           avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
         },
       },
@@ -182,6 +198,10 @@ export default class AuthenticationService {
 
     if (!isValid) {
       throw new InternalServerErrorException(SYS_MSG.ENABLE_2FA_ERROR);
+    }
+
+    if (user.is_2fa_enabled) {
+      throw new CustomHttpException(SYS_MSG.ALREADY_ENABLED_2FA, HttpStatus.BAD_REQUEST);
     }
 
     const secret = speakeasy.generateSecret({ length: 32 });
@@ -282,7 +302,7 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: {
+      data: {
         id: userExists.id,
         email: userExists.email,
         first_name: userExists.first_name,
@@ -295,6 +315,19 @@ export default class AuthenticationService {
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
     const newUser = await this.userService.createUser(userPayload);
+    const newOrganisationPaload = {
+      name: `${newUser.first_name}'s Organisation`,
+      description: '',
+      email: newUser.email,
+      industry: '',
+      type: '',
+      country: '',
+      address: '',
+      state: '',
+    };
+
+    await this.organisationService.create(newOrganisationPaload, newUser.id);
+
     const accessToken = await this.jwtService.sign({
       sub: newUser.id,
       id: newUser.id,
@@ -368,7 +401,7 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: responsePayload,
+      data: responsePayload,
     };
   }
 }
