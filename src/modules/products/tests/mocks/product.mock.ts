@@ -12,7 +12,6 @@ export const productMock: Product = {
   id: randomUUID(),
   name: 'TV',
   description: '',
-  is_deleted: false,
   stock_status: StockStatusType.LOW_STOCK,
   image: '',
   price: 12,

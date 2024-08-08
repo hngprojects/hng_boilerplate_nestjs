@@ -8,9 +8,9 @@ import {
   DefaultValuePipe,
   Query,
   ParseIntPipe,
+  ParseUUIDPipe,
+  HttpStatus,
   Delete,
-  UseGuards,
-  Res,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
@@ -23,7 +23,6 @@ import {
   GetTestimonials400ErrorResponseDto,
   GetTestimonials404ErrorResponseDto,
 } from './dto/get-testimonials.dto';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Testimonials')
@@ -74,7 +73,7 @@ export class TestimonialsController {
     description: 'User has no testimonials',
     type: GetTestimonials400ErrorResponseDto,
   })
-  @Get('/:user_id')
+  @Get('user/:user_id')
   async getAllTestimonials(
     @Param('user_id') userId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -82,9 +81,31 @@ export class TestimonialsController {
   ) {
     return this.testimonialsService.getAllTestimonials(userId, page, page_size);
   }
+  @Get(':testimonial_id')
+  @ApiOperation({ summary: 'Get Testimonial By ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Testimonial fetched successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Testimonial not found',
+    type: GetTestimonials404ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async getTestimonialById(@Param('testimonial_id', ParseUUIDPipe) testimonialId: string) {
+    const testimonial = await this.testimonialsService.getTestimonialById(testimonialId);
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Testimonial fetched successfully',
+      data: testimonial,
+    };
+  }
 
   @Delete(':id')
-  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Delete a Testimonial' })
   @ApiResponse({ status: 200, description: 'Testimonial deleted successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
