@@ -78,6 +78,6 @@ jobs:
         run: |
           sshpass -p "${SERVER_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_HOST} << 'EOF'
             cd /home/teamalpha/docker/main
-            docker load -i nestjs-backend-main.tar
-            docker-compose up -f docker-compose.staging.yml -d
+            echo "${SERVER_PASSWORD}" | sudo -S docker load -i nestjs-backend.tar
+            echo "${SERVER_PASSWORD}" | sudo -S docker-compose -f docker-compose.staging.yml up -d
           EOF
