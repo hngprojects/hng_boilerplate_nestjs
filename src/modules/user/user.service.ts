@@ -321,11 +321,11 @@ export default class UserService {
 
     if (format === 'xlsx') {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename="${userId}-${new Date()}.xlsx"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${userId}-data.xlsx"`);
       stream.push(this.generateExcelExportFile(jsonData));
       stream.push(null);
     } else if (format === 'json') {
-      res.setHeader('Content-Disposition', `attachment; filename="${userId}-${new Date()}.json"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${userId}-data.json"`);
       res.setHeader('Content-Type', 'application/json');
       stream.push(JSON.stringify(jsonData));
       stream.push(null);

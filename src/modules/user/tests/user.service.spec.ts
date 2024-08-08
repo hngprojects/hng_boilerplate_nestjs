@@ -589,7 +589,7 @@ describe('UserService', () => {
       expect(mockResponse.setHeader).toHaveBeenNthCalledWith(
         1,
         'Content-Disposition',
-        `attachment; filename="${mockJsonData.user.id}-${new Date()}.json"`
+        `attachment; filename="${mockJsonData.user.id}-data.json"`
       );
 
       expect(mockResponse.setHeader).toHaveBeenNthCalledWith(2, 'Content-Type', 'application/json');

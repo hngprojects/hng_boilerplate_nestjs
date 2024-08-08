@@ -92,6 +92,35 @@ export class UserController {
     return this.userService.updateUser(userId, updatedUserDto, req.user);
   }
 
+  @ApiQuery({
+    name: 'format',
+    description: 'The format in which the user data should be exported (e.g., JSON, XLSX)',
+    enum: ['json', 'xlsx'],
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the user data in the requested format.',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            user: {
+              type: 'object',
+              description: 'User data object',
+            },
+          },
+        },
+      },
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @Get('export')
   async exportUserData(
     @Query() { format }: UserDataExportDto,
