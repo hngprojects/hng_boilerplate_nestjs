@@ -17,6 +17,7 @@ import {
   Res,
   UseGuards,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
@@ -52,7 +53,7 @@ export class OrganisationsController {
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
-    return this.organisationsService.create(createOrganisationDto, user.sub);
+    return this.organisationsService.createOrganisation(createOrganisationDto, user.sub);
   }
 
   @UseGuards(OwnershipGuard)

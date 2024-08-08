@@ -65,6 +65,11 @@ export class OrganisationsService {
     return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
   }
 
+  async createOrganisation(createOrganisationDto: CreateOrganisationType, userId: string) {
+    const query = await this.create(createOrganisationDto, userId);
+    return { status_code: HttpStatus.CREATED, messge: 'Organisation created', data: query };
+  }
+
   async create(createOrganisationDto: CreateOrganisationType, userId: string) {
     try {
       if (createOrganisationDto.email) {
