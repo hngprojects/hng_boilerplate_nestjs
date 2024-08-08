@@ -1,6 +1,6 @@
 import { UpdatePermissionDto } from '../dto/update-permission.dto';
 
-export const mockUpdatePermissionDto: UpdatePermissionDto = {
+export const mockUpdatePermissionDto = {
   permission_list: {
     canViewTransactions: true,
     canViewRefunds: true,

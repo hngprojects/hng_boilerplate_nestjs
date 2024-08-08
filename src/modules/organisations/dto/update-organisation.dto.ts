@@ -1,7 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { OrganisationRequestDto } from './organisation.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { User } from '../../../modules/user/entities/user.entity';
 
 export class UpdateOrganisationDto extends PartialType(OrganisationRequestDto) {
   @ApiPropertyOptional({
@@ -64,8 +65,14 @@ export class UpdateOrganisationDto extends PartialType(OrganisationRequestDto) {
   @ApiPropertyOptional({
     type: String,
   })
-  @IsNotEmpty()
+  @IsOptional()
+  owner?: User;
+
   @IsString()
   @IsOptional()
-  readonly state?: string;
+  state?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isDeleted?: boolean;
 }
