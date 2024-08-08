@@ -1,7 +1,6 @@
-import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
 import { v4 as uuidv4 } from 'uuid';
 
-export const organisationRoleMock: OrganisationRole = {
+export const organisationRoleMock = {
   id: uuidv4(),
   name: 'Admin',
   description: 'Administrator role with full permissions',
@@ -12,7 +11,7 @@ export const organisationRoleMock: OrganisationRole = {
   updated_at: new Date(),
 };
 
-export const organisationRoleMocks: OrganisationRole[] = [
+export const organisationRoleMocks = [
   {
     id: uuidv4(),
     name: 'Admin',
