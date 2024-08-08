@@ -8,6 +8,7 @@ import { Testimonial } from '../../../modules/testimonials/entities/testimonials
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
+import { Comment } from '../../comments/entities/comments.entity';
 import { Blog } from '../../blogs/entities/blog.entity';
 import { Comment } from '../../comments/entities/comment.entity';
 
@@ -27,6 +28,9 @@ export class User extends AbstractBaseEntity {
 
   @Column({ unique: true, nullable: false })
   email: string;
+
+  @Column({ unique: false, nullable: true })
+  status: string;
 
   @Column({ nullable: false })
   password: string;
@@ -79,7 +83,7 @@ export class User extends AbstractBaseEntity {
   organisationMembers: OrganisationMember[];
 
   @OneToMany(() => Blog, blog => blog.author)
-  blogs: Blog[];
+  blogs?: Blog[];
 
   @OneToMany(() => Comment, comment => comment.user)
   comments: Comment[];
@@ -95,4 +99,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
   notification_settings: NotificationSettings[];
+
+  @OneToMany(() => Comment, comment => comment.user)
+  comments?: Comment[];
 }

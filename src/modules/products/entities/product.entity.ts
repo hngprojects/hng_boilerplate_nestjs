@@ -1,6 +1,7 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Comment } from '../../../modules/comments/entities/comments.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',
@@ -28,7 +29,7 @@ export class Product extends AbstractBaseEntity {
   @Column({ type: 'text', nullable: true })
   image: string;
 
-  @Column({ type: 'int', nullable: false, default: 0 })
+  @Column({ type: 'float', nullable: false, default: 0 })
   price: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
@@ -53,4 +54,7 @@ export class Product extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, org => org.products)
   org: Organisation;
+
+  @OneToMany(() => Comment, comment => comment.product)
+  comments?: Comment[];
 }
