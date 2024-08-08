@@ -47,6 +47,7 @@ export const PAYMENT_NOTFOUND = 'Payment plan not found';
 export const PRODUCT_NOT_FOUND = 'Product not found!';
 export const COMMENT_CREATED = 'Comment added successfully';
 export const ORG_UPDATE = 'Organisation updated successfully';
+export const ORG_EXISTS_ERROR = 'Organisation with this email already exists';
 export const ORG_MEMBER_NOT_FOUND = 'Member not found';
 export const ORG_MEMBER_DOES_NOT_BELONG = 'Member does not belong to the specified organisation';
 export const ROLE_NOT_FOUND = 'Role not found in the organization';
