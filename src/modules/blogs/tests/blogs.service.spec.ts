@@ -347,4 +347,65 @@ describe('BlogService', () => {
       await expect(service.deleteBlogPost('blog-id')).rejects.toThrow('Blog post with this id does not exist');
     });
   });
+
+  describe('getAllBlogs', () => {
+    it('should successfully retrieve all blogs with pagination', async () => {
+      const blog1 = new Blog();
+      blog1.id = 'blog-id-1';
+      blog1.title = 'Test Blog 1';
+      blog1.content = 'Test Content 1';
+      blog1.tags = ['test'];
+      blog1.image_urls = ['http://example.com/image1.jpg'];
+      blog1.author = new User();
+      blog1.author.first_name = 'John';
+      blog1.author.last_name = 'Doe';
+      blog1.created_at = new Date();
+
+      const blog2 = new Blog();
+      blog2.id = 'blog-id-2';
+      blog2.title = 'Test Blog 2';
+      blog2.content = 'Test Content 2';
+      blog2.tags = ['test'];
+      blog2.image_urls = ['http://example.com/image2.jpg'];
+      blog2.author = new User();
+      blog2.author.first_name = 'Jane';
+      blog2.author.last_name = 'Doe';
+      blog2.created_at = new Date();
+
+      const expectedResponse = {
+        data: [
+          {
+            blog_id: 'blog-id-1',
+            title: 'Test Blog 1',
+            content: 'Test Content 1',
+            tags: ['test'],
+            image_urls: ['http://example.com/image1.jpg'],
+            author: 'John Doe',
+            created_at: blog1.created_at,
+          },
+          {
+            blog_id: 'blog-id-2',
+            title: 'Test Blog 2',
+            content: 'Test Content 2',
+            tags: ['test'],
+            image_urls: ['http://example.com/image2.jpg'],
+            author: 'Jane Doe',
+            created_at: blog2.created_at,
+          },
+        ],
+        total: 2,
+      };
+
+      jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([[blog1, blog2], 2]);
+
+      const result = await service.getAllBlogs(1, 10);
+
+      expect(result).toEqual(expectedResponse);
+      expect(blogRepository.findAndCount).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        relations: ['author'],
+      });
+    });
+  });
 });

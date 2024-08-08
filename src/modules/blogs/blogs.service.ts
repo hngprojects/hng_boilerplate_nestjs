@@ -107,6 +107,19 @@ export class BlogService {
     } else await this.blogRepository.remove(blog);
   }
 
+  async getAllBlogs(page: number, pageSize: number): Promise<{ data: BlogResponseDto[]; total: number }> {
+    const skip = (page - 1) * pageSize;
+
+    const [result, total] = await this.blogRepository.findAndCount({
+      skip,
+      take: pageSize,
+      relations: ['author'],
+    });
+
+    const data = this.mapBlogResults(result);
+    return { data, total };
+  }
+
   async searchBlogs(query: any): Promise<{ data: BlogResponseDto[]; total: number }> {
     const { page = 1, page_size = 10 } = query;
     const skip = (page - 1) * page_size;
