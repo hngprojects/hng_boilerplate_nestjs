@@ -21,4 +21,7 @@ export const productMock: Product = {
   org: orgMock,
   created_at: new Date(),
   updated_at: new Date(),
+  cost_price: 10,
+  cart: [],
+  orderItems: [],
 };

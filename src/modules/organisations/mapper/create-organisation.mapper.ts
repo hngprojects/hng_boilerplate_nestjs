@@ -19,7 +19,6 @@ export class CreateOrganisationMapper {
     organisation.address = dto.address;
     organisation.state = dto.state;
     organisation.owner = owner;
-    organisation.creator = owner;
 
     return organisation;
   }

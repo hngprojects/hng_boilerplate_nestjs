@@ -16,6 +16,11 @@ import { Otp } from '../otp/entities/otp.entity';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthService } from './google-auth.service';
 import { Profile } from '../profile/entities/profile.entity';
+import QueueService from '../email/queue.service';
+import { OrganisationsService } from '../organisations/organisations.service';
+import { Organisation } from '../organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
+import { Role } from '../role/entities/role.entity';
 
 @Module({
   controllers: [RegistrationController],
@@ -27,9 +32,10 @@ import { Profile } from '../profile/entities/profile.entity';
     EmailService,
     GoogleStrategy,
     GoogleAuthService,
+    OrganisationsService,
   ],
   imports: [
-    TypeOrmModule.forFeature([User, Otp, Profile]),
+    TypeOrmModule.forFeature([User, Otp, Profile, Organisation, OrganisationUserRole, Role]),
     PassportModule,
     OtpModule,
     EmailModule,
