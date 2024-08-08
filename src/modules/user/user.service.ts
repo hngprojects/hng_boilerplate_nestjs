@@ -206,9 +206,13 @@ export default class UserService {
 
     const user = await this.getUserRecord(identifierOptions);
 
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
     user.is_active = true;
     user.attempts_left = 5;
-    user.time_left = 30 * 60 * 1000; // 30 minutes
+    user.time_left = 30 * 60 * 1000;
 
     await this.userRepository.save(user);
 
