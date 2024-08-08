@@ -1,4 +1,16 @@
-import { Body, Controller, Post, Req, Get, Param, DefaultValuePipe, Query, ParseIntPipe, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Req,
+  Get,
+  Param,
+  DefaultValuePipe,
+  Query,
+  ParseIntPipe,
+  ParseUUIDPipe,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
 import UserService from '../user/user.service';
@@ -62,7 +74,7 @@ export class TestimonialsController {
     description: 'User has no testimonials',
     type: GetTestimonials400ErrorResponseDto,
   })
-  @Get('/:user_id')
+  @Get('user/:user_id')
   async getAllTestimonials(
     @Param('user_id') userId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -70,26 +82,27 @@ export class TestimonialsController {
   ) {
     return this.testimonialsService.getAllTestimonials(userId, page, page_size);
   }
-
-  @Patch(':id')
-@ApiOperation({ summary: 'Update Testimonial' })
-@ApiResponse({ status: 200, description: 'Testimonial updated successfully' })
-@ApiResponse({ status: 404, description: 'Testimonial not found' })
-@ApiResponse({ status: 401, description: 'Unauthorized' })
-@ApiResponse({ status: 500, description: 'Internal Server Error' })
-async update(
-  @Param('id') id: string,
-  @Body() updateTestimonialDto: UpdateTestimonialDto,
-  @Req() req: { user: UserPayload }
-): Promise<UpdateTestimonialResponseDto> {
-  const userId = req.user.id;
-
-  const data = await this.testimonialsService.updateTestimonial(id, updateTestimonialDto, userId);
-
-  return {
-    status: 'success',
-    message: 'Testimonial updated successfully',
-    data,
+  @Get(':testimonial_id')
+  @ApiOperation({ summary: 'Get Testimonial By ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Testimonial fetched successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Testimonial not found',
+    type: GetTestimonials404ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async getTestimonialById(@Param('testimonial_id', ParseUUIDPipe) testimonialId: string) {
+    const testimonial = await this.testimonialsService.getTestimonialById(testimonialId);
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Testimonial fetched successfully',
+      data: testimonial,
+    };
   }
-}
 }
