@@ -42,6 +42,7 @@ export class Profile extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   deactivation_reason: string;
+
   @DeleteDateColumn()
   deletedAt?: Date;
 }
