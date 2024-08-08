@@ -2,10 +2,12 @@ import { Controller, Post, Get, Body, Res, Patch, Param, UseGuards } from '@nest
 import { Response } from 'express';
 import { EmailService } from './email.service';
 import { SendEmailDto, UpdateTemplateDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { skip } from 'node:test';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiTags('email')
+@ApiBearerAuth()
 @Controller('email')
 @UseGuards(SuperAdminGuard)
 export class EmailController {
