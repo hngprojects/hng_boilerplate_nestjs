@@ -58,6 +58,11 @@ export const JOB_LISTING_RETRIEVAL_SUCCESSFUL = 'Jobs listing fetched successful
 export const JOB_CREATION_SUCCESSFUL = 'Job listing created successfully';
 export const NO_USER_ORGS = 'User has no organisations';
 export const DEADLINE_PASSED = 'Job application deadline passed';
+export const EMAIL_TEMPLATES = {
+  TEMPLATE_UPDATED_SUCCESSFULLY: 'Template updated successfully',
+  INVALID_HTML_FORMAT: 'Invalid HTML format',
+  TEMPLATE_NOT_FOUND: 'Template not found',
+};
 export const EXISTING_ROLE = 'A role with this name already exists in the organisation';
 export const ROLE_CREATION_FAILED = 'Failed to create organisation role';
 export const ROLE_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';

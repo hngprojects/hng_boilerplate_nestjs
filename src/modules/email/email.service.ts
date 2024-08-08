@@ -1,5 +1,4 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { validateOrReject } from 'class-validator';
 import * as Handlebars from 'handlebars';
 import * as htmlValidator from 'html-validator';
@@ -10,7 +9,10 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { MailInterface } from './interfaces/MailInterface';
 import QueueService from './queue.service';
 import { ArticleInterface } from './interface/article.interface';
+import { createTemplateDto, getTemplateDto, UpdateTemplateDto } from './dto/email.dto';
 import { IMessageInterface } from './interface/message.interface';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { getFile, createFile, deleteFile } from '../../helpers/fileHelpers';
 
 @Injectable()
@@ -27,7 +29,7 @@ export class EmailService {
       },
     };
 
-    this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
+    await this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
   }
 
   async sendUserEmailConfirmationOtp(email: string, otp: string) {
@@ -39,7 +41,7 @@ export class EmailService {
       },
     };
 
-    this.mailerService.sendMail({ variant: 'register-otp', mail: mailPayload });
+    await this.mailerService.sendMail({ variant: 'register-otp', mail: mailPayload });
   }
 
   async sendForgotPasswordMail(email: string, url: string, token: string) {
@@ -145,6 +147,47 @@ export class EmailService {
         message: 'Something went wrong, please try again',
       };
     }
+  }
+
+  async updateTemplate(templateName: string, templateInfo: UpdateTemplateDto) {
+    const html = Handlebars.compile(templateInfo.template)({});
+
+    const validationResult = await htmlValidator({ data: html });
+
+    const filteredMessages = validationResult.messages.filter(
+      message =>
+        !(
+          (message.message.includes('Trailing slash on void elements has no effect') && message.type === 'info') ||
+          (message.message.includes('Consider adding a “lang” attribute') && message.subType === 'warning')
+        )
+    );
+
+    if (filteredMessages.length > 0) {
+      throw new CustomHttpException(
+        {
+          message: SYS_MSG.EMAIL_TEMPLATES.INVALID_HTML_FORMAT,
+          validation_errors: filteredMessages.map(msg => msg.message),
+        },
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const templatePath = `./src/modules/email/templates/${templateName}.hbs`;
+
+    if (!fs.existsSync(templatePath)) {
+      throw new CustomHttpException(SYS_MSG.EMAIL_TEMPLATES.TEMPLATE_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    await promisify(fs.writeFile)(templatePath, html, 'utf-8');
+
+    return {
+      status_code: HttpStatus.OK,
+      message: SYS_MSG.EMAIL_TEMPLATES.TEMPLATE_UPDATED_SUCCESSFULLY,
+      data: {
+        name: templateName,
+        content: html,
+      },
+    };
   }
 
   async getTemplate(templateInfo: getTemplateDto) {
