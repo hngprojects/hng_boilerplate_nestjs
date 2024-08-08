@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Comment } from './entities/comment.entity';
+import { Comment } from './entities/comments.entity';
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { User } from '../user/entities/user.entity';
 import { CommentResponseDto } from './dtos/comment-response.dto';
@@ -16,9 +16,9 @@ export class CommentsService {
   ) {}
 
   async addComment(createCommentDto: CreateCommentDto, userId: string): Promise<CommentResponseDto> {
-    const { model_id, model_type, content } = createCommentDto;
+    const { model_id, model_type, comment } = createCommentDto;
 
-    if (!content || content.trim().length === 0) {
+    if (!comment || comment.trim().length === 0) {
       throw new BadRequestException('Comment cannot be empty');
     }
 
@@ -30,19 +30,20 @@ export class CommentsService {
     const commentedBy: string = user.first_name + ' ' + user.last_name;
 
     try {
-      const comment = this.commentRepository.create({
+      const Comment = this.commentRepository.create({
         model_id,
         model_type,
-        content,
+        comment,
       });
 
-      const savedComment = await this.commentRepository.save(comment);
+      const loadComment = await this.commentRepository.save(Comment);
       return {
         message: 'Comment added successfully!',
-        comment: savedComment,
+        savedComment: loadComment,
         commentedBy,
       };
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException('An internal server error occurred');
     }
   }

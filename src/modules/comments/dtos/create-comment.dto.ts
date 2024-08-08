@@ -11,5 +11,5 @@ export class CreateCommentDto {
 
   @IsString()
   @IsNotEmpty()
-  content: string;
+  comment: string;
 }
