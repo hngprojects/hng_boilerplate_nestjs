@@ -1,7 +1,8 @@
-import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import smsConfig from 'config/sms.config';
 import { Twilio } from 'twilio';
+import { CreateSmsDto } from './dto/create-sms.dto';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 @Injectable()
 export class SmsService {
@@ -12,12 +13,22 @@ export class SmsService {
     this.twilioClient = new Twilio(accountSid, authToken);
   }
 
-  async sendSms(to: string, body: string) {
+  async sendSms(createSmsDto: CreateSmsDto) {
     const from = smsConfig().phoneNumber;
-    return await this.twilioClient.messages.create({
-      body,
-      from,
-      to,
-    });
+    try {
+      const response = await this.twilioClient.messages.create({
+        body: createSmsDto.message,
+        from,
+        to: createSmsDto.phone_number,
+      });
+      return {
+        message: 'SMS sent successfully.',
+        data: {
+          sid: response.sid,
+        },
+      };
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

@@ -1,24 +1,19 @@
-import { Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { SmsService } from './sms.service';
 import { CreateSmsDto } from './dto/create-sms.dto';
-import QueueService from '../email/queue.service';
-import SmsQueueService from './sms-queue.service';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('sms')
 export class SmsController {
-  constructor(
-    private readonly smsQueueService: SmsQueueService,
-    private readonly smsService: SmsService
-  ) {}
+  constructor(private readonly smsService: SmsService) {}
 
   @Post('/send')
   @HttpCode(200)
-  async sendSms(createSmsDto: CreateSmsDto) {
-    const job = await this.smsQueueService.sendSms(createSmsDto);
-    return {
-      status: 'success',
-      message: 'SMS is being processed in background',
-      job: job,
-    };
+  @ApiOperation({ summary: 'Send an sms' })
+  @ApiResponse({ status: 200, description: 'SMS sent successfully' })
+  @ApiResponse({ status: 404, description: 'A valid phone number must be provided' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async sendSms(@Body() createSmsDto: CreateSmsDto) {
+    return this.smsService.sendSms(createSmsDto);
   }
 }
