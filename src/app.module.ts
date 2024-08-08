@@ -30,8 +30,8 @@ import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
-import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
-import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
+import { RoleModule } from './modules/role/role.module';
+import { OrganisationPermissionsModule } from './modules/permissions/permissions.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { FaqModule } from './modules/faq/faq.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
@@ -41,6 +41,8 @@ import { TeamsModule } from './modules/teams/teams.module';
 import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { RevenueModule } from './modules/revenue/revenue.module';
 
 @Module({
   providers: [
@@ -139,7 +141,7 @@ import { CommentsModule } from './modules/comments/comments.module';
     BillingPlanModule,
     JobsModule,
     ProfileModule,
-    OrganisationRoleModule,
+    RoleModule,
     OrganisationPermissionsModule,
     RunTestsModule,
     ContactUsModule,
@@ -152,6 +154,8 @@ import { CommentsModule } from './modules/comments/comments.module';
     FlutterwaveModule,
     BlogModule,
     CommentsModule,
+    SubscriptionsModule,
+    RevenueModule,
   ],
   controllers: [HealthController, ProbeController],
 })

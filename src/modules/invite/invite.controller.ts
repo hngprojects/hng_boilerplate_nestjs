@@ -62,10 +62,7 @@ export class InviteController {
     description: SYS_MSG.ORG_NOT_FOUND,
   })
   @Post('accept-invite')
-  async acceptInvite(@Body() acceptInviteDto: AcceptInviteDto): Promise<{
-    status: string;
-    message: string;
-  }> {
+  async acceptInvite(@Body() acceptInviteDto: AcceptInviteDto) {
     return await this.inviteService.acceptInvite(acceptInviteDto);
   }
 }

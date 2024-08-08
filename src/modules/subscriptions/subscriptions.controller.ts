@@ -6,7 +6,7 @@ import { SubscriptionsService } from './subscriptions.service';
 
 @ApiBearerAuth()
 @Controller('subscriptions')
-@ApiTags('Subscriptions')
+@ApiTags('Dashboard')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
