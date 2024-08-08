@@ -1,4 +1,4 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,6 +8,10 @@ import UserService from '../../user/user.service';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { Testimonial } from '../entities/testimonials.entity';
 import { TestimonialsService } from '../testimonials.service';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { mockUser } from '../../organisations/tests/mocks/user.mock';
+import { testimonialsMock } from './mocks/testimonials.mock';
 
 describe('TestimonialsService', () => {
   let service: TestimonialsService;
@@ -97,6 +101,36 @@ describe('TestimonialsService', () => {
           status_code: 500,
         })
       );
+    });
+  });
+
+  describe("retrieve all user's testimonials", () => {
+    it('should validate the user id', async () => {
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(null);
+
+      await expect(service.getAllTestimonials('user_id', 1, 10)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
+    });
+
+    it('should throw an error if the user has no testimonials', async () => {
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(mockUser);
+      jest.spyOn(testimonialRepository, 'find').mockResolvedValue([]);
+
+      await expect(service.getAllTestimonials('user_id', 1, 10)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.NO_USER_TESTIMONIALS, HttpStatus.BAD_REQUEST)
+      );
+    });
+
+    it('should return all testimonials for a user', async () => {
+      jest.spyOn(userService, 'getUserRecord').mockResolvedValue(mockUser);
+      jest.spyOn(testimonialRepository, 'find').mockResolvedValue(testimonialsMock);
+
+      const res = await service.getAllTestimonials(mockUser.id, 1, 5);
+
+      expect(res.message).toEqual(SYS_MSG.USER_TESTIMONIALS_FETCHED);
+      expect(res.data.testimonials.length).toEqual(testimonialsMock.length);
+      expect(res.data.user_id).toEqual(mockUser.id);
     });
   });
 });
