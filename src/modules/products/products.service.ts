@@ -18,7 +18,7 @@ import { User } from '../user/entities/user.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { ProductVariant } from './entities/product-variant.entity';
-import { Product, StockStatusType } from './entities/product.entity';
+import { Product, ProductSizeType, StockStatusType } from './entities/product.entity';
 
 interface SearchCriteria {
   name?: string;
@@ -45,7 +45,17 @@ export class ProductsService {
         message: 'Invalid organisation credentials',
         status_code: 422,
       });
-    const newProduct: Product = this.productRepository.create(dto);
+    const payload = {
+      name: dto.name,
+      quantity: dto.quantity,
+      price: dto.price,
+      category: dto.category,
+      description: dto.description,
+      image: dto.image_url,
+      size: dto.size as ProductSizeType,
+    };
+
+    const newProduct: Product = this.productRepository.create(payload);
     newProduct.org = org;
     const statusCal = await this.calculateProductStatus(dto.quantity);
     newProduct.stock_status = statusCal;
