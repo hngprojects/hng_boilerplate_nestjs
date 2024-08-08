@@ -170,7 +170,6 @@ export class ProfileService {
   private async createUploadsDirectory() {
     try {
       await fs.mkdir(this.uploadsDir, { recursive: true });
-      console.log(SYS_MSG.DIRECTORY_CREATED, this.uploadsDir);
     } catch (error) {
       console.error(SYS_MSG.ERROR_DIRECTORY, error);
     }
