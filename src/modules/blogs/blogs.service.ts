@@ -1,3 +1,5 @@
+// src/modules/blogs/blogs.service.ts
+
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,7 +10,7 @@ import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { BlogResponseDto } from './dtos/blog-response.dto';
-import CustomExceptionHandler from '../../helpers/exceptionHandler';
+import CustomExceptionHandler from 'src/helpers/exceptionHandler';
 
 @Injectable()
 export class BlogService {
@@ -58,17 +60,14 @@ export class BlogService {
     const fullName = await this.fetchUserById(user.id);
 
     if (!singleBlog) {
-      CustomExceptionHandler({
-        response: SYS_MSG.BLOG_NOT_FOUND,
-        status: 404,
-      });
+      throw new CustomHttpException(SYS_MSG.BLOG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const { id, created_at, updated_at, ...rest } = singleBlog;
     const author = `${fullName.first_name} ${fullName.last_name}`;
 
     return {
-      status: 200,
+      status_code: 200,
       message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
       data: { blog_id: id, ...rest, author, published_date: created_at },
     };
@@ -107,9 +106,7 @@ export class BlogService {
     } else await this.blogRepository.remove(blog);
   }
 
-  async searchBlogs(
-    query: any
-  ): Promise<{
+  async searchBlogs(query: any): Promise<{
     status_code: number;
     message: string;
     data: { current_page: number; total_pages: number; total_results: number; blogs: BlogResponseDto[]; meta: any };
@@ -207,10 +204,7 @@ export class BlogService {
   private mapBlogResults(result: Blog[]): BlogResponseDto[] {
     return result.map(blog => {
       if (!blog.author) {
-        CustomExceptionHandler({
-          response: 'author_not_found',
-          status: 500,
-        });
+        throw new CustomHttpException('author_not_found', HttpStatus.INTERNAL_SERVER_ERROR);
       }
       const author_name = blog.author ? `${blog.author.first_name} ${blog.author.last_name}` : 'Unknown';
       return {
