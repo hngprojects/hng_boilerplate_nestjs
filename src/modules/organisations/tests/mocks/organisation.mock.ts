@@ -26,6 +26,8 @@ export const createMockOrganisation = (): Organisation => {
     region: 'US',
     timezones: 'America/New_York',
     profile_pic_url: '',
+    deactivated: false,
+    deactivation_reason: 'nothing',
     created_at: new Date(),
     updated_at: new Date(),
   };

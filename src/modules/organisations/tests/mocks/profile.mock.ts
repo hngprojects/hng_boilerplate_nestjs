@@ -11,6 +11,8 @@ export const profileMock: Profile = {
   social_links: [],
   language: 'English',
   region: 'US',
+  deactivated: false,
+  deactivation_reason: 'none',
   timezones: 'America/New_York',
   profile_pic_url: '',
   created_at: new Date(),
