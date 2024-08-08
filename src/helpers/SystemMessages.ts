@@ -28,6 +28,7 @@ export const LOGIN_SUCCESSFUL = 'Login successful';
 export const LOGIN_ERROR = 'An error occurred during login';
 export const EMAIL_SENT = 'Email sent successfully';
 export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
+export const ALREADY_ENABLED_2FA = '2FA already enabled on your account';
 export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
 export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
@@ -58,6 +59,14 @@ export const EMAIL_TEMPLATES = {
   TEMPLATE_UPDATED_SUCCESSFULLY: 'Template updated successfully',
   INVALID_HTML_FORMAT: 'Invalid HTML format',
   TEMPLATE_NOT_FOUND: 'Template not found',
+};
+export const EXISTING_ROLE = 'A role with this name already exists in the organisation';
+export const ROLE_CREATION_FAILED = 'Failed to create organisation role';
+export const ROLE_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
+export const ROLE_CREATED_SUCCESSFULLY = 'Role created successfully';
+
+export const RESOURCE_NOT_FOUND = resource => {
+  return `${resource} does not exist`;
 };
 export const INVALID_UUID_FORMAT = 'Invalid UUID format';
 export const MEMBER_ALREADY_EXISTS = 'User already added to organization';

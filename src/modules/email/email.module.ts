@@ -10,12 +10,16 @@ import { EmailController } from './email.controller';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
+import { Organisation } from '../organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
+import { Profile } from '../profile/entities/profile.entity';
+import { Role } from '../role/entities/role.entity';
 
 @Module({
   providers: [EmailService, QueueService, EmailQueueConsumer],
   exports: [EmailService, QueueService],
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Organisation, OrganisationUserRole, Profile, Role]),
     BullModule.registerQueueAsync({
       name: 'emailSending',
     }),

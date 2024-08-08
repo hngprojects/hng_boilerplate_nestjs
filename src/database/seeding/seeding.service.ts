@@ -10,22 +10,22 @@ import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Notification } from '../../modules/notifications/entities/notifications.entity';
-import { DefaultPermissions } from '../../modules/organisation-permissions/entities/default-permissions.entity';
-import { PermissionCategory } from '../../modules/organisation-permissions/helpers/PermissionCategory';
-import { DefaultRole } from '../../modules/organisation-role/entities/role.entity';
-import { RoleCategory, RoleCategoryDescriptions } from '../../modules/organisation-role/helpers/RoleCategory';
-import { Organisation } from '../../modules/organisations/entities/organisations.entity';
-import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
+import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
+import { DefaultPermissions } from '../../modules/permissions/entities/default-permissions.entity';
+import { PermissionCategory } from '../../modules/permissions/helpers/PermissionCategory';
+import { Notification } from '../../modules/notifications/entities/notifications.entity';
+import { Organisation } from '../../modules/organisations/entities/organisations.entity';
+
 import { Profile } from '../../modules/profile/entities/profile.entity';
 import { Cart } from '../../modules/revenue/entities/cart.entity';
 import { OrderItem } from '../../modules/revenue/entities/order-items.entity';
 import { Order } from '../../modules/revenue/entities/order.entity';
 import { Transaction } from '../../modules/revenue/entities/transaction.entity';
-import { User, UserType } from '../../modules/user/entities/user.entity';
+import { User } from '../../modules/user/entities/user.entity';
 import { CreateAdminDto } from './dto/admin.dto';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
+import { Role } from '../../modules/role/entities/role.entity';
 
 @Injectable()
 export class SeedingService {
@@ -40,7 +40,7 @@ export class SeedingService {
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
     const notificationRepository = this.dataSource.getRepository(Notification);
-    const defaultRoleRepository = this.dataSource.getRepository(DefaultRole);
+    const defaultRoleRepository = this.dataSource.getRepository(Role);
 
     try {
       const existingPermissions = await defaultPermissionRepository.count();
@@ -59,17 +59,16 @@ export class SeedingService {
       }
 
       //Populate the database with default Roles if none exits else stop execution
-      if (existingRoles <= 0) {
-        const defaultRoles = Object.values(RoleCategory).map(name =>
-          defaultRoleRepository.create({
-            name: name,
-            description: RoleCategoryDescriptions[name],
-          })
-        );
+      // if (existingRoles <= 0) {
+      //   const defaultRoles = Object.values(RoleCategory).map(name =>
+      //     defaultRoleRepository.create({
+      //       description: RoleCategoryDescriptions[name],
+      //     })
+      //   );
 
-        // Save all default roles to the database
-        await defaultRoleRepository.save(defaultRoles);
-      }
+      //   // Save all default roles to the database
+      //   await defaultRoleRepository.save(defaultRoles);
+      // }
 
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
@@ -134,7 +133,6 @@ export class SeedingService {
           state: 'state1',
           address: 'address1',
           owner: savedUsers[0],
-          creator: savedUsers[0],
           isDeleted: false,
         });
 
@@ -148,7 +146,6 @@ export class SeedingService {
           state: 'state2',
           address: 'address2',
           owner: savedUsers[0],
-          creator: savedUsers[0],
           isDeleted: false,
         });
 
@@ -180,6 +177,7 @@ export class SeedingService {
           name: 'Product 1',
           description: 'Description for Product 1',
           size: ProductSizeType.STANDARD,
+          category: 'electricity',
           quantity: 1,
           price: 500,
           org: or1,
@@ -188,6 +186,7 @@ export class SeedingService {
           name: 'Product 2',
           description: 'Description for Product 2',
           size: ProductSizeType.LARGE,
+          category: 'electricity',
           quantity: 2,
           price: 50,
           org: or2,
@@ -196,6 +195,7 @@ export class SeedingService {
           name: 'Product 2',
           description: 'Description for Product 2',
           size: ProductSizeType.STANDARD,
+          category: 'electricity',
           quantity: 2,
           price: 50,
           org: or1,
@@ -204,6 +204,7 @@ export class SeedingService {
           name: 'Product 2',
           description: 'Description for Product 2',
           size: ProductSizeType.SMALL,
+          category: 'clothing',
           quantity: 2,
           price: 50,
           org: or2,
@@ -296,7 +297,7 @@ export class SeedingService {
       const { ADMIN_SECRET } = process.env;
       if (secret !== ADMIN_SECRET) throw new UnauthorizedException(INVALID_ADMIN_SECRET);
 
-      user.user_type = UserType.SUPER_ADMIN;
+      // user.user_type = UserType.SUPER_ADMIN;
       const admin = await userRepository.save(user);
       return { status: 201, message: ADMIN_CREATED, data: admin };
     } catch (error) {
