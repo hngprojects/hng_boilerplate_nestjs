@@ -1,4 +1,3 @@
-// import { Profile } from 'src/modules/profile/entities/profile.entity';
 import { Profile } from '../../../modules/profile/entities/profile.entity';
 import { UserType } from '../entities/user.entity';
 
@@ -18,8 +17,6 @@ interface UserInterface {
   secret: string;
 
   is_2fa_enabled: boolean;
-
-  user_type: UserType;
 
   is_active: boolean;
 
