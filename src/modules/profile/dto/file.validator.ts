@@ -1,4 +1,3 @@
-// file.validator.ts
 import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
 
 @Injectable()
