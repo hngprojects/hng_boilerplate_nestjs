@@ -1,7 +1,7 @@
-import { Comment } from '../entities/comment.entity';
+import { Comment } from '../entities/comments.entity';
 
 export class CommentResponseDto {
   message: string;
-  comment: Comment;
+  savedComment: Comment;
   commentedBy: string;
 }
