@@ -181,4 +181,17 @@ export class UserController {
   async updateUserStatus(@Param('userId', ParseUUIDPipe) userId: string, @Body() { status }: UpdateUserStatusDto) {
     return this.userService.updateUserStatus(userId, status);
   }
+
+  @Delete(':userId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Soft delete a user account' })
+  @ApiResponse({ status: 204, description: 'Deletion in progress' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async softDeleteUser(@Param('userId', ParseUUIDPipe) userId: string, @Req() req) {
+    const authenticatedUserId = req['user'].id;
+
+    return this.userService.softDeleteUser(userId, authenticatedUserId);
+  }
 }

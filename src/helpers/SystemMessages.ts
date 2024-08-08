@@ -28,6 +28,7 @@ export const LOGIN_SUCCESSFUL = 'Login successful';
 export const LOGIN_ERROR = 'An error occurred during login';
 export const EMAIL_SENT = 'Email sent successfully';
 export const ENABLE_2FA_ERROR = 'Error occured enabling 2fa';
+export const ALREADY_ENABLED_2FA = '2FA already enabled on your account';
 export const SIGN_IN_OTP_SENT = 'Sign-in token sent to email';
 export const WRONG_PARAMETERS =
   'permission_list must be an object with keys from PermissionCategory and boolean values';
@@ -54,6 +55,14 @@ export const JOB_LISTING_RETRIEVAL_SUCCESSFUL = 'Jobs listing fetched successful
 export const JOB_CREATION_SUCCESSFUL = 'Job listing created successfully';
 export const NO_USER_ORGS = 'User has no organisations';
 export const DEADLINE_PASSED = 'Job application deadline passed';
+export const EXISTING_ROLE = 'A role with this name already exists in the organisation';
+export const ROLE_CREATION_FAILED = 'Failed to create organisation role';
+export const ROLE_FETCHED_SUCCESSFULLY = 'Roles fetched successfully';
+export const ROLE_CREATED_SUCCESSFULLY = 'Role created successfully';
+
+export const RESOURCE_NOT_FOUND = resource => {
+  return `${resource} does not exist`;
+};
 export const INVALID_UUID_FORMAT = 'Invalid UUID format';
 export const MEMBER_ALREADY_EXISTS = 'User already added to organization';
 export const MEMBER_ALREADY_SUCCESSFULLY = 'Member added successfully';
@@ -65,5 +74,8 @@ export const INVITE_NOT_FOUND = 'Invite link not found';
 export const BLOG_DELETED = 'Blog post has been successfully deleted';
 export const NO_USER_TESTIMONIALS = 'User has no testimonials';
 export const USER_TESTIMONIALS_FETCHED = 'User testimonials retrieved successfully';
+export const INVALID_ORG_ID = 'Provide a valid organization Id';
+export const INVALID_USER_ID = 'Provide a valid user Id';
+export const INVALID_PRODUCT_ID = 'Provide a valid user Id';
 export const REVENUE_FETCHED_SUCCESSFULLY = 'Revenue Fetched';
 export const QUESTION_ALREADY_EXISTS = 'This question already exists.';

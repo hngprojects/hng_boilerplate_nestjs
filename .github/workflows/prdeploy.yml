@@ -1,0 +1,52 @@
+name: PR Deploy
+on:
+  pull_request_target:
+    branches:
+      - dev
+
+jobs:
+  deploy-pr-for-testing:
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.preview-url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to branch
+        uses: actions/checkout@v4
+      - id: deploy
+
+        name: Pull Request Deploy
+        uses: hngprojects/pr-deploy@2.0.1
+        with:
+          server_host: ${{ secrets.SERVER_HOST }}
+          server_username: ${{ secrets.SERVER_USERNAME }}
+          server_password: ${{ secrets.SERVER_PASSWORD }}
+          server_port: ${{ secrets.SERVER_PORT }}
+          comment: true
+          context: '.'
+          dockerfile: 'dockerfile'
+          exposed_port: '3100'
+          host_volume_path: '/var/'
+          container_volume_path: '/var/'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          envs:
+            DB_USERNAME: ${{ secrets.DB_USERNAME }}
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+            DB_DATABASE: ${{ secrets.DB_DATABASE }}
+            DB_HOST: ${{ secrets.DB_HOST }}
+            DB_PORT: ${{ secrets.DB_PORT }}
+            DB_ENTITIES: ${{ secrets.DB_ENTITIES }}
+            DB_MIGRATIONS: ${{ secrets.DB_MIGRATIONS }}
+            GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+            REDIS_HOST: ${{ secrets.REDIS_HOST }}
+            DB_TYPE: 'postgres'
+            PROFILE: 'staging'
+            NODE_ENV: 'development'
+            PORT: 3000
+            REDIS_PORT: 6379
+
+      - name: Print Preview Url
+        run: |
+          echo "Preview Url: ${{ steps.deploy.outputs.preview-url }}"

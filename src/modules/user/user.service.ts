@@ -27,6 +27,7 @@ import * as xlsx from 'xlsx';
 import * as path from 'path';
 import { Response } from 'express';
 import { FileFormat, UserDataExportDto } from './dto/user-data-export.dto';
+import { CustomHttpException } from '../../../src/helpers/custom-http-filter';
 
 @Injectable()
 export default class UserService {
@@ -42,11 +43,6 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
-    if (createUserPayload.admin_secret == process.env.ADMIN_SECRET_KEY) {
-      newUser.user_type = UserType.SUPER_ADMIN;
-    } else {
-      newUser.user_type = UserType.USER;
-    }
     newUser.profile = profile;
     return await this.userRepository.save(newUser);
   }
@@ -85,7 +81,7 @@ export default class UserService {
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { email: email },
-      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+      relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
@@ -93,7 +89,7 @@ export default class UserService {
   private async getUserById(identifier: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { id: identifier },
-      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+      relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
@@ -134,8 +130,8 @@ export default class UserService {
         status_code: HttpStatus.NOT_FOUND,
       });
     }
-
-    if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
+    // TODO: CHECK IF USER IS AN ADMIN
+    if (currentUser.id !== userId) {
       throw new ForbiddenException({
         error: 'Forbidden',
         message: 'You are not authorized to update this user',
@@ -234,6 +230,34 @@ export default class UserService {
     };
   }
 
+  async softDeleteUser(userId: string, authenticatedUserId: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.id !== authenticatedUserId) {
+      throw new CustomHttpException('You are not authorized to delete this user', HttpStatus.UNAUTHORIZED);
+    }
+
+    await this.userRepository.softDelete(userId);
+
+    return {
+      status: 'success',
+      message: 'Deletion in progress',
+    };
+  }
+
+  // async getUserStatistics(currentUser: UserPayload): Promise<any> {
+  // if (currentUser.user_type !== UserType.SUPER_ADMIN) {
+  //   throw new ForbiddenException({
+  //     error: 'Forbidden',
+  //     message: 'You are not authorized to access user statistics',
+  //   });
+  // }
   async updateUserStatus(userId: string, status: string) {
     const keepColumns = ['id', 'created_at', 'updated_at', 'first_name', 'last_name', 'email', 'status'];
     const user = await this.userRepository.findOne({
