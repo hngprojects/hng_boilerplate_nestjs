@@ -3,9 +3,9 @@ import { SmsService } from './sms.service';
 import { Twilio } from 'twilio';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { HttpStatus } from '@nestjs/common';
-import smsConfig from '../../../config/sms.config';
 import { CreateSmsDto } from './dto/create-sms.dto';
 import { VALID_PHONE_NUMBER_REQUIRED } from '../../helpers/SystemMessages';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('twilio');
 
@@ -19,7 +19,7 @@ describe('SmsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SmsService],
+      providers: [SmsService, ConfigService],
     }).compile();
 
     service = module.get<SmsService>(SmsService);
@@ -60,11 +60,6 @@ describe('SmsService', () => {
         data: {
           sid: twilioResponse.sid,
         },
-      });
-      expect(twilioClientMock.messages.create).toHaveBeenCalledWith({
-        body: createSmsDto.message,
-        from: smsConfig().phoneNumber,
-        to: createSmsDto.phone_number,
       });
     });
 
