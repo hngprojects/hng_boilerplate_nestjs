@@ -18,7 +18,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
-import { OrganisationMember } from '../entities/org-members.entity';
 import { organisationMembersMocks } from './mocks/organisation-members.mock';
 import { AddMemberDto } from '../dto/add-member.dto';
 import { OrganisationRole } from '../../../modules/organisation-role/entities/organisation-role.entity';
