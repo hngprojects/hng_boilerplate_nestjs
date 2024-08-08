@@ -118,7 +118,7 @@ describe('OrganisationsService', () => {
 
       const result = await service.create(createOrganisationDto, userId);
 
-      expect(result).toEqual(
+      expect(result.data).toEqual(
         expect.objectContaining({
           id: 'org-id',
           name: 'Test Org',
