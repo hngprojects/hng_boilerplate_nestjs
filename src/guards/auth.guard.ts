@@ -28,6 +28,7 @@ export class AuthGuard implements CanActivate {
     }
 
     if (!token) {
+      console.log('no token');
       throw new CustomHttpException(SYS_MSG.UNAUTHENTICATED_MESSAGE, HttpStatus.UNAUTHORIZED);
     }
 

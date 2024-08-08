@@ -2,7 +2,7 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Permissions } from '../../permissions/entities/permissions.entity';
 
-@Entity({ name: 'defaultRole' })
+@Entity({ name: 'roles' })
 export class Role extends AbstractBaseEntity {
   @Column()
   name: string;

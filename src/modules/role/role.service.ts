@@ -12,7 +12,7 @@ import { Permissions } from '../permissions/entities/permissions.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationUserRole } from './entities/organisation-user-role.entity';
-import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
+import { AttachPermissionsDto, UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { Role } from './entities/role.entity';
 import {
   EXISTING_ROLE,
@@ -53,6 +53,35 @@ export class RoleService {
 
     return role;
   }
+
+  async attachRoletoPermissions(payload: AttachPermissionsDto) {
+    const roleExists = await this.rolesRepository.findOne({ where: { id: payload.roleId } });
+    if (!roleExists) {
+      throw new CustomHttpException('Invalid Role', HttpStatus.BAD_REQUEST);
+    }
+
+    return await this.updateRolePermissions({ roleId: payload.roleId, permissions: payload.permissions });
+  }
+
+  // async updateRoleWithPermissions({role, permissions}:{role: Role, permissions: string[]}) {
+
+  //   // const role = await this.rolesRepository.find();
+  //   const roleWithPermissions = await this.updateRolePermissions({
+  //     roleId: role.id,
+  //     permissions: permissions_ids,
+  //   });
+
+  //   return {
+  //     status_code: HttpStatus.CREATED,
+  //     message: ROLE_CREATED_SUCCESSFULLY,
+  //     data: {
+  //       id: roleWithPermissions.id,
+  //       name: roleWithPermissions.name,
+  //       description: roleWithPermissions.description || '',
+  //       permissions: roleWithPermissions.permissions.map(permission => permission.title),
+  //     },
+  //   };
+  // }
 
   async createRoleWithPermissions(createRoleDto: CreateRoleWithPermissionDto) {
     const role = await this.createRole(createRoleDto.rolePayload);
@@ -140,8 +169,13 @@ export class RoleService {
     if (!role) {
       throw new CustomHttpException(RESOURCE_NOT_FOUND('Role'), HttpStatus.NOT_FOUND);
     }
+    let currentRolePermissions;
+    if (role.permissions.length) {
+      currentRolePermissions = role.permissions;
+    } else {
+      currentRolePermissions = [];
+    }
 
-    const currentRolePermissions = role.permissions;
     const newPermissions: Permissions[] = [];
     for (let permission of permissions) {
       const permissionInstance = await this.permissionRepository.findOne({ where: { id: permission } });
@@ -151,13 +185,13 @@ export class RoleService {
     const updatedPermissions = [...currentRolePermissions, ...newPermissions];
     role.permissions = updatedPermissions;
 
-    if (!role) {
-      throw new NotFoundException({
-        status_code: HttpStatus.NOT_FOUND,
-        error: 'Role not found',
-        message: `The role with ID ${roleId} does not exist`,
-      });
-    }
+    // if (!role) {
+    //   throw new NotFoundException({
+    //     status_code: HttpStatus.NOT_FOUND,
+    //     error: 'Role not found',
+    //     message: `The role with ID ${roleId} does not exist`,
+    //   });
+    // }
 
     await this.rolesRepository.save(role);
     return role;
