@@ -2,7 +2,7 @@ name: PR Deploy
 on:
   pull_request_target:
     branches:
-      - dev
+      - dev 
 
 jobs:
   deploy-pr-for-testing:
