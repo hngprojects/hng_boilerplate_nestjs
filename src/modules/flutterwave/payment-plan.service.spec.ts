@@ -73,8 +73,15 @@ describe('PaymentPlanService', () => {
       amount: 10000,
       duration: 12,
       interval: 'monthly',
-      description: '',
-      features: '',
+      description: 'This is a basic plan',
+      features: 'Default plan',
+    };
+
+    const paymentPlan = {
+      name: 'Basic Plan',
+      amount: 10000,
+      duration: 12,
+      interval: 'monthly',
     };
 
     const result = await service.create(createPaymentPlanDto);
@@ -86,7 +93,7 @@ describe('PaymentPlanService', () => {
         paymentPlan: paymentPlanResponse.data.data,
       },
     });
-    expect(httpService.post).toHaveBeenCalledWith('mock-base-url/payment-plans', createPaymentPlanDto, {
+    expect(httpService.post).toHaveBeenCalledWith('mock-base-url/payment-plans', paymentPlan, {
       headers: service['headers'],
     });
     expect(paymentPlanRepo.create).toHaveBeenCalledWith(createPaymentPlanDto);
