@@ -11,7 +11,11 @@ import { UserPayload } from '../interfaces/user-payload.interface';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
 import UserService from '../user.service';
+import { mockUser } from './mocks/user.mock';
 import exp from 'constants';
+import { PassThrough } from 'stream';
+import { Response } from 'express';
+import { FileFormat } from '../dto/user-data-export.dto';
 
 describe('UserService', () => {
   let service: UserService;
@@ -24,6 +28,12 @@ describe('UserService', () => {
     findAndCount: jest.fn(),
     count: jest.fn(),
     softDelete: jest.fn(),
+  };
+
+  const mockResponse: Partial<Response> = {
+    setHeader: jest.fn().mockReturnThis(),
+    pipe: jest.fn(),
+    end: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -537,6 +547,50 @@ describe('UserService', () => {
     });
   });
 
+  describe('userDataExport', () => {
+    it('should return JSON data when the requested format is JSON', async () => {
+      const mockStream = new PassThrough();
+      const result: Buffer[] = []; // Use Buffer[] to handle binary data chunks
+
+      const mockJsonData = { user: { id: 'mockUserId', first_name: 'John', last_name: 'Doe' } };
+
+      mockUserRepository.findOne.mockResolvedValue(mockJsonData.user);
+
+      const streamableFile = await service.exportUserDataAsJsonOrExcelFile(
+        'json' as FileFormat.JSON,
+        mockJsonData.user.id,
+        mockResponse as Response
+      );
+
+      streamableFile.getStream().pipe(mockStream);
+
+      mockStream.on('data', chunk => {
+        result.push(chunk);
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        mockStream.on('end', () => {
+          try {
+            const parsedResult = JSON.parse(Buffer.concat(result).toString());
+            expect(parsedResult).toEqual(mockJsonData);
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        });
+
+        mockStream.on('error', err => reject(err));
+      });
+
+      expect(mockResponse.setHeader).toHaveBeenNthCalledWith(
+        1,
+        'Content-Disposition',
+        `attachment; filename="${mockJsonData.user.id}-data.json"`
+      );
+
+      expect(mockResponse.setHeader).toHaveBeenNthCalledWith(2, 'Content-Type', 'application/json');
+    });
+  });
   describe('softDeleteUser', () => {
     it('should soft delete a user', async () => {
       const userId = '1';
