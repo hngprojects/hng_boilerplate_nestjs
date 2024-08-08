@@ -5,10 +5,13 @@ import { Job } from '../../../modules/jobs/entities/job.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 import { Notification } from '../../../modules/notifications/entities/notifications.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
+import { Blog } from '../../blogs/entities/blog.entity';
+import { Comment } from '../../comments/entities/comments.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
-import { Blog } from '../../blogs/entities/blog.entity';
+import { Cart } from '../../revenue/entities/cart.entity';
+import { Order } from '../../revenue/entities/order.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -81,7 +84,7 @@ export class User extends AbstractBaseEntity {
   organisationMembers: OrganisationMember[];
 
   @OneToMany(() => Blog, blog => blog.author)
-  blogs: Blog[];
+  blogs?: Blog[];
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -94,4 +97,13 @@ export class User extends AbstractBaseEntity {
 
   @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
   notification_settings: NotificationSettings[];
+
+  @OneToMany(() => Comment, comment => comment.user)
+  comments?: Comment[];
+
+  @OneToMany(() => Order, order => order.user)
+  orders?: Order[];
+
+  @OneToMany(() => Cart, cart => cart.user)
+  cart: Cart[];
 }
