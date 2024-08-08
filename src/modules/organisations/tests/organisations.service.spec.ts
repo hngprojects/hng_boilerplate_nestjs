@@ -123,7 +123,6 @@ describe('OrganisationsService', () => {
           id: 'org-id',
           name: 'Test Org',
           email: 'test@example.com',
-          owner_id: 'user-id', // Matching the owner_id instead of nested owner object
         })
       );
     });
