@@ -1,4 +1,17 @@
-import { Body, Controller, Post, Req, Get, Param, DefaultValuePipe, Query, ParseIntPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Req,
+  Get,
+  Param,
+  DefaultValuePipe,
+  Query,
+  ParseIntPipe,
+  Delete,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
 import UserService from '../user/user.service';
@@ -10,6 +23,7 @@ import {
   GetTestimonials400ErrorResponseDto,
   GetTestimonials404ErrorResponseDto,
 } from './dto/get-testimonials.dto';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Testimonials')
@@ -67,5 +81,17 @@ export class TestimonialsController {
     @Query('page_size', new DefaultValuePipe(3), ParseIntPipe) page_size: number
   ) {
     return this.testimonialsService.getAllTestimonials(userId, page, page_size);
+  }
+
+  @Delete(':id')
+  @UseGuards(SuperAdminGuard)
+  @ApiOperation({ summary: 'Delete a Testimonial' })
+  @ApiResponse({ status: 200, description: 'Testimonial deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Testimonial not found' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async deleteTestimonial(@Param('id') id: string) {
+    return this.testimonialsService.deleteTestimonial(id);
   }
 }
