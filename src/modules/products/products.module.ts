@@ -8,13 +8,26 @@ import { Order } from '../revenue/entities/order.entity';
 import { User } from '../user/entities/user.entity';
 import { UserModule } from '../user/user.module';
 import { ProductVariant } from './entities/product-variant.entity';
+import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
+import { Role } from '../role/entities/role.entity';
 import { Product } from './entities/product.entity';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, Organisation, ProductVariant, Comment, User, Order, OrderItem, Cart]),
+    TypeOrmModule.forFeature([
+      Product,
+      Organisation,
+      ProductVariant,
+      User,
+      OrganisationUserRole,
+      Role,
+      Comment,
+      Order,
+      OrderItem,
+      Cart,
+    ]),
     UserModule,
   ],
   controllers: [ProductsController],
