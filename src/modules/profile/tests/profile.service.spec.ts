@@ -3,9 +3,10 @@ import { ProfileService } from '../profile.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Profile } from '../entities/profile.entity';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { User } from '../../user/entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
+import { DeactivateProfileDto } from '../dto/deactivate-profile.dto';
 
 describe('ProfileService', () => {
   let service: ProfileService;
@@ -35,7 +36,7 @@ describe('ProfileService', () => {
   describe('findOneProfile', () => {
     it('should return profile data if user and profile are found', async () => {
       const userId = 'some-uuid';
-      const user = { id: userId, profile: { id: 'profile-uuid', user_id: userId } } as any;
+      const user = { id: userId, profile: { id: 'profile-uuid', user_id: userId, deactivated: false } } as any;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
 
@@ -76,7 +77,7 @@ describe('ProfileService', () => {
     it('should update and return the profile successfully', async () => {
       const userId = '1';
       const updateProfileDto: UpdateProfileDto = { bio: 'Updated bio' };
-      const user = { id: userId, profile: { id: 'profile-uuid', bio: 'Old bio' } } as any;
+      const user = { id: userId, profile: { id: 'profile-uuid', bio: 'Old bio', deactivated: false } } as any;
       const updatedProfile = { ...user.profile, ...updateProfileDto };
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
@@ -115,7 +116,7 @@ describe('ProfileService', () => {
     it('should throw InternalServerErrorException on other errors', async () => {
       const userId = '1';
       const updateProfileDto: UpdateProfileDto = { bio: 'Updated bio' };
-      const user = { id: userId, profile: { id: 'profile-uuid', bio: 'Old bio' } } as any;
+      const user = { id: userId, profile: { id: 'profile-uuid', bio: 'Old bio', deactivated: false } } as any;
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(profileRepository, 'update').mockRejectedValue(new Error('Something went wrong'));
@@ -124,6 +125,86 @@ describe('ProfileService', () => {
     });
   });
 
+  describe('deactivateProfile', () => {
+    it('should deactivate and return the profile successfully', async () => {
+      const userId = 'some-uuid';
+      const deactivateProfileDto: DeactivateProfileDto = {
+        reason: 'No longer needed',
+        confirmation: false,
+      };
+      const user = { id: userId, profile: { id: 'profile-uuid', deactivated: false } } as any;
+      const updatedProfile = { ...user.profile, deactivated: true, deactivation_reason: deactivateProfileDto.reason };
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'save').mockResolvedValue(updatedProfile);
+
+      const result = await service.deactivateProfile(userId, deactivateProfileDto);
+
+      expect(result).toEqual(updatedProfile);
+      expect(profileRepository.save).toHaveBeenCalledWith({
+        ...user.profile,
+        deactivated: true,
+        deactivation_reason: deactivateProfileDto.reason,
+      });
+    });
+
+    it('should throw NotFoundException if user is not found', async () => {
+      const userId = 'some-uuid';
+      const deactivateProfileDto: DeactivateProfileDto = {
+        reason: 'No longer needed',
+        confirmation: false,
+      };
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.deactivateProfile(userId, deactivateProfileDto)).rejects.toThrow(NotFoundException);
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
+    });
+
+    it('should throw NotFoundException if profile is not found', async () => {
+      const userId = 'some-uuid';
+      const deactivateProfileDto: DeactivateProfileDto = {
+        reason: 'No longer needed',
+        confirmation: false,
+      };
+      const user = { id: userId, profile: null } as any;
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+
+      await expect(service.deactivateProfile(userId, deactivateProfileDto)).rejects.toThrow(NotFoundException);
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
+    });
+
+    it('should throw UnauthorizedException if profile is already deactivated', async () => {
+      const userId = 'some-uuid';
+      const deactivateProfileDto: DeactivateProfileDto = {
+        reason: 'No longer needed',
+        confirmation: false,
+      };
+      const user = { id: userId, profile: { id: 'profile-uuid', deactivated: true } } as any;
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+
+      await expect(service.deactivateProfile(userId, deactivateProfileDto)).rejects.toThrow(UnauthorizedException);
+      expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId }, relations: ['profile'] });
+    });
+
+    it('should throw InternalServerErrorException on unexpected errors', async () => {
+      const userId = 'some-uuid';
+      const deactivateProfileDto: DeactivateProfileDto = {
+        reason: 'No longer needed',
+        confirmation: false,
+      };
+      const user = { id: userId, profile: { id: 'profile-uuid', deactivated: false } } as any;
+
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(profileRepository, 'save').mockRejectedValue(new Error('Unexpected error'));
+
+      await expect(service.deactivateProfile(userId, deactivateProfileDto)).rejects.toThrow(
+        InternalServerErrorException
+      );
+    });
+  });
   describe('deleteProfile', () => {
     it('should throw NotFoundException if user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);

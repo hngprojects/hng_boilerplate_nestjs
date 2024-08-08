@@ -1,9 +1,15 @@
-import { profile } from 'console';
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
+import { DeactivateProfileDto } from './dto/deactivate-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
@@ -15,17 +21,12 @@ export class ProfileService {
 
   async findOneProfile(userId: string) {
     try {
-      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      const userProfile = await this.userRepository.findOne({
-        where: { id: userId },
-        relations: ['profile'],
-      });
-
-      const profile = userProfile.profile;
+      const profile = user.profile;
       if (!profile) {
         throw new NotFoundException('Profile not found');
       }
@@ -37,7 +38,7 @@ export class ProfileService {
 
       return responseData;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (error instanceof NotFoundException) {
         throw error;
       }
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);
@@ -67,7 +68,36 @@ export class ProfileService {
 
       return responseData;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Internal server error: ${error.message}`);
+    }
+  }
+
+  async deactivateProfile(userId: string, deactivateProfileDto: DeactivateProfileDto): Promise<Profile> {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['profile'] });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const profile = user.profile;
+      if (!profile) {
+        throw new NotFoundException('Profile not found');
+      }
+
+      if (profile.deactivated) {
+        throw new UnauthorizedException('Profile already deactivated');
+      }
+
+      profile.deactivated = true;
+      profile.deactivation_reason = deactivateProfileDto.reason || 'No reason provided';
+      await this.profileRepository.save(profile);
+
+      return profile;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof UnauthorizedException) {
         throw error;
       }
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);

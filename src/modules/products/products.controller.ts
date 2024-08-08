@@ -1,5 +1,14 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards, Query, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+  ApiQuery,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
@@ -117,5 +126,17 @@ export class ProductsController {
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async getProductStock(@Param('productId') productId: string) {
     return this.productsService.getProductStock(productId);
+  }
+
+  @UseGuards(OwnershipGuard)
+  @Get('')
+  @ApiOperation({ summary: 'Gets all products' })
+  @ApiParam({ name: 'id', description: 'Organisation ID', example: '12345' })
+  @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
+  @ApiResponse({ status: 204, description: 'No products found' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getAllProducts(@Param('id') id: string, @Query('page') page: number = 1, @Query('limit') limit: number = 10) {
+    return this.productsService.getAllProducts(id, page, limit);
   }
 }

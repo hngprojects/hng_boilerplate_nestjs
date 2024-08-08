@@ -13,6 +13,8 @@ export const profileMock: Profile = {
   region: 'US',
   timezones: 'America/New_York',
   profile_pic_url: '',
+  deactivated: false,
+  deactivation_reason: 'none',
   created_at: new Date(),
   updated_at: new Date(),
 };
