@@ -41,6 +41,7 @@ import { TeamsModule } from './modules/teams/teams.module';
 import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { RevenueModule } from './modules/revenue/revenue.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -154,6 +155,7 @@ import { join } from 'path';
     FlutterwaveModule,
     BlogModule,
     SubscriptionsModule,
+    RevenueModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'uploads'),
       serveRoot: '/uploads',

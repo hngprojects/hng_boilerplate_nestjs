@@ -8,11 +8,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailController } from './email.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../user/entities/user.entity';
 
 @Module({
   providers: [EmailService, QueueService, EmailQueueConsumer],
   exports: [EmailService, QueueService],
   imports: [
+    TypeOrmModule.forFeature([User]),
     BullModule.registerQueueAsync({
       name: 'emailSending',
     }),
@@ -31,7 +34,7 @@ import { EmailController } from './email.controller';
           from: `"Team Remote Bingo" <${configService.get<string>('SMTP_USER')}>`,
         },
         template: {
-          dir: process.cwd() + '/src/modules/email/templates',
+          dir: process.cwd() + '/src/modules/email/hng-templates',
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
