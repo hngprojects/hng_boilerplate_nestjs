@@ -7,8 +7,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { DashboardService } from './dashboard.service';
+import { GetMoMStatisticsDto } from './dto/get-mom-statistics.dto';
+import { SalesStatisticsDto } from './dto/get-sales-statistics.dto';
+import { GetStatisticsDto } from './dto/get-statistics.dto';
 
-@ApiTags('Dashboard')
+@ApiTags('Admin Dashboard')
 @Controller()
 @ApiBearerAuth()
 export class DashboardController {
@@ -16,22 +19,34 @@ export class DashboardController {
 
   @Get('statistics')
   @ApiOkResponse({
-    description: 'Revenue Fetched',
-    schema: {
-      properties: {
-        message: { type: 'string' },
-        data: {
-          properties: {
-            totalRevenueCurrentMonth: { type: 'number' },
-            revenuePercentChange: { type: 'string' },
-          },
-        },
-      },
-    },
+    description: 'Admin Statistics Fetched',
+    type: GetStatisticsDto,
   })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  getStatistics(): Promise<any> {
+  getStatistics(): Promise<GetStatisticsDto> {
     return this.dashDashboardService.getStatistics();
+  }
+
+  @Get('analytics')
+  @ApiOkResponse({
+    description: 'Admin Analytics Fetched',
+    type: GetMoMStatisticsDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async getMoMRevenue() {
+    return this.dashDashboardService.getMoMRevenue();
+  }
+
+  @Get('sales')
+  @ApiOkResponse({
+    description: 'Admin Sales Data Fetch LogicIn Progress',
+    type: SalesStatisticsDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async getSales(): Promise<{ message: string }> {
+    return this.dashDashboardService.getSales();
   }
 }
