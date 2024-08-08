@@ -207,4 +207,88 @@ describe('ProductsService', () => {
       await expect(service.getProductStock(productId)).rejects.toThrow(new NotFoundException('Product not found'));
     });
   });
+
+  describe('getAllProducts', () => {
+    it('should return all products with pagination', async () => {
+      const queryBuilderMock = {
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]),
+        getCount: jest.fn().mockResolvedValue(1),
+      };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const result = await service.getAllProducts(orgMock.id, 1, 10);
+
+      expect(result).toEqual({
+        success: true,
+        statusCode: 200,
+        total: 1,
+        currentPage: 1,
+        totalPages: 1,
+        products: [productMock],
+      });
+    });
+
+    it('should return products for the specified page and limit', async () => {
+      const queryBuilderMock = {
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([productMock]),
+        getCount: jest.fn().mockResolvedValue(1),
+      };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const result = await service.getAllProducts(orgMock.id, 2, 5);
+
+      expect(queryBuilderMock.skip).toHaveBeenCalledWith(5);
+      expect(queryBuilderMock.take).toHaveBeenCalledWith(5);
+      expect(result).toEqual({
+        success: true,
+        statusCode: 200,
+        total: 1,
+        currentPage: 2,
+        totalPages: 1,
+        products: [productMock],
+      });
+    });
+
+    it('should return an empty array if no products are found', async () => {
+      const queryBuilderMock = {
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]),
+        getCount: jest.fn().mockResolvedValue(0),
+      };
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
+      jest.spyOn(productRepository, 'createQueryBuilder').mockReturnValue(queryBuilderMock as any);
+
+      const result = await service.getAllProducts(orgMock.id, 1, 10);
+
+      expect(result).toEqual({
+        success: true,
+        statusCode: 200,
+        total: 0,
+        currentPage: 1,
+        totalPages: 0,
+        products: [],
+      });
+    });
+
+    it('should throw an error if organisation is not found', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.getAllProducts('invalid-org-id', 1, 10)).rejects.toThrow(
+        new NotFoundException({ status: 'error', statusCode: 404, message: 'Organisation not found' })
+      );
+    });
+
+    it('should throw InternalServerErrorException if an unexpected error occurs', async () => {
+      jest.spyOn(organisationRepository, 'findOne').mockRejectedValue(new Error('Unexpected error'));
+
+      await expect(service.getAllProducts(orgMock.id, 1, 10)).rejects.toThrow(InternalServerErrorException);
+    });
+  });
 });

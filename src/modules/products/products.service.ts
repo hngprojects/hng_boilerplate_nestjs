@@ -215,4 +215,45 @@ export class ProductsService {
       },
     };
   }
+
+  async getAllProducts(orgId: string, page: number, limit: number) {
+    const org = await this.organisationRepository.findOne({ where: { id: orgId } });
+
+    if (!org) {
+      throw new InternalServerErrorException({
+        status: 'Unprocessable entity exception',
+        message: 'Invalid organisation credentials',
+        status_code: 422,
+      });
+    }
+
+    const [products, total] = await this.productRepository.findAndCount({
+      where: { org: { id: orgId } },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    if (!products.length) {
+      throw new NotFoundException({
+        status: 'No Content',
+        status_code: 204,
+        message: 'No products found',
+      });
+    }
+
+    const responseData = products.map(product => ({
+      name: product.name,
+      price: product.price,
+      category: product.category,
+    }));
+
+    return {
+      success: true,
+      statusCode: 200,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      products: responseData,
+    };
+  }
 }
