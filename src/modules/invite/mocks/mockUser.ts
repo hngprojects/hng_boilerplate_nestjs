@@ -28,4 +28,5 @@ export const mockUser: User = {
   notifications: [],
   blogs: [],
   comments: [],
+  cart: [],
 };

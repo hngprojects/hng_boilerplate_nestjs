@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Organisation } from '../../entities/organisations.entity';
-import { User } from '../../../user/entities/user.entity';
+import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
 import { Profile } from '../../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../entities/org-members.entity';
-import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
+import { Organisation } from '../../entities/organisations.entity';
 import { mockUser } from './user.mock';
 
 export enum UserType {
@@ -86,6 +85,7 @@ export const createMockOrganisation = (): Organisation => {
     organisationMembers: [orgMemberMock],
     blogs: [],
     comments: [],
+    cart: [],
   };
 
   return {
