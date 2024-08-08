@@ -106,4 +106,15 @@ export class TestimonialsService {
 
     return TestimonialResponseMapper.mapToEntity(testimonial);
   }
+  async deleteTestimonial(id: string) {
+    const testimonial = await this.testimonialRepository.findOne({ where: { id } });
+    if (!testimonial) {
+      throw new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND);
+    }
+    await this.testimonialRepository.remove(testimonial);
+    return {
+      message: 'Testimonial deleted successfully',
+      status_code: HttpStatus.OK,
+    };
+  }
 }
