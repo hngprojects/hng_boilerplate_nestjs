@@ -1,4 +1,4 @@
-import { ConflictException, HttpException, NotFoundException } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,13 +8,15 @@ import { Organisation } from '../../organisations/entities/organisations.entity'
 import { OrganisationRole } from '../entities/organisation-role.entity';
 import { OrganisationRoleService } from '../organisation-role.service';
 import { UpdateOrganisationRoleDto } from '../dto/update-organisation-role.dto';
+import { ORG_NOT_FOUND, ROLE_ALREADY_EXISTS, ROLE_NOT_FOUND } from '../../../helpers/SystemMessages';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
 
 describe('OrganisationRoleService', () => {
   let service: OrganisationRoleService;
   let rolesRepository: Repository<OrganisationRole>;
   let organisationRepository: Repository<Organisation>;
   let permissionRepository: Repository<Permissions>;
-  let defaultPermissionRepository: Repository<DefaultPermissions>;
+  let defaultPermissionsRepository: Repository<DefaultPermissions>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,6 +45,7 @@ describe('OrganisationRoleService', () => {
     rolesRepository = module.get<Repository<OrganisationRole>>(getRepositoryToken(OrganisationRole));
     organisationRepository = module.get<Repository<Organisation>>(getRepositoryToken(Organisation));
     permissionRepository = module.get<Repository<Permissions>>(getRepositoryToken(Permissions));
+    defaultPermissionsRepository = module.get<Repository<DefaultPermissions>>(getRepositoryToken(DefaultPermissions));
   });
 
   describe('createOrgRoles', () => {
@@ -57,7 +60,7 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(mockOrganisation as Organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
       jest
-        .spyOn(service['defaultPermissionsRepository'], 'find')
+        .spyOn(defaultPermissionsRepository, 'find')
         .mockResolvedValue(mockDefaultPermissions as DefaultPermissions[]);
       jest.spyOn(rolesRepository, 'create').mockReturnValue({ ...createRoleDto } as OrganisationRole);
       jest.spyOn(rolesRepository, 'save').mockResolvedValue(mockSavedRole as OrganisationRole);
@@ -78,14 +81,18 @@ describe('OrganisationRoleService', () => {
     it('should throw NotFoundException when organisation is not found', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.createOrgRoles({ name: 'TestRole' }, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.createOrgRoles({ name: 'TestRole' }, 'nonexistent')).rejects.toThrow(
+        new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
 
     it('should throw ConflictException when role already exists', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: 'org123' } as Organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue({ id: 'existing' } as OrganisationRole);
 
-      await expect(service.createOrgRoles({ name: 'ExistingRole' }, 'org123')).rejects.toThrow(ConflictException);
+      await expect(service.createOrgRoles({ name: 'ExistingRole' }, 'org123')).rejects.toThrow(
+        new CustomHttpException(ROLE_ALREADY_EXISTS, HttpStatus.CONFLICT)
+      );
     });
   });
 
@@ -108,8 +115,11 @@ describe('OrganisationRoleService', () => {
       const organisationId = '1';
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.getAllRolesInOrg(organisationId)).rejects.toThrow(NotFoundException);
+      await expect(service.getAllRolesInOrg(organisationId)).rejects.toThrow(
+        new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
+
     it('should handle cases where roles are not available', async () => {
       const organisationId = '1';
 
@@ -146,14 +156,18 @@ describe('OrganisationRoleService', () => {
     it('should throw NotFoundException when organisation is not found', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findSingleRole('role123', 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findSingleRole('role123', 'nonexistent')).rejects.toThrow(
+        new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
 
     it('should throw NotFoundException when role is not found', async () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue({ id: 'org123' } as Organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findSingleRole('nonexistent', 'org123')).rejects.toThrow(NotFoundException);
+      await expect(service.findSingleRole('nonexistent', 'org123')).rejects.toThrow(
+        new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
   });
 
@@ -190,7 +204,9 @@ describe('OrganisationRoleService', () => {
 
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateRole(updateRoleDto, orgId, roleId)).rejects.toThrow(NotFoundException);
+      await expect(service.updateRole(updateRoleDto, orgId, roleId)).rejects.toThrow(
+        new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
 
     it('should throw NotFoundException if the role does not exist', async () => {
@@ -204,7 +220,9 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.updateRole(updateRoleDto, orgId, roleId)).rejects.toThrow(NotFoundException);
+      await expect(service.updateRole(updateRoleDto, orgId, roleId)).rejects.toThrow(
+        new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
   });
 
@@ -223,6 +241,7 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(role);
       jest.spyOn(rolesRepository, 'remove').mockResolvedValue(role);
+      jest.spyOn(permissionRepository, 'delete').mockResolvedValue(undefined);
 
       const result = await service.removeRole(orgId, roleId);
 
@@ -232,19 +251,18 @@ describe('OrganisationRoleService', () => {
       });
     });
 
-    it('should throw HttpException if the organisation does not exist', async () => {
+    it('should throw NotFoundException if the organisation does not exist', async () => {
       const orgId = 'non-existent-org-id';
       const roleId = 'role-id';
 
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(HttpException);
       await expect(service.removeRole(orgId, roleId)).rejects.toThrow(
-        `The organisation with ID ${orgId} does not exist`
+        new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND)
       );
     });
 
-    it('should throw HttpException if the role does not exist', async () => {
+    it('should throw NotFoundException if the role does not exist', async () => {
       const orgId = 'org-id';
       const roleId = 'non-existent-role-id';
 
@@ -254,8 +272,9 @@ describe('OrganisationRoleService', () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(organisation);
       jest.spyOn(rolesRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(HttpException);
-      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(`The role with ID ${roleId} does not exist`);
+      await expect(service.removeRole(orgId, roleId)).rejects.toThrow(
+        new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND)
+      );
     });
   });
 });
