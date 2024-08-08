@@ -4,8 +4,6 @@ import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BlogCategoryService } from './blog-category.service';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
 import { UpdateBlogCategoryDto } from './dto/update-blog-category.dto';
-import { User } from '../user/entities/user.entity';
-import { AuthGuard } from '../../guards/auth.guard';
 
 @ApiTags('Blog Categories')
 @Controller('blogs/categories')
