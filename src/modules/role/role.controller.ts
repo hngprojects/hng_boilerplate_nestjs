@@ -20,7 +20,7 @@ import {
   AttachPermissionsDto,
   UpdateOrganisationRoleDto,
 } from './dto/update-organisation-role.dto';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiTags('organisation Settings')
 // @UseGuards(OwnershipGuard)

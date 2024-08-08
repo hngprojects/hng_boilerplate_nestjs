@@ -27,7 +27,7 @@ import * as xlsx from 'xlsx';
 import * as path from 'path';
 import { Response } from 'express';
 import { FileFormat, UserDataExportDto } from './dto/user-data-export.dto';
-import { CustomHttpException } from '../../../src/helpers/custom-http-filter';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
 export default class UserService {

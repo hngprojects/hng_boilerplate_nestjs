@@ -16,7 +16,7 @@ import { AttachPermissionsDto, UpdateOrganisationRoleDto } from './dto/update-or
 import { Role } from './entities/role.entity';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { CreateRoleWithPermissionDto } from './dto/create-role-with-permission.dto';
-import { RESOURCE_NOT_FOUND, ROLE_CREATED_SUCCESSFULLY, ROLE_FETCHED_SUCCESSFULLY } from 'src/helpers/SystemMessages';
+import { RESOURCE_NOT_FOUND, ROLE_CREATED_SUCCESSFULLY, ROLE_FETCHED_SUCCESSFULLY } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class RoleService {
@@ -38,7 +38,7 @@ export class RoleService {
     const existingRole = await this.rolesRepository.findOne({ where: { name: createRoleOption.name } });
 
     if (existingRole) {
-      throw new CustomHttpException('Role exists', HttpStatus.CONFLICT);
+      throw new CustomHttpException('A role with this name already exists in the organisation', HttpStatus.CONFLICT);
     }
     const newRole = new Role();
     Object.assign(newRole, createRoleOption);
