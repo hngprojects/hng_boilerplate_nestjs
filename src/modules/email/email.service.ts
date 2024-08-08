@@ -1,14 +1,19 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { validateOrReject } from 'class-validator';
+import * as Handlebars from 'handlebars';
+import * as htmlValidator from 'html-validator';
+import * as fs from 'fs';
+import { promisify } from 'util';
+import * as path from 'path';
+import { MailerService } from '@nestjs-modules/mailer';
 import { MailInterface } from './interfaces/MailInterface';
 import QueueService from './queue.service';
 import { ArticleInterface } from './interface/article.interface';
-import { createTemplateDto, getTemplateDto } from './dto/email.dto';
+import { createTemplateDto, getTemplateDto, UpdateTemplateDto } from './dto/email.dto';
 import { IMessageInterface } from './interface/message.interface';
-import { promisify } from 'util';
-import path from 'path';
-import { createFile, deleteFile, getFile } from './email_storage.service';
-import fs from 'fs';
-import * as htmlValidator from 'html-validator';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { getFile, createFile, deleteFile } from '../../helpers/fileHelpers';
 
 @Injectable()
 export class EmailService {
@@ -24,7 +29,7 @@ export class EmailService {
       },
     };
 
-    this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
+    await this.mailerService.sendMail({ variant: 'welcome', mail: mailPayload });
   }
 
   async sendUserEmailConfirmationOtp(email: string, otp: string) {
@@ -36,7 +41,7 @@ export class EmailService {
       },
     };
 
-    this.mailerService.sendMail({ variant: 'register-otp', mail: mailPayload });
+    await this.mailerService.sendMail({ variant: 'register-otp', mail: mailPayload });
   }
 
   async sendForgotPasswordMail(email: string, url: string, token: string) {
@@ -105,9 +110,7 @@ export class EmailService {
 
   async createTemplate(templateInfo: createTemplateDto) {
     try {
-      const html = Handlebars.compile(templateInfo.template)({});
-
-      const validationResult = await htmlValidator({ data: html });
+      const validationResult = await htmlValidator({ data: templateInfo.template });
 
       const filteredMessages = validationResult.messages.filter(
         message =>
@@ -130,7 +133,11 @@ export class EmailService {
       }
 
       if (response.status_code === HttpStatus.CREATED) {
-        await createFile('./src/modules/email/templates', `${templateInfo.templateName}.hbs`, html);
+        await createFile(
+          './src/modules/email/hng-templates',
+          `${templateInfo.templateName}.hbs`,
+          templateInfo.template
+        );
       }
 
       return response;
@@ -142,10 +149,50 @@ export class EmailService {
     }
   }
 
+  async updateTemplate(templateName: string, templateInfo: UpdateTemplateDto) {
+    const html = Handlebars.compile(templateInfo.template)({});
+
+    const validationResult = await htmlValidator({ data: html });
+
+    const filteredMessages = validationResult.messages.filter(
+      message =>
+        !(
+          (message.message.includes('Trailing slash on void elements has no effect') && message.type === 'info') ||
+          (message.message.includes('Consider adding a “lang” attribute') && message.subType === 'warning')
+        )
+    );
+
+    if (filteredMessages.length > 0) {
+      throw new CustomHttpException(
+        {
+          message: SYS_MSG.EMAIL_TEMPLATES.INVALID_HTML_FORMAT,
+          validation_errors: filteredMessages.map(msg => msg.message),
+        },
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const templatePath = `./src/modules/email/templates/${templateName}.hbs`;
+
+    if (!fs.existsSync(templatePath)) {
+      throw new CustomHttpException(SYS_MSG.EMAIL_TEMPLATES.TEMPLATE_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    await promisify(fs.writeFile)(templatePath, html, 'utf-8');
+
+    return {
+      status_code: HttpStatus.OK,
+      message: SYS_MSG.EMAIL_TEMPLATES.TEMPLATE_UPDATED_SUCCESSFULLY,
+      data: {
+        name: templateName,
+        content: html,
+      },
+    };
+  }
+
   async getTemplate(templateInfo: getTemplateDto) {
     try {
-      const template = await getFile(`./src/modules/email/templates/${templateInfo.templateName}.hbs`, 'utf-8');
-      console.log(template);
+      const template = await getFile(`./src/modules/email/hng-templates/${templateInfo.templateName}.hbs`, 'utf-8');
 
       return {
         status_code: HttpStatus.OK,
@@ -162,7 +209,7 @@ export class EmailService {
 
   async deleteTemplate(templateInfo: getTemplateDto) {
     try {
-      await deleteFile(`./src/modules/email/templates/${templateInfo.templateName}.hbs`);
+      await deleteFile(`./src/modules/email/hng-templates/${templateInfo.templateName}.hbs`);
       return {
         status_code: HttpStatus.OK,
         message: 'Template deleted successfully',
@@ -177,7 +224,7 @@ export class EmailService {
 
   async getAllTemplates() {
     try {
-      const templatesDirectory = './src/modules/email/templates';
+      const templatesDirectory = './src/modules/email/hng-templates';
       const files = await promisify(fs.readdir)(templatesDirectory);
 
       const templates = await Promise.all(
@@ -201,7 +248,6 @@ export class EmailService {
         templates: validTemplates,
       };
     } catch (error) {
-      console.log(error);
       return {
         status_code: HttpStatus.NOT_FOUND,
         message: 'Template not found',

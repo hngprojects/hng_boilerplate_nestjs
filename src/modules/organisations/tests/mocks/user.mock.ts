@@ -1,6 +1,5 @@
-import { orgMemberMock } from './organisation-member.mock';
-import { profileMock } from './profile.mock';
 import { UserType } from './organisation.mock';
+import { profileMock } from './profile.mock';
 
 export const mockUser = {
   id: 'user123',
@@ -10,6 +9,7 @@ export const mockUser = {
   last_name: 'Smith',
   email: 'john.smith@example.com',
   password: 'pass123',
+  status: 'Hello from the children of planet Earth',
   is_two_factor_enabled: false,
   two_factor_secret: 'some-secret',
   backup_codes: [],
@@ -20,7 +20,6 @@ export const mockUser = {
   attempts_left: 3,
   time_left: 3600,
   owned_organisations: [],
-  created_organisations: [],
   invites: [],
   testimonials: [],
   notifications: [],
@@ -30,6 +29,7 @@ export const mockUser = {
   is_2fa_enabled: false,
   products: [],
   profile: profileMock,
-  organisationMembers: [orgMemberMock],
   blogs: null,
+  comments: null,
+  cart: [],
 };
