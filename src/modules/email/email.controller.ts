@@ -4,14 +4,12 @@ import { EmailService } from './email.service';
 import { SendEmailDto, UpdateTemplateDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import {
-  CreateTemplateResponseDto,
-  UpdateTemplateResponseDto,
-  GetTemplateResponseDto,
-  DeleteTemplateResponseDto,
-  GetAllTemplatesResponseDto,
-  ErrorResponseDto,
-} from './dto/email-response.dto';
+import { GetTemplateResponseDto } from './dto/get-template-response.dto';
+import { CreateTemplateResponseDto } from './dto/create-template-response.dto';
+import { ErrorResponseDto } from './dto/error-response-dto';
+import { UpdateTemplateResponseDto } from './dto/update-template-response.dto';
+import { DeleteTemplateResponseDto } from './dto/delete-template-response.dto';
+import { GetAllTemplatesResponseDto } from './dto/get-all-template-response.dto';
 
 @ApiTags('Emails')
 @ApiBearerAuth()
