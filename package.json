@@ -32,7 +32,6 @@
     "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
-    "@img/sharp-linuxmusl-arm64v8": "^0.33.2",
     "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
     "@css-inline/css-inline": "^0.14.1",
     "@faker-js/faker": "^8.4.1",
