@@ -1,5 +1,5 @@
 import { Controller, Post, Body, UsePipes, ValidationPipe, Get, Put, Param, Delete, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FaqService } from './faq.service';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { Faq } from './entities/faq.entity';
@@ -29,7 +29,7 @@ export class FaqController {
     status: 500,
     description: 'Internal Server Error if an unexpected error occurs.',
   })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiBearerAuth()
   async create(@Body() createFaqDto: CreateFaqDto): Promise<ICreateFaqResponse> {
     const faq: IFaq = await this.faqService.create(createFaqDto);
     return {

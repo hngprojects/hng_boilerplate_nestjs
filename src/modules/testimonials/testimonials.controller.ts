@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   ParseUUIDPipe,
   HttpStatus,
+  Delete,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
@@ -104,5 +105,16 @@ export class TestimonialsController {
       message: 'Testimonial fetched successfully',
       data: testimonial,
     };
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a Testimonial' })
+  @ApiResponse({ status: 200, description: 'Testimonial deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Testimonial not found' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async deleteTestimonial(@Param('id') id: string) {
+    return this.testimonialsService.deleteTestimonial(id);
   }
 }

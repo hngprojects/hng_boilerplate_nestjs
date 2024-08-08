@@ -11,19 +11,24 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { RoleService } from './role.service';
-import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
+import {
+  AttachPermissionsApiBody,
+  AttachPermissionsDto,
+  UpdateOrganisationRoleDto,
+} from './dto/update-organisation-role.dto';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiTags('organisation Settings')
 // @UseGuards(OwnershipGuard)
-@ApiBearerAuth()
+// @ApiBearerAuth()
+@skipAuth()
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
-
   @Post('')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new role in an organisation' })
@@ -78,5 +83,20 @@ export class RoleController {
       status_code: 200,
       data,
     };
+  }
+
+  @Post('permissions')
+  @ApiOperation({ summary: 'attach permissions to a role' })
+  @ApiResponse({
+    status: 200,
+    description: 'The role has been successfully updated',
+  })
+  @ApiBody({ type: AttachPermissionsApiBody })
+  @ApiResponse({ status: 400, description: 'Invalid role ID format or input data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiResponse({ status: 404, description: 'Role not found' })
+  async attachPermissions(@Body() attachRoletoPermissionsDto: AttachPermissionsDto) {
+    return await this.roleService.attachRoletoPermissions(attachRoletoPermissionsDto);
   }
 }

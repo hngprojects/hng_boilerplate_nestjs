@@ -27,7 +27,7 @@ import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Products')
-@Controller('organizations')
+@Controller('organisations')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -42,7 +42,7 @@ export class ProductsController {
   @UseGuards(OwnershipGuard)
   @Post('/:orgId/products')
   @ApiOperation({ summary: 'Creates a new product' })
-  @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
+  @ApiParam({ name: 'orgId', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -131,6 +131,7 @@ export class ProductsController {
     return this.productsService.addCommentToProduct(productId, commentDto, user.sub);
   }
 
+  @UseGuards(OwnershipGuard)
   @Get(':productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })

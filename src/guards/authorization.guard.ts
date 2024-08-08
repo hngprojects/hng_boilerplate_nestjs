@@ -26,9 +26,19 @@ export class OwnershipGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const userId = request.user.sub;
-    const user = this.userRepository.findOne({ where: { id: userId } });
-    const organisationId = request.params.id;
+    const organisationId = request.params.orgId || request.query.org_id;
 
+    const adminUserRole = await this.organisationMembersRole.find({ where: { userId }, relations: ['role'] });
+    if (adminUserRole.length) {
+      const roles = adminUserRole.map(instance => instance.role.name);
+      if (roles.includes('super-admin')) {
+        return true;
+      }
+    }
+
+    if (!organisationId) {
+      throw new CustomHttpException('Invalid Organisation', HttpStatus.BAD_REQUEST);
+    }
     const organisation = await this.organisationRepository.findOne({
       where: { id: organisationId },
       relations: ['owner'],
@@ -37,15 +47,6 @@ export class OwnershipGuard implements CanActivate {
     if (!organisation) {
       throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-
-    const userRole = (
-      await this.organisationMembersRole.findOne({
-        where: { userId, organisationId: organisation.id },
-        relations: ['role'],
-      })
-    ).role;
-    const isSuperAdmin = userRole.name === 'super-admin';
-    if (isSuperAdmin) return true;
 
     if (organisation.owner.id === userId) {
       return true;
