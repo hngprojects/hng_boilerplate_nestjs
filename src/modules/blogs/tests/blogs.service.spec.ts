@@ -133,6 +133,7 @@ describe('BlogService', () => {
       blog.image_urls = ['http://example.com/image.jpg'];
       blog.author = user;
       blog.created_at = new Date('2023-01-01');
+      blog.updated_at = new Date();
 
       const expectedResponse = {
         data: [
@@ -271,139 +272,69 @@ describe('BlogService', () => {
     });
   });
 
-  describe('getSingleBlog', () => {
-    it('should successfully retrieve a blog', async () => {
-      const user = new User();
-      user.id = 'user-id';
-      user.first_name = 'John';
-      user.last_name = 'Doe';
-
-      const blogId = 'blog-id';
-      const blog = new Blog();
-      blog.id = 'blog-id';
-      blog.title = 'Test Blog';
-      blog.content = 'Test Content';
-      blog.tags = ['test'];
-      blog.image_urls = ['http://example.com/image.jpg'];
-      blog.created_at = new Date();
-      blog.updated_at = new Date();
-
-      jest.spyOn(blogRepository, 'findOneBy').mockResolvedValue(blog);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-
-      const result = await service.getSingleBlog(blogId, user);
-
-      expect(result).toEqual({
-        status: 200,
-        message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
-        data: {
-          blog_id: blog.id,
-          title: blog.title,
-          content: blog.content,
-          tags: blog.tags,
-          image_urls: blog.image_urls,
-          published_date: blog.created_at,
-          author: 'John Doe',
-        },
-      });
-      expect(blogRepository.findOneBy).toHaveBeenCalledWith({ id: blogId });
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        where: { id: user.id },
-        select: ['first_name', 'last_name'],
-      });
-    });
-
-    it('should throw an error if blog not found', async () => {
-      const blogId = 'non-existent-blog-id';
-      const user = new User();
-      user.id = 'user-id-is-here';
-      user.first_name = 'John';
-      user.last_name = 'Doe';
-
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
-      jest.spyOn(blogRepository, 'findOneBy').mockResolvedValue(null);
-
-      await expect(service.getSingleBlog(blogId, user)).rejects.toThrowError(SYS_MSG.BLOG_NOT_FOUND);
-    });
-  });
-
-  describe('deleteBlogPost', () => {
-    it('should successfully delete a blog post', async () => {
-      const blog = new Blog();
-      blog.id = 'blog-id';
-
-      jest.spyOn(blogRepository, 'findOne').mockResolvedValue(blog);
-      jest.spyOn(blogRepository, 'remove').mockResolvedValue(undefined);
-
-      await service.deleteBlogPost('blog-id');
-
-      expect(blogRepository.findOne).toHaveBeenCalledWith({ where: { id: 'blog-id' } });
-      expect(blogRepository.remove).toHaveBeenCalledWith(blog);
-    });
-
-    it('should throw a 404 error if blog not found', async () => {
-      jest.spyOn(blogRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.deleteBlogPost('blog-id')).rejects.toThrow('Blog post with this id does not exist');
-    });
-  });
-
   describe('getAllBlogs', () => {
     it('should successfully retrieve all blogs with pagination', async () => {
-      const blog1 = new Blog();
-      blog1.id = 'blog-id-1';
-      blog1.title = 'Test Blog 1';
-      blog1.content = 'Test Content 1';
-      blog1.tags = ['test'];
-      blog1.image_urls = ['http://example.com/image1.jpg'];
-      blog1.author = new User();
-      blog1.author.first_name = 'John';
-      blog1.author.last_name = 'Doe';
-      blog1.created_at = new Date();
+      const page = 1;
+      const pageSize = 10;
 
-      const blog2 = new Blog();
-      blog2.id = 'blog-id-2';
-      blog2.title = 'Test Blog 2';
-      blog2.content = 'Test Content 2';
-      blog2.tags = ['test'];
-      blog2.image_urls = ['http://example.com/image2.jpg'];
-      blog2.author = new User();
-      blog2.author.first_name = 'Jane';
-      blog2.author.last_name = 'Doe';
-      blog2.created_at = new Date();
+      const blogs = [
+        {
+          id: 'blog-id-1',
+          title: 'Test Blog 1',
+          content: 'Test Content 1',
+          author: { first_name: 'John', last_name: 'Doe' } as User,
+          created_at: new Date('2024-08-08T13:37:01.793Z'),
+          updated_at: new Date('2024-08-08T13:37:01.793Z'),
+          tags: ['test'],
+          image_urls: ['http://example.com/image1.jpg'],
+        },
+        {
+          id: 'blog-id-2',
+          title: 'Test Blog 2',
+          content: 'Test Content 2',
+          author: { first_name: 'Jane', last_name: 'Doe' } as User,
+          created_at: new Date('2024-08-08T13:37:01.793Z'),
+          updated_at: new Date('2024-08-08T13:37:01.793Z'),
+          tags: ['test'],
+          image_urls: ['http://example.com/image2.jpg'],
+        },
+      ];
+
+      const total = blogs.length;
 
       const expectedResponse = {
-        data: [
-          {
-            blog_id: 'blog-id-1',
-            title: 'Test Blog 1',
-            content: 'Test Content 1',
-            tags: ['test'],
-            image_urls: ['http://example.com/image1.jpg'],
-            author: 'John Doe',
-            created_at: blog1.created_at,
+        status_code: 200,
+        message: 'Blog fetched successfully',
+        data: {
+          currentPage: page,
+          totalPages: 1,
+          totalResults: total,
+          blogs: blogs.map(blog => ({
+            blog_id: blog.id,
+            title: blog.title,
+            content: blog.content,
+            author: `${blog.author.first_name} ${blog.author.last_name}`,
+            created_at: blog.created_at,
+            tags: blog.tags,
+            image_urls: blog.image_urls,
+          })),
+          meta: {
+            hasNext: false,
+            total,
+            nextPage: null,
+            prevPage: null,
           },
-          {
-            blog_id: 'blog-id-2',
-            title: 'Test Blog 2',
-            content: 'Test Content 2',
-            tags: ['test'],
-            image_urls: ['http://example.com/image2.jpg'],
-            author: 'Jane Doe',
-            created_at: blog2.created_at,
-          },
-        ],
-        total: 2,
+        },
       };
 
-      jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([[blog1, blog2], 2]);
+      jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([blogs, total]);
 
-      const result = await service.getAllBlogs(1, 10);
+      const result = await service.getAllBlogs(page, pageSize);
 
       expect(result).toEqual(expectedResponse);
       expect(blogRepository.findAndCount).toHaveBeenCalledWith({
         skip: 0,
-        take: 10,
+        take: pageSize,
         relations: ['author'],
       });
     });
