@@ -5,11 +5,11 @@ import { Job } from '../../../modules/jobs/entities/job.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 import { Notification } from '../../../modules/notifications/entities/notifications.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
+import { Blog } from '../../blogs/entities/blog.entity';
+import { Comment } from '../../comments/entities/comments.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
-import { Comment } from '../../comments/entities/comments.entity';
-import { Blog } from '../../blogs/entities/blog.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
