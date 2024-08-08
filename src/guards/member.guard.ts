@@ -25,40 +25,40 @@ export class MembershipGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const currentUserId = request.user.sub;
-    return true;
-    // const organisationId = request.params.org_id;
-    // const adminRole = await this.userRoleManager.findOne({
-    //   where: { name: 'member' },
-    //   relations: ['permissions'],
-    // });
-    // const requiredPermissions = adminRole.permissions.map(permission => permission.title);
 
-    // const organisation = await this.organisationRepository.findOne({
-    //   where: { id: organisationId },
-    //   relations: ['owner'],
-    // });
+    const organisationId = request.params.org_id;
+    const adminRole = await this.userRoleManager.findOne({
+      where: { name: 'member' },
+      relations: ['permissions'],
+    });
+    const requiredPermissions = adminRole.permissions.map(permission => permission.title);
 
-    // if (!organisation) {
-    //   throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
-    // }
+    const organisation = await this.organisationRepository.findOne({
+      where: { id: organisationId },
+      relations: ['owner'],
+    });
 
-    // if (organisation.owner.id === currentUserId) return true;
+    if (!organisation) {
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
 
-    // const userRole = (
-    //   await this.organisationMembersRole.findOne({
-    //     where: { organisationId: organisation.id, userId: currentUserId },
-    //     relations: ['role', 'role.permissions'],
-    //   })
-    // ).role;
+    if (organisation.owner.id === currentUserId) return true;
 
-    // const userHasPerms = userRole.permissions.some(permission => {
-    //   return requiredPermissions.includes(permission.title);
-    // });
+    const userRole = (
+      await this.organisationMembersRole.findOne({
+        where: { organisationId: organisation.id, userId: currentUserId },
+        relations: ['role', 'role.permissions'],
+      })
+    ).role;
 
-    // if (userHasPerms) {
-    //   return true;
-    // } else {
-    //   throw new CustomHttpException(SYS_MSG.FORBIDDEN_ACTION, HttpStatus.FORBIDDEN);
-    // }
+    const userHasPerms = userRole.permissions.some(permission => {
+      return requiredPermissions.includes(permission.title);
+    });
+
+    if (userHasPerms) {
+      return true;
+    } else {
+      throw new CustomHttpException(SYS_MSG.FORBIDDEN_ACTION, HttpStatus.FORBIDDEN);
+    }
   }
 }

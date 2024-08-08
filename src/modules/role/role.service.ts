@@ -154,38 +154,23 @@ export class RoleService {
 
   async updateRolePermissions({ roleId, permissions }: { roleId: string; permissions?: string[] }) {
     const role = await this.rolesRepository.findOne({
-      where: {
-        id: roleId,
-      },
+      where: { id: roleId },
       relations: ['permissions'],
     });
 
     if (!role) {
       throw new CustomHttpException(RESOURCE_NOT_FOUND('Role'), HttpStatus.NOT_FOUND);
     }
-    let currentRolePermissions;
-    if (role.permissions.length) {
-      currentRolePermissions = role.permissions;
-    } else {
-      currentRolePermissions = [];
-    }
 
     const newPermissions: Permissions[] = [];
     for (let permission of permissions) {
       const permissionInstance = await this.permissionRepository.findOne({ where: { id: permission } });
-      newPermissions.push(permissionInstance);
+      if (permissionInstance) {
+        newPermissions.push(permissionInstance);
+      }
     }
 
-    const updatedPermissions = [...currentRolePermissions, ...newPermissions];
-    role.permissions = updatedPermissions;
-
-    // if (!role) {
-    //   throw new NotFoundException({
-    //     status_code: HttpStatus.NOT_FOUND,
-    //     error: 'Role not found',
-    //     message: `The role with ID ${roleId} does not exist`,
-    //   });
-    // }
+    role.permissions = newPermissions;
 
     await this.rolesRepository.save(role);
     return role;
