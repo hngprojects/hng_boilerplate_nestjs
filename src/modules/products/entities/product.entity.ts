@@ -1,9 +1,9 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
-import { Cart } from '../../revenue/entities/cart.entity';
-import { OrderItem } from '../../revenue/entities/order-items.entity';
+import { Cart } from '../../dashboard/entities/cart.entity';
+import { OrderItem } from '../../dashboard/entities/order-items.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',
@@ -40,9 +40,6 @@ export class Product extends AbstractBaseEntity {
   @Column({ type: 'int', nullable: false, default: 0 })
   quantity: number;
 
-  @Column({ nullable: true, default: false })
-  is_deleted: boolean;
-
   @Column({
     type: 'enum',
     enum: ProductSizeType,
@@ -59,6 +56,9 @@ export class Product extends AbstractBaseEntity {
 
   @ManyToOne(() => Organisation, org => org.products)
   org: Organisation;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 
   @OneToMany(() => Comment, comment => comment.product)
   comments?: Comment[];

@@ -9,23 +9,23 @@ import {
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
+import { Cart } from '../../modules/dashboard/entities/cart.entity';
+import { OrderItem } from '../../modules/dashboard/entities/order-items.entity';
+import { Order } from '../../modules/dashboard/entities/order.entity';
+import { Transaction } from '../../modules/dashboard/entities/transaction.entity';
 import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
-import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
-import { DefaultPermissions } from '../../modules/permissions/entities/default-permissions.entity';
-import { PermissionCategory } from '../../modules/permissions/helpers/PermissionCategory';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
+import { DefaultPermissions } from '../../modules/permissions/entities/default-permissions.entity';
+import { PermissionCategory } from '../../modules/permissions/helpers/PermissionCategory';
+import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
+import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
 
 import { Profile } from '../../modules/profile/entities/profile.entity';
-import { Cart } from '../../modules/revenue/entities/cart.entity';
-import { OrderItem } from '../../modules/revenue/entities/order-items.entity';
-import { Order } from '../../modules/revenue/entities/order.entity';
-import { Transaction } from '../../modules/revenue/entities/transaction.entity';
+import { Role } from '../../modules/role/entities/role.entity';
 import { User } from '../../modules/user/entities/user.entity';
 import { CreateAdminDto } from './dto/admin.dto';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
-import { Role } from '../../modules/role/entities/role.entity';
 
 @Injectable()
 export class SeedingService {

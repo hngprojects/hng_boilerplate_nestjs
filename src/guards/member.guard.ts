@@ -25,6 +25,7 @@ export class MembershipGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const currentUserId = request.user.sub;
+
     const organisationId = request.params.org_id;
     const adminRole = await this.userRoleManager.findOne({
       where: { name: 'member' },

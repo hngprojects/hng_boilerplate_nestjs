@@ -1,9 +1,9 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Permissions } from '../../permissions/entities/permissions.entity';
 import { OrganisationUserRole } from './organisation-user-role.entity';
 
-@Entity({ name: 'defaultRole' })
+@Entity({ name: 'roles' })
 export class Role extends AbstractBaseEntity {
   @Column()
   name: string;
@@ -11,7 +11,18 @@ export class Role extends AbstractBaseEntity {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @OneToMany(() => Permissions, permission => permission.id)
+  @ManyToMany(() => Permissions, permission => permission.roles, { cascade: true })
+  @JoinTable({
+    name: 'role_permissions', // This is the join table
+    joinColumn: {
+      name: 'role_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'permission_id',
+      referencedColumnName: 'id',
+    },
+  })
   permissions: Permissions[];
 
   @OneToMany(() => OrganisationUserRole, userRole => userRole.role)
