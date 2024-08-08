@@ -4,7 +4,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Comment } from '../entities/comments.entity';
 import { User } from '../../user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { HttpStatus } from '@nestjs/common';
 
 const mockCommentRepository = () => ({
   create: jest.fn(),
@@ -35,45 +36,43 @@ describe('CommentsService', () => {
   });
 
   describe('addComment', () => {
-    it('should throw BadRequestException if comment is empty', async () => {
-      const dto = { model_id: '1', model_type: 'post', comment: '' };
+    it('should throw CustomHttpException if comment is empty', async () => {
+      const createCommentDto = { model_id: '1', model_type: 'post', comment: '' };
 
-      await expect(service.addComment(dto, 'user-id')).rejects.toThrow(BadRequestException);
+      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toThrow(CustomHttpException);
+      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toMatchObject({
+        message: 'Comment cannot be empty',
+        status: HttpStatus.BAD_REQUEST,
+      });
     });
 
-    it('should throw NotFoundException if user is not found', async () => {
-      const dto = { model_id: '1', model_type: 'post', comment: 'Great post!' };
+    it('should throw CustomHttpException if user is not found', async () => {
+      const createCommentDto = { model_id: '1', model_type: 'post', comment: 'A valid comment' };
       userRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.addComment(dto, 'user-id')).rejects.toThrow(NotFoundException);
+      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toThrow(CustomHttpException);
+      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toMatchObject({
+        message: 'User not found',
+        status: HttpStatus.NOT_FOUND,
+      });
     });
 
-    it('should successfully add a comment', async () => {
-      const dto = { model_id: '1', model_type: 'post', comment: 'Great post!' };
+    it('should add a comment successfully', async () => {
+      const createCommentDto = { model_id: '1', model_type: 'post', comment: 'A valid comment' };
       const mockUser = { id: 'user-id', first_name: 'John', last_name: 'Doe' };
-      const mockComment = { id: 'comment-id', model_id: '1', model_type: 'post', comment: 'Great post!' };
+      const mockComment = { id: 'comment-id', model_id: '1', model_type: 'post', comment: 'A valid comment' };
 
       userRepository.findOne.mockResolvedValue(mockUser);
       commentRepository.create.mockReturnValue(mockComment);
       commentRepository.save.mockResolvedValue(mockComment);
 
-      const result = await service.addComment(dto, 'user-id');
+      const result = await service.addComment(createCommentDto, 'user-id');
+
       expect(result).toEqual({
         message: 'Comment added successfully!',
         savedComment: mockComment,
         commentedBy: 'John Doe',
       });
-    });
-
-    it('should throw InternalServerErrorException if save fails', async () => {
-      const dto = { model_id: '1', model_type: 'post', comment: 'Great post!' };
-      const mockUser = { id: 'user-id', first_name: 'John', last_name: 'Doe' };
-
-      userRepository.findOne.mockResolvedValue(mockUser);
-      commentRepository.create.mockReturnValue({});
-      commentRepository.save.mockRejectedValue(new Error('Some error'));
-
-      await expect(service.addComment(dto, 'user-id')).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

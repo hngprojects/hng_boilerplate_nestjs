@@ -5,7 +5,7 @@ import { Comment } from './entities/comments.entity';
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { User } from '../user/entities/user.entity';
 import { CommentResponseDto } from './dtos/comment-response.dto';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 @Injectable()
 export class CommentsService {
   constructor(
