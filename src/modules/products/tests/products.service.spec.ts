@@ -1,7 +1,7 @@
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
@@ -37,6 +37,7 @@ describe('ProductsService', () => {
             save: jest.fn(),
             create: jest.fn(),
             update: jest.fn(),
+            softDelete: jest.fn(),
           },
         },
         {
@@ -187,14 +188,14 @@ describe('ProductsService', () => {
 
   describe('deleteProduct', () => {
     it('should delete the product successfully', async () => {
+      const deleteResult: UpdateResult = { raw: [], affected: 1, generatedMaps: [] };
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(orgMock);
       jest.spyOn(productRepository, 'findOne').mockResolvedValue(productMock);
-      jest.spyOn(productRepository, 'save').mockResolvedValue(deletedProductMock);
+      jest.spyOn(productRepository, 'softDelete').mockResolvedValue(deleteResult);
 
       const result = await service.deleteProduct(orgMock.id, productMock.id);
 
       expect(result.message).toEqual('Product successfully deleted');
-      expect(deletedProductMock.is_deleted).toBe(true);
     });
   });
 

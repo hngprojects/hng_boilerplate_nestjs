@@ -11,7 +11,11 @@ import { UserPayload } from '../interfaces/user-payload.interface';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
 import UserService from '../user.service';
+import { mockUser } from './mocks/user.mock';
 import exp from 'constants';
+import { PassThrough } from 'stream';
+import { Response } from 'express';
+import { FileFormat } from '../dto/user-data-export.dto';
 
 describe('UserService', () => {
   let service: UserService;
@@ -23,6 +27,13 @@ describe('UserService', () => {
     findOne: jest.fn(),
     findAndCount: jest.fn(),
     count: jest.fn(),
+    softDelete: jest.fn(),
+  };
+
+  const mockResponse: Partial<Response> = {
+    setHeader: jest.fn().mockReturnThis(),
+    pipe: jest.fn(),
+    end: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -453,7 +464,6 @@ describe('UserService', () => {
         },
       });
     });
-
     describe('getUserStats', () => {
       it('should return user statistics for active status', async () => {
         const totalUsers = 100;
@@ -534,6 +544,122 @@ describe('UserService', () => {
         });
         expect(mockUserRepository.count).toHaveBeenCalledTimes(3);
       });
+    });
+  });
+
+  describe('userDataExport', () => {
+    it('should return JSON data when the requested format is JSON', async () => {
+      const mockStream = new PassThrough();
+      const result: Buffer[] = []; // Use Buffer[] to handle binary data chunks
+
+      const mockJsonData = { user: { id: 'mockUserId', first_name: 'John', last_name: 'Doe' } };
+
+      mockUserRepository.findOne.mockResolvedValue(mockJsonData.user);
+
+      const streamableFile = await service.exportUserDataAsJsonOrExcelFile(
+        'json' as FileFormat.JSON,
+        mockJsonData.user.id,
+        mockResponse as Response
+      );
+
+      streamableFile.getStream().pipe(mockStream);
+
+      mockStream.on('data', chunk => {
+        result.push(chunk);
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        mockStream.on('end', () => {
+          try {
+            const parsedResult = JSON.parse(Buffer.concat(result).toString());
+            expect(parsedResult).toEqual(mockJsonData);
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        });
+
+        mockStream.on('error', err => reject(err));
+      });
+
+      expect(mockResponse.setHeader).toHaveBeenNthCalledWith(
+        1,
+        'Content-Disposition',
+        `attachment; filename="${mockJsonData.user.id}-data.json"`
+      );
+
+      expect(mockResponse.setHeader).toHaveBeenNthCalledWith(2, 'Content-Type', 'application/json');
+    });
+  });
+  describe('softDeleteUser', () => {
+    it('should soft delete a user', async () => {
+      const userId = '1';
+      const authenticatedUserId = '1';
+      const userToDelete = {
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        password: 'hashedpassword',
+        is_active: true,
+        attempts_left: 3,
+        time_left: 60,
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(userToDelete);
+      mockUserRepository.softDelete.mockResolvedValueOnce({ affected: 1 });
+      mockUserRepository.softDelete.mockResolvedValueOnce({ affected: 1 });
+
+      const result = await service.softDeleteUser(userId, authenticatedUserId);
+
+      expect(result.status).toBe('success');
+      expect(result.message).toBe('Deletion in progress');
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+      });
+      expect(mockUserRepository.softDelete).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error if user is not found', async () => {
+      const userId = '1';
+      const authenticatedUserId = '1';
+
+      mockUserRepository.findOne.mockResolvedValueOnce(null);
+
+      await expect(service.softDeleteUser(userId, authenticatedUserId)).rejects.toHaveProperty(
+        'response',
+        'User not found'
+      );
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+      });
+      expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
+    });
+
+    it('should throw an error if the user is not authorized to delete the user', async () => {
+      const userId = '1';
+      const authenticatedUserId = '2';
+      const userToDelete = {
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        password: 'hashedpassword',
+        is_active: true,
+        attempts_left: 3,
+        time_left: 60,
+      };
+
+      mockUserRepository.findOne.mockResolvedValueOnce(userToDelete);
+
+      await expect(service.softDeleteUser(userId, authenticatedUserId)).rejects.toHaveProperty(
+        'response',
+        'You are not authorized to delete this user'
+      );
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+      });
+      expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
     });
   });
 });

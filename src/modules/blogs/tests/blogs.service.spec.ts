@@ -136,18 +136,30 @@ describe('BlogService', () => {
       blog.updated_at = new Date();
 
       const expectedResponse = {
-        data: [
-          {
-            blog_id: 'blog-id',
-            title: 'Test Blog',
-            content: 'Test Content',
-            tags: ['test'],
-            image_urls: ['http://example.com/image.jpg'],
-            author: 'John Doe',
-            created_at: new Date('2023-01-01'),
+        status_code: 200,
+        message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
+        data: {
+          current_page: 1,
+          total_pages: 1,
+          total_results: 1,
+          blogs: [
+            {
+              blog_id: 'blog-id',
+              title: 'Test Blog',
+              content: 'Test Content',
+              tags: ['test'],
+              image_urls: ['http://example.com/image.jpg'],
+              author: 'John Doe',
+              created_at: new Date('2023-01-01'),
+            },
+          ],
+          meta: {
+            has_next: false,
+            total: 1,
+            next_page: null,
+            prev_page: null,
           },
-        ],
-        total: 1,
+        },
       };
 
       jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([[blog], 1]);
@@ -172,16 +184,35 @@ describe('BlogService', () => {
       });
     });
 
-    it('should throw an error if no results are found', async () => {
+    it('should return an empty response if no results are found', async () => {
       const query = {
         author: 'NonExistentAuthor',
         page: 1,
         page_size: 10,
       };
 
+      const expectedResponse = {
+        status_code: 404,
+        message: 'no_results_found_for_the_provided_search_criteria',
+        data: {
+          current_page: 1,
+          total_pages: 0,
+          total_results: 0,
+          blogs: [],
+          meta: {
+            has_next: false,
+            total: 0,
+            next_page: null,
+            prev_page: null,
+          },
+        },
+      };
+
       jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([[], 0]);
 
-      await expect(service.searchBlogs(query)).rejects.toThrow('No results found for the provided search criteria');
+      const result = await service.searchBlogs(query);
+
+      expect(result).toEqual(expectedResponse);
     });
 
     it('should validate empty query values and throw an error', async () => {
@@ -191,7 +222,7 @@ describe('BlogService', () => {
         page_size: 10,
       };
 
-      await expect(service.searchBlogs(query)).rejects.toThrow('Author value is empty');
+      await expect(service.searchBlogs(query)).rejects.toThrow('author value is empty');
     });
   });
 
@@ -218,7 +249,7 @@ describe('BlogService', () => {
       const result = await service.getSingleBlog(blogId, user);
 
       expect(result).toEqual({
-        status: 200,
+        status_code: 200,
         message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
         data: {
           blog_id: blog.id,
@@ -247,7 +278,7 @@ describe('BlogService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
       jest.spyOn(blogRepository, 'findOneBy').mockResolvedValue(null);
 
-      await expect(service.getSingleBlog(blogId, user)).rejects.toThrowError(SYS_MSG.BLOG_NOT_FOUND);
+      await expect(service.getSingleBlog(blogId, user)).rejects.toThrow(SYS_MSG.BLOG_NOT_FOUND);
     });
   });
 
@@ -269,74 +300,6 @@ describe('BlogService', () => {
       jest.spyOn(blogRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.deleteBlogPost('blog-id')).rejects.toThrow('Blog post with this id does not exist');
-    });
-  });
-
-  describe('getAllBlogs', () => {
-    it('should successfully retrieve all blogs with pagination', async () => {
-      const page = 1;
-      const pageSize = 10;
-
-      const blogs = [
-        {
-          id: 'blog-id-1',
-          title: 'Test Blog 1',
-          content: 'Test Content 1',
-          author: { first_name: 'John', last_name: 'Doe' } as User,
-          created_at: new Date('2024-08-08T13:37:01.793Z'),
-          updated_at: new Date('2024-08-08T13:37:01.793Z'),
-          tags: ['test'],
-          image_urls: ['http://example.com/image1.jpg'],
-        },
-        {
-          id: 'blog-id-2',
-          title: 'Test Blog 2',
-          content: 'Test Content 2',
-          author: { first_name: 'Jane', last_name: 'Doe' } as User,
-          created_at: new Date('2024-08-08T13:37:01.793Z'),
-          updated_at: new Date('2024-08-08T13:37:01.793Z'),
-          tags: ['test'],
-          image_urls: ['http://example.com/image2.jpg'],
-        },
-      ];
-
-      const total = blogs.length;
-
-      const expectedResponse = {
-        status_code: 200,
-        message: 'Blog fetched successfully',
-        data: {
-          currentPage: page,
-          totalPages: 1,
-          totalResults: total,
-          blogs: blogs.map(blog => ({
-            blog_id: blog.id,
-            title: blog.title,
-            content: blog.content,
-            author: `${blog.author.first_name} ${blog.author.last_name}`,
-            created_at: blog.created_at,
-            tags: blog.tags,
-            image_urls: blog.image_urls,
-          })),
-          meta: {
-            hasNext: false,
-            total,
-            nextPage: null,
-            prevPage: null,
-          },
-        },
-      };
-
-      jest.spyOn(blogRepository, 'findAndCount').mockResolvedValue([blogs, total]);
-
-      const result = await service.getAllBlogs(page, pageSize);
-
-      expect(result).toEqual(expectedResponse);
-      expect(blogRepository.findAndCount).toHaveBeenCalledWith({
-        skip: 0,
-        take: pageSize,
-        relations: ['author'],
-      });
     });
   });
 });

@@ -1,4 +1,20 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query, Req, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Query,
+  Req,
+  Request,
+  UseGuards,
+  Res,
+  StreamableFile,
+  Header,
+  ParseEnumPipe,
+  Delete,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -18,6 +34,10 @@ import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserStatusResponseDto } from './dto/update-user-status-response.dto';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
+import { skipAuth } from '../../helpers/skipAuth';
+import { Response } from 'express';
+import * as path from 'path';
+import { UserDataExportDto } from './dto/user-data-export.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -73,6 +93,45 @@ export class UserController {
     return this.userService.updateUser(userId, updatedUserDto, req.user);
   }
 
+  @ApiQuery({
+    name: 'format',
+    description: 'The format in which the user data should be exported (e.g., JSON, XLSX)',
+    enum: ['json', 'xlsx'],
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the user data in the requested format.',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            user: {
+              type: 'object',
+              description: 'User data object',
+            },
+          },
+        },
+      },
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @Get('export')
+  async exportUserData(
+    @Query() { format }: UserDataExportDto,
+    @Res({ passthrough: false }) res: Response,
+    @Req() { user }
+  ) {
+    const file = await this.userService.exportUserDataAsJsonOrExcelFile(format, user.id, res);
+    file.getStream().pipe(res);
+  }
+
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get User Data' })
   @ApiResponse({ status: 200, description: 'User data fetched successfully' })
@@ -122,5 +181,18 @@ export class UserController {
   @UseGuards(SuperAdminGuard)
   async updateUserStatus(@Param('userId', ParseUUIDPipe) userId: string, @Body() { status }: UpdateUserStatusDto) {
     return this.userService.updateUserStatus(userId, status);
+  }
+
+  @Delete(':userId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Soft delete a user account' })
+  @ApiResponse({ status: 204, description: 'Deletion in progress' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async softDeleteUser(@Param('userId', ParseUUIDPipe) userId: string, @Req() req) {
+    const authenticatedUserId = req['user'].id;
+
+    return this.userService.softDeleteUser(userId, authenticatedUserId);
   }
 }
