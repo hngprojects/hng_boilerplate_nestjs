@@ -308,7 +308,6 @@ export default class UserService {
       'notifications',
       'testimonials',
     ];
-
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations,
@@ -321,9 +320,13 @@ export default class UserService {
     }
 
     if (format === 'xlsx') {
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${userId}-${new Date()}.xlsx"`);
       stream.push(this.generateExcelExportFile(jsonData));
       stream.push(null);
     } else if (format === 'json') {
+      res.setHeader('Content-Disposition', `attachment; filename="${userId}-${new Date()}.json"`);
+      res.setHeader('Content-Type', 'application/json');
       stream.push(JSON.stringify(jsonData));
       stream.push(null);
     }
