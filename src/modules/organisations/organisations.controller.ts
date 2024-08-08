@@ -135,18 +135,6 @@ export class OrganisationsController {
     return this.organisationsService.searchOrganisationMember(orgId, searchTerm, query?.filter);
   }
 
-  @UseGuards(OwnershipGuard)
-  @Delete(':org_id/members/:userId')
-  @ApiOperation({ summary: 'Gets a product by id' })
-  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
-  @ApiResponse({ status: 200, description: 'Member removed successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 404, description: 'Product not found' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
-  async removeOrganisationMember(@Param() params: RemoveOrganisationMemberDto) {
-    return this.organisationsService.removeOrganisationMember(params);
-  }
-
   @ApiOperation({ summary: 'Assign roles to members of an organisation' })
   @ApiResponse({
     status: 200,
