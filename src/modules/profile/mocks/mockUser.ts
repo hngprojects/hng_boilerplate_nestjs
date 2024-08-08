@@ -4,6 +4,7 @@ import { User, UserType } from '../../user/entities/user.entity';
 const profile = new Profile();
 export const mockUserWithProfile: User = {
   email: 'tester@example.com',
+  status: null,
   first_name: 'John',
   last_name: 'Doe',
   is_active: true,

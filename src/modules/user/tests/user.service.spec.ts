@@ -11,6 +11,7 @@ import { UserPayload } from '../interfaces/user-payload.interface';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
 import UserService from '../user.service';
+import exp from 'constants';
 
 describe('UserService', () => {
   let service: UserService;
@@ -21,6 +22,7 @@ describe('UserService', () => {
     save: jest.fn(),
     findOne: jest.fn(),
     findAndCount: jest.fn(),
+    count: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -129,6 +131,16 @@ describe('UserService', () => {
       phone_number: '0987654321',
       user_type: UserType.USER,
     };
+    const updatedUserStatusResponse = {
+      id: '4a3731d6-8dfd-42b1-b572-96c7805f7586',
+      created_at: '2024-08-05T19:16:57.264Z',
+      updated_at: '2024-08-05T19:43:25.073Z',
+      first_name: 'John',
+      last_name: 'Smith',
+      email: 'john.smith@example.com',
+      status: 'Hello there! This is what my updated status looks like!',
+    };
+
     const updatedUser = { ...existingUser, ...updateOptions };
 
     const superAdminPayload: UserPayload = {
@@ -202,6 +214,13 @@ describe('UserService', () => {
         relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
       });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should update the user status successfully (super admin)', async () => {
+      mockUserRepository.findOne.mockResolvedValueOnce(existingUser);
+      mockUserRepository.save.mockResolvedValueOnce(updatedUserStatusResponse);
+      const result = await service.updateUserStatus(userId, 'Hello there! This is what my new status looks like!');
+      expect(result.data).toEqual(updatedUserStatusResponse);
     });
 
     it('should throw NotFoundException for invalid userId', async () => {
@@ -436,6 +455,88 @@ describe('UserService', () => {
             total_users: 0,
           },
         },
+      });
+    });
+
+    describe('getUserStats', () => {
+      it('should return user statistics for active status', async () => {
+        const totalUsers = 100;
+        const activeUsers = 70;
+        const deletedUsers = 30;
+
+        mockUserRepository.count
+          .mockResolvedValueOnce(totalUsers)
+          .mockResolvedValueOnce(activeUsers)
+          .mockResolvedValueOnce(deletedUsers);
+
+        const result = await service.getUserStats('active');
+
+        expect(result).toEqual({
+          status: 'success',
+          status_code: 200,
+          message: 'Request completed successfully',
+          data: {
+            total_users: totalUsers,
+            active_users: activeUsers,
+            deleted_users: deletedUsers,
+          },
+        });
+        expect(mockUserRepository.count).toHaveBeenCalledTimes(3);
+      });
+
+      it('should return user statistics for deleted status', async () => {
+        const totalUsers = 100;
+        const activeUsers = 40;
+        const deletedUsers = 60;
+
+        mockUserRepository.count
+          .mockResolvedValueOnce(totalUsers)
+          .mockResolvedValueOnce(activeUsers)
+          .mockResolvedValueOnce(deletedUsers);
+
+        const result = await service.getUserStats('deleted');
+
+        expect(result).toEqual({
+          status: 'success',
+          status_code: 200,
+          message: 'Request completed successfully',
+          data: {
+            total_users: totalUsers,
+            active_users: activeUsers,
+            deleted_users: deletedUsers,
+          },
+        });
+        expect(mockUserRepository.count).toHaveBeenCalledTimes(3);
+      });
+
+      it('should throw BadRequestException for invalid status', async () => {
+        await expect(service.getUserStats('unknown')).rejects.toThrow(BadRequestException);
+        expect(mockUserRepository.count).not.toHaveBeenCalled();
+      });
+
+      it('should return user statistics without status', async () => {
+        const totalUsers = 100;
+        const activeUsers = 70;
+        const deletedUsers = 30;
+
+        mockUserRepository.count
+          .mockResolvedValueOnce(totalUsers)
+          .mockResolvedValueOnce(activeUsers)
+          .mockResolvedValueOnce(deletedUsers);
+
+        const result = await service.getUserStats();
+
+        expect(result).toEqual({
+          status: 'success',
+          status_code: 200,
+          message: 'Request completed successfully',
+          data: {
+            total_users: totalUsers,
+            active_users: activeUsers,
+            deleted_users: deletedUsers,
+          },
+        });
+        expect(mockUserRepository.count).toHaveBeenCalledTimes(3);
       });
     });
   });

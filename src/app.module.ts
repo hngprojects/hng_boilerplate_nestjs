@@ -38,6 +38,7 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
 import { TeamsModule } from './modules/teams/teams.module';
+import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -124,6 +125,8 @@ import { join } from 'path';
         redis: {
           host: authConfig().redis.host,
           port: +authConfig().redis.port,
+          password: authConfig().redis.password,
+          username: authConfig().redis.username,
         },
       }),
     }),
@@ -148,6 +151,7 @@ import { join } from 'path';
     WaitlistModule,
     NewsletterSubscriptionModule,
     TeamsModule,
+    FlutterwaveModule,
     BlogModule,
     SubscriptionsModule,
     ServeStaticModule.forRoot({
