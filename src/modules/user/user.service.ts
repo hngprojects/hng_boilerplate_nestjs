@@ -18,6 +18,9 @@ import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
+import { pick } from '../../helpers/pick';
+import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @Injectable()
 export default class UserService {
@@ -33,11 +36,6 @@ export default class UserService {
     const newUser = new User();
     Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
-    if (createUserPayload.admin_secret == process.env.ADMIN_SECRET_KEY) {
-      newUser.user_type = UserType.SUPER_ADMIN;
-    } else {
-      newUser.user_type = UserType.USER;
-    }
     newUser.profile = profile;
     return await this.userRepository.save(newUser);
   }
@@ -76,7 +74,7 @@ export default class UserService {
   private async getUserByEmail(email: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { email: email },
-      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+      relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
@@ -84,7 +82,7 @@ export default class UserService {
   private async getUserById(identifier: string) {
     const user: UserResponseDTO = await this.userRepository.findOne({
       where: { id: identifier },
-      relations: ['profile', 'organisationMembers', 'created_organisations', 'owned_organisations'],
+      relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
@@ -125,9 +123,8 @@ export default class UserService {
         status_code: HttpStatus.NOT_FOUND,
       });
     }
-
-    // Check if the current user is a super admin or the user being updated
-    if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
+    // TODO: CHECK IF USER IS AN ADMIN
+    if (currentUser.id !== userId) {
       throw new ForbiddenException({
         error: 'Forbidden',
         message: 'You are not authorized to update this user',
@@ -226,22 +223,71 @@ export default class UserService {
     };
   }
 
-  async getUserStatistics(currentUser: UserPayload): Promise<any> {
-    if (currentUser.user_type !== UserType.SUPER_ADMIN) {
-      throw new ForbiddenException({
-        error: 'Forbidden',
-        message: 'You are not authorized to access user statistics',
+  // async getUserStatistics(currentUser: UserPayload): Promise<any> {
+  // if (currentUser.user_type !== UserType.SUPER_ADMIN) {
+  //   throw new ForbiddenException({
+  //     error: 'Forbidden',
+  //     message: 'You are not authorized to access user statistics',
+  //   });
+  // }
+  async updateUserStatus(userId: string, status: string) {
+    const keepColumns = ['id', 'created_at', 'updated_at', 'first_name', 'last_name', 'email', 'status'];
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException({
+        error: 'Not Found',
+        message: 'User not found',
+        status_code: HttpStatus.NOT_FOUND,
       });
+    }
+    const updatedUser = Object.assign(user, { status });
+    const result = await this.userRepository.save(updatedUser);
+
+    return {
+      status: 'success',
+      status_code: HttpStatus.OK,
+      data: pick(result, keepColumns),
+    };
+  }
+
+  async getUserStats(status?: string): Promise<GetUserStatsResponseDto> {
+    const filters = {};
+
+    if (status) {
+      if (status === 'active') {
+        filters['is_active'] = true;
+      } else if (status === 'deleted') {
+        filters['is_active'] = false;
+      } else {
+        throw new BadRequestException({
+          error: 'Bad Request',
+          message: SYS_MSG.BAD_REQUEST,
+          status_code: HttpStatus.BAD_REQUEST,
+        });
+      }
     }
 
     const totalUsers = await this.userRepository.count();
-    const activeUsers = await this.userRepository.count({ where: { is_active: true } });
-    const deletedUsers = await this.userRepository.count({ where: { is_active: false } });
+
+    const activeUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: true } })
+      : await this.userRepository.count({ where: { is_active: true } });
+
+    const deletedUsers = status
+      ? await this.userRepository.count({ where: { ...filters, is_active: false } })
+      : await this.userRepository.count({ where: { is_active: false } });
 
     return {
-      total_users: totalUsers,
-      active_users: activeUsers,
-      deleted_users: deletedUsers,
+      status: 'success',
+      status_code: 200,
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
+      data: {
+        total_users: totalUsers,
+        active_users: activeUsers,
+        deleted_users: deletedUsers,
+      },
     };
   }
 }
