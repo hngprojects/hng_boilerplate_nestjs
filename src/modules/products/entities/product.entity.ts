@@ -1,7 +1,10 @@
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from 'typeorm';
-import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Cart } from '../../revenue/entities/cart.entity';
+import { OrderItem } from '../../revenue/entities/order-items.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',
@@ -32,6 +35,9 @@ export class Product extends AbstractBaseEntity {
   @Column({ type: 'float', nullable: false, default: 0 })
   price: number;
 
+  @Column({ type: 'float', nullable: false, default: 0 })
+  cost_price: number;
+
   @Column({ type: 'int', nullable: false, default: 0 })
   quantity: number;
 
@@ -57,4 +63,10 @@ export class Product extends AbstractBaseEntity {
 
   @OneToMany(() => Comment, comment => comment.product)
   comments?: Comment[];
+
+  @OneToMany(() => OrderItem, orderItem => orderItem.product)
+  orderItems: OrderItem[];
+
+  @OneToMany(() => Cart, cart => cart.product)
+  cart: Cart[];
 }

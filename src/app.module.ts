@@ -30,8 +30,8 @@ import { UserModule } from './modules/user/user.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
-import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
-import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
+import { RoleModule } from './modules/role/role.module';
+import { OrganisationPermissionsModule } from './modules/permissions/permissions.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { FaqModule } from './modules/faq/faq.module';
 import { HelpCenterModule } from './modules/help-center/help-center.module';
@@ -40,7 +40,9 @@ import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/
 import { TeamsModule } from './modules/teams/teams.module';
 import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
+import { CommentsModule } from './modules/comments/comments.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { RevenueModule } from './modules/revenue/revenue.module';
 import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 
 @Module({
@@ -140,7 +142,7 @@ import { BlogCategoryModule } from './modules/blog-category/blog-category.module
     BillingPlanModule,
     JobsModule,
     ProfileModule,
-    OrganisationRoleModule,
+    RoleModule,
     OrganisationPermissionsModule,
     RunTestsModule,
     ContactUsModule,
@@ -152,7 +154,9 @@ import { BlogCategoryModule } from './modules/blog-category/blog-category.module
     TeamsModule,
     FlutterwaveModule,
     BlogModule,
+    CommentsModule,
     SubscriptionsModule,
+    RevenueModule,
     BlogCategoryModule,
   ],
   controllers: [HealthController, ProbeController],

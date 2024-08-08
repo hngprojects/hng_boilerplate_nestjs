@@ -6,7 +6,6 @@ import { SendEmailDto, createTemplateDto, getTemplateDto } from './dto/email.dto
 import { skip } from 'node:test';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-
 @ApiTags('Emails')
 @ApiBearerAuth()
 @Controller('email')
