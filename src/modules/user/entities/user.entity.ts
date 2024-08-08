@@ -7,11 +7,11 @@ import { Notification } from '../../../modules/notifications/entities/notificati
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
 import { Blog } from '../../blogs/entities/blog.entity';
 import { Comment } from '../../comments/entities/comments.entity';
+import { Cart } from '../../dashboard/entities/cart.entity';
+import { Order } from '../../dashboard/entities/order.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
-import { Cart } from '../../revenue/entities/cart.entity';
-import { Order } from '../../revenue/entities/order.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',

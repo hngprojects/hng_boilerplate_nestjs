@@ -6,16 +6,15 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetRevenueResponseDto } from './dto/get-revenue-response.dto';
-import { RevenueService } from './revenue.service';
+import { DashboardService } from './dashboard.service';
 
 @ApiTags('Dashboard')
-@Controller('revenue')
+@Controller()
 @ApiBearerAuth()
-export class RevenueController {
-  constructor(private readonly revenueService: RevenueService) {}
+export class DashboardController {
+  constructor(private readonly dashDashboardService: DashboardService) {}
 
-  @Get()
+  @Get('statistics')
   @ApiOkResponse({
     description: 'Revenue Fetched',
     schema: {
@@ -32,7 +31,7 @@ export class RevenueController {
   })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  getRevenue(): Promise<GetRevenueResponseDto> {
-    return this.revenueService.getRevenue();
+  getStatistics(): Promise<any> {
+    return this.dashDashboardService.getStatistics();
   }
 }

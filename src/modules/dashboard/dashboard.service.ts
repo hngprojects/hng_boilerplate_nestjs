@@ -2,17 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as SYS_MSG from '../../helpers/SystemMessages';
-import { GetRevenueResponseDto } from './dto/get-revenue-response.dto';
 import { Transaction } from './entities/transaction.entity';
 
 @Injectable()
-export class RevenueService {
+export class DashboardService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>
   ) {}
 
-  async getRevenue(): Promise<GetRevenueResponseDto> {
+  async getStatistics(): Promise<any> {
     const currentMonth = new Date();
     const previousMonth = new Date();
 

@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { DashboardService } from './dashboard.service';
 import { GetRevenueResponseDto } from './dto/get-revenue-response.dto';
 import { Transaction } from './entities/transaction.entity';
-import { RevenueService } from './revenue.service';
 
-describe('RevenueService', () => {
-  let service: RevenueService;
+describe('DashboardService', () => {
+  let service: DashboardService;
   let repository: Repository<Transaction>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        RevenueService,
+        DashboardService,
         {
           provide: getRepositoryToken(Transaction),
           useClass: Repository,
@@ -20,7 +20,7 @@ describe('RevenueService', () => {
       ],
     }).compile();
 
-    service = module.get<RevenueService>(RevenueService);
+    service = module.get<DashboardService>(DashboardService);
     repository = module.get<Repository<Transaction>>(getRepositoryToken(Transaction));
   });
 
