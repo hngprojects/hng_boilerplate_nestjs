@@ -1,0 +1,340 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>New Feature Announcement</title>
+    <style>
+      @import
+      url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+      * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter; } body { min-height: 100svh; } header {
+      display: flex; width: 100%; height: 7.625rem; justify-content: center; align-items: center; background: rgba(225,
+      214, 214, 0.4); } h2 { color: #121a26; font-feature-settings: "liga" off, "clig" off; font-size: 1.5rem;
+      font-weight: 600; } .template-main { display: flex; padding: 3.5rem 3.5rem 2rem 3.5rem; flex-direction: column;
+      align-items: center; gap: 3.5rem; max-width: 790px; margin: 0 auto; } .heading { display: flex; flex-direction:
+      column; justify-content: center; align-items: center; gap: 0.75rem; } .content { display: flex; flex-direction:
+      column; gap: 2rem; } .template-header { color: var(--Neutral-Colors-Dark-2, #0a0a0a); text-align: center;
+      font-size: 1.5rem; font-weight: 600; } .template-subheader { color: rgba(0, 0, 0, 0.8); text-align: center;
+      font-size: 1.125rem; font-weight: 500; } .template-receiver-name { color: #111; font-size: 1.125rem; font-weight:
+      600; } .template-welcome-message { color: rgba(17, 17, 17, 0.9); font-size: 1rem; font-weight: 400; }
+      .editable-content-title { color: var(--Neutral-Colors-Dark-2, #0a0a0a); font-size: 1rem; font-weight: 600;
+      opacity: 0.9; margin-bottom: 1.25rem; } .editable-content-list p { opacity: 0.9; color:
+      var(--Neutral-Colors-Dark-2, rgba(17, 17, 17, 0.9)); font-size: 1rem; font-weight: 400; margin-bottom: 1rem; }
+      .editable-content-list span { color: var(--Neutral-Colors-Dark-2, #0a0a0a); font-size: 1rem; font-weight: 600; }
+      .template-btn { display: flex; height: 2.75rem; padding: 0.5rem 2.5rem; align-items: center; gap: 0.625rem;
+      border-radius: 0.5rem; align-self: center; text-decoration: none; cursor: pointer; } .button-fill { border: none;
+      color: white; background: #f97316; } .button-outline { border: 1px solid #f97316; color: #f97316; background:
+      none; } .button-group { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; } .custom-list-items {
+      list-style: none; } .custom-list-items li { display: flex; align-items: center; margin-bottom: 1rem; }
+      .custom-list-items li svg { margin-right: 1rem; } .template-farewell p { color: #111; font-size: 0.875rem;
+      font-weight: 500; margin-bottom: 0.5rem; } .closing-regards { color: rgba(17, 17, 17, 0.9); font-family: Inter;
+      font-size: 16px; font-style: normal; font-weight: 400; line-height: normal; } a { font-weight: 600;
+      text-decoration: underline; color: #111; } .closing-regards a:hover { text-decoration: underline; } .link-faq {
+      text-decoration: none; color: #f97316; font-weight: 600; } .link-email { text-decoration: none; color: #f97316;
+      font-weight: 400; } footer { background: #f3efef; display: flex; width: 100%; padding: 2rem 0; justify-content:
+      center; } .footer-container { max-width: 790px; width: 100%; padding: 0 3rem; } footer .heading { display: flex;
+      flex-direction: row; align-items: center; gap: 2.0625rem; margin-bottom: 1rem; } footer .content { display: flex;
+      flex-direction: column; gap: 1.875rem; color: #5b5b5d; font-size: 0.875rem; font-weight: 400; } footer .content >
+      span { margin-block-start: 1.3em; } footer .contact-support { color: #111; font-size: 0.875rem; font-weight: 600;
+      text-decoration: underline; } footer hr { border-style: dashed; width: 100%; border-color: #969696; } .expiry-date
+      { width: 100%; display: flex; gap: 4px; flex-direction: column; background-color: #f97316; color: white; padding:
+      40px; } .expiry-date .text { color: var(#fff); text-align: center; font-family: Inter; font-size: 24px;
+      font-style: normal; font-weight: 500; line-height: 27px; } .expiry-date .date { color: var(#fafafa); text-align:
+      center; font-family: Inter; font-size: 44px; font-style: normal; font-weight: 700; line-height: normal; }
+    </style>
+  </head>
+
+  <body>
+    <!-- Header -->
+    <header class='Header'>
+      <h2>
+        <svg width='19' height='19' viewBox='0 0 19 19' fill='none' xmlns='http://www.w3.org/2000/svg'>
+          <circle cx='4.5' cy='4.5' r='4' fill='#F97316' />
+          <circle cx='14.5' cy='4.5' r='4' fill='#F97316' />
+          <circle cx='4.5' cy='14.5' r='4' fill='#F97316' />
+          <circle cx='14.5' cy='14.5' r='4' fill='#F97316' />
+        </svg>
+        <span>Boilerplate.</span>
+      </h2>
+    </header>
+    <!-- Body -->
+    <div class='template-main'>
+      <div class='heading'>
+        <div style='margin-bottom: 40px'>
+          <svg xmlns='http://www.w3.org/2000/svg' width='178' height='178' viewBox='0 0 178 178' fill='none'>
+            <g opacity='0.45'>
+              <path
+                d='M90.8357 164.753C132.693 164.753 166.625 160.421 166.625 155.077C166.625 149.733 132.693 145.401 90.8357 145.401C48.9787 145.401 15.0469 149.733 15.0469 155.077C15.0469 160.421 48.9787 164.753 90.8357 164.753Z'
+                fill='#E6E6E6'
+              />
+            </g>
+            <path
+              d='M20.7183 120.492C20.5866 120.492 20.4513 120.485 20.316 120.467C18.593 120.246 17.3754 118.673 17.5962 116.95C21.4481 86.8677 41.5372 63.9697 42.3916 63.0085C43.545 61.7091 45.535 61.5917 46.8309 62.7487C48.1303 63.9021 48.2478 65.8886 47.0943 67.188C46.8985 67.4087 27.4324 89.6445 23.8368 117.751C23.6339 119.338 22.2811 120.495 20.7218 120.495L20.7183 120.492Z'
+              fill='#2E3053'
+            />
+            <path
+              d='M138.106 99.9578C137.839 99.9578 137.568 99.9507 137.294 99.9329C120.217 98.9111 111.637 70.3884 111.281 69.1745C110.79 67.5084 111.744 65.7604 113.41 65.2691C115.073 64.7814 116.824 65.7319 117.312 67.398C119.405 74.486 127.141 93.0229 137.665 93.653C147.636 94.2226 153.378 71.6629 154.61 63.7027C154.874 61.9868 156.483 60.8085 158.199 61.0755C159.915 61.3389 161.093 62.948 160.826 64.6639C160.26 68.3236 154.884 99.9578 138.102 99.9578H138.106Z'
+              fill='#2E3053'
+            />
+            <path
+              d='M26.712 119.491C26.712 119.491 36.1745 122.756 33.8925 127.793C31.6141 132.831 27.4311 131.692 27.4311 131.692C27.4311 131.692 28.4777 142.934 19.1363 140.666C9.79485 138.399 8.10029 125.366 12.7319 118.965C17.3634 112.564 26.712 119.491 26.712 119.491Z'
+              fill='#FFD200'
+            />
+            <path
+              d='M104.951 143.062C104.663 143.062 104.371 143.023 104.083 142.938C102.413 142.457 101.448 140.716 101.929 139.047C106.536 122.998 100.939 99.584 100.882 99.349C100.473 97.6616 101.509 95.9599 103.196 95.5505C104.884 95.1375 106.585 96.177 106.995 97.8645C107.244 98.8898 113.036 123.148 107.974 140.784C107.579 142.165 106.318 143.062 104.951 143.062Z'
+              fill='#2E3053'
+            />
+            <path d='M114.618 122.881H97.9961V154.593H129.684L112.816 144.248L114.618 122.881Z' fill='#FFD200' />
+            <path
+              d='M65.0711 143.062C63.7041 143.062 62.4474 142.165 62.0487 140.784C56.9863 123.151 62.7785 98.8897 63.0277 97.8644C63.4371 96.177 65.1388 95.141 66.8262 95.5504C68.5136 95.9598 69.5496 97.6615 69.1402 99.349C69.0832 99.5839 63.494 123.027 68.0936 139.047C68.5742 140.716 67.6094 142.457 65.9398 142.938C65.6514 143.019 65.3559 143.062 65.0711 143.062Z'
+              fill='#2E3053'
+            />
+            <path
+              d='M85.5667 111.076C112.581 111.076 134.481 89.1759 134.481 62.1612C134.481 35.1465 112.581 13.2468 85.5667 13.2468C58.5521 13.2468 36.6523 35.1465 36.6523 62.1612C36.6523 89.1759 58.5521 111.076 85.5667 111.076Z'
+              fill='#F9AA73'
+            />
+            <g opacity='0.09'>
+              <path
+                d='M122.205 29.8684C125.754 36.6431 127.773 44.3469 127.773 52.5278C127.773 79.5411 105.871 101.442 78.8581 101.442C64.223 101.442 51.1008 95.0057 42.1367 84.8206C50.3105 100.424 66.6473 111.076 85.4833 111.076C112.497 111.076 134.398 89.178 134.398 62.1612C134.398 49.783 129.791 38.4836 122.205 29.8684Z'
+                fill='#000001'
+              />
+            </g>
+            <path
+              d='M71.0022 60.9224C73.6073 60.9224 75.7192 56.2619 75.7192 50.513C75.7192 44.764 73.6073 40.1035 71.0022 40.1035C68.397 40.1035 66.2852 44.764 66.2852 50.513C66.2852 56.2619 68.397 60.9224 71.0022 60.9224Z'
+              fill='#2E3053'
+            />
+            <path
+              d='M99.8225 60.9224C102.428 60.9224 104.539 56.2619 104.539 50.513C104.539 44.764 102.428 40.1035 99.8225 40.1035C97.2173 40.1035 95.1055 44.764 95.1055 50.513C95.1055 56.2619 97.2173 60.9224 99.8225 60.9224Z'
+              fill='#2E3053'
+            />
+            <path
+              d='M85.1089 93.5035C63.4356 93.5035 61.7126 73.7241 61.6984 73.5212C61.6521 72.8733 62.1363 72.3072 62.7877 72.2574C63.4463 72.2075 64.0017 72.6953 64.0515 73.3432C64.1085 74.0979 65.7034 91.727 86.1164 91.1289C106.533 90.5309 107.419 74.0872 107.448 73.3859C107.473 72.7344 108.025 72.2253 108.673 72.2538C109.32 72.2787 109.83 72.8234 109.808 73.4713C109.801 73.6636 108.858 92.8199 86.1876 93.4821C85.8245 93.4928 85.4649 93.4999 85.1125 93.4999L85.1089 93.5035Z'
+              fill='#2E3053'
+            />
+            <g opacity='0.36'>
+              <path
+                d='M60.1515 68.4126C64.0602 68.4126 67.2288 66.7359 67.2288 64.6675C67.2288 62.5991 64.0602 60.9224 60.1515 60.9224C56.2428 60.9224 53.0742 62.5991 53.0742 64.6675C53.0742 66.7359 56.2428 68.4126 60.1515 68.4126Z'
+                fill='white'
+              />
+            </g>
+            <g opacity='0.36'>
+              <path
+                d='M111.62 68.4126C115.529 68.4126 118.698 66.7359 118.698 64.6675C118.698 62.5991 115.529 60.9224 111.62 60.9224C107.712 60.9224 104.543 62.5991 104.543 64.6675C104.543 66.7359 107.712 68.4126 111.62 68.4126Z'
+                fill='white'
+              />
+            </g>
+            <path d='M55.4054 122.881H72.0271V154.593H40.3359L57.2032 144.248L55.4054 122.881Z' fill='#FFD200' />
+            <path
+              d='M14.2311 108.317C14.2311 108.317 36.9617 106.871 33.9251 115.362C30.8884 123.849 20.0304 119.488 13.4942 119.061C6.95805 118.634 5.68001 109.808 14.2311 108.317Z'
+              fill='#FFD200'
+            />
+            <g opacity='0.44'>
+              <path
+                d='M14.2311 108.317C14.2311 108.317 36.9617 106.871 33.9251 115.362C30.8884 123.849 20.0304 119.488 13.4942 119.061C6.95805 118.634 5.68001 109.808 14.2311 108.317Z'
+                fill='white'
+              />
+            </g>
+            <path
+              d='M151.749 62.4709C151.749 62.4709 143.119 57.4015 146.348 52.9123C149.577 48.4232 153.454 50.3669 153.454 50.3669C153.454 50.3669 154.65 39.1387 163.358 43.2078C172.066 47.2768 171.154 60.3883 165.344 65.7461C159.538 71.1039 151.745 62.4674 151.745 62.4674L151.749 62.4709Z'
+              fill='#FFD200'
+            />
+            <path
+              d='M161.774 75.8921C161.774 75.8921 139.207 72.8163 143.863 65.0947C148.516 57.373 158.299 63.7953 164.622 65.5076C170.944 67.2164 170.453 76.12 161.774 75.8921Z'
+              fill='#FFD200'
+            />
+            <g opacity='0.44'>
+              <path
+                d='M161.774 75.8921C161.774 75.8921 139.207 72.8163 143.863 65.0947C148.516 57.373 158.299 63.7953 164.622 65.5076C170.944 67.2164 170.453 76.12 161.774 75.8921Z'
+                fill='white'
+              />
+            </g>
+            <g opacity='0.58'>
+              <path
+                d='M147.536 144.611C147.536 144.611 139.953 142.539 138.305 135.483C138.305 135.483 150.053 133.108 150.387 145.234L147.536 144.611Z'
+                fill='#F9AA73'
+              />
+            </g>
+            <g opacity='0.73'>
+              <path
+                d='M148.464 143.856C148.464 143.856 143.167 135.483 147.83 127.651C147.83 127.651 156.762 133.322 152.793 143.874L148.464 143.856Z'
+                fill='#F9AA73'
+              />
+            </g>
+            <path
+              d='M149.832 143.863C149.832 143.863 152.63 135.02 161.092 133.343C161.092 133.343 162.68 139.086 155.613 143.888L149.832 143.863Z'
+              fill='#F9AA73'
+            />
+            <path d='M144.332 143.664L145.87 154.18L155.55 154.219L156.977 143.717L144.332 143.664Z' fill='#24285B' />
+          </svg>
+        </div>
+        <p class='template-header'>Subscription Confirmation</p>
+      </div>
+      <div class='content'>
+        <p class='template-receiver-name'>Hi {{name}},</p>
+        <p class='template-welcome-message'>
+          Your payment was processed successfully. Thank you for subscribing to our Bi-monthly feature! We’re excited to
+          have you on board. You’ll receive a separate receipt via email. Below are the details of your subscription:
+        </p>
+
+        <ul class='custom-list-items'>
+          <li>
+            <svg width='24' height='24' viewBox='0 0 24 24' fill='none'>
+              <path
+                d='M12 0L15.2414 8.75862L24 12L15.2414 15.2414L12 24L8.75862 15.2414L0 12L8.75862 8.75862L12 0Z'
+                fill='rgba(249, 115, 22, 0.40)'
+              />
+            </svg>
+            <b>Email Address: &nbsp;</b>
+            {{email}}
+          </li>
+          <li>
+            <svg width='24' height='24' viewBox='0 0 24 24' fill='none'>
+              <path
+                d='M12 0L15.2414 8.75862L24 12L15.2414 15.2414L12 24L8.75862 15.2414L0 12L8.75862 8.75862L12 0Z'
+                fill='rgba(249, 115, 22, 0.40)'
+              />
+            </svg>
+            <b>Subscription Plan:&nbsp;</b>
+            {{subscriptionPlan}}
+          </li>
+          <li>
+            <svg width='24' height='24' viewBox='0 0 24 24' fill='none'>
+              <path
+                d='M12 0L15.2414 8.75862L24 12L15.2414 15.2414L12 24L8.75862 15.2414L0 12L8.75862 8.75862L12 0Z'
+                fill='rgba(249, 115, 22, 0.40)'
+              />
+            </svg>
+            <b>Cost: &nbsp;</b>
+            {{cost}}
+          </li>
+          <li>
+            <svg width='24' height='24' viewBox='0 0 24 24' fill='none'>
+              <path
+                d='M12 0L15.2414 8.75862L24 12L15.2414 15.2414L12 24L8.75862 15.2414L0 12L8.75862 8.75862L12 0Z'
+                fill='rgba(249, 115, 22, 0.40)'
+              />
+            </svg>
+            <b>Duration: &nbsp;</b>
+            {{duration}}
+          </li>
+          <li>
+            <svg width='24' height='24' viewBox='0 0 24 24' fill='none'>
+              <path
+                d='M12 0L15.2414 8.75862L24 12L15.2414 15.2414L12 24L8.75862 15.2414L0 12L8.75862 8.75862L12 0Z'
+                fill='rgba(249, 115, 22, 0.40)'
+              />
+            </svg>
+            <b>Subscription Start Date:&nbsp;</b>
+            {{subscriptionStartDate}}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class='expiry-date'>
+      <p class='text'>The estimated expiry date</p>
+      <p class='date'>{{expiryDate}}</p>
+    </div>
+
+    <div class='template-main'>
+      <div class='content'>
+        <div class='closing-regards'>
+          <p>
+            If you have any questions or need further assistance, please don’t hesitate to reach out to our customer
+            <a
+              href='https://starlight-nestjs.teams.hng.tech/contact-us'
+              class='link-faq'
+              style='font-weight: 400'
+            >support</a>
+            team or send a mail to us on
+            <a href='mailto:help@boilerplate.com' class='link-email'>boilerplate@gmail.com</a>.
+            <br />We look forward to providing you with an exceptional experience. Thank you for choosing our product!
+          </p>
+        </div>
+
+        <a href='#' class='template-btn button-fill'>Unsubscribe</a>
+        <div class='template-farewell'>
+          <p>Regards,</p>
+          <p>Boilerplate</p>
+        </div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <footer>
+      <div class='footer-container'>
+        <div class='heading'>
+          <svg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path
+              d='M18.8263 1.90393H22.1998L14.8297 10.3274L23.5 21.7899H16.7112L11.394 14.838L5.30995 21.7899H1.93443L9.81743 12.78L1.5 1.90393H8.46111L13.2674 8.25826L18.8263 1.90393ZM17.6423 19.7707H19.5116L7.44539 3.81706H5.43946L17.6423 19.7707Z'
+              fill='#5B5B5D'
+            />
+          </svg>
+          <svg xmlns='http://www.w3.org/2000/svg' width='25' height='24' viewBox='0 0 25 24' fill='none'>
+            <g clip-path='url(#clip0_23775_3072)'>
+              <path
+                d='M12.5 2.16094C15.7063 2.16094 16.0859 2.175 17.3469 2.23125C18.5188 2.28281 19.1516 2.47969 19.5734 2.64375C20.1313 2.85938 20.5344 3.12188 20.9516 3.53906C21.3734 3.96094 21.6313 4.35938 21.8469 4.91719C22.0109 5.33906 22.2078 5.97656 22.2594 7.14375C22.3156 8.40937 22.3297 8.78906 22.3297 11.9906C22.3297 15.1969 22.3156 15.5766 22.2594 16.8375C22.2078 18.0094 22.0109 18.6422 21.8469 19.0641C21.6313 19.6219 21.3687 20.025 20.9516 20.4422C20.5297 20.8641 20.1313 21.1219 19.5734 21.3375C19.1516 21.5016 18.5141 21.6984 17.3469 21.75C16.0813 21.8062 15.7016 21.8203 12.5 21.8203C9.29375 21.8203 8.91406 21.8062 7.65313 21.75C6.48125 21.6984 5.84844 21.5016 5.42656 21.3375C4.86875 21.1219 4.46563 20.8594 4.04844 20.4422C3.62656 20.0203 3.36875 19.6219 3.15313 19.0641C2.98906 18.6422 2.79219 18.0047 2.74063 16.8375C2.68438 15.5719 2.67031 15.1922 2.67031 11.9906C2.67031 8.78438 2.68438 8.40469 2.74063 7.14375C2.79219 5.97187 2.98906 5.33906 3.15313 4.91719C3.36875 4.35938 3.63125 3.95625 4.04844 3.53906C4.47031 3.11719 4.86875 2.85938 5.42656 2.64375C5.84844 2.47969 6.48594 2.28281 7.65313 2.23125C8.91406 2.175 9.29375 2.16094 12.5 2.16094ZM12.5 0C9.24219 0 8.83438 0.0140625 7.55469 0.0703125C6.27969 0.126563 5.40313 0.332812 4.64375 0.628125C3.85156 0.9375 3.18125 1.34531 2.51563 2.01562C1.84531 2.68125 1.4375 3.35156 1.12813 4.13906C0.832812 4.90313 0.626563 5.775 0.570313 7.05C0.514063 8.33437 0.5 8.74219 0.5 12C0.5 15.2578 0.514063 15.6656 0.570313 16.9453C0.626563 18.2203 0.832812 19.0969 1.12813 19.8563C1.4375 20.6484 1.84531 21.3188 2.51563 21.9844C3.18125 22.65 3.85156 23.0625 4.63906 23.3672C5.40313 23.6625 6.275 23.8687 7.55 23.925C8.82969 23.9812 9.2375 23.9953 12.4953 23.9953C15.7531 23.9953 16.1609 23.9812 17.4406 23.925C18.7156 23.8687 19.5922 23.6625 20.3516 23.3672C21.1391 23.0625 21.8094 22.65 22.475 21.9844C23.1406 21.3188 23.5531 20.6484 23.8578 19.8609C24.1531 19.0969 24.3594 18.225 24.4156 16.95C24.4719 15.6703 24.4859 15.2625 24.4859 12.0047C24.4859 8.74688 24.4719 8.33906 24.4156 7.05938C24.3594 5.78438 24.1531 4.90781 23.8578 4.14844C23.5625 3.35156 23.1547 2.68125 22.4844 2.01562C21.8188 1.35 21.1484 0.9375 20.3609 0.632812C19.5969 0.3375 18.725 0.13125 17.45 0.075C16.1656 0.0140625 15.7578 0 12.5 0Z'
+                fill='#5B5B5D'
+              />
+              <path
+                d='M12.5 5.83594C9.09688 5.83594 6.33594 8.59688 6.33594 12C6.33594 15.4031 9.09688 18.1641 12.5 18.1641C15.9031 18.1641 18.6641 15.4031 18.6641 12C18.6641 8.59688 15.9031 5.83594 12.5 5.83594ZM12.5 15.9984C10.2922 15.9984 8.50156 14.2078 8.50156 12C8.50156 9.79219 10.2922 8.00156 12.5 8.00156C14.7078 8.00156 16.4984 9.79219 16.4984 12C16.4984 14.2078 14.7078 15.9984 12.5 15.9984Z'
+                fill='#5B5B5D'
+              />
+              <path
+                d='M20.3469 5.59214C20.3469 6.38902 19.7 7.0312 18.9078 7.0312C18.1109 7.0312 17.4688 6.38433 17.4688 5.59214C17.4688 4.79526 18.1156 4.15308 18.9078 4.15308C19.7 4.15308 20.3469 4.79995 20.3469 5.59214Z'
+                fill='#5B5B5D'
+              />
+            </g>
+            <defs>
+              <clipPath id='clip0_23775_3072'>
+                <rect width='24' height='24' fill='white' transform='translate(0.5)' />
+              </clipPath>
+            </defs>
+          </svg>
+          <svg width='25' height='24' viewBox='0 0 25 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path
+              d='M17.5725 0H13.5278V16.3478C13.5278 18.2957 11.9722 19.8957 10.0363 19.8957C8.10034 19.8957 6.54469 18.2957 6.54469 16.3478C6.54469 14.4348 8.06577 12.8695 9.93257 12.8V8.69567C5.81872 8.7652 2.5 12.1391 2.5 16.3478C2.5 20.5913 5.88786 24 10.0708 24C14.2538 24 17.6416 20.5565 17.6416 16.3478V7.9652C19.1627 9.07827 21.0295 9.73913 23 9.77393V5.66957C19.9579 5.56522 17.5725 3.06087 17.5725 0Z'
+              fill='#5B5B5D'
+            />
+          </svg>
+          <svg xmlns='http://www.w3.org/2000/svg' width='25' height='24' viewBox='0 0 25 24' fill='none'>
+            <path
+              d='M14.9414 5.65873C15.1495 6.54092 15.9417 7.19811 16.8877 7.19811C17.992 7.19811 18.8873 6.30279 18.8873 5.19842C18.8873 4.09404 17.992 3.19873 16.8877 3.19873C15.922 3.19873 15.1167 3.88311 14.9292 4.79342C13.312 4.96686 12.0492 6.33842 12.0492 8.00061C12.0492 8.00436 12.0492 8.00717 12.0492 8.01092C10.2905 8.08498 8.68453 8.58561 7.40953 9.37592C6.93609 9.00936 6.34172 8.79092 5.69672 8.79092C4.14891 8.79092 2.89453 10.0453 2.89453 11.5931C2.89453 12.7162 3.55453 13.6837 4.50797 14.1309C4.60078 17.384 8.14547 20.0006 12.5058 20.0006C16.8661 20.0006 20.4155 17.3812 20.5036 14.1253C21.4495 13.6753 22.1039 12.7106 22.1039 11.594C22.1039 10.0462 20.8495 8.79186 19.3017 8.79186C18.6595 8.79186 18.068 9.00842 17.5955 9.37217C16.3092 8.57623 14.6855 8.07561 12.9089 8.00904C12.9089 8.00623 12.9089 8.00436 12.9089 8.00154C12.9089 6.81092 13.7939 5.82279 14.9414 5.66061V5.65873ZM7.29703 13.3715C7.34391 12.3553 8.01891 11.5753 8.80359 11.5753C9.58828 11.5753 10.1883 12.3994 10.1414 13.4156C10.0945 14.4319 9.50859 14.8012 8.72297 14.8012C7.93734 14.8012 7.25016 14.3878 7.29703 13.3715ZM16.2089 11.5753C16.9945 11.5753 17.6695 12.3553 17.7155 13.3715C17.7623 14.3878 17.0742 14.8012 16.2895 14.8012C15.5048 14.8012 14.918 14.4328 14.8711 13.4156C14.8242 12.3994 15.4233 11.5753 16.2089 11.5753ZM15.2752 15.7228C15.4223 15.7378 15.5161 15.8906 15.4589 16.0275C14.9761 17.1815 13.8361 17.9925 12.5058 17.9925C11.1755 17.9925 10.0364 17.1815 9.55266 16.0275C9.49547 15.8906 9.58922 15.7378 9.73641 15.7228C10.5989 15.6356 11.5317 15.5878 12.5058 15.5878C13.4798 15.5878 14.4117 15.6356 15.2752 15.7228Z'
+              fill='#5B5B5D'
+            />
+          </svg>
+
+          <svg xmlns='http://www.w3.org/2000/svg' width='25' height='24' viewBox='0 0 25 24' fill='none'>
+            <g clip-path='url(#clip0_23775_3080)'>
+              <path
+                d='M22.7234 0H2.27187C1.29219 0 0.5 0.773438 0.5 1.72969V22.2656C0.5 23.2219 1.29219 24 2.27187 24H22.7234C23.7031 24 24.5 23.2219 24.5 22.2703V1.72969C24.5 0.773438 23.7031 0 22.7234 0ZM7.62031 20.4516H4.05781V8.99531H7.62031V20.4516ZM5.83906 7.43438C4.69531 7.43438 3.77188 6.51094 3.77188 5.37187C3.77188 4.23281 4.69531 3.30937 5.83906 3.30937C6.97813 3.30937 7.90156 4.23281 7.90156 5.37187C7.90156 6.50625 6.97813 7.43438 5.83906 7.43438ZM20.9516 20.4516H17.3937V14.8828C17.3937 13.5562 17.3703 11.8453 15.5422 11.8453C13.6906 11.8453 13.4094 13.2937 13.4094 14.7891V20.4516H9.85625V8.99531H13.2687V10.5609H13.3156C13.7891 9.66094 14.9516 8.70938 16.6813 8.70938C20.2859 8.70938 20.9516 11.0813 20.9516 14.1656V20.4516Z'
+                fill='#5B5B5D'
+              />
+            </g>
+            <defs>
+              <clipPath id='clip0_23775_3080'>
+                <rect width='24' height='24' fill='white' transform='translate(0.5)' />
+              </clipPath>
+            </defs>
+          </svg>
+        </div>
+        <div class='content'>
+          <span>
+            Thank you for choosing Boilerplate.com. Need help?
+            <a href='https://starlight-nestjs.teams.hng.tech/contact-us' class='contact-support'>Contact our customer
+              support</a>
+          </span>
+          <hr />
+          <p>
+            You are receiving this email because you signed up at Boilerplate.com. Want to change how you receive these
+            emails?
+          </p>
+          <p>
+            You can
+            <a href='#' style='color: #111; text-decoration: none'>update your preferences</a>
+            or
+            <a href='#' style='color: #111; text-decoration: none'>unsubscribe from this list</a>.
+          </p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -10,12 +10,12 @@ import { EmailController } from './email.controller';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
-import { UserModule } from '../user/user.module';
 
 @Module({
-  providers: [EmailService, QueueService, EmailQueueConsumer, SuperAdminGuard],
+  providers: [EmailService, QueueService, EmailQueueConsumer],
   exports: [EmailService, QueueService],
   imports: [
+    TypeOrmModule.forFeature([User]),
     BullModule.registerQueueAsync({
       name: 'emailSending',
     }),
@@ -34,7 +34,7 @@ import { UserModule } from '../user/user.module';
           from: `"Team Remote Bingo" <${configService.get<string>('SMTP_USER')}>`,
         },
         template: {
-          dir: process.cwd() + '/src/modules/email/templates',
+          dir: process.cwd() + '/src/modules/email/hng-templates',
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
@@ -44,7 +44,6 @@ import { UserModule } from '../user/user.module';
       inject: [ConfigService],
     }),
     ConfigModule,
-    TypeOrmModule.forFeature([User]),
   ],
   controllers: [EmailController],
 })

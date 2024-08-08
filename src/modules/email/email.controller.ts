@@ -15,8 +15,8 @@ import {
 
 @ApiTags('Emails')
 @ApiBearerAuth()
-@Controller('email')
 @UseGuards(SuperAdminGuard)
+@Controller('email')
 export class EmailController {
   constructor(private emailService: EmailService) {}
 
@@ -35,7 +35,6 @@ export class EmailController {
   @ApiResponse({ status: 404, description: 'Template not found', type: ErrorResponseDto })
   @ApiParam({ name: 'templateName', required: true, description: 'The name of the template to update' })
   @Patch('update-template/:templateName')
-  @UseGuards(SuperAdminGuard)
   async updateTemplate(
     @Param('templateName') name: string,
     @Body() body: UpdateTemplateDto,
@@ -48,6 +47,7 @@ export class EmailController {
   @ApiOperation({ summary: 'Retrieve an email template' })
   @ApiResponse({ status: 200, description: 'Template retrieved successfully', type: GetTemplateResponseDto })
   @ApiResponse({ status: 404, description: 'Template not found', type: ErrorResponseDto })
+  @UseGuards(SuperAdminGuard)
   @Post('get-template')
   async getTemplate(@Body() body: getTemplateDto, @Res() res: Response): Promise<any> {
     const response = await this.emailService.getTemplate(body);
