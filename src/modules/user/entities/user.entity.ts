@@ -5,11 +5,12 @@ import { Job } from '../../../modules/jobs/entities/job.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
 import { Notification } from '../../../modules/notifications/entities/notifications.entity';
 import { Testimonial } from '../../../modules/testimonials/entities/testimonials.entity';
-import { OrganisationMember } from '../../organisations/entities/org-members.entity';
+import { Blog } from '../../blogs/entities/blog.entity';
+import { Comment } from '../../comments/entities/comments.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
-import { Comment } from '../../comments/entities/comments.entity';
-import { Blog } from '../../blogs/entities/blog.entity';
+import { Cart } from '../../revenue/entities/cart.entity';
+import { Order } from '../../revenue/entities/order.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -55,18 +56,8 @@ export class User extends AbstractBaseEntity {
   @Column({ default: false })
   is_2fa_enabled: boolean;
 
-  @Column({
-    type: 'enum',
-    enum: UserType,
-    default: UserType.USER,
-  })
-  user_type: UserType;
-
   @OneToMany(() => Organisation, organisation => organisation.owner)
   owned_organisations: Organisation[];
-
-  @OneToMany(() => Organisation, organisation => organisation.creator)
-  created_organisations: Organisation[];
 
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
@@ -77,9 +68,6 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Testimonial, testimonial => testimonial.user)
   testimonials: Testimonial[];
-
-  @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
-  organisationMembers: OrganisationMember[];
 
   @OneToMany(() => Blog, blog => blog.author)
   blogs?: Blog[];
@@ -98,4 +86,10 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Comment, comment => comment.user)
   comments?: Comment[];
+
+  @OneToMany(() => Order, order => order.user)
+  orders?: Order[];
+
+  @OneToMany(() => Cart, cart => cart.user)
+  cart: Cart[];
 }

@@ -7,6 +7,10 @@ import { IFaq, ICreateFaqResponse } from '../faq.interface';
 import { User, UserType } from '../../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { SuperAdminGuard } from '../../../guards/super-admin.guard';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Role } from '../../../modules/role/entities/role.entity';
+import { OrganisationUserRole } from '../../../modules/role/entities/organisation-user-role.entity';
+import { Repository } from 'typeorm';
 
 describe('FaqController (e2e)', () => {
   let app;
@@ -29,17 +33,47 @@ describe('FaqController (e2e)', () => {
     findOne: jest.fn().mockImplementation(({ where: { id } }) => {
       return Promise.resolve({
         id,
-        user_type: UserType.SUPER_ADMIN,
+        // user_type: UserType.SUPER_ADMIN,
+      });
+    }),
+  };
+
+  const mockSuperAdminGuard = {
+    canActivate: jest.fn().mockImplementation(() => true),
+  };
+
+  const mockOrganisationRepository = {
+    findOne: jest.fn().mockImplementation(({ where: { id } }) => {
+      return Promise.resolve({
+        id,
+        owner: { id: 'owner-id' },
+      });
+    }),
+  };
+
+  const mockOrganisationUserRoleRepository = {
+    findOne: jest.fn().mockImplementation(({ where: { organisationId, userId } }) => {
+      return Promise.resolve({
+        role: {
+          id: 'role-id',
+          permissions: [{ title: 'super-admin' }],
+        },
+      });
+    }),
+  };
+
+  const mockRoleRepository = {
+    findOne: jest.fn().mockImplementation(({ where: { name } }) => {
+      return Promise.resolve({
+        id: 'role-id',
+        name,
+        permissions: [{ title: 'super-admin' }],
       });
     }),
   };
 
   const mockUser = {
     sub: 'user-id',
-  };
-
-  const mockSuperAdminGuard = {
-    canActivate: jest.fn().mockImplementation(() => true),
   };
 
   beforeAll(async () => {
@@ -53,6 +87,18 @@ describe('FaqController (e2e)', () => {
         {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
+        },
+        {
+          provide: getRepositoryToken(Organisation),
+          useValue: mockOrganisationRepository,
+        },
+        {
+          provide: getRepositoryToken(Role),
+          useValue: mockRoleRepository,
+        },
+        {
+          provide: getRepositoryToken(OrganisationUserRole),
+          useValue: mockOrganisationUserRoleRepository,
         },
       ],
     })
