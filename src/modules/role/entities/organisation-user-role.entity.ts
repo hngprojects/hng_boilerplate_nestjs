@@ -1,17 +1,17 @@
 import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { Role } from './role.entity';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 
 @Entity('organization_user_role')
 export class OrganisationUserRole extends AbstractBaseEntity {
-  @OneToMany(() => Role, role => role.user_roles)
+  @ManyToOne(() => Role, role => role.user_roles)
   role: Role;
 
-  @OneToMany(() => User, user => user.roles)
+  @ManyToOne(() => User, user => user.roles)
   user: User;
 
-  @OneToMany(() => Organisation, organisation => organisation.roles)
+  @ManyToOne(() => Organisation, organisation => organisation.roles)
   organisation: Organisation;
 }

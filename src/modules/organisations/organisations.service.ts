@@ -79,12 +79,13 @@ export class OrganisationsService {
       const organisationInstance = new Organisation();
       Object.assign(organisationInstance, createOrganisationDto);
       organisationInstance.owner = owner;
+      organisationInstance.members = [owner];
       const newOrganisation = await this.organisationRepository.save(organisationInstance);
 
       const adminRole = new OrganisationUserRole();
-      adminRole.user.id = owner.id;
-      adminRole.organisation.id = newOrganisation.id;
-      adminRole.role.id = superAdminRole.id;
+      adminRole.user = owner;
+      adminRole.organisation = newOrganisation;
+      adminRole.role = superAdminRole;
 
       await this.organisationUserRole.save(adminRole);
 
@@ -219,9 +220,9 @@ export class OrganisationsService {
       user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
 
     const memberOrgs = await this.organisationUserRole.find({
-      relations: ['user', 'role', 'organisation'],
+      relations: ['user', 'role', 'organisation', 'role.permissions'],
       where: {
-        user: { id: user.id },
+        user: { id: userId },
       },
     });
 

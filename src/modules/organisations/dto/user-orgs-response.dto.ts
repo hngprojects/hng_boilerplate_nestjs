@@ -27,12 +27,7 @@ class MemberOrgDto {
   organisation: OrganisationRequestDto;
 }
 
-class DataDto {
-  @ApiProperty({
-    description: "List of User's Created Organisations",
-  })
-  created_organisations: OrganisationRequestDto[];
-
+class MemberOrgDataDto {
   @ApiProperty({
     description: "List of User's Owned Organisations",
   })
@@ -60,7 +55,7 @@ export class UserOrganizationResponseDto {
   @ApiProperty({
     description: "List of all the user's organisations",
   })
-  data: DataDto;
+  data: MemberOrgDataDto;
 }
 
 export class UserOrganizationErrorResponseDto {
