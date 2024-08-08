@@ -88,11 +88,10 @@ describe('EmailService', () => {
     const result = await queueService.sendMail(mailSender);
 
     expect(mockQueue.add).toHaveBeenCalledWith(mailSender.variant, { mail: mailSender.mail });
-    expect(result).toEqual({jobId: jobMock.id});
+    expect(result).toEqual({ jobId: jobMock.id });
   });
 
-  
-describe('createTemplate', () => {
+  describe('createTemplate', () => {
     it('should create a template if HTML is valid', async () => {
       const templateInfo: createTemplateDto = { templateName: 'test', template: '<div></div>' };
       (htmlValidator as jest.Mock).mockResolvedValue({ messages: [] });
@@ -133,7 +132,6 @@ describe('createTemplate', () => {
       });
     });
   });
-
 
   describe('getTemplate', () => {
     it('should return the content of a template', async () => {
