@@ -40,6 +40,8 @@ import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/
 import { TeamsModule } from './modules/teams/teams.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   providers: [
@@ -148,6 +150,13 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
     TeamsModule,
     BlogModule,
     SubscriptionsModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'uploads'),
+      serveRoot: '/uploads',
+      serveStaticOptions: {
+        index: false,
+      },
+    }),
   ],
   controllers: [HealthController, ProbeController],
 })

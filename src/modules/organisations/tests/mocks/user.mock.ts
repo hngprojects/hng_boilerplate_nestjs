@@ -1,6 +1,6 @@
 import { orgMemberMock } from './organisation-member.mock';
-import { profileMock } from './profile.mock';
 import { UserType } from './organisation.mock';
+import { mockProfile } from '../../../../modules/profile/mocks/profileMock';
 
 export const mockUser = {
   id: 'user123',
@@ -29,7 +29,7 @@ export const mockUser = {
   secret: 'secret',
   is_2fa_enabled: false,
   products: [],
-  profile: profileMock,
+  profile: mockProfile,
   organisationMembers: [orgMemberMock],
   blogs: null,
 };

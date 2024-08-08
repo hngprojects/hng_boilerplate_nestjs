@@ -1,7 +1,8 @@
-import { mockProfile } from '../../../modules/profile/mocks/profileMock';
+import { Profile } from '../../../modules/profile/entities/profile.entity';
 import { User, UserType } from '../../user/entities/user.entity';
 
-export const mockUser: User = {
+const profile = new Profile();
+export const mockUserWithProfile: User = {
   email: 'tester@example.com',
   first_name: 'John',
   last_name: 'Doe',
@@ -22,7 +23,7 @@ export const mockUser: User = {
   secret: 'secret',
   is_2fa_enabled: true,
   testimonials: [],
-  profile: mockProfile,
+  profile: null,
   organisationMembers: [],
   notification_settings: [],
   notifications: [],
