@@ -4,24 +4,6 @@ on:
     branches:
       - dev
 
-env:
-  DB_USERNAME: ${{ secrets.DB_USERNAME }}
-  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  DB_DATABASE: ${{ secrets.DB_DATABASE }}
-  DB_HOST: ${{ secrets.DB_HOST }}
-  DB_PORT: ${{ secrets.DB_PORT }}
-  DB_ENTITIES: ${{ secrets.DB_ENTITIES }}
-  DB_MIGRATIONS: ${{ secrets.DB_MIGRATIONS }}
-  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-  GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
-  REDIS_HOST: ${{ secrets.REDIS_HOST }}
-  DB_TYPE: 'postgres'
-  PROFILE: 'staging'
-  NODE_ENV: 'development'
-  PORT: 3100
-  REDIS_PORT: 6379
-
 jobs:
   deploy-pr-for-testing:
     environment:
