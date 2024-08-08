@@ -27,12 +27,12 @@ import { JobsModule } from './modules/jobs/jobs.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
 import { NotificationSettingsModule } from './modules/notification-settings/notification-settings.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
-import { OrganisationPermissionsModule } from './modules/organisation-permissions/organisation-permissions.module';
-import { OrganisationRoleModule } from './modules/organisation-role/organisation-role.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { OtpModule } from './modules/otp/otp.module';
+import { OrganisationPermissionsModule } from './modules/permissions/permissions.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { RoleModule } from './modules/role/role.module';
 import { SqueezeModule } from './modules/squeeze/squeeze.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { TeamsModule } from './modules/teams/teams.module';
@@ -140,7 +140,7 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     BillingPlanModule,
     JobsModule,
     ProfileModule,
-    OrganisationRoleModule,
+    RoleModule,
     OrganisationPermissionsModule,
     RunTestsModule,
     ContactUsModule,

@@ -9,7 +9,6 @@ import { Blog } from '../../blogs/entities/blog.entity';
 import { Comment } from '../../comments/entities/comments.entity';
 import { Cart } from '../../dashboard/entities/cart.entity';
 import { Order } from '../../dashboard/entities/order.entity';
-import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 
@@ -57,18 +56,8 @@ export class User extends AbstractBaseEntity {
   @Column({ default: false })
   is_2fa_enabled: boolean;
 
-  @Column({
-    type: 'enum',
-    enum: UserType,
-    default: UserType.USER,
-  })
-  user_type: UserType;
-
   @OneToMany(() => Organisation, organisation => organisation.owner)
   owned_organisations: Organisation[];
-
-  @OneToMany(() => Organisation, organisation => organisation.creator)
-  created_organisations: Organisation[];
 
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];
@@ -79,9 +68,6 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Testimonial, testimonial => testimonial.user)
   testimonials: Testimonial[];
-
-  @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
-  organisationMembers: OrganisationMember[];
 
   @OneToMany(() => Blog, blog => blog.author)
   blogs?: Blog[];
