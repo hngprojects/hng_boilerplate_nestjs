@@ -1,4 +1,5 @@
-import { Body, Controller, Post, Req, Param, Get, ParseUUIDPipe, HttpStatus } from '@nestjs/common';
+
+import { Body, Controller, Post, Req, Param, Get, ParseUUIDPipe, HttpStatus,DefaultValuePipe, Query, ParseIntPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
 import UserService from '../user/user.service';
@@ -9,6 +10,11 @@ import { TestimonialResponseDto } from './dto/response-testimonial.dto';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { TestimonialResponse } from './interfaces/testimonial-response.interface';
 import { TestimonialData } from './interfaces/testimonials.interface';
+import {
+  GetTestimonialsResponseDto,
+  GetTestimonials400ErrorResponseDto,
+  GetTestimonials404ErrorResponseDto,
+} from './dto/get-testimonials.dto';
 
 @ApiBearerAuth()
 @ApiTags('Testimonials')
@@ -72,5 +78,30 @@ export class TestimonialsController {
       message: SYS_MSG.TESTIMONIAL_FOUND,
       data: responseData,
     };
+  }
+
+  @ApiOperation({ summary: "Get All User's Testimonials" })
+  @ApiResponse({
+    status: 200,
+    description: 'User testimonials retrieved successfully',
+    type: GetTestimonialsResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    type: GetTestimonials404ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'User has no testimonials',
+    type: GetTestimonials400ErrorResponseDto,
+  })
+  @Get('/:user_id')
+  async getAllTestimonials(
+    @Param('user_id') userId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('page_size', new DefaultValuePipe(3), ParseIntPipe) page_size: number
+  ) {
+    return this.testimonialsService.getAllTestimonials(userId, page, page_size);
   }
 }
