@@ -10,14 +10,11 @@ import { UpdateCommentDto } from './dtos/update-comment.dto';
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
-  @Post('add')
-  async addComment(@Body() createCommentDto: CreateCommentDto, @Request() req): Promise<CommentResponseDto> {
-    const { userId } = req.user;
-    return await this.commentsService.addComment(createCommentDto, userId);
-  }
 
   @ApiOperation({ summary: 'Update a comment' })
   @ApiResponse({ status: 200, description: 'The comment has been successfully updated.' })
+  @ApiResponse({ status: 404, description: 'User or Comment not found.' })
+  @ApiResponse({ status: 500, description: 'Internal server error.' })
   @Patch('update/:id')
   async updateComment(
     @Param('id') id: string,
