@@ -26,4 +26,5 @@ export const mockUser: User = {
   notification_settings: [],
   notifications: [],
   hashPassword: () => null,
+  cart: [],
 };
