@@ -39,3 +39,4 @@ export const NOT_ORG_OWNER = 'You do not have permission to update this organisa
 export const PASSWORD_UPDATED = 'Password updated successfully';
 export const REQUEST_SUCCESSFUL = 'Request completed successfully';
 export const DEADLINE_PASSED = 'Job application deadline passed';
+export const VALID_PHONE_NUMBER_REQUIRED = 'Valid phone number and message content must be provided';

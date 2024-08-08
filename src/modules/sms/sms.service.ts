@@ -1,9 +1,9 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import smsConfig from 'config/sms.config';
+import smsConfig from '../../../config/sms.config';
 import { Twilio } from 'twilio';
 import { CreateSmsDto } from './dto/create-sms.dto';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
-import { VALID_PHONE_NUMBER_REQUIRED } from 'src/helpers/SystemMessages';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { VALID_PHONE_NUMBER_REQUIRED } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class SmsService {
