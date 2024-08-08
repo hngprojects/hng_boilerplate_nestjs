@@ -43,7 +43,7 @@ import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SmsModule } from './modules/sms/sms.module';
 import { CommentsModule } from './modules/comments/comments.module';
-import { RevenueModule } from './modules/revenue/revenue.module';
+import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 
 @Module({
   providers: [
@@ -157,7 +157,7 @@ import { RevenueModule } from './modules/revenue/revenue.module';
     SmsModule,
     CommentsModule,
     SubscriptionsModule,
-    RevenueModule,
+    BlogCategoryModule,
   ],
   controllers: [HealthController, ProbeController],
 })
