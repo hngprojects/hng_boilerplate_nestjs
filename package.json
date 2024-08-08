@@ -74,7 +74,8 @@
     "typeorm": "^0.3.20",
     "typeorm-extension": "^3.5.1",
     "types-joi": "^2.1.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
