@@ -65,3 +65,4 @@ export const BLOG_DELETED = 'Blog post has been successfully deleted';
 export const NO_USER_TESTIMONIALS = 'User has no testimonials';
 export const USER_TESTIMONIALS_FETCHED = 'User testimonials retrieved successfully';
 export const QUESTION_ALREADY_EXISTS = 'This question already exists.';
+export const ROLE_ALREADY_EXISTS = 'A role with this name already exists in the organisation';

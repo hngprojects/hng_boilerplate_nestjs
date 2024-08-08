@@ -14,6 +14,7 @@ import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationRole } from './entities/organisation-role.entity';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { ORG_NOT_FOUND, ROLE_ALREADY_EXISTS, ROLE_NOT_FOUND } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationRoleService {
@@ -29,57 +30,38 @@ export class OrganisationRoleService {
   ) {}
 
   async createOrgRoles(createOrganisationRoleDto: CreateOrganisationRoleDto, organisationId: string) {
-    try {
-      const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
-      if (!organisation) {
-        throw new NotFoundException({
-          status_code: HttpStatus.NOT_FOUND,
-          error: 'Not Found',
-          message: 'Organisation not found',
-        });
-      }
-
-      const existingRole = await this.rolesRepository.findOne({
-        where: { name: createOrganisationRoleDto.name, organisation: { id: organisationId } },
-      });
-      if (existingRole) {
-        throw new ConflictException({
-          status_code: HttpStatus.CONFLICT,
-          error: 'Conflict',
-          message: 'A role with this name already exists in the organisation',
-        });
-      }
-
-      const role = this.rolesRepository.create({
-        ...createOrganisationRoleDto,
-        organisation,
-      });
-
-      const createdRole = await this.rolesRepository.save(role);
-
-      const defaultPermissions = await this.defaultPermissionsRepository.find();
-
-      const rolePermissions = defaultPermissions.map(defaultPerm => {
-        const permission = new Permissions();
-        permission.category = defaultPerm.category;
-        permission.permission_list = defaultPerm.permission_list;
-        permission.role = role;
-        return permission;
-      });
-
-      await this.permissionRepository.save(rolePermissions);
-
-      return createdRole;
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
-        throw error;
-      }
-      throw new InternalServerErrorException({
-        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: 'Internal Server Error',
-        message: 'Failed to create organisation role',
-      });
+    const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+    if (!organisation) {
+      throw new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
+
+    const existingRole = await this.rolesRepository.findOne({
+      where: { name: createOrganisationRoleDto.name, organisation: { id: organisationId } },
+    });
+    if (existingRole) {
+      throw new CustomHttpException(ROLE_ALREADY_EXISTS, HttpStatus.CONFLICT);
+    }
+
+    const role = this.rolesRepository.create({
+      ...createOrganisationRoleDto,
+      organisation,
+    });
+
+    const createdRole = await this.rolesRepository.save(role);
+
+    const defaultPermissions = await this.defaultPermissionsRepository.find();
+
+    const rolePermissions = defaultPermissions.map(defaultPerm => {
+      const permission = new Permissions();
+      permission.category = defaultPerm.category;
+      permission.permission_list = defaultPerm.permission_list;
+      permission.role = role;
+      return permission;
+    });
+
+    await this.permissionRepository.save(rolePermissions);
+
+    return createdRole;
   }
 
   async getAllRolesInOrg(organisationID: string) {
@@ -87,7 +69,7 @@ export class OrganisationRoleService {
       where: { id: organisationID },
     });
     if (!organisation) {
-      throw new NotFoundException('Organisation not found');
+      throw new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     return this.rolesRepository
@@ -102,29 +84,22 @@ export class OrganisationRoleService {
   }
 
   async findSingleRole(id: string, organisationId: string): Promise<OrganisationRole> {
-    try {
-      const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
+    const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
 
-      if (!organisation) {
-        throw new NotFoundException(`Organisation with ID ${organisationId} not found`);
-      }
-
-      const role = await this.rolesRepository.findOne({
-        where: { id, organisation: { id: organisationId } },
-        relations: ['permissions'],
-      });
-
-      if (!role) {
-        throw new NotFoundException(`The role with ID ${id} does not exist in the organisation`);
-      }
-
-      return role;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new Error(`Failed to fetch role: ${error.message}`);
+    if (!organisation) {
+      throw new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
+
+    const role = await this.rolesRepository.findOne({
+      where: { id, organisation: { id: organisationId } },
+      relations: ['permissions'],
+    });
+
+    if (!role) {
+      throw new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    return role;
   }
 
   async updateRole(updateRoleDto: UpdateOrganisationRoleDto, orgId: string, roleId: string) {
@@ -135,32 +110,28 @@ export class OrganisationRoleService {
     });
 
     if (!organisation) {
-      throw new NotFoundException({
-        status_code: HttpStatus.NOT_FOUND,
-        error: 'Organization not found',
-        message: `The organization with ID ${orgId} does not exist`,
-      });
+      throw new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const role = await this.rolesRepository.findOne({
       where: {
         id: roleId,
-        organisation: organisation,
+        organisation: { id: orgId },
       },
     });
 
     if (!role) {
-      throw new NotFoundException({
-        status_code: HttpStatus.NOT_FOUND,
-        error: 'Role not found',
-        message: `The role with ID ${roleId} does not exist`,
-      });
+      throw new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     Object.assign(role, updateRoleDto);
-
     await this.rolesRepository.save(role);
-    return role;
+
+    return {
+      id: role.id,
+      name: role.name,
+      description: role.description,
+    };
   }
 
   async removeRole(orgId: string, roleId: string) {
@@ -171,30 +142,22 @@ export class OrganisationRoleService {
     });
 
     if (!organisation) {
-      throw new CustomHttpException(
-        { status_code: 404, error: 'Not Found', message: `The organisation with ID ${orgId} does not exist` },
-        HttpStatus.NOT_FOUND
-      );
+      throw new CustomHttpException(ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const role = await this.rolesRepository.findOne({
       where: {
         id: roleId,
-        organisation: organisation,
+        organisation: { id: orgId },
       },
+      relations: ['permissions'],
     });
 
     if (!role) {
-      throw new CustomHttpException(
-        {
-          status_code: 404,
-          error: 'Not Found',
-          message: `The role with ID ${roleId} does not exist`,
-        },
-        HttpStatus.NOT_FOUND
-      );
+      throw new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
+    await this.permissionRepository.delete({ role: { id: roleId } });
     await this.rolesRepository.remove(role);
 
     return {
