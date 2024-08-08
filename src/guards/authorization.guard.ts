@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, HttpStatus } from '@nestjs/c
 import { Reflector } from '@nestjs/core';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserType } from '../modules/user/entities/user.entity';
+import { User } from '../modules/user/entities/user.entity';
 import * as SYS_MSG from '../helpers/SystemMessages';
 import { Organisation } from './../modules/organisations/entities/organisations.entity';
 import { CustomHttpException } from '../helpers/custom-http-filter';

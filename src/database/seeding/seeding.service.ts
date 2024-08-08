@@ -7,19 +7,25 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User, UserType } from '../../modules/user/entities/user.entity';
-import { Organisation } from '../../modules/organisations/entities/organisations.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
 import { Invite } from '../../modules/invite/entities/invite.entity';
 import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
 import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
 import { DefaultPermissions } from '../../modules/permissions/entities/default-permissions.entity';
 import { PermissionCategory } from '../../modules/permissions/helpers/PermissionCategory';
-import { Profile } from '../../modules/profile/entities/profile.entity';
 import { Notification } from '../../modules/notifications/entities/notifications.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { Organisation } from '../../modules/organisations/entities/organisations.entity';
+
+import { Profile } from '../../modules/profile/entities/profile.entity';
+import { Cart } from '../../modules/revenue/entities/cart.entity';
+import { OrderItem } from '../../modules/revenue/entities/order-items.entity';
+import { Order } from '../../modules/revenue/entities/order.entity';
+import { Transaction } from '../../modules/revenue/entities/transaction.entity';
+import { User } from '../../modules/user/entities/user.entity';
 import { CreateAdminDto } from './dto/admin.dto';
-import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
+import { Role } from '../../modules/role/entities/role.entity';
 
 @Injectable()
 export class SeedingService {
@@ -34,9 +40,11 @@ export class SeedingService {
     const categoryRepository = this.dataSource.getRepository(ProductCategory);
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
     const notificationRepository = this.dataSource.getRepository(Notification);
+    const defaultRoleRepository = this.dataSource.getRepository(Role);
 
     try {
       const existingPermissions = await defaultPermissionRepository.count();
+      const existingRoles = await defaultRoleRepository.count();
 
       //Populate the database with default permissions if none exits else stop execution
       if (existingPermissions <= 0) {
@@ -49,6 +57,18 @@ export class SeedingService {
 
         await defaultPermissionRepository.save(defaultPermissions);
       }
+
+      //Populate the database with default Roles if none exits else stop execution
+      // if (existingRoles <= 0) {
+      //   const defaultRoles = Object.values(RoleCategory).map(name =>
+      //     defaultRoleRepository.create({
+      //       description: RoleCategoryDescriptions[name],
+      //     })
+      //   );
+
+      //   // Save all default roles to the database
+      //   await defaultRoleRepository.save(defaultRoles);
+      // }
 
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
@@ -77,6 +97,7 @@ export class SeedingService {
         await userRepository.save([u1, u2]);
 
         const savedUsers = await userRepository.find();
+
         if (savedUsers.length !== 2) {
           throw new Error('Failed to create all users');
         }
@@ -284,5 +305,149 @@ export class SeedingService {
       if (error instanceof UnauthorizedException || error instanceof ConflictException) throw error;
       throw new InternalServerErrorException(SERVER_ERROR);
     }
+  }
+
+  async seedTransactions() {
+    const cartRepository = this.dataSource.getRepository(Cart);
+    const orderRepository = this.dataSource.getRepository(Order);
+    const orderItemRepository = this.dataSource.getRepository(OrderItem);
+    const transactionRepository = this.dataSource.getRepository(Transaction);
+    const userRepository = this.dataSource.getRepository(User);
+    const productRepository = this.dataSource.getRepository(Product);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const savedUsers = await userRepository.find();
+    const savedProducts = await productRepository.find();
+
+    const orders = [
+      orderRepository.create({
+        user: savedUsers[0],
+        total_price: 1000,
+      }),
+      orderRepository.create({
+        user: savedUsers[1],
+        total_price: 1500,
+      }),
+      orderRepository.create({
+        user: savedUsers[0],
+        total_price: 750,
+      }),
+      orderRepository.create({
+        user: savedUsers[1],
+        total_price: 1250,
+      }),
+      orderRepository.create({
+        user: savedUsers[0],
+        total_price: 2000,
+      }),
+    ];
+
+    await orderRepository.save(orders);
+
+    const orderItems = [
+      orderItemRepository.create({
+        order: orders[0],
+        product: savedProducts[0],
+        quantity: 2,
+        total_price: 500,
+      }),
+      orderItemRepository.create({
+        order: orders[1],
+        product: savedProducts[1],
+        quantity: 3,
+        total_price: 1500,
+      }),
+      orderItemRepository.create({
+        order: orders[2],
+        product: savedProducts[2],
+        quantity: 1,
+        total_price: 750,
+      }),
+      orderItemRepository.create({
+        order: orders[3],
+        product: savedProducts[0],
+        quantity: 5,
+        total_price: 1250,
+      }),
+      orderItemRepository.create({
+        order: orders[4],
+        product: savedProducts[1],
+        quantity: 4,
+        total_price: 2000,
+      }),
+    ];
+
+    await orderItemRepository.save(orderItems);
+
+    const carts = [
+      cartRepository.create({
+        user: savedUsers[0],
+        product: savedProducts[0],
+        quantity: 1,
+      }),
+      cartRepository.create({
+        user: savedUsers[1],
+        product: savedProducts[1],
+        quantity: 2,
+      }),
+      cartRepository.create({
+        user: savedUsers[0],
+        product: savedProducts[2],
+        quantity: 1,
+      }),
+      cartRepository.create({
+        user: savedUsers[1],
+        product: savedProducts[0],
+        quantity: 3,
+      }),
+      cartRepository.create({
+        user: savedUsers[0],
+        product: savedProducts[1],
+        quantity: 2,
+      }),
+    ];
+
+    await cartRepository.save(carts);
+
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    const currentMonthDate = (day: number) => new Date(currentYear, currentMonth, day);
+    const previousMonthDate = (day: number) => new Date(currentYear, currentMonth - 1, day);
+
+    const transactions = [
+      transactionRepository.create({
+        order: orders[0],
+        amount: 1000,
+        date: currentMonthDate(1),
+      }),
+      transactionRepository.create({
+        order: orders[1],
+        amount: 1500,
+        date: currentMonthDate(10),
+      }),
+      transactionRepository.create({
+        order: orders[2],
+        amount: 750,
+        date: currentMonthDate(20),
+      }),
+      transactionRepository.create({
+        order: orders[3],
+        amount: 1250,
+        date: previousMonthDate(1),
+      }),
+      transactionRepository.create({
+        order: orders[4],
+        amount: 2000,
+        date: previousMonthDate(15),
+      }),
+    ];
+
+    await transactionRepository.save(transactions);
+
+    await queryRunner.commitTransaction();
   }
 }

@@ -2,9 +2,9 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Permissions } from '../../permissions/entities/permissions.entity';
 
-@Entity()
+@Entity({ name: 'defaultRole' })
 export class Role extends AbstractBaseEntity {
-  @Column({ type: 'text' })
+  @Column()
   name: string;
 
   @Column({ type: 'text', nullable: true })

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Organisation } from '../../entities/organisations.entity';
+
 import { Profile } from '../../../profile/entities/profile.entity';
+import { Organisation } from '../../entities/organisations.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -9,6 +10,9 @@ export enum UserType {
 }
 
 export const createMockOrganisation = (): Organisation => {
+  const org = new Organisation();
+  org.id = uuidv4();
+
   const profileMock: Profile = {
     id: 'some-uuid',
     username: 'mockuser',
@@ -26,28 +30,6 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
   };
 
-  // Create a mock object that matches the OrganisationRole interface
-  const organisationRoleMock = {
-    id: uuidv4(),
-    name: 'Admin',
-    description: 'Administrator role with full permissions',
-    permissions: [],
-    organisation: null,
-    organisationMembers: [],
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
-
-  const orgMemberMock = {
-    id: uuidv4(),
-    created_at: new Date(),
-    updated_at: new Date(),
-    user_id: null,
-    role: organisationRoleMock,
-    organisation_id: null,
-    profile_id: profileMock,
-  };
-
   const ownerAndCreator = {
     id: uuidv4(),
     created_at: new Date(),
@@ -60,6 +42,7 @@ export const createMockOrganisation = (): Organisation => {
     two_factor_secret: 'some-secret',
     backup_codes: [],
     jobs: [],
+    status: 'Hello from the children of planet Earth',
     phone: '+1234567890',
     hashPassword: async () => {},
     is_active: true,
@@ -74,12 +57,12 @@ export const createMockOrganisation = (): Organisation => {
     is_2fa_enabled: false,
     products: [],
     profile: profileMock,
-    organisationMembers: [orgMemberMock],
     blogs: [],
+    cart: [],
   };
 
   return {
-    id: uuidv4(),
+    ...org,
     name: 'John & Co',
     description: 'An imports organisation',
     email: 'johnCo@example.com',

@@ -339,11 +339,10 @@ describe('AuthenticationService', () => {
     const emailData = {
       to: email,
       subject: 'Reset Password',
-      template: 'reset-password',
+      template: 'Password-Reset-Complete-Template',
       context: {
-        link: 'http://example.com/auth/reset-password',
-        email: email,
-        token: '123456',
+        otp: '123456',
+        name: email,
       },
     };
 
