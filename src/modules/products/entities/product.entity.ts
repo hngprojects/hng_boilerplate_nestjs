@@ -1,4 +1,3 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
