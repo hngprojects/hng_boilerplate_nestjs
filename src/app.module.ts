@@ -44,6 +44,7 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 
 @Module({
   providers: [
@@ -158,6 +159,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     SubscriptionsModule,
     PaymentsModule,
     RevenueModule,
+    BlogCategoryModule,
   ],
   controllers: [HealthController, ProbeController],
 })
