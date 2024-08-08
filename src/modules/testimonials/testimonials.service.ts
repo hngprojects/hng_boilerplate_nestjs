@@ -13,6 +13,7 @@ import * as SYS_MSG from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import UserService from '../user/user.service';
 import { TestimonialMapper } from './mappers/testimonial.mapper';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 
 @Injectable()
 export class TestimonialsService {
@@ -91,4 +92,23 @@ export class TestimonialsService {
       },
     };
   }
+
+  async updateTestimonial(id: string, updateTestimonialDto: UpdateTestimonialDto, userId: string) {
+    const testimonial = await this.testimonialRepository.findOne({ where: { id, user: { id: userId } } });
+  
+    if (!testimonial) {
+      throw new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND);
+    }
+  
+    Object.assign(testimonial, updateTestimonialDto);
+    await this.testimonialRepository.save(testimonial);
+  
+    return {
+      id: testimonial.id,
+      user_id: userId,
+      content: testimonial.content,
+      name: testimonial.name,
+      updated_at: new Date(),
+    };
+  } 
 }

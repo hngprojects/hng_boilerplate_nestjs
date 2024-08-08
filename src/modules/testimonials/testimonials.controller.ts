@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Get, Param, DefaultValuePipe, Query, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Post, Req, Get, Param, DefaultValuePipe, Query, ParseIntPipe, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
 import UserService from '../user/user.service';
@@ -10,6 +10,8 @@ import {
   GetTestimonials400ErrorResponseDto,
   GetTestimonials404ErrorResponseDto,
 } from './dto/get-testimonials.dto';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
+import { UpdateTestimonialResponseDto } from './dto/update-testimonial.response.dto';
 
 @ApiBearerAuth()
 @ApiTags('Testimonials')
@@ -68,4 +70,26 @@ export class TestimonialsController {
   ) {
     return this.testimonialsService.getAllTestimonials(userId, page, page_size);
   }
+
+  @Patch(':id')
+@ApiOperation({ summary: 'Update Testimonial' })
+@ApiResponse({ status: 200, description: 'Testimonial updated successfully' })
+@ApiResponse({ status: 404, description: 'Testimonial not found' })
+@ApiResponse({ status: 401, description: 'Unauthorized' })
+@ApiResponse({ status: 500, description: 'Internal Server Error' })
+async update(
+  @Param('id') id: string,
+  @Body() updateTestimonialDto: UpdateTestimonialDto,
+  @Req() req: { user: UserPayload }
+): Promise<UpdateTestimonialResponseDto> {
+  const userId = req.user.id;
+
+  const data = await this.testimonialsService.updateTestimonial(id, updateTestimonialDto, userId);
+
+  return {
+    status: 'success',
+    message: 'Testimonial updated successfully',
+    data,
+  }
+}
 }
