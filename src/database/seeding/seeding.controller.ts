@@ -1,10 +1,11 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { SeedingService } from './seeding.service';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { skipAuth } from '../../helpers/skipAuth';
 import { CreateAdminDto } from './dto/admin.dto';
-import { User } from '../../modules/user/entities/user.entity';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
+import { SeedingService } from './seeding.service';
 
+@ApiTags('Seed')
 @skipAuth()
 @Controller('seed')
 export class SeedingController {
@@ -24,5 +25,11 @@ export class SeedingController {
   @Post('super-admin')
   async seedSuperAdmin(@Body() adminDetails: CreateAdminDto): Promise<CreateAdminResponseDto> {
     return this.seedingService.createSuperAdmin(adminDetails);
+  }
+
+  @Post('transactions')
+  @ApiOperation({ summary: 'Seed transactions' })
+  async seedTransactions() {
+    return this.seedingService.seedTransactions();
   }
 }

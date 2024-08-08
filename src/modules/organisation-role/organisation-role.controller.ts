@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -111,5 +112,27 @@ export class OrganisationRoleController {
       status_code: 200,
       data,
     };
+  }
+
+  @Delete(':orgId/roles/:roleId')
+  @ApiOperation({ summary: 'remove a role from an organization' })
+  @ApiResponse({
+    status: 200,
+    description: 'Role successfully removed',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid role ID format',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'The role with ID does not exist',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'The organisation with ID does not exist',
+  })
+  async removeRole(@Param('orgId') orgId: string, @Param('roleId') roleId: string) {
+    return this.organisationRoleService.removeRole(orgId, roleId);
   }
 }

@@ -12,21 +12,28 @@ import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
-import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationMember } from './entities/org-members.entity';
 import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
-import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
-import { AddMemberDto } from './dto/add-member.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
+import { UpdateOrganisationDto } from './dto/update-organisation.dto';
+import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
+import { ORG_MEMBER_DOES_NOT_BELONG, ORG_MEMBER_NOT_FOUND, ROLE_NOT_FOUND } from '../../helpers/SystemMessages';
+import { MemberRoleMapper } from './mapper/member-role.mapper';
+import { AddMemberDto } from './dto/add-member.dto';
 import { DefaultRole } from '../organisation-role/entities/role.entity';
 import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
 import { RoleCategory } from '../organisation-role/helpers/RoleCategory';
 import { Permissions } from '../organisation-permissions/entities/permissions.entity';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import UserService from '../user/user.service';
+import { isUUID } from 'class-validator';
+import { createObjectCsvStringifier } from 'csv-writer';
+import { join } from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class OrganisationsService {
@@ -44,7 +51,8 @@ export class OrganisationsService {
     @InjectRepository(DefaultPermissions)
     private readonly defaultPermissionsRepository: Repository<DefaultPermissions>,
     @InjectRepository(Permissions)
-    private readonly permissionsRepository: Repository<Permissions>
+    private readonly permissionsRepository: Repository<Permissions>,
+    private readonly userService: UserService
   ) {}
 
   async getOrganisationMembers(
@@ -149,53 +157,58 @@ export class OrganisationsService {
     return emailFound?.length ? true : false;
   }
 
-  async updateOrganisation(
-    id: string,
-    updateOrganisationDto: UpdateOrganisationDto
-  ): Promise<{ message: string; org: Organisation }> {
-    try {
-      const org = await this.organisationRepository.findOneBy({ id });
-      if (!org) {
-        throw new NotFoundException('organisation not found');
-      }
-      await this.organisationRepository.update(id, updateOrganisationDto);
-      const updatedOrg = await this.organisationRepository.findOneBy({ id });
+  async updateOrganisation(orgId: string, updateOrganisationDto: UpdateOrganisationDto) {
+    const organisation = await this.organisationRepository.findOne({ where: { id: orgId } });
 
-      return { message: 'Organisation successfully updated', org: updatedOrg };
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(`An internal server error occurred: ${error.message}`);
+    if (!organisation) {
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
+
+    await this.organisationRepository.update(orgId, updateOrganisationDto);
+    const updatedOrg = await this.organisationRepository.findOne({ where: { id: orgId } });
+
+    return {
+      message: SYS_MSG.ORG_UPDATE,
+      data: updatedOrg,
+    };
   }
 
-  async removeOrganisationMember(removeOrganisationMemberDto: RemoveOrganisationMemberDto) {
-    const { organisationId, userId } = removeOrganisationMemberDto;
+  async updateMemberRole(orgId: string, memberId: string, updateMemberRoleDto: UpdateMemberRoleDto) {
+    const member = await this.organisationMemberRepository.findOne({
+      where: { id: memberId },
+      relations: ['user_id', 'organisation_id', 'role'],
+    });
 
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new CustomHttpException('No user found with the provided id', 404);
+    if (!member) {
+      throw new CustomHttpException(ORG_MEMBER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const org = await this.organisationRepository.findOne({ where: { id: organisationId } });
-    if (!org) {
-      throw new CustomHttpException('No organisation found with the provided id', 404);
+    if (member.organisation_id.id !== orgId) {
+      throw new CustomHttpException(ORG_MEMBER_DOES_NOT_BELONG, HttpStatus.FORBIDDEN);
     }
 
-    const orgMember = await this.organisationMemberRepository.findOne({
+    const newRole = await this.roleRepository.findOne({
       where: {
-        organisation_id: { id: organisationId },
-        user_id: { id: userId },
+        name: updateMemberRoleDto.role,
+        organisation: { id: orgId },
       },
     });
-    if (!orgMember) {
-      throw new CustomHttpException('No organisation member found with provided ids', 404);
+
+    if (!newRole) {
+      throw new CustomHttpException(ROLE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    await this.organisationMemberRepository.softDelete(orgMember.id);
+    member.role = newRole;
+    await this.organisationMemberRepository.save(member);
 
-    return { message: 'Member removed from organisation successfully' };
+    return {
+      message: `${member.user_id.first_name} ${member.user_id.last_name} has successfully been added to the ${newRole.name} role`,
+      data: {
+        user: member.user_id,
+        org: member.organisation_id,
+        role: newRole,
+      },
+    };
   }
 
   async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
@@ -234,5 +247,81 @@ export class OrganisationsService {
 
     await this.organisationMemberRepository.save(newMember);
     return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
+  }
+
+  async getUserOrganisations(userId: string) {
+    const res = await this.userService.getUserDataWithoutPasswordById(userId);
+    const user = res.user as User;
+
+    const createdOrgs =
+      user.created_organisations && user.created_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+
+    const ownedOrgs =
+      user.owned_organisations && user.owned_organisations.map(org => OrganisationMapper.mapToResponseFormat(org));
+
+    const memberOrgs = await this.organisationMemberRepository.find({
+      where: { user_id: { id: user.id } },
+      relations: ['organisation_id', 'user_id', 'role'],
+    });
+
+    const memberOrgsMapped =
+      memberOrgs &&
+      memberOrgs.map(org => {
+        const organisation = org.organisation_id && OrganisationMapper.mapToResponseFormat(org.organisation_id);
+        const role = org.role && MemberRoleMapper.mapToResponseFormat(org.role);
+        return {
+          organisation,
+          role,
+        };
+      });
+
+    if (
+      (!createdOrgs && !ownedOrgs && !memberOrgsMapped) ||
+      (!createdOrgs.length && !ownedOrgs.length && !memberOrgsMapped.length)
+    ) {
+      throw new CustomHttpException(SYS_MSG.NO_USER_ORGS, HttpStatus.BAD_REQUEST);
+    }
+
+    return {
+      message: 'Organisations retrieved successfully',
+      data: {
+        created_organisations: createdOrgs,
+        owned_organisations: ownedOrgs,
+        member_organisations: memberOrgsMapped,
+      },
+    };
+  }
+
+  async getOrganizationDetailsById(orgId: string) {
+    if (!isUUID(orgId)) {
+      throw new CustomHttpException('Must Provide a valid organization Id', HttpStatus.BAD_REQUEST);
+    }
+
+    const orgDetails = await this.organisationRepository.findOne({ where: { id: orgId } });
+
+    if (!orgDetails) {
+      throw new CustomHttpException('Organization Id Not Found', HttpStatus.NOT_FOUND);
+    }
+    return { message: 'Fetched Organization Details Successfully', data: orgDetails };
+  }
+
+  async exportOrganisationMembers(orgId: string, userId: string): Promise<string> {
+    const membersResponse = await this.getOrganisationMembers(orgId, 1, Number.MAX_SAFE_INTEGER, userId);
+
+    const csvStringifier = createObjectCsvStringifier({
+      header: [
+        { id: 'id', title: 'ID' },
+        { id: 'name', title: 'Name' },
+        { id: 'email', title: 'Email' },
+        { id: 'role', title: 'Role' },
+      ],
+    });
+
+    const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(membersResponse.data);
+
+    const filePath = join(__dirname, `organisation-members-${orgId}.csv`);
+    fs.writeFileSync(filePath, csvData);
+
+    return filePath;
   }
 }

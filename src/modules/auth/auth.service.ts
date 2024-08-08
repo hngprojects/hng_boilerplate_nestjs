@@ -18,7 +18,6 @@ import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
-import { OrganisationsService } from '../organisations/organisations.service';
 
 @Injectable()
 export default class AuthenticationService {
@@ -27,8 +26,7 @@ export default class AuthenticationService {
     private jwtService: JwtService,
     private otpService: OtpService,
     private emailService: EmailService,
-    private googleAuthService: GoogleAuthService,
-    private organisationService: OrganisationsService
+    private googleAuthService: GoogleAuthService
   ) {}
 
   async createNewUser(createUserDto: CreateUserDTO) {
@@ -50,18 +48,7 @@ export default class AuthenticationService {
     }
 
     const token = (await this.otpService.createOtp(user.id)).token;
-
-    const newOrganisationPaload = {
-      name: `${user.first_name}'s Organisation`,
-      description: '',
-      email: user.email,
-      industry: '',
-      type: '',
-      country: '',
-      address: '',
-      state: '',
-    };
-    const newOrganization = await this.organisationService.create(newOrganisationPaload, user.id);
+    await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
 
@@ -91,6 +78,7 @@ export default class AuthenticationService {
 
     const token = (await this.otpService.createOtp(user.id)).token;
     await this.emailService.sendForgotPasswordMail(user.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+
     return {
       message: SYS_MSG.EMAIL_SENT,
     };
@@ -295,7 +283,7 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: {
+      data: {
         id: userExists.id,
         email: userExists.email,
         first_name: userExists.first_name,
@@ -381,7 +369,7 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: responsePayload,
+      data: responsePayload,
     };
   }
 }

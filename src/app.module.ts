@@ -38,8 +38,10 @@ import { HelpCenterModule } from './modules/help-center/help-center.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/newsletter-subscription.module';
 import { TeamsModule } from './modules/teams/teams.module';
+import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { RevenueModule } from './modules/revenue/revenue.module';
 
 @Module({
   providers: [
@@ -122,6 +124,8 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
         redis: {
           host: authConfig().redis.host,
           port: +authConfig().redis.port,
+          password: authConfig().redis.password,
+          username: authConfig().redis.username,
         },
       }),
     }),
@@ -146,8 +150,10 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
     WaitlistModule,
     NewsletterSubscriptionModule,
     TeamsModule,
+    FlutterwaveModule,
     BlogModule,
     SubscriptionsModule,
+    RevenueModule,
   ],
   controllers: [HealthController, ProbeController],
 })
