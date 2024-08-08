@@ -6,11 +6,12 @@ import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { User } from '../../user/entities/user.entity';
 import { JobApplicationDto } from '../dto/job-application.dto';
-import { JobDto } from '../dto/job.dto';
+import { JobDto, SalaryRange, JobType, JobMode } from '../dto/job.dto';
 import { JobApplication } from '../entities/job-application.entity';
 import { Job } from '../entities/job.entity';
 import { JobsService } from '../jobs.service';
 import { jobsMock } from './mocks/jobs.mock';
+import { JobSearchDto } from '../dto/jobSearch.dto';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -22,7 +23,7 @@ describe('JobsService', () => {
   const mockJob = {
     data: {
       is_deleted: false,
-      deadline: new Date(new Date().getTime() + 1000 * 60 * 60 * 24).toISOString(), // Future date
+      deadline: new Date(new Date().getTime() + 1000 * 60 * 60 * 24).toISOString(),
     },
   };
 
@@ -70,6 +71,14 @@ describe('JobsService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
+            createQueryBuilder: jest.fn().mockReturnValue({
+              where: jest.fn().mockReturnThis(),
+              andWhere: jest.fn().mockReturnThis(),
+              getCount: jest.fn().mockReturnThis(),
+              skip: jest.fn().mockReturnThis(),
+              take: jest.fn().mockReturnThis(),
+              getMany: jest.fn().mockReturnThis(),
+            }),
           },
         },
         {
@@ -121,10 +130,10 @@ describe('JobsService', () => {
       expect(result.data).toEqual(createJobDto);
     });
 
-    it('should throw NotFoundException if user is not found', async () => {
+    it('should throw CustomHttpException if user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.create({} as JobDto, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.create({} as JobDto, 'nonexistent')).rejects.toThrow(CustomHttpException);
     });
   });
 
@@ -184,6 +193,82 @@ describe('JobsService', () => {
         ...mockJob,
       });
       expect(saveMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('searchJobs', () => {
+    it('should return jobs based on search criteria', async () => {
+      const searchDto: JobSearchDto = {
+        location: 'Boston',
+        salary_range: '70k_to_100k' as SalaryRange,
+        job_type: 'full-time' as JobType,
+        job_mode: 'remote' as JobMode,
+        page: 1,
+        limit: 10,
+      };
+
+      jest.spyOn(jobRepository, 'createQueryBuilder').mockImplementation(() => {
+        return {
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          getCount: jest.fn().mockResolvedValue(1),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getMany: jest.fn().mockResolvedValue([mockJob]),
+        } as any;
+      });
+
+      const result = await service.searchJobs(searchDto, searchDto.page, searchDto.limit);
+      expect(result.status_code).toBe(200);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toEqual(mockJob);
+    });
+
+    it('should return empty array if no jobs match the criteria', async () => {
+      const searchDto: JobSearchDto = {
+        location: 'Nowhere',
+        salary_range: '100k_to_150k' as SalaryRange,
+        job_type: 'part-time' as JobType,
+        job_mode: 'onsite' as JobMode,
+        page: 1,
+        limit: 10,
+      };
+
+      jest.spyOn(jobRepository, 'createQueryBuilder').mockImplementation(() => {
+        return {
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          getCount: jest.fn().mockResolvedValue(0),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getMany: jest.fn().mockResolvedValue([]),
+        } as any;
+      });
+
+      const result = await service.searchJobs(searchDto, searchDto.page, searchDto.limit);
+      expect(result.status_code).toBe(200);
+      expect(result.data).toHaveLength(0);
+    });
+
+    it('should handle pagination correctly', async () => {
+      const searchDto: JobSearchDto = {};
+      const page = 2;
+      const limit = 5;
+
+      jest.spyOn(jobRepository, 'createQueryBuilder').mockImplementation(() => {
+        return {
+          where: jest.fn().mockReturnThis(),
+          andWhere: jest.fn().mockReturnThis(),
+          getCount: jest.fn().mockResolvedValue(12),
+          skip: jest.fn().mockReturnThis(),
+          take: jest.fn().mockReturnThis(),
+          getMany: jest.fn().mockResolvedValue([mockJob, mockJob]),
+        } as any;
+      });
+
+      const result = await service.searchJobs(searchDto, page, limit);
+      expect(result.status_code).toBe(200);
+      expect(result.data).toHaveLength(2);
     });
   });
 });

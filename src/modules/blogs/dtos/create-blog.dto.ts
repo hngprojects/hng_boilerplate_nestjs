@@ -11,13 +11,13 @@ export class CreateBlogDto {
   @IsNotEmpty()
   content: string;
 
-  @ApiProperty({ description: 'The tags associated with the blog', isArray: true, required: false })
+  @ApiProperty({ description: 'The tags associated with the blog', required: false })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
 
-  @ApiProperty({ description: 'The image URLs associated with the blog', isArray: true, required: false })
+  @ApiProperty({ description: 'The image URLs associated with the blog', required: false })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
