@@ -41,22 +41,8 @@ export class BlogController {
   @ApiOperation({ summary: 'Search and filter blogs' })
   @ApiResponse({ status: 200, description: 'Search results returned successfully.', type: [BlogResponseDto] })
   async searchBlogs(@Query() query: any): Promise<any> {
-    const { data, total } = await this.blogService.searchBlogs(query);
-    const totalPages = Math.ceil(total / (query.page_size || 10));
-
-    return {
-      status: 200,
-      current_page: query.page || 1,
-      total_pages: totalPages,
-      total_results: total,
-      blogs: data,
-      meta: {
-        has_next: (query.page || 1) < totalPages,
-        total: total,
-        next_page: (query.page || 1) < totalPages ? (query.page || 1) + 1 : null,
-        prev_page: (query.page || 1) > 1 ? (query.page || 1) - 1 : null,
-      },
-    };
+    const result = await this.blogService.searchBlogs(query);
+    return result;
   }
 
   @Put(':id')

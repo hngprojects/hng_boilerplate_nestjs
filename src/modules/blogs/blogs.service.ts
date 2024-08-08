@@ -107,7 +107,13 @@ export class BlogService {
     } else await this.blogRepository.remove(blog);
   }
 
-  async searchBlogs(query: any): Promise<{ data: BlogResponseDto[]; total: number }> {
+  async searchBlogs(
+    query: any
+  ): Promise<{
+    status_code: number;
+    message: string;
+    data: { current_page: number; total_pages: number; total_results: number; blogs: BlogResponseDto[]; meta: any };
+  }> {
     const { page = 1, page_size = 10 } = query;
     const skip = (page - 1) * page_size;
 
@@ -123,15 +129,43 @@ export class BlogService {
     });
 
     if (!result || result.length === 0) {
-      CustomExceptionHandler({
-        response: 'No results found for the provided search criteria',
-        status: 404,
-      });
-      return { data: [], total: 0 };
+      return {
+        status_code: HttpStatus.NOT_FOUND,
+        message: 'no_results_found_for_the_provided_search_criteria',
+        data: {
+          current_page: page,
+          total_pages: 0,
+          total_results: 0,
+          blogs: [],
+          meta: {
+            has_next: false,
+            total: 0,
+            next_page: null,
+            prev_page: null,
+          },
+        },
+      };
     }
 
     const data = this.mapBlogResults(result);
-    return { data, total };
+    const totalPages = Math.ceil(total / page_size);
+
+    return {
+      status_code: HttpStatus.OK,
+      message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
+      data: {
+        current_page: page,
+        total_pages: totalPages,
+        total_results: total,
+        blogs: data,
+        meta: {
+          has_next: page < totalPages,
+          total,
+          next_page: page < totalPages ? page + 1 : null,
+          prev_page: page > 1 ? page - 1 : null,
+        },
+      },
+    };
   }
 
   private buildWhereClause(query: any): FindOptionsWhere<Blog> {
@@ -164,10 +198,7 @@ export class BlogService {
       if (query.hasOwnProperty(key) && query[key] !== undefined) {
         const value = query[key];
         if (typeof value === 'string' && !value.trim()) {
-          CustomExceptionHandler({
-            response: `${key.charAt(0).toUpperCase() + key.slice(1)} value is empty`,
-            status: 400,
-          });
+          throw new CustomHttpException(`${key.replace(/_/g, ' ')} value is empty`, HttpStatus.BAD_REQUEST);
         }
       }
     }
@@ -177,7 +208,7 @@ export class BlogService {
     return result.map(blog => {
       if (!blog.author) {
         CustomExceptionHandler({
-          response: 'Author not found',
+          response: 'author_not_found',
           status: 500,
         });
       }
