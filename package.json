@@ -32,8 +32,6 @@
     "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
-    "@css-inline/css-inline": "^0.14.1",
-    "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
     "@faker-js/faker": "^8.4.1",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^3.0.2",
@@ -46,6 +44,7 @@
     "@nestjs/swagger": "^7.4.0",
     "@nestjs/typeorm": "^10.0.2",
     "@types/nodemailer": "^6.4.15",
+    "axios": "^1.7.2",
     "@types/speakeasy": "^2.0.10",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
