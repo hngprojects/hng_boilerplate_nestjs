@@ -1,24 +1,24 @@
 import {
-  BadRequestException,
   ForbiddenException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 import { Repository } from 'typeorm';
-import { Product, StockStatusType } from './entities/product.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { CreateProductRequestDto } from './dto/create-product.dto';
-import { UpdateProductDTO } from './dto/update-product.dto';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as systemMessages from '../../helpers/SystemMessages';
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { Comment } from '../comments/entities/comments.entity';
+import { Organisation } from '../organisations/entities/organisations.entity';
 import { User } from '../user/entities/user.entity';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
-import * as systemMessages from '../../helpers/SystemMessages';
+import { CreateProductRequestDto } from './dto/create-product.dto';
+import { UpdateProductDTO } from './dto/update-product.dto';
+import { ProductVariant } from './entities/product-variant.entity';
+import { Product, StockStatusType } from './entities/product.entity';
 
 interface SearchCriteria {
   name?: string;
@@ -49,6 +49,7 @@ export class ProductsService {
     newProduct.org = org;
     const statusCal = await this.calculateProductStatus(dto.quantity);
     newProduct.stock_status = statusCal;
+    newProduct.cost_price = 0.2 * dto.price - dto.price;
     const product = await this.productRepository.save(newProduct);
     if (!product || !newProduct)
       throw new InternalServerErrorException({
@@ -66,7 +67,6 @@ export class ProductsService {
         description: product.description,
         price: product.price,
         status: product.stock_status,
-        is_deleted: product.is_deleted,
         quantity: product.quantity,
         created_at: product.created_at,
         updated_at: product.updated_at,
@@ -144,6 +144,7 @@ export class ProductsService {
     try {
       await this.productRepository.update(productId, {
         ...updateProductDto,
+        cost_price: 0.2 * updateProductDto.price - updateProductDto.price,
         stock_status: await this.calculateProductStatus(updateProductDto.quantity),
       });
 
@@ -180,28 +181,14 @@ export class ProductsService {
   async deleteProduct(orgId: string, productId: string) {
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
     if (!org) {
-      throw new InternalServerErrorException({
-        status: 'Unprocessable entity exception',
-        message: 'Invalid organisation credentials',
-        status_code: 422,
-      });
+      throw new CustomHttpException(systemMessages.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    try {
-      const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
-      if (product.org.id !== org.id) {
-        throw new ForbiddenException({
-          status: 'fail',
-          message: 'Not allowed to perform this action',
-        });
-      }
-      product.is_deleted = true;
-      await this.productRepository.save(product);
-    } catch (error) {
-      this.logger.log(error);
-      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
+    if (!product) {
+      throw new CustomHttpException(systemMessages.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-
+    await this.productRepository.softDelete(product.id);
     return {
       message: 'Product successfully deleted',
       data: {},
