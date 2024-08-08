@@ -2,8 +2,8 @@ import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
-import { Cart } from '../../revenue/entities/cart.entity';
-import { OrderItem } from '../../revenue/entities/order-items.entity';
+import { Cart } from '../../dashboard/entities/cart.entity';
+import { OrderItem } from '../../dashboard/entities/order-items.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',

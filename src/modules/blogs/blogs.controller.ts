@@ -37,6 +37,14 @@ export class BlogController {
     return this.blogService.createBlog(createBlogDto, req.user);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all blogs' })
+  @ApiResponse({ status: 200, description: 'All blogs fetched successfully.', type: [BlogResponseDto] })
+  async getAllBlogs(@Query('page') page: number = 1, @Query('pageSize') pageSize: number = 10): Promise<any> {
+    const result = await this.blogService.getAllBlogs(page, pageSize);
+    return result;
+  }
+
   @Get('/search')
   @ApiOperation({ summary: 'Search and filter blogs' })
   @ApiResponse({ status: 200, description: 'Search results returned successfully.', type: [BlogResponseDto] })
