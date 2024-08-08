@@ -38,6 +38,14 @@ export class BlogController {
     return this.blogService.createBlog(createBlogDto, req.user);
   }
 
+  @Get('/search')
+  @ApiOperation({ summary: 'Search and filter blogs' })
+  @ApiResponse({ status: 200, description: 'Search results returned successfully.', type: [BlogResponseDto] })
+  async searchBlogs(@Query() query: any): Promise<any> {
+    const result = await this.blogService.searchBlogs(query);
+    return result;
+  }
+
   @Put(':id')
   @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Update a blog post by ID' })
@@ -65,6 +73,7 @@ export class BlogController {
   async getSingleBlog(@Param('id', new ParseUUIDPipe()) id: string, @Request() req): Promise<BlogDto> {
     return await this.blogService.getSingleBlog(id, req.user);
   }
+
   @Delete(':id')
   @UseGuards(SuperAdminGuard)
   @HttpCode(HttpStatus.ACCEPTED)

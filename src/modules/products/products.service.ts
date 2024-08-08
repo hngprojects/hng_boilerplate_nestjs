@@ -17,6 +17,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { User } from '../user/entities/user.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
+import { ProductVariant } from './entities/product-variant.entity';
 import { Product, StockStatusType } from './entities/product.entity';
 
 interface SearchCriteria {
@@ -66,7 +67,6 @@ export class ProductsService {
         description: product.description,
         price: product.price,
         status: product.stock_status,
-        is_deleted: product.is_deleted,
         quantity: product.quantity,
         created_at: product.created_at,
         updated_at: product.updated_at,
@@ -181,28 +181,14 @@ export class ProductsService {
   async deleteProduct(orgId: string, productId: string) {
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
     if (!org) {
-      throw new InternalServerErrorException({
-        status: 'Unprocessable entity exception',
-        message: 'Invalid organisation credentials',
-        status_code: 422,
-      });
+      throw new CustomHttpException(systemMessages.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    try {
-      const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
-      if (product.org.id !== org.id) {
-        throw new ForbiddenException({
-          status: 'fail',
-          message: 'Not allowed to perform this action',
-        });
-      }
-      product.is_deleted = true;
-      await this.productRepository.save(product);
-    } catch (error) {
-      this.logger.log(error);
-      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
+    if (!product) {
+      throw new CustomHttpException(systemMessages.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-
+    await this.productRepository.softDelete(product.id);
     return {
       message: 'Product successfully deleted',
       data: {},
