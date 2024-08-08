@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comments.entity';
@@ -43,7 +49,6 @@ export class CommentsService {
         commentedBy,
       };
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException('An internal server error occurred');
     }
   }
@@ -70,6 +75,21 @@ export class CommentsService {
       message: 'Comment updated successfully!',
       savedComment: updatedComment,
       commentedBy: user.first_name + ' ' + user.last_name,
+    };
+  }
+
+  async getAComment(commentId: string, userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const comment = await this.commentRepository.findOneBy({ id: commentId });
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+    return {
+      message: 'Comment retrieved successfully',
+      data: { comment },
     };
   }
 }
