@@ -204,31 +204,31 @@ export class OrganisationsController {
   // async getById(@Param('org_id') org_id: string) {
   //   return this.organisationsService.getOrganizationDetailsById(org_id);
   // }
-  // @ApiOperation({ summary: 'Export members of an Organisation to a CSV file' })
-  // @ApiResponse({
-  //   status: 200,
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'The CSV file containing organisation members is returned.',
-  //   headers: {
-  //     'Content-Type': {
-  //       description: 'The content type of the response, which is text/csv.',
-  //       schema: {
-  //         type: 'string',
-  //         example: 'text/csv',
-  //       },
-  //     },
-  //     'Content-Disposition': {
-  //       description: 'Indicates that the content is an attachment with a filename.',
-  //       schema: {
-  //         type: 'string',
-  //         example: 'attachment; filename="organisation-members-{orgId}.csv"',
-  //       },
-  //     },
-  //   },
-  // })
 
+  @ApiOperation({ summary: 'Export members of an Organisation to a CSV file' })
+  @ApiResponse({
+    status: 200,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The CSV file containing organisation members is returned.',
+    headers: {
+      'Content-Type': {
+        description: 'The content type of the response, which is text/csv.',
+        schema: {
+          type: 'string',
+          example: 'text/csv',
+        },
+      },
+      'Content-Disposition': {
+        description: 'Indicates that the content is an attachment with a filename.',
+        schema: {
+          type: 'string',
+          example: 'attachment; filename="organisation-members-{orgId}.csv"',
+        },
+      },
+    },
+  })
   @UseGuards(OwnershipGuard)
   @Get(':org_id/members/export')
   async exportOrganisationMembers(
