@@ -19,7 +19,6 @@ import { Organisation } from './entities/organisations.entity';
 import { CreateOrganisationMapper } from './mapper/create-organisation.mapper';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { OrganisationMapper } from './mapper/organisation.mapper';
-import { SearchMemberQueryDto } from './dto/search-member-query.dto';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
@@ -171,7 +170,11 @@ export class OrganisationsService {
     }
   }
 
-  async searchOrganisationMember(orgId: string, searchTerm: string, searchMemberQueryDto: SearchMemberQueryDto) {
+  async searchOrganisationMember(orgId: string, searchTerm: string, filter: string | null) {
+    const filterValues = ['suspended', 'active_member', 'left_workspace'];
+    if (filter != null && !filterValues.includes(filter)) {
+      throw new CustomHttpException(SYS_MSG.BAD_REQUEST, HttpStatus.BAD_REQUEST);
+    }
     const organisationMembers = await this.organisationMemberRepository.find({
       where: { organisation_id: { id: orgId } },
       relations: ['user_id', 'profile_id'],
@@ -192,8 +195,11 @@ export class OrganisationsService {
       const memberFound = fieldsToSearch.some(field => field?.toLowerCase()?.includes(lowerCaseSearchTerm));
 
       if (!memberFound) return false;
-      if (searchMemberQueryDto.filter && member[searchMemberQueryDto.filter]) return true;
-      if (searchMemberQueryDto.filter) return false;
+
+      if (filter === 'left_workspace' && member[filter]) return true;
+      if (filter === 'active_member' && member[filter] && !member.deletedAt) return true;
+      if ((member[filter] || member.deletedAt) && filter === 'suspended') return true;
+      if (filter) return false;
       return true;
     });
 
@@ -210,7 +216,7 @@ export class OrganisationsService {
   }
 
   async removeOrganisationMember(removeOrganisationMemberDto: RemoveOrganisationMemberDto) {
-    const { organisationId, userId } = removeOrganisationMemberDto;
+    const { org_id: organisationId, userId } = removeOrganisationMemberDto;
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {

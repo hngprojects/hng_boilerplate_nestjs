@@ -310,9 +310,9 @@ describe('OrganisationsService', () => {
       });
 
       jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([...orgMembers]);
-      const result = await service.searchOrganisationMember('some-org-uuid', 'Alice Johnson', { filter: 'suspended' });
-      const result2 = await service.searchOrganisationMember('some-org-uuid', 'Jan', { filter: 'active_member' });
-      const result3 = await service.searchOrganisationMember('some-org-uuid', 'bolu', { filter: 'left_workspace' });
+      const result = await service.searchOrganisationMember('some-org-uuid', 'Alice Johnson', 'suspended');
+      const result2 = await service.searchOrganisationMember('some-org-uuid', 'Jan', 'active_member');
+      const result3 = await service.searchOrganisationMember('some-org-uuid', 'bolu', 'left_workspace');
 
       const expectedMembers1 = [{ ...orgMembers[2] }].map(generateMemberResponseFormat);
       const expectedMembers2 = [{ ...orgMembers[0] }, { ...orgMembers[4] }].map(generateMemberResponseFormat);
@@ -326,9 +326,7 @@ describe('OrganisationsService', () => {
     it('should return an empty array for members when no members are found', async () => {
       jest.spyOn(organisationMemberRepository, 'find').mockResolvedValue([...orgMembers]);
 
-      const result = await service.searchOrganisationMember('some-org-uuid', 'JamesBondIsGood', {
-        filter: 'active_member',
-      });
+      const result = await service.searchOrganisationMember('some-org-uuid', 'JamesBondIsGood', 'active_member');
 
       expect(result).toEqual({ message: 'User(s) found successfully', data: { members: [] } });
     });

@@ -1,20 +1,9 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  OneToOne,
-  JoinColumn,
-  DeleteDateColumn,
-  BeforeUpdate,
-  UpdateEvent,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn, DeleteDateColumn } from 'typeorm';
 import { AbstractBaseEntity } from './../../../entities/base.entity';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from './organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationRole } from '../../organisation-role/entities/organisation-role.entity';
-import { getEntityManagerToken } from '@nestjs/typeorm';
 
 @Entity()
 export class OrganisationMember extends AbstractBaseEntity {
@@ -45,12 +34,4 @@ export class OrganisationMember extends AbstractBaseEntity {
 
   @DeleteDateColumn()
   deletedAt?: Date;
-
-  @BeforeUpdate()
-  beforeSoftDeleteMember(event: UpdateEvent<any>) {
-    if (this.deletedAt) {
-      this.suspended = true;
-      this.active_member = false;
-    }
-  }
 }

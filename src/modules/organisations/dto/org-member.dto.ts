@@ -5,5 +5,5 @@ export class RemoveOrganisationMemberDto {
   userId?: string;
 
   @IsUUID()
-  organisationId?: string;
+  org_id?: string;
 }

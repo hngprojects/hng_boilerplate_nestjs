@@ -14,13 +14,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { OrganisationsService } from './organisations.service';
-import { SearchMemberQueryDto } from './dto/search-member-query.dto';
+import { Filter } from './dto/search-member-query.dto';
 import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { MembershipGuard } from '../../guards/member.guard';
 import { SearchMemberResponseDto } from './dto/search-member-response.dto';
@@ -94,22 +94,24 @@ export class OrganisationsController {
 
   @UseGuards(MembershipGuard)
   @Get(':org_id/members/search')
+  @ApiQuery({ name: 'filter', required: false, enum: Filter })
   @ApiOperation({ summary: 'Search for members within an organization' })
   @ApiResponse({ status: 200, description: 'User(s) found successfully', type: SearchMemberResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 403, description: 'User does not have permission' })
   @ApiResponse({ status: 404, description: 'Organisation Not Found' })
   @ApiResponse({ status: 500, description: 'An error occured internally' })
   async searchMembers(
     @Param('org_id') orgId: string,
     @Body() searchMemberBodyDto: SearchMemberBodyDto,
-    @Query() searchMemberQueryDto: SearchMemberQueryDto
+    @Query() query?: any
   ) {
     const searchTerm = searchMemberBodyDto.search_term;
-    return this.organisationsService.searchOrganisationMember(orgId, searchTerm, searchMemberQueryDto);
+    return this.organisationsService.searchOrganisationMember(orgId, searchTerm, query?.filter);
   }
 
   @UseGuards(OwnershipGuard)
-  @Delete(':organizatonId/members/:userId')
+  @Delete(':org_id/members/:userId')
   @ApiOperation({ summary: 'Gets a product by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Member removed successfully' })
