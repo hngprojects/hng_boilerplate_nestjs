@@ -29,7 +29,8 @@
     "premigration:run": "npm run build",
     "migration:run": "npx typeorm migration:run -d dist/src/database/data-source",
     "migration:revert": "npx typeorm migration:revert -d dist/src/database/data-source",
-    "seed": "ts-node src/seed.ts"
+    "seed": "ts-node src/seed.ts",
+    "postinstall": "npm install --platform=linux --arch=x64 sharp"
   },
   "dependencies": {
     "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
