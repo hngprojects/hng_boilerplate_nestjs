@@ -137,8 +137,6 @@ export class PaymentsService {
         return { message: 'Payment failed', data: { status: 'failed' } };
       }
     } catch (error) {
-      console.log({ error });
-
       return { message: 'Payment failed', data: { status: 'failed' } };
     }
   }
