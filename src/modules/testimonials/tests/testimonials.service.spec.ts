@@ -54,13 +54,19 @@ describe('TestimonialsService', () => {
         content: 'Great service!',
       };
       const user = { id: 'user_id' } as User;
+      const testimonial = {
+        id: 'test_id',
+        ...createTestimonialDto,
+        created_at: new Date(),
+      } as Testimonial;
 
       jest.spyOn(userService, 'getUserRecord').mockResolvedValue(user);
-      jest.spyOn(testimonialRepository, 'save').mockResolvedValue(undefined);
+      jest.spyOn(testimonialRepository, 'save').mockResolvedValue(testimonial);
 
       const result = await service.createTestimonial(createTestimonialDto, user);
 
       expect(result).toEqual({
+        id: 'test_id',
         user_id: 'user_id',
         ...createTestimonialDto,
         created_at: expect.any(Date),
