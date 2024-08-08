@@ -18,8 +18,8 @@ import { OrganisationPermissionsService } from './permissions.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 
 @ApiBearerAuth()
-@ApiTags('Organisation Permissions')
-@Controller('')
+@ApiTags('Permissions')
+@Controller('permissions')
 export class OrganisationPermissionsController {
   constructor(private readonly permissionService: OrganisationPermissionsService) {}
 
@@ -30,30 +30,30 @@ export class OrganisationPermissionsController {
     type: CreatePermissionDto,
   })
   // @UseGuards(OwnershipGuard)
-  @Post('permissions')
+  @Post('')
   async createPermission(@Body() createPermissionDto: CreatePermissionDto) {
     return await this.permissionService.createPermission(createPermissionDto.title);
   }
 
-  @ApiOperation({ summary: 'Create Permission' })
+  @ApiOperation({ summary: 'Update Permission' })
   @ApiResponse({
     status: 200,
-    description: 'Create a new existing permission',
+    description: 'Update an existing permission',
     type: CreatePermissionDto,
   })
-  @Patch('permissions/:permission_id')
+  @Patch('/:permission_id')
   async updatePermission(@Body() updatePermissionDto: UpdatePermissionDto, @Param('permission_id') id: string) {
     return await this.permissionService.updatePermission({ id, permission: updatePermissionDto });
   }
 
   @ApiOperation({ summary: 'Fetch all Permission' })
-  @Get('permissions')
+  @Get('')
   async getAllPermissions() {
     return await this.permissionService.getAllPermissions();
   }
 
-  @ApiOperation({ summary: 'Fetch all Permission' })
-  @Get('permissions/:permission_id')
+  @ApiOperation({ summary: 'Fetch a single Permission' })
+  @Get('/:permission_id')
   async getSinglePermission(@Param('permission_id') id: string) {
     return await this.permissionService.getSinglePermission(id);
   }

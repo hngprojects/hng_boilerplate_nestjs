@@ -48,14 +48,20 @@ export default class AuthenticationService {
     if (!user) {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
+    const newOrganisationPaload = {
+      name: `${user.first_name}'s Organisation`,
+      description: '',
+      email: user.email,
+      industry: '',
+      type: '',
+      country: '',
+      address: '',
+      state: '',
+    };
 
-    const userOrganisation = await this.organisationService.create(
-      { name: `${user.first_name}'s Organisation`, email: '' },
-      user.id
-    );
+    await this.organisationService.create(newOrganisationPaload, user.id);
 
     const token = (await this.otpService.createOtp(user.id)).token;
-    await this.emailService.sendUserEmailConfirmationOtp(user.email, token);
 
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
 

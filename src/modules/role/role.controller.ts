@@ -18,16 +18,15 @@ import { RoleService } from './role.service';
 import { UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 
 @ApiTags('organisation Settings')
-@UseGuards(OwnershipGuard)
+// @UseGuards(OwnershipGuard)
 @ApiBearerAuth()
-@Controller('organisations')
+@Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  @Post('roles')
+  @Post('')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new role in an organisation' })
-  @ApiParam({ name: 'organisationId', required: true, description: 'ID of the organisation' })
   @ApiResponse({ status: 201, description: 'The role has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -49,8 +48,8 @@ export class RoleController {
   //   };
   // }
 
-  @Get(':id/roles/:roleId')
-  @ApiOperation({ summary: 'Fetch a single role within an organization' })
+  @Get('/:roleId')
+  @ApiOperation({ summary: 'Fetch a single role ' })
   @ApiParam({ name: 'id', required: true, description: 'ID of the role' })
   @ApiResponse({ status: 200, description: 'The role has been successfully fetched.' })
   @ApiResponse({ status: 400, description: 'Bad Request - Invalid role ID format.' })
@@ -61,7 +60,7 @@ export class RoleController {
     return await this.roleService.findSingleRole(roleId);
   }
 
-  @Patch('roles/:roleId')
+  @Patch('/:roleId')
   @ApiOperation({ summary: 'update a role within an organization' })
   @ApiResponse({
     status: 200,

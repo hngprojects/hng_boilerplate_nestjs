@@ -31,7 +31,7 @@ export class OwnershipGuard implements CanActivate {
 
     const organisation = await this.organisationRepository.findOne({
       where: { id: organisationId },
-      relations: ['owner', 'creator'],
+      relations: ['owner'],
     });
 
     if (!organisation) {

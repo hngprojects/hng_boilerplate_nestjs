@@ -47,9 +47,6 @@ export class UpdateOrganisationDto {
   @IsOptional()
   state?: string;
 
-  @IsOptional()
-  creator?: User;
-
   @IsBoolean()
   @IsOptional()
   isDeleted?: boolean;
