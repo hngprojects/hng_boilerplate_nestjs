@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bull';
 import { EmailService } from './email.service';
 import QueueService from './queue.service';
 import authConfig from 'config/auth.config';
