@@ -59,11 +59,15 @@ export default class AuthenticationService {
       state: '',
     };
 
-    await this.organisationService.create(newOrganisationPaload, user.id);
+    const newOrganisation = await this.organisationService.create(newOrganisationPaload, user.id);
 
     const token = (await this.otpService.createOtp(user.id)).token;
 
-    const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
+    const access_token = this.jwtService.sign({
+      id: user.id,
+      sub: user.id,
+      email: user.email,
+    });
 
     const responsePayload = {
       user: {
@@ -311,6 +315,19 @@ export default class AuthenticationService {
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
     const newUser = await this.userService.createUser(userPayload);
+    const newOrganisationPaload = {
+      name: `${newUser.first_name}'s Organisation`,
+      description: '',
+      email: newUser.email,
+      industry: '',
+      type: '',
+      country: '',
+      address: '',
+      state: '',
+    };
+
+    await this.organisationService.create(newOrganisationPaload, newUser.id);
+
     const accessToken = await this.jwtService.sign({
       sub: newUser.id,
       id: newUser.id,
