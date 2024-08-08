@@ -1,56 +1,71 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
-import { User } from '../../user/entities/user.entity';
+import { PartialType } from '@nestjs/mapped-types';
+import { OrganisationRequestDto } from './organisation.dto';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class UpdateOrganisationDto {
-  @ApiProperty({
-    example: "CodeGhinux's Organisation",
-    description: 'Name of organisation',
+export class UpdateOrganisationDto extends PartialType(OrganisationRequestDto) {
+  @ApiPropertyOptional({
+    type: String,
   })
-  @IsString()
-  @MinLength(2, { message: 'organisation name must be at least 2 characters long' })
-  @IsOptional()
-  name?: string;
-
-  @ApiProperty({
-    example: "CodeGhinux's Organisation Description",
-    description: 'description of organisation',
-  })
+  @IsNotEmpty()
   @IsString()
   @IsOptional()
-  description?: string;
+  readonly name?: string;
 
+  @ApiPropertyOptional({
+    type: String,
+  })
+  @IsNotEmpty()
+  @IsString()
+  @IsOptional()
+  readonly description?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Organisation email must be unique',
+  })
   @IsEmail()
+  @IsNotEmpty()
   @IsOptional()
-  email?: string;
+  readonly email?: string;
 
+  @ApiPropertyOptional({
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly industry?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly type?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly country?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  readonly address?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+  })
+  @IsNotEmpty()
   @IsString()
   @IsOptional()
-  industry?: string;
-
-  @IsString()
-  @IsOptional()
-  type?: string;
-
-  @IsString()
-  @IsOptional()
-  country?: string;
-
-  @IsString()
-  @IsOptional()
-  address?: string;
-
-  @IsOptional()
-  owner?: User;
-
-  @IsString()
-  @IsOptional()
-  state?: string;
-
-  @IsOptional()
-  creator?: User;
-
-  @IsBoolean()
-  @IsOptional()
-  isDeleted?: boolean;
+  readonly state?: string;
 }
