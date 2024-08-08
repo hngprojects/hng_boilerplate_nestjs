@@ -51,8 +51,8 @@ export class Organisation extends AbstractBaseEntity {
   @ManyToMany(() => User, user => user.organisations)
   @JoinTable({
     name: 'organisation_members',
-    joinColumn: { name: 'user_id' },
-    inverseJoinColumn: { name: 'department_id' },
+    joinColumn: { name: 'organisation_id' },
+    inverseJoinColumn: { name: 'user_id' },
   })
   members: User[];
 
