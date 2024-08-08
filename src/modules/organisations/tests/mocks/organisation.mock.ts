@@ -59,6 +59,7 @@ export const createMockOrganisation = (): Organisation => {
     profile: profileMock,
     blogs: [],
     cart: [],
+    organisations: null,
   };
 
   return {
@@ -78,6 +79,7 @@ export const createMockOrganisation = (): Organisation => {
     preferences: [],
     invites: [],
     products: [],
+    members: null,
   };
 };
 

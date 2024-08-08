@@ -20,6 +20,8 @@ import { OrganisationUserRole } from '../role/entities/organisation-user-role.en
 import CreateOrganisationType from './dto/create-organisation-options';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { ORG_NOT_FOUND, ORG_UPDATE } from '../../helpers/SystemMessages';
+import { AddMemberDto } from './dto/add-member.dto';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationsService {
@@ -78,6 +80,8 @@ export class OrganisationsService {
       const organisationInstance = new Organisation();
       Object.assign(organisationInstance, createOrganisationDto);
       organisationInstance.owner = owner;
+
+      organisationInstance.members = [owner];
       const newOrganisation = await this.organisationRepository.save(organisationInstance);
 
       const adminRole = new OrganisationUserRole();
@@ -172,43 +176,45 @@ export class OrganisationsService {
   //   };
   // }
 
-  // async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
-  //   const organisation = await this.organisationRepository.findOneBy({ id: org_id });
-  //   if (!organisation) {
-  //     throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
-  //   }
+  async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
+    const organisation = await this.organisationRepository.findOneBy({ id: org_id });
+    if (!organisation) {
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
 
-  //   const user = await this.userRepository.findOne({
-  //     where: { id: addMemberDto.user_id },
-  //     relations: ['profile'],
-  //   });
+    const user = await this.userRepository.findOne({
+      where: { id: addMemberDto.user_id },
+      relations: ['organisations'],
+    });
 
-  //   if (!user) {
-  //     throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-  //   }
+    if (!user) {
+      throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
 
-  //   const existingMember = await this.organisationMemberRepository.findOne({
-  //     where: { user_id: { id: user.id }, organisation_id: { id: organisation.id } },
-  //   });
+    const existingMember = user.organisations.some(org => org.id === organisation.id);
 
-  //   if (existingMember) {
-  //     throw new CustomHttpException(SYS_MSG.MEMBER_ALREADY_EXISTS, HttpStatus.CONFLICT);
-  //   }
+    if (existingMember) {
+      throw new CustomHttpException(SYS_MSG.MEMBER_ALREADY_EXISTS, HttpStatus.CONFLICT);
+    }
 
-  //   const getDefaultRole = await this.roleRepository.findOne({
-  //     where: { name: RoleCategory.User, organisation: { id: organisation.id } },
-  //   });
+    const userRole = await this.roleRepository.findOne({ where: { name: 'user' } });
 
-  //   const newMember = this.organisationMemberRepository.create({
-  //     user_id: user,
-  //     role: getDefaultRole,
-  //     profile_id: user.profile,
-  //     organisation_id: organisation,
-  //   });
+    const defaultRole = new OrganisationUserRole();
+    defaultRole.userId = user.id;
+    console.log('user.id', user.id);
+    defaultRole.user = user;
+    defaultRole.organisation = organisation;
+    defaultRole.organisationId = organisation.id;
+    console.log('userRole.id', userRole.id);
+    defaultRole.roleId = userRole.id;
 
-  //   await this.organisationMemberRepository.save(newMember);
-  //   return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: newMember };
-  // }
+    await this.organisationUserRole.save(defaultRole);
+
+    user.organisations = [...user.organisations, organisation];
+    await this.userRepository.save(user);
+
+    return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: user };
+  }
 
   // async getUserOrganisations(userId: string) {
   //   const res = await this.userService.getUserDataWithoutPasswordById(userId);

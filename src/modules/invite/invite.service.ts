@@ -95,18 +95,16 @@ export class InviteService {
       throw new CustomHttpException(SYS_MSG.USER_NOT_REGISTERED, HttpStatus.NOT_FOUND);
     }
 
-    return { status_code: 200, data: {}, message: '' };
+    const response = await this.OrganisationService.addOrganisationMember(invite.organisation.id, {
+      user_id: user.id,
+    });
 
-    // const response = await this.OrganisationService.addOrganisationMember(invite.organisation.id, {
-    //   user_id: user.id,
-    // });
-
-    // if (response.status === 'success') {
-    //   invite.isAccepted = true;
-    //   await this.inviteRepository.save(invite);
-    //   return response;
-    // } else {
-    //   throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
-    // }
+    if (response.status === 'success') {
+      invite.isAccepted = true;
+      await this.inviteRepository.save(invite);
+      return response;
+    } else {
+      throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

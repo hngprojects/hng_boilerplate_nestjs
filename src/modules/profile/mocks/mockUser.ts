@@ -1,3 +1,4 @@
+import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { Profile } from '../../../modules/profile/entities/profile.entity';
 import { User, UserType } from '../../user/entities/user.entity';
 
@@ -27,4 +28,5 @@ export const mockUserWithProfile: User = {
   notification_settings: [],
   notifications: [],
   blogs: [],
+  organisations: null,
 };
