@@ -16,6 +16,6 @@ export class Blog extends AbstractBaseEntity {
   @Column('simple-array', { nullable: true })
   image_urls?: string[];
 
-  @ManyToOne(() => User, user => user.blogs, { eager: true })
+  @ManyToOne(() => User, user => user.blogs)
   author: User;
 }
