@@ -19,7 +19,7 @@ import { Role } from '../role/entities/role.entity';
 import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
 import CreateOrganisationType from './dto/create-organisation-options';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { ORG_NOT_FOUND, ORG_UPDATE } from '../../helpers/SystemMessages';
+import { ORG_EXISTS, ORG_NOT_FOUND, ORG_UPDATE } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class OrganisationsService {
@@ -63,36 +63,32 @@ export class OrganisationsService {
   }
 
   async create(createOrganisationDto: CreateOrganisationType, userId: string) {
-    try {
-      if (createOrganisationDto.email) {
-        const emailFound = await this.emailExists(createOrganisationDto.email);
-        if (emailFound) throw new ConflictException('Organisation with this email already exists');
-      }
-
-      const owner = await this.userRepository.findOne({
-        where: { id: userId },
-      });
-
-      const superAdminRole = await this.roleRepository.findOne({ where: { name: 'super-admin' } });
-
-      const organisationInstance = new Organisation();
-      Object.assign(organisationInstance, createOrganisationDto);
-      organisationInstance.owner = owner;
-      const newOrganisation = await this.organisationRepository.save(organisationInstance);
-
-      const adminRole = new OrganisationUserRole();
-      adminRole.userId = owner.id;
-      adminRole.organisationId = newOrganisation.id;
-      adminRole.roleId = superAdminRole.id;
-
-      await this.organisationUserRole.save(adminRole);
-
-      const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
-
-      return { status_code: HttpStatus.OK, message: 'organisation created successfully', data: mappedResponse };
-    } catch (error) {
-      console.log(error);
+    if (createOrganisationDto.email) {
+      const emailFound = await this.emailExists(createOrganisationDto.email);
+      if (emailFound) throw new CustomHttpException(ORG_EXISTS, HttpStatus.CONFLICT);
     }
+
+    const owner = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    const superAdminRole = await this.roleRepository.findOne({ where: { name: 'super-admin' } });
+
+    const organisationInstance = new Organisation();
+    Object.assign(organisationInstance, createOrganisationDto);
+    organisationInstance.owner = owner;
+    const newOrganisation = await this.organisationRepository.save(organisationInstance);
+
+    const adminRole = new OrganisationUserRole();
+    adminRole.userId = owner.id;
+    adminRole.organisationId = newOrganisation.id;
+    adminRole.roleId = superAdminRole.id;
+
+    await this.organisationUserRole.save(adminRole);
+
+    const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
+
+    return { status_code: HttpStatus.OK, message: 'organisation created successfully', data: mappedResponse };
   }
 
   async deleteorganisation(id: string) {
