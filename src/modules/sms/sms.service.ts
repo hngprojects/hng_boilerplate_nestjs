@@ -1,26 +1,29 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import smsConfig from '../../../config/sms.config';
 import { Twilio } from 'twilio';
 import { CreateSmsDto } from './dto/create-sms.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { VALID_PHONE_NUMBER_REQUIRED } from '../../helpers/SystemMessages';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SmsService {
   private logger = new Logger(SmsService.name);
   private twilioClient: Twilio;
-  constructor() {
-    const accountSid = smsConfig().acountSid;
-    const authToken = smsConfig().authToken;
-    this.twilioClient = new Twilio(accountSid, authToken);
+  private readonly accountSid;
+  private readonly authToken;
+  private readonly from;
+  constructor(private readonly configService: ConfigService) {
+    this.accountSid = configService.get<string>('TWILIO_ACCOUNT_SID');
+    this.authToken = configService.get<string>('TWILIO_AUTH_TOKEN');
+    this.from = configService.get<string>('TWILIO_PHONE_NUMBER');
+    this.twilioClient = new Twilio(this.accountSid, this.authToken);
   }
 
   async sendSms(createSmsDto: CreateSmsDto) {
-    const from = smsConfig().phoneNumber;
     try {
       const response = await this.twilioClient.messages.create({
         body: createSmsDto.message,
-        from,
+        from: this.from,
         to: createSmsDto.phone_number,
       });
       return {
