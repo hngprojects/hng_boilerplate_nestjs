@@ -11,6 +11,7 @@ import {
   ParseUUIDPipe,
   HttpStatus,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
@@ -116,5 +117,27 @@ export class TestimonialsController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async deleteTestimonial(@Param('id') id: string) {
     return this.testimonialsService.deleteTestimonial(id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update Testimonial' })
+  @ApiResponse({ status: 200, description: 'Testimonial updated successfully' })
+  @ApiResponse({ status: 404, description: 'Testimonial not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  async update(
+    @Param('id') id: string,
+    @Body() updateTestimonialDto: UpdateTestimonialDto,
+    @Req() req: { user: UserPayload }
+  ): Promise<UpdateTestimonialResponseDto> {
+    const userId = req.user.id;
+  
+    const data = await this.testimonialsService.updateTestimonial(id, updateTestimonialDto, userId);
+  
+    return {
+      status: 'success',
+      message: 'Testimonial updated successfully',
+      data,
+    }
   }
 }
