@@ -26,7 +26,7 @@ export class SuperAdminGuard implements CanActivate {
     const currentUserId = request.user.sub;
 
     const adminRole = await this.userRoleManager.findOne({
-      where: { name: 'admin' },
+      where: { name: 'super-admin' },
       relations: ['permissions'],
     });
 
@@ -40,6 +40,9 @@ export class SuperAdminGuard implements CanActivate {
         role: { id: adminRole.id },
       },
     });
+
+    console.log(userRole);
+    console.log(userRole.length);
 
     if (!userRole.length) {
       throw new CustomHttpException('This is an admin route', HttpStatus.NOT_FOUND);
