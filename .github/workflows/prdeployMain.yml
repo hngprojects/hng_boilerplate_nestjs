@@ -65,7 +65,7 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
         run: |
-          sshpass -p "${SERVER_PASSWORD}" scp -o StrictHostKeyChecking=no nestjs-backend-main.tar ${SERVER_USERNAME}@${SERVER_HOST}:/home/teamalpha/docker_deploy/main
+          sshpass -p "${SERVER_PASSWORD}" scp -o StrictHostKeyChecking=no nestjs-backend-main.tar ${SERVER_USERNAME}@${SERVER_HOST}:/home/teamalpha/docker/main
 
       - name: Load Docker Image on Server and Run via Docker Compose
         env:
@@ -74,7 +74,7 @@ jobs:
           SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
         run: |
           sshpass -p "${SERVER_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_HOST} << 'EOF'
-            cd /home/teamalpha/docker_deploy/main
+            cd /home/teamalpha/docker/main
             docker load -i nestjs-backend-main.tar
             docker-compose up -f docker-compose.staging.yml -d
           EOF
