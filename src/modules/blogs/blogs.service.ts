@@ -1,7 +1,7 @@
 // src/modules/blogs/blogs.service.ts
 
 import * as SYS_MSG from '../../helpers/SystemMessages';
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, MoreThanOrEqual, FindOptionsWhere } from 'typeorm';
 import { Blog } from './entities/blog.entity';
@@ -10,7 +10,6 @@ import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { BlogResponseDto } from './dtos/blog-response.dto';
-import CustomExceptionHandler from 'src/helpers/exceptionHandler';
 
 @Injectable()
 export class BlogService {

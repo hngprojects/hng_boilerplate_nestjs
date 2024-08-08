@@ -33,7 +33,7 @@ export class BlogController {
   @ApiOperation({ summary: 'Create a new blog' })
   @ApiResponse({ status: 201, description: 'The blog has been successfully created.', type: BlogResponseDto })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<any> {
+  async createBlog(@Body() createBlogDto: CreateBlogDto, @Request() req): Promise<BlogResponseDto> {
     return this.blogService.createBlog(createBlogDto, req.user);
   }
 
