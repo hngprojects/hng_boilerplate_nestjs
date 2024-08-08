@@ -40,7 +40,6 @@ import { NewsletterSubscriptionModule } from './modules/newsletter-subscription/
 import { TeamsModule } from './modules/teams/teams.module';
 import { FlutterwaveModule } from './modules/flutterwave/flutterwave.module';
 import { BlogModule } from './modules/blogs/blogs.module';
-import { SmsModule } from './modules/sms/sms.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { RevenueModule } from './modules/revenue/revenue.module';
 
@@ -153,7 +152,6 @@ import { RevenueModule } from './modules/revenue/revenue.module';
     TeamsModule,
     FlutterwaveModule,
     BlogModule,
-    SmsModule,
     SubscriptionsModule,
     RevenueModule,
   ],

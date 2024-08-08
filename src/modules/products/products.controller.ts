@@ -7,6 +7,7 @@ import { UpdateProductDTO } from './dto/update-product.dto';
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { MembershipGuard } from 'src/guards/member.guard';
 
 @ApiBearerAuth()
 @ApiTags('Products')
@@ -108,6 +109,7 @@ export class ProductsController {
     return this.productsService.addCommentToProduct(productId, commentDto, user.sub);
   }
 
+  @UseGuards(MembershipGuard)
   @Get(':productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
