@@ -1,4 +1,4 @@
-import { UpdateRecordGeneric } from 'src/helpers/UpdateRecordGeneric';
+import { UpdateRecordGeneric } from '../../../helpers/UpdateRecordGeneric';
 import UserIdentifierOptionsType from './UserIdentifierOptions';
 import UserInterface from '../interfaces/UserInterface';
 
