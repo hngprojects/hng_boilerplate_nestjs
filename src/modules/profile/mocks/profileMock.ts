@@ -1,7 +1,7 @@
 import { Profile } from '../entities/profile.entity';
 
 export const mockProfile: Profile = {
-  id: 'profile-id', // Assuming you have an `id` field inherited from `AbstractBaseEntity`
+  id: 'profile-id',
   created_at: new Date(),
   updated_at: new Date(),
   username: 'testuser',
