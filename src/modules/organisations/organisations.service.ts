@@ -20,6 +20,7 @@ import { OrganisationUserRole } from '../role/entities/organisation-user-role.en
 import CreateOrganisationType from './dto/create-organisation-options';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { ORG_NOT_FOUND, ORG_UPDATE } from '../../helpers/SystemMessages';
+import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 
 @Injectable()
 export class OrganisationsService {
@@ -52,14 +53,21 @@ export class OrganisationsService {
     if (!members.length) {
       return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data: [] };
     }
-    const organisationMembers = members.map(instance => instance.user);
+    let organisationMembers = members.map(instance => instance.user);
 
     const isMember = organisationMembers.find(member => member.id === sub);
     if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
 
-    const data = organisationMembers.splice(skip, skip + page_size);
+    const organisationPayload = organisationMembers.map(member => OrganisationMemberMapper.mapToResponseFormat(member));
+
+    const data = organisationPayload.splice(skip, skip + page_size);
 
     return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
+  }
+
+  async createOrganisation(createOrganisationDto: CreateOrganisationType, userId: string) {
+    const query = await this.create(createOrganisationDto, userId);
+    return { status_code: HttpStatus.CREATED, messge: 'Organisation created', data: query };
   }
 
   async create(createOrganisationDto: CreateOrganisationType, userId: string) {
@@ -139,7 +147,16 @@ export class OrganisationsService {
     if (!user) {
       throw new CustomHttpException('Invalid Request', HttpStatus.BAD_REQUEST);
     }
-    const userOrganisations = await this.organisationUserRole.find({ where: { userId } });
+    const userOrganisations = (
+      await this.organisationUserRole.find({
+        where: { userId },
+        relations: ['organisation', 'role'],
+      })
+    ).map(instance => ({
+      organisation_id: instance.organisation.id,
+      name: instance.organisation.name,
+      user_role: instance.role.name,
+    }));
 
     return {
       status_code: HttpStatus.OK,
