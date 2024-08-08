@@ -16,6 +16,7 @@ import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
 import { BlogModule } from './modules/blogs/blogs.module';
+import { CommentsModule } from './modules/comments/comments.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { RevenueModule } from './modules/dashboard/dashboard.module';
 import { EmailModule } from './modules/email/email.module';
@@ -152,6 +153,7 @@ import { RunTestsModule } from './run-tests/run-tests.module';
     TeamsModule,
     FlutterwaveModule,
     BlogModule,
+    CommentsModule,
     SubscriptionsModule,
     RevenueModule,
   ],
