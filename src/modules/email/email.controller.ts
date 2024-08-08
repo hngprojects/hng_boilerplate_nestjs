@@ -13,7 +13,7 @@ import {
   ErrorResponseDto,
 } from './dto/email-response.dto';
 
-@ApiTags('email')
+@ApiTags('Emails')
 @ApiBearerAuth()
 @Controller('email')
 @UseGuards(SuperAdminGuard)
