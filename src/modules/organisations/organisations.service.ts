@@ -225,10 +225,11 @@ export class OrganisationsService {
       },
     });
 
-    const memberOrgsData = memberOrgs.map(org => {
+    const memberOrgsData = memberOrgs.map(data => {
+      const org = OrganisationMapper.mapToResponseFormat(data.organisation);
       return {
-        organisation: org.organisation,
-        role: org.role,
+        organisation: org,
+        role: data.role,
       };
     });
 

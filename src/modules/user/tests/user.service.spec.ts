@@ -94,7 +94,7 @@ describe('UserService', () => {
       expect(result).toEqual(userResponseDto);
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { email },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
     });
 
@@ -113,7 +113,7 @@ describe('UserService', () => {
       expect(result).toEqual(userResponseDto);
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
     });
 
@@ -208,7 +208,7 @@ describe('UserService', () => {
       });
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
       expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
     });
@@ -220,7 +220,7 @@ describe('UserService', () => {
 
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -241,7 +241,7 @@ describe('UserService', () => {
       );
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: invalidUserId },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
     });
 
@@ -263,7 +263,7 @@ describe('UserService', () => {
       );
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
       expect(mockUserRepository.save).toHaveBeenCalled();
     });
@@ -295,7 +295,7 @@ describe('UserService', () => {
       expect(result.message).toBe('Account Deactivated Successfully');
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
       expect(mockUserRepository.save).toHaveBeenCalledWith({ ...userToUpdate, is_active: false });
     });
@@ -316,7 +316,7 @@ describe('UserService', () => {
       });
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -341,7 +341,7 @@ describe('UserService', () => {
       expect(result.user).not.toHaveProperty('password');
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
-        relations: ['profile', 'owned_organisations'],
+        relations: ['profile', 'owned_organisations', 'organisations'],
       });
     });
   });

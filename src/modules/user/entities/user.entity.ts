@@ -21,7 +21,7 @@ import { Cart } from '../../dashboard/entities/cart.entity';
 import { Order } from '../../dashboard/entities/order.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
-import { OrganisationUserRole } from 'src/modules/role/entities/organisation-user-role.entity';
+import { OrganisationUserRole } from '../../role/entities/organisation-user-role.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',

@@ -4,8 +4,7 @@ import { OrganisationPreference } from './org-preferences.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Invite } from '../../invite/entities/invite.entity';
 import { Product } from '../../products/entities/product.entity';
-import { Role } from 'src/modules/role/entities/role.entity';
-import { OrganisationUserRole } from 'src/modules/role/entities/organisation-user-role.entity';
+import { OrganisationUserRole } from '../../role/entities/organisation-user-role.entity';
 
 @Entity()
 export class Organisation extends AbstractBaseEntity {

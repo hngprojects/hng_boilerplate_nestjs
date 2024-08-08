@@ -105,9 +105,9 @@ describe('OrganisationsService', () => {
       const newOrganisation = { ...createOrganisationDto, id: 'org-id', owner: user };
       const adminReponse = {
         id: 'some-id',
-        userId,
-        roleId: 'role-id',
-        organisationId: 'org-id',
+        user: user,
+        role: superAdminRole,
+        organisation: orgMock,
       } as OrganisationUserRole;
 
       jest.spyOn(organisationRepository, 'findBy').mockResolvedValue(null);
