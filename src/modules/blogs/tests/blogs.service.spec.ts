@@ -133,6 +133,7 @@ describe('BlogService', () => {
       blog.image_urls = ['http://example.com/image.jpg'];
       blog.author = user;
       blog.created_at = new Date('2023-01-01');
+      blog.updated_at = new Date();
 
       const expectedResponse = {
         status_code: 200,
