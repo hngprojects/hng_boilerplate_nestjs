@@ -44,6 +44,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Run tests
+        run: npm run test
+
       - name: Build Docker Images
         run: |
           docker build -t nestjs-backend:tag .
