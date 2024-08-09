@@ -24,6 +24,7 @@ export class CreateTestimonialResponseDto {
     type: TestimonialData,
     description: 'Testimonial data',
     example: {
+      id: '1',
       user_id: '1',
       name: 'John Doe',
       content: 'I am very happy with the service provided by the company',

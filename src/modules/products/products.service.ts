@@ -10,14 +10,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 import { Repository } from 'typeorm';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
-import * as systemMessages from '../../helpers/SystemMessages';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { Comment } from '../comments/entities/comments.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { User } from '../user/entities/user.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
-import { Product, StockStatusType } from './entities/product.entity';
+import { ProductVariant } from './entities/product-variant.entity';
+import { Product, ProductSizeType, StockStatusType } from './entities/product.entity';
 
 interface SearchCriteria {
   name?: string;
@@ -44,7 +45,17 @@ export class ProductsService {
         message: 'Invalid organisation credentials',
         status_code: 422,
       });
-    const newProduct: Product = this.productRepository.create(dto);
+    const payload = {
+      name: dto.name,
+      quantity: dto.quantity,
+      price: dto.price,
+      category: dto.category,
+      description: dto.description,
+      image: dto.image_url,
+      size: dto.size as ProductSizeType,
+    };
+
+    const newProduct: Product = this.productRepository.create(payload);
     newProduct.org = org;
     const statusCal = await this.calculateProductStatus(dto.quantity);
     newProduct.stock_status = statusCal;
@@ -66,12 +77,36 @@ export class ProductsService {
         description: product.description,
         price: product.price,
         status: product.stock_status,
-        is_deleted: product.is_deleted,
         quantity: product.quantity,
         created_at: product.created_at,
         updated_at: product.updated_at,
       },
     };
+  }
+
+  async getAllProducts({ page = 1, pageSize = 2 }: { page: number; pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const allProucts = await this.productRepository.find({ skip, take: pageSize });
+    const totalProducts = await this.productRepository.count();
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'members retrieved successfully',
+      data: {
+        products: allProucts,
+        total: totalProducts,
+        page,
+        pageSize,
+      },
+    };
+  }
+
+  async getSingleProduct(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new CustomHttpException(SYS_MSG.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return { status_code: HttpStatus.OK, message: 'Product fetched successfully', data: product };
   }
 
   async searchProducts(orgId: string, criteria: SearchCriteria) {
@@ -181,28 +216,14 @@ export class ProductsService {
   async deleteProduct(orgId: string, productId: string) {
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
     if (!org) {
-      throw new InternalServerErrorException({
-        status: 'Unprocessable entity exception',
-        message: 'Invalid organisation credentials',
-        status_code: 422,
-      });
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    try {
-      const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
-      if (product.org.id !== org.id) {
-        throw new ForbiddenException({
-          status: 'fail',
-          message: 'Not allowed to perform this action',
-        });
-      }
-      product.is_deleted = true;
-      await this.productRepository.save(product);
-    } catch (error) {
-      this.logger.log(error);
-      throw new InternalServerErrorException(`Internal error occurred: ${error.message}`);
+    const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
+    if (!product) {
+      throw new CustomHttpException(SYS_MSG.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-
+    await this.productRepository.softDelete(product.id);
     return {
       message: 'Product successfully deleted',
       data: {},
@@ -215,7 +236,7 @@ export class ProductsService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!product) {
-      throw new CustomHttpException(systemMessages.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(SYS_MSG.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const productComment = this.commentRepository.create({ comment, product, user });
@@ -231,7 +252,7 @@ export class ProductsService {
     };
 
     return {
-      message: systemMessages.COMMENT_CREATED,
+      message: SYS_MSG.COMMENT_CREATED,
       data: responsePayload,
     };
   }
@@ -294,7 +315,7 @@ export class ProductsService {
     }
 
     return {
-      message: systemMessages.TOTAL_PRODUCTS_FETCHED_SUCCESSFULLY,
+      message: SYS_MSG.TOTAL_PRODUCTS_FETCHED_SUCCESSFULLY,
       data: {
         total_products: totalProductsThisMonth,
         percentage_change: percentageChange,
