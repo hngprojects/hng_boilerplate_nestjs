@@ -5,11 +5,10 @@ import { Comment } from '../entities/comments.entity';
 import { User } from '../../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import { HttpStatus } from '@nestjs/common';
 
 const mockCommentRepository = () => ({
-  create: jest.fn(),
-  save: jest.fn(),
+  findOneBy: jest.fn(),
+  update: jest.fn(),
 });
 
 const mockUserRepository = () => ({
@@ -35,42 +34,48 @@ describe('CommentsService', () => {
     userRepository = module.get(getRepositoryToken(User));
   });
 
-  describe('addComment', () => {
-    it('should throw CustomHttpException if comment is empty', async () => {
-      const createCommentDto = { model_id: '1', model_type: 'post', comment: '' };
+  describe('updateComment', () => {
+    const commentId = 'comment-id';
+    const userId = 'user-id';
+    const updateCommentDto = { comment: 'Updated comment' };
 
-      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toThrow(CustomHttpException);
-      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toMatchObject({
-        message: 'Comment cannot be empty',
-        status: HttpStatus.BAD_REQUEST,
+    it('should throw CustomHttpException if comment is not found', async () => {
+      commentRepository.findOneBy.mockResolvedValue(null);
+
+      await expect(service.updateComment(commentId, userId, updateCommentDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.updateComment(commentId, userId, updateCommentDto)).rejects.toMatchObject({
+        message: 'Comment not found',
+        status: 404,
       });
     });
 
     it('should throw CustomHttpException if user is not found', async () => {
-      const createCommentDto = { model_id: '1', model_type: 'post', comment: 'A valid comment' };
+      commentRepository.findOneBy.mockResolvedValue({ id: commentId, comment: 'Original comment' });
       userRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toThrow(CustomHttpException);
-      await expect(service.addComment(createCommentDto, 'user-id')).rejects.toMatchObject({
+      await expect(service.updateComment(commentId, userId, updateCommentDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.updateComment(commentId, userId, updateCommentDto)).rejects.toMatchObject({
         message: 'User not found',
-        status: HttpStatus.NOT_FOUND,
+        status: 404,
       });
     });
 
-    it('should add a comment successfully', async () => {
-      const createCommentDto = { model_id: '1', model_type: 'post', comment: 'A valid comment' };
-      const mockUser = { id: 'user-id', first_name: 'John', last_name: 'Doe' };
-      const mockComment = { id: 'comment-id', model_id: '1', model_type: 'post', comment: 'A valid comment' };
+    it('should update the comment successfully', async () => {
+      const mockUser = { id: userId, first_name: 'John', last_name: 'Doe' };
+      const mockComment = { id: commentId, comment: 'Original comment' };
+      const updatedComment = { id: commentId, comment: 'Updated comment' };
 
+      commentRepository.findOneBy
+        .mockResolvedValueOnce(mockComment) // Initial findOneBy for existing comment
+        .mockResolvedValueOnce(updatedComment); // findOneBy after update
       userRepository.findOne.mockResolvedValue(mockUser);
-      commentRepository.create.mockReturnValue(mockComment);
-      commentRepository.save.mockResolvedValue(mockComment);
+      commentRepository.update.mockResolvedValue({ affected: 1 });
 
-      const result = await service.addComment(createCommentDto, 'user-id');
+      const result = await service.updateComment(commentId, userId, updateCommentDto);
 
       expect(result).toEqual({
-        message: 'Comment added successfully!',
-        savedComment: mockComment,
+        message: 'Comment updated successfully!',
+        savedComment: updatedComment,
         commentedBy: 'John Doe',
       });
     });
