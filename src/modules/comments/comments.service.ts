@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, InternalServerErrorException, BadRequest
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comments.entity';
-import { CreateCommentDto } from './dtos/create-comment.dto';
 import { User } from '../user/entities/user.entity';
 import { CommentResponseDto } from './dtos/comment-response.dto';
 import { UpdateCommentDto } from './dtos/update-comment.dto';
