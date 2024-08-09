@@ -55,7 +55,7 @@ export class OrganisationsService {
     if (!members.length) {
       return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data: [] };
     }
-    const  organisationMembers = members.map(instance => instance.user);
+    const organisationMembers = members.map(instance => instance.user);
 
     const isMember = organisationMembers.find(member => member.id === sub);
     if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
@@ -237,7 +237,14 @@ export class OrganisationsService {
     user.organisations = [...user.organisations, organisation];
     await this.userRepository.save(user);
 
-    return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: user };
+    const responsePayload = {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+    };
+
+    return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: responsePayload };
   }
 
   // async getUserOrganisations(userId: string) {

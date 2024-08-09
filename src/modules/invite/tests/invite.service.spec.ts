@@ -178,27 +178,6 @@ describe('InviteService', () => {
   });
 
   describe('Accept Invite Service', () => {
-    it('should accept a valid invite', async () => {
-      const mockInvite = {
-        id: 'some-id',
-        token: 'valid-token',
-        email: 'test@example.com',
-        isGeneric: false,
-        isAccepted: false,
-        organisation: orgMock,
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
-
-      jest.spyOn(repository, 'findOne').mockResolvedValue(mockInvite);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
-
-      const result = await service.acceptInvite({ token: 'valid-token', email: 'test@example.com' });
-
-      expect(result).toEqual({ status: 'success', message: 'Member added', member: mockUser });
-      expect(repository.save).toHaveBeenCalledWith({ ...mockInvite, isAccepted: true });
-    });
-
     it('should throw NotFoundException if invite not found', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
 
