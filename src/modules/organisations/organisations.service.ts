@@ -227,11 +227,9 @@ export class OrganisationsService {
 
     const defaultRole = new OrganisationUserRole();
     defaultRole.userId = user.id;
-    console.log('user.id', user.id);
     defaultRole.user = user;
     defaultRole.organisation = organisation;
     defaultRole.organisationId = organisation.id;
-    console.log('userRole.id', userRole.id);
     defaultRole.roleId = userRole.id;
 
     await this.organisationUserRole.save(defaultRole);
