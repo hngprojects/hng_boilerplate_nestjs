@@ -89,4 +89,10 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Comment, comment => comment.user)
   comments?: Comment[];
+
+  @OneToMany(() => Order, order => order.user)
+  orders?: Order[];
+
+  @OneToMany(() => Cart, cart => cart.user)
+  cart: Cart[];
 }
