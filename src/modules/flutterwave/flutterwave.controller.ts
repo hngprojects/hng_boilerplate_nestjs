@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/
 import { FlutterwaveService } from './flutterwave.service';
 import { CreateFlutterwavePaymentDto } from './dto/create-flutterwave-payment.dto';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
+import { skipAuth } from 'src/helpers/skipAuth';
 
 @Controller('payments/flutterwave')
 export class FlutterwaveController {
