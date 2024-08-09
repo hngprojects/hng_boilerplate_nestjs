@@ -91,13 +91,32 @@ export class ProductsService {
 
     return {
       status_code: HttpStatus.OK,
-      message: 'members retrieved successfully',
+      message: 'Product retrieved successfully',
       data: {
         products: allProucts,
         total: totalProducts,
         page,
         pageSize,
       },
+    };
+  }
+
+  async getAllOrganisationProducts(organisationId: string) {
+    const organisation = await this.organisationRepository.findOne({
+      where: { id: organisationId },
+      relations: ['products'],
+    });
+
+    if (!organisation) {
+      throw new CustomHttpException('Invalid Organisation', HttpStatus.BAD_REQUEST);
+    }
+
+    const allProucts = organisation.products;
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Products retrieved successfully',
+      data: allProucts,
     };
   }
 
