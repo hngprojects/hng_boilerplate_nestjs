@@ -34,7 +34,7 @@ import { pipeline } from 'stream/promises';
 import { unlink } from 'fs/promises';
 
 @ApiBearerAuth()
-@ApiTags('organization')
+@ApiTags('Organization')
 @Controller('organizations')
 export class OrganisationsController {
   private readonly logger = new Logger(OrganisationsController.name);
@@ -140,120 +140,12 @@ export class OrganisationsController {
     status: 403,
     description: 'User not a member of the organisation',
   })
-  @Put(':orgId/members/:memberId/role')
+  @Put(':org_id/users/:user_id/role')
   async updateMemberRole(
-    @Param('memberId') memberId: string,
-    @Param('orgId') orgId: string,
+    @Param('user_id') memberId: string,
+    @Param('org_id') orgId: string,
     @Body() updateMemberRoleDto: UpdateMemberRoleDto
   ) {
     return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
-  }
-
-  @UseGuards(OwnershipGuard)
-  @ApiOperation({ summary: 'Add member to an organization' })
-  @ApiResponse({
-    status: 201,
-    description: 'Member added successfully',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User already added to organization.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Organisation not found',
-  })
-  @Post(':org_id/users')
-  async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
-    return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
-  }
-
-  @ApiOperation({ summary: "Gets a user's organizations" })
-  @ApiResponse({
-    status: 200,
-    description: 'Organisations retrieved successfully',
-    type: UserOrganizationResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request',
-    type: UserOrganizationErrorResponseDto,
-  })
-  @Get('/')
-  async getUserOrganisations(@Req() req) {
-    const { sub } = req.user;
-    return this.organisationsService.getUserOrganisations(sub);
-  }
-
-  @ApiOperation({ summary: 'Get Organization details by Id' })
-  @ApiResponse({
-    status: 200,
-    description: 'Fetched Organization details',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Must provide a valid organization Id',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Organization not found',
-  })
-  @Get(':org_id')
-  async getById(@Param('org_id') org_id: string) {
-    return this.organisationsService.getOrganizationDetailsById(org_id);
-  }
-
-  @ApiOperation({ summary: 'Export members of an Organisation to a CSV file' })
-  @ApiResponse({
-    status: 200,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The CSV file containing organisation members is returned.',
-    headers: {
-      'Content-Type': {
-        description: 'The content type of the response, which is text/csv.',
-        schema: {
-          type: 'string',
-          example: 'text/csv',
-        },
-      },
-      'Content-Disposition': {
-        description: 'Indicates that the content is an attachment with a filename.',
-        schema: {
-          type: 'string',
-          example: 'attachment; filename="organisation-members-{orgId}.csv"',
-        },
-      },
-    },
-  })
-  @UseGuards(OwnershipGuard)
-  @Get(':org_id/members/export')
-  async exportOrganisationMembers(
-    @Param('org_id', ParseUUIDPipe) orgId: string,
-    @Req() req: Request,
-    @Res() res: Response
-  ) {
-    const userId = req['user'].id;
-    const filePath = await this.organisationsService.exportOrganisationMembers(orgId, userId);
-
-    res.set({
-      'Content-Type': 'text/csv',
-      'Content-Disposition': `attachment; filename="organisation-members-${orgId}.csv"`,
-    });
-
-    const fileStream = createReadStream(filePath);
-
-    pipeline(fileStream, res)
-      .then(() => unlink(filePath))
-      .catch(error => {
-        this.logger.error('Pipeline failed:', error.stack);
-        if (!res.headersSent) {
-          res.status(500).send('Internal Server Error');
-        }
-        return unlink(filePath).catch(unlinkError => {
-          this.logger.error(`Failed to delete file: ${unlinkError.message}`, unlinkError.stack);
-        });
-      });
   }
 }

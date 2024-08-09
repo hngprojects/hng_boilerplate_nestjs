@@ -36,6 +36,7 @@
     "@css-inline/css-inline": "^0.14.1",
     "@faker-js/faker": "^8.4.1",
     "@nestjs-modules/mailer": "^2.0.2",
+    "@nestjs/axios": "^3.0.2",
     "@nestjs/bull": "^10.2.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
