@@ -1,10 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Organisation } from '../../entities/organisations.entity';
-import { User } from '../../../user/entities/user.entity';
+
 import { Profile } from '../../../profile/entities/profile.entity';
-import { OrganisationMember } from '../../entities/org-members.entity';
-import { OrganisationRole } from '../../../organisation-role/entities/organisation-role.entity';
-import { mockUser } from './user.mock';
+import { Organisation } from '../../entities/organisations.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -33,27 +30,6 @@ export const createMockOrganisation = (): Organisation => {
     updated_at: new Date(),
   };
 
-  const organisationRoleMock: OrganisationRole = {
-    id: uuidv4(),
-    name: 'Admin',
-    description: 'Administrator role with full permissions',
-    permissions: [],
-    organisation: org,
-    organisationMembers: [],
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
-
-  const orgMemberMock: OrganisationMember = {
-    id: uuidv4(),
-    created_at: new Date(),
-    updated_at: new Date(),
-    user_id: mockUser,
-    role: organisationRoleMock,
-    organisation_id: org,
-    profile_id: profileMock,
-  };
-
   const ownerAndCreator = {
     id: uuidv4(),
     created_at: new Date(),
@@ -73,18 +49,17 @@ export const createMockOrganisation = (): Organisation => {
     attempts_left: 3,
     time_left: 3600,
     owned_organisations: [],
-    created_organisations: [],
     invites: [],
     testimonials: [],
     notifications: [],
     notification_settings: [],
-    user_type: UserType.ADMIN,
     secret: 'secret',
     is_2fa_enabled: false,
     products: [],
     profile: profileMock,
-    organisationMembers: [orgMemberMock],
     blogs: [],
+    comments: [],
+    cart: [],
   };
 
   return {
@@ -98,14 +73,11 @@ export const createMockOrganisation = (): Organisation => {
     address: 'Street 101 Building 26',
     state: 'Lagos',
     owner: ownerAndCreator,
-    creator: { ...ownerAndCreator, user_type: UserType.USER },
     created_at: new Date(),
     updated_at: new Date(),
     isDeleted: false,
     preferences: [],
     invites: [],
-    role: null,
-    organisationMembers: [orgMemberMock],
     products: [],
   };
 };
