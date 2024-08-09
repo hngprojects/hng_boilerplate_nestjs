@@ -26,7 +26,6 @@ import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { skipAuth } from 'src/helpers/skipAuth';
 
-@ApiBearerAuth()
 @ApiTags('Products')
 @Controller('')
 export class ProductsController {
@@ -42,6 +41,17 @@ export class ProductsController {
     return await this.productsService.getAllProducts({ page, pageSize });
   }
 
+  @UseGuards(OwnershipGuard)
+  @ApiBearerAuth()
+  @Get(':org_id/products')
+  @ApiOperation({ summary: 'Fetch all products' })
+  @ApiResponse({ status: 201, description: 'Products fetched successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getAllOrganisationProducts(@Param('org_id') organisationId: string) {
+    return await this.productsService.getAllOrganisationProducts(organisationId);
+  }
+
   @skipAuth()
   @Get('/products/:product_id')
   @ApiOperation({ summary: 'fetches a single product' })
@@ -52,6 +62,7 @@ export class ProductsController {
     return await this.productsService.getSingleProduct(productId);
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Get('organisations/products/total')
   @ApiOkResponse({ type: GetTotalProductsResponseDto, description: 'Total Products fetched successfully' })
@@ -60,6 +71,7 @@ export class ProductsController {
     return await this.productsService.getTotalProducts();
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Post('organisations/:orgId/products')
   @ApiOperation({ summary: 'Creates a new product' })
@@ -72,6 +84,7 @@ export class ProductsController {
     return this.productsService.createProduct(orgId, createProductDto);
   }
 
+  @ApiBearerAuth()
   @Get('organisations/:orgId/products/search')
   @ApiOperation({ summary: 'Search for products' })
   @ApiParam({ name: 'orgId', description: 'organisation ID', example: '12345' })
@@ -89,6 +102,7 @@ export class ProductsController {
     return this.productsService.searchProducts(orgId, { name, category, minPrice, maxPrice });
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Get('organisations/:orgId/products/:productId')
   @ApiOperation({ summary: 'Gets a product by id' })
@@ -101,6 +115,7 @@ export class ProductsController {
     return this.productsService.getProductById(productId);
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Patch('organisations/:orgId/products/:productId')
   @HttpCode(200)
@@ -118,6 +133,7 @@ export class ProductsController {
     return this.productsService.updateProduct(orgId, productId, updateProductDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Delete('organisations/:orgId/products/:productId')
   @ApiOperation({ summary: 'Delete a product' })
@@ -136,6 +152,7 @@ export class ProductsController {
     return this.productsService.deleteProduct(orgId, productId);
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Post('organisations/:productId/comments')
   @ApiBearerAuth()
@@ -152,6 +169,7 @@ export class ProductsController {
     return this.productsService.addCommentToProduct(productId, commentDto, user.sub);
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Get('organisations/:productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })

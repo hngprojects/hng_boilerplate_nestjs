@@ -66,14 +66,15 @@ jobs:
         run: |
           sshpass -p "${SERVER_PASSWORD}" scp -o StrictHostKeyChecking=no nestjs-backend.tar ${SERVER_USERNAME}@${SERVER_HOST}:/home/teamalpha/docker/dev
 
-      - name: Load Docker Image on Server and Run via Docker Compose
-        env:
-          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-        run: |
-          sshpass -p "${SERVER_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_HOST} << 'EOF'
+      - name: Load docker image on server and run via docker compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT }}
+ 
+          script: |
             cd /home/teamalpha/docker/dev
-            docker load -i nestjs-backend.tar
-            docker-compose up -f docker-compose.staging.yml -d
-          EOF
+            sudo docker load -i nestjs-backend.tar
+            sudo docker-compose -f docker-compose.staging.yml up -d
