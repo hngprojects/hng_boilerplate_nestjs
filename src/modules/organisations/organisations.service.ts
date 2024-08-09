@@ -80,7 +80,7 @@ export class OrganisationsService {
       where: { id: userId },
     });
 
-    const superAdminRole = await this.roleRepository.findOne({ where: { name: 'admin' } });
+    const vendorRole = await this.roleRepository.findOne({ where: { name: 'admin' } });
 
     const organisationInstance = new Organisation();
     Object.assign(organisationInstance, createOrganisationDto);
@@ -90,7 +90,7 @@ export class OrganisationsService {
     const adminRole = new OrganisationUserRole();
     adminRole.userId = owner.id;
     adminRole.organisationId = newOrganisation.id;
-    adminRole.roleId = superAdminRole.id;
+    adminRole.roleId = vendorRole.id;
 
     await this.organisationUserRole.save(adminRole);
 
