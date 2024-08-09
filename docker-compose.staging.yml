@@ -1,0 +1,34 @@
+  GNU nano 6.2 docker-compose.staging.yml
+version: '3.8'
+
+services:
+  # NestJS Application Service
+  app:
+    build: .
+    container_name: team-alpha
+    ports:
+      - "3100:3100"
+    # entrypoint: ./start.sh
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+
+  # PostgreSQL Service
+  db:
+    image: postgres:16
+    container_name: postgres-db
+    env_file:
+      - ./.env
+    ports:
+      - "5678:5432"
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgres>
+
+  # Redis Service
+  redis:
+    image: redis:7
+    container_name: redis-server
+    ports:
+      - "6378:6379"
