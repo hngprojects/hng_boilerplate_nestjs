@@ -41,6 +41,7 @@ export class ProductsController {
     return await this.productsService.getAllProducts({ page, pageSize });
   }
 
+  @UseGuards(OwnershipGuard)
   @ApiBearerAuth()
   @Get(':org_id/products')
   @ApiOperation({ summary: 'Fetch all products' })
