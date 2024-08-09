@@ -58,6 +58,7 @@ export const JOB_LISTING_RETRIEVAL_SUCCESSFUL = 'Jobs listing fetched successful
 export const JOB_CREATION_SUCCESSFUL = 'Job listing created successfully';
 export const NO_USER_ORGS = 'User has no organisations';
 export const DEADLINE_PASSED = 'Job application deadline passed';
+export const VALID_PHONE_NUMBER_REQUIRED = 'Valid phone number and message content must be provided';
 export const EMAIL_TEMPLATES = {
   TEMPLATE_UPDATED_SUCCESSFULLY: 'Template updated successfully',
   INVALID_HTML_FORMAT: 'Invalid HTML format',
