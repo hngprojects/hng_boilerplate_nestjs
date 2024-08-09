@@ -60,7 +60,7 @@ export class InviteService {
       isGeneric: true,
     });
 
-    await this.inviteRepository.save(invite);
+    await this.inviteRepository.save(invite)
 
     const link = `${process.env.FRONTEND_URL}/invite?token=${token}`;
 
