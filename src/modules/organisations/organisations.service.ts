@@ -55,7 +55,7 @@ export class OrganisationsService {
     if (!members.length) {
       return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data: [] };
     }
-    const organisationMembers = members.map(instance => instance.user);
+    const  organisationMembers = members.map(instance => instance.user);
 
     const isMember = organisationMembers.find(member => member.id === sub);
     if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
