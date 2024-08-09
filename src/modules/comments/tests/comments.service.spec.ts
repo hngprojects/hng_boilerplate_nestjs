@@ -3,12 +3,13 @@ import { CommentsService } from '../comments.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Comment } from '../entities/comments.entity';
 import { User } from '../../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { HttpStatus } from '@nestjs/common';
 
 const mockCommentRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
-  findOneBy: jest.fn(),
-  update: jest.fn(),
 });
 
 const mockUserRepository = () => ({
