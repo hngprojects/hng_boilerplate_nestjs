@@ -31,6 +31,7 @@ import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import UserService from './user.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { ReactivateAccountDto } from './dto/reactivate-account.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserStatusResponseDto } from './dto/update-user-status-response.dto';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
@@ -57,6 +58,19 @@ export class UserController {
     const userId = user.sub;
 
     return this.userService.deactivateUser(userId, deactivateAccountDto);
+  }
+
+  @Patch('/reactivate')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reactivate a user account' })
+  @ApiResponse({ status: 200, description: 'The account has been successfully reactivated.' })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  async reactivateAccount(@Body() reactivateAccountDto: ReactivateAccountDto) {
+    const { email } = reactivateAccountDto;
+
+    return this.userService.reactivateUser(email, reactivateAccountDto);
   }
 
   @Get('stats')

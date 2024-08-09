@@ -30,14 +30,17 @@ export class SuperAdminGuard implements CanActivate {
       relations: ['permissions'],
     });
 
+    if (!adminRole) {
+      throw new CustomHttpException('Admin Role does not exist', HttpStatus.BAD_REQUEST);
+    }
+
     const userRole = await this.organisationMembersRole.find({
       where: { userId: currentUserId, roleId: adminRole.id },
     });
 
     if (!userRole.length) {
-      throw new CustomHttpException('This is an admin route', HttpStatus.NOT_FOUND);
+      throw new CustomHttpException('Access denied', HttpStatus.FORBIDDEN);
     }
-
     return true;
   }
 }

@@ -76,6 +76,7 @@ export const MEMBER_ALREADY_EXISTS = 'User already added to organization';
 export const MEMBER_ALREADY_SUCCESSFULLY = 'Member added successfully';
 export const MEMBER_NOT_ADDED = 'Failed to add member to the organisation';
 export const USER_NOT_REGISTERED = 'User not found, register to continue';
+export const CATEGORY_NOT_FOUND = 'Organization category not found';
 export const INVITE_ACCEPTED = 'Invite already accepted';
 export const INVALID_INVITE = 'Invalid invite link';
 export const INVITE_NOT_FOUND = 'Invite link not found';

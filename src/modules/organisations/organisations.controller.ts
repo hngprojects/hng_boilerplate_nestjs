@@ -17,6 +17,7 @@ import {
   Res,
   UseGuards,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
@@ -52,8 +53,9 @@ export class OrganisationsController {
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
-    return this.organisationsService.create(createOrganisationDto, user.sub);
+    return this.organisationsService.createOrganisation(createOrganisationDto, user.sub);
   }
+
   @UseGuards(OwnershipGuard)
   @Delete(':org_id')
   async delete(@Param('org_id') id: string, @Res() response: Response) {
@@ -111,6 +113,23 @@ export class OrganisationsController {
   ): Promise<OrganisationMembersResponseDto> {
     const { sub } = req.user;
     return this.organisationsService.getOrganisationMembers(org_id, page, page_size, sub);
+  }
+
+  @ApiOperation({ summary: "Gets a user's organizations" })
+  @ApiResponse({
+    status: 200,
+    description: 'Organisations retrieved successfully',
+    type: UserOrganizationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request',
+    type: UserOrganizationErrorResponseDto,
+  })
+  @Get('/')
+  async getUserOrganisations(@Req() req) {
+    const { sub } = req.user;
+    return this.organisationsService.getUserOrganisations(sub);
   }
 
   // @ApiOperation({ summary: 'Assign roles to members of an organisation' })

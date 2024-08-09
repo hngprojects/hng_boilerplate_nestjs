@@ -2,7 +2,10 @@ name: PR Deploy
 on:
   pull_request_target:
     branches:
-      - dev
+      - main
+  push:
+    branches:
+      - main
 
 jobs:
   deploy-pr-for-testing:
@@ -22,7 +25,7 @@ jobs:
 
       - id: deploy
         name: Pull Request Deploy
-        uses: hngprojects/pr-deploy@dev
+        uses: hngprojects/pr-deploy@main
         with:
           server_host: ${{ secrets.SERVER_HOST }}
           server_username: ${{ secrets.SERVER_USERNAME }}
@@ -31,7 +34,7 @@ jobs:
           comment: true
           context: '.'
           dockerfile: 'dockerfile'
-          exposed_port: '3100'
+          exposed_port: '3200'
           host_volume_path: '/var/'
           container_volume_path: '/var/'
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -42,6 +45,7 @@ jobs:
 
   deploy-to-server:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout code
@@ -52,11 +56,11 @@ jobs:
 
       - name: Build Docker Images
         run: |
-          docker build -t nestjs-backend:tag .
+          docker build -t nestjs-backend-main:tag .
 
       - name: Save Docker Images as Tarballs
         run: |
-          docker save -o nestjs-backend.tar nestjs-backend:tag
+          docker save -o nestjs-backend.tar nestjs-backend-main:tag
 
       - name: Upload Docker Image to Server using SCP
         env:
@@ -64,17 +68,16 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
         run: |
-          sshpass -p "${SERVER_PASSWORD}" scp -o StrictHostKeyChecking=no nestjs-backend.tar ${SERVER_USERNAME}@${SERVER_HOST}:/home/teamalpha/docker/dev
+          sshpass -p "${SERVER_PASSWORD}" scp -o StrictHostKeyChecking=no nestjs-backend-main.tar ${SERVER_USERNAME}@${SERVER_HOST}:/home/teamalpha/docker/main
 
-      - name: Load docker image on server and run via docker compose
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT }}
- 
-          script: |
-            cd /home/teamalpha/docker/dev
+      - name: Load Docker Image on Server and Run via Docker Compose
+        env:
+          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+        run: |
+          sshpass -p "${SERVER_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_HOST} << 'EOF'
+            cd /home/teamalpha/docker/main
             sudo docker load -i nestjs-backend.tar
             sudo docker-compose -f docker-compose.staging.yml up -d
+          EOF
