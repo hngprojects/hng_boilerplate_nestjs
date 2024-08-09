@@ -304,7 +304,6 @@ export class OrganisationsService {
         { id: 'id', title: 'ID' },
         { id: 'name', title: 'Name' },
         { id: 'email', title: 'Email' },
-        { id: 'role', title: 'Role' },
       ],
     });
 
