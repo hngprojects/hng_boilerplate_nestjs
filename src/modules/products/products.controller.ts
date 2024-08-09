@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
+import { MembershipGuard } from '../../guards/member.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
@@ -170,8 +171,7 @@ export class ProductsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(OwnershipGuard)
-  @Get('organisations/:productId/stock')
+  @Get('organisations/:org_id/products/:productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
