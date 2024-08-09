@@ -73,7 +73,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           port: ${{ secrets.SERVER_PORT }}
+          ask: password
+ 
           script: |
             cd /home/teamalpha/docker/dev
-            sudo docker load -i nestjs-backend.tar
-            sudo docker-compose -f docker-compose.staging.yml up -d
+            echo "$password" | sudo -S docker load -i nestjs-backend.tar
+            echo "$password" | sudo -S docker-compose -f docker-compose.staging.yml up -d
