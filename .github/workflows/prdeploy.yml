@@ -13,8 +13,14 @@ jobs:
     steps:
       - name: Checkout to branch
         uses: actions/checkout@v4
-      - id: deploy
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
+
+      - id: deploy
         name: Pull Request Deploy
         uses: hngprojects/pr-deploy@dev
         with:
@@ -34,7 +40,7 @@ jobs:
         run: |
           echo "Preview Url: ${{ steps.deploy.outputs.preview-url }}"
 
-  build-and-deploy:
+  deploy-to-server:
     runs-on: ubuntu-latest
 
     steps:
@@ -43,9 +49,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Run tests
-        run: npm run test
 
       - name: Build Docker Images
         run: |
@@ -63,14 +66,15 @@ jobs:
         run: |
           sshpass -p "${SERVER_PASSWORD}" scp -o StrictHostKeyChecking=no nestjs-backend.tar ${SERVER_USERNAME}@${SERVER_HOST}:/home/teamalpha/docker/dev
 
-      - name: Load Docker Image on Server and Run via Docker Compose
-        env:
-          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-        run: |
-          sshpass -p "${SERVER_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_HOST} << 'EOF'
+      - name: Load docker image on server and run via docker compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT }}
+
+          script: |
             cd /home/teamalpha/docker/dev
-            docker load -i nestjs-backend.tar
-            docker-compose up -f docker-compose.staging.yml -d
-          EOF
+            sudo docker load -i nestjs-backend.tar
+            sudo docker-compose -f docker-compose.staging.yml up -d

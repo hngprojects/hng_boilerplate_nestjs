@@ -61,6 +61,8 @@ export default class AuthenticationService {
 
     const newOrganisation = await this.organisationService.create(newOrganisationPaload, user.id);
 
+    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
+
     const token = (await this.otpService.createOtp(user.id)).token;
 
     const access_token = this.jwtService.sign({
@@ -77,6 +79,7 @@ export default class AuthenticationService {
         email: user.email,
         avatar_url: user.profile.profile_pic_url,
       },
+      oranisations: userOranisations,
     };
 
     return {
@@ -156,7 +159,7 @@ export default class AuthenticationService {
     if (!isMatch) {
       throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
-
+    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
 
     const responsePayload = {
@@ -169,6 +172,7 @@ export default class AuthenticationService {
           email: user.email,
           avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
         },
+        organisations: userOranisations,
       },
     };
 

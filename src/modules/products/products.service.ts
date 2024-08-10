@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 import { Repository } from 'typeorm';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
-import * as systemMessages from '../../helpers/SystemMessages';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { Comment } from '../comments/entities/comments.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
@@ -82,6 +82,50 @@ export class ProductsService {
         updated_at: product.updated_at,
       },
     };
+  }
+
+  async getAllProducts({ page = 1, pageSize = 2 }: { page: number; pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const allProucts = await this.productRepository.find({ skip, take: pageSize });
+    const totalProducts = await this.productRepository.count();
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Product retrieved successfully',
+      data: {
+        products: allProucts,
+        total: totalProducts,
+        page,
+        pageSize,
+      },
+    };
+  }
+
+  async getAllOrganisationProducts(organisationId: string) {
+    const organisation = await this.organisationRepository.findOne({
+      where: { id: organisationId },
+      relations: ['products'],
+    });
+
+    if (!organisation) {
+      throw new CustomHttpException('Invalid Organisation', HttpStatus.BAD_REQUEST);
+    }
+
+    const allProucts = organisation.products;
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Products retrieved successfully',
+      data: allProucts,
+    };
+  }
+
+  async getSingleProduct(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new CustomHttpException(SYS_MSG.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return { status_code: HttpStatus.OK, message: 'Product fetched successfully', data: product };
   }
 
   async searchProducts(orgId: string, criteria: SearchCriteria) {
@@ -191,12 +235,12 @@ export class ProductsService {
   async deleteProduct(orgId: string, productId: string) {
     const org = await this.organisationRepository.findOne({ where: { id: orgId } });
     if (!org) {
-      throw new CustomHttpException(systemMessages.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['org'] });
     if (!product) {
-      throw new CustomHttpException(systemMessages.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(SYS_MSG.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     await this.productRepository.softDelete(product.id);
     return {
@@ -211,7 +255,7 @@ export class ProductsService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!product) {
-      throw new CustomHttpException(systemMessages.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(SYS_MSG.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const productComment = this.commentRepository.create({ comment, product, user });
@@ -227,7 +271,7 @@ export class ProductsService {
     };
 
     return {
-      message: systemMessages.COMMENT_CREATED,
+      message: SYS_MSG.COMMENT_CREATED,
       data: responsePayload,
     };
   }
@@ -290,7 +334,7 @@ export class ProductsService {
     }
 
     return {
-      message: systemMessages.TOTAL_PRODUCTS_FETCHED_SUCCESSFULLY,
+      message: SYS_MSG.TOTAL_PRODUCTS_FETCHED_SUCCESSFULLY,
       data: {
         total_products: totalProductsThisMonth,
         percentage_change: percentageChange,

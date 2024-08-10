@@ -38,13 +38,9 @@ export class SuperAdminGuard implements CanActivate {
       where: { userId: currentUserId, roleId: adminRole.id },
     });
 
-    console.log(userRole);
-    console.log(userRole.length);
-
     if (!userRole.length) {
-      throw new CustomHttpException('This is an admin route', HttpStatus.NOT_FOUND);
+      throw new CustomHttpException('Access denied', HttpStatus.FORBIDDEN);
     }
-
     return true;
   }
 }

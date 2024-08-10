@@ -108,18 +108,6 @@ describe('InviteService', () => {
             find: jest.fn(),
           },
         },
-        // {
-        //   provide: getRepositoryToken(OrganisationMember),
-        //   useValue: {
-        //     findBy: jest.fn(),
-        //     findOne: jest.fn(),
-        //     create: jest.fn(),
-        //     save: jest.fn(),
-        //     findOneBy: jest.fn(),
-        //     update: jest.fn(),
-        //     find: jest.fn(),
-        //   },
-        // },
         {
           provide: getRepositoryToken(User),
           useValue: {
@@ -304,6 +292,85 @@ describe('InviteService', () => {
         to: 'valid@example.com',
         subject: 'Invitation to join an organization',
         html: expect.any(String),
+      });
+    });
+    describe('Accept Invite Service', () => {
+      it('should throw NotFoundException if invite not found', async () => {
+        jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+        await expect(service.acceptInvite({ token: 'invalid-token', email: 'test@example.com' })).rejects.toThrow(
+          CustomHttpException
+        );
+      });
+
+      it('should throw BadRequestException if email does not match non-generic invite', async () => {
+        const mockInvite = {
+          id: 'some-id',
+          token: 'valid-token',
+          email: 'test@example.com',
+          isGeneric: false,
+          isAccepted: true,
+          organisation: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+
+        jest.spyOn(repository, 'findOne').mockResolvedValue(mockInvite);
+
+        await expect(service.acceptInvite({ token: 'valid-token', email: 'wrong@example.com' })).rejects.toThrow(
+          CustomHttpException
+        );
+      });
+
+      it('should throw BadRequestException if invite already accepted', async () => {
+        const mockInvite = {
+          id: 'some-id',
+          token: 'valid-token',
+          email: 'test@example.com',
+          isGeneric: false,
+          isAccepted: true,
+          organisation: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+
+        jest.spyOn(repository, 'findOne').mockResolvedValue(mockInvite);
+
+        await expect(service.acceptInvite({ token: 'valid-token', email: 'test@example.com' })).rejects.toThrow(
+          CustomHttpException
+        );
+      });
+
+      it('should throw NotFoundException if user not found', async () => {
+        jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+        jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+        await expect(service.acceptInvite({ token: 'valid-token', email: 'test@example.com' })).rejects.toThrow(
+          CustomHttpException
+        );
+      });
+
+      it('should throw InternalServerErrorException if adding member fails', async () => {
+        const mockInvite = {
+          id: 'some-id',
+          token: 'valid-token',
+          email: 'test@example.com',
+          isGeneric: false,
+          isAccepted: false,
+          organisation: orgMock,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+
+        jest.spyOn(repository, 'findOne').mockResolvedValue(mockInvite);
+        jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+        jest
+          .spyOn(organisationService, 'addOrganisationMember')
+          .mockResolvedValue({ status: 'error', message: 'Member added', member: mockUser });
+
+        await expect(service.acceptInvite({ token: 'valid-token', email: 'test@example.com' })).rejects.toThrow(
+          CustomHttpException
+        );
       });
     });
   });

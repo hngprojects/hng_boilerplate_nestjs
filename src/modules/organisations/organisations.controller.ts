@@ -17,6 +17,7 @@ import {
   Res,
   UseGuards,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
@@ -52,13 +53,12 @@ export class OrganisationsController {
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
-    return this.organisationsService.create(createOrganisationDto, user.sub);
+    return this.organisationsService.createOrganisation(createOrganisationDto, user.sub);
   }
 
   @UseGuards(OwnershipGuard)
   @Delete(':org_id')
-  async delete(@Param('org_id') id: string, @Res() response: Response) {
-    this.organisationsService;
+  async delete(@Param('org_id') id: string) {
     return this.organisationsService.deleteorganisation(id);
   }
 
@@ -167,25 +167,42 @@ export class OrganisationsController {
   // ) {
   //   return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
   // }
-  // @UseGuards(OwnershipGuard)
-  // @ApiOperation({ summary: 'Add member to an organization' })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'Member added successfully',
-  // })
-  // @ApiResponse({
-  //   status: 409,
-  //   description: 'User already added to organization.',
-  // })
-  // @ApiResponse({
-  //   status: 404,
-  //   description: 'Organisation not found',
-  // })
-  // @Post(':org_id/users')
-  // async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
-  //   return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
-  // }
 
+  @UseGuards(OwnershipGuard)
+  @ApiOperation({ summary: 'Add member to an organization' })
+  @ApiResponse({
+    status: 201,
+    description: 'Member added successfully',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User already added to organization.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @Post(':org_id/users')
+  async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
+    return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
+  }
+
+  // @ApiOperation({ summary: "Gets a user's organizations" })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Organisations retrieved successfully',
+  //   type: UserOrganizationResponseDto,
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'Bad request',
+  //   type: UserOrganizationErrorResponseDto,
+  // })
+  // @Get('/')
+  // async getUserOrganisations(@Req() req) {
+  //   const { sub } = req.user;
+  //   return this.organisationsService.getUserOrganisations(sub);
+  // }
   // @ApiOperation({ summary: 'Get Organization details by Id' })
   // @ApiResponse({
   //   status: 200,

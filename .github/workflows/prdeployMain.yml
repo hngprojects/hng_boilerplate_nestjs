@@ -16,8 +16,14 @@ jobs:
     steps:
       - name: Checkout to branch
         uses: actions/checkout@v4
-      - id: deploy
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
+
+      - id: deploy
         name: Pull Request Deploy
         uses: hngprojects/pr-deploy@main
         with:
@@ -37,7 +43,7 @@ jobs:
         run: |
           echo "Preview Url: ${{ steps.deploy.outputs.preview-url }}"
 
-  build-and-deploy:
+  deploy-to-server:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
@@ -47,9 +53,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Run tests
-        run: npm run test
 
       - name: Build Docker Images
         run: |
@@ -75,6 +78,6 @@ jobs:
         run: |
           sshpass -p "${SERVER_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_HOST} << 'EOF'
             cd /home/teamalpha/docker/main
-            docker load -i nestjs-backend-main.tar
-            docker-compose up -f docker-compose.staging.yml -d
+            sudo docker load -i nestjs-backend.tar
+            sudo docker-compose -f docker-compose.staging.yml up -d
           EOF

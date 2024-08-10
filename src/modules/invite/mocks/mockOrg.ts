@@ -18,4 +18,5 @@ export const mockOrg: Organisation = {
   preferences: [],
   invites: [],
   products: [],
+  members: null,
 };
