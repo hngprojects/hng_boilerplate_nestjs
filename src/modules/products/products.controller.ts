@@ -62,11 +62,10 @@ export class ProductsController {
     return await this.productsService.getSingleProduct(productId);
   }
 
-  @skipAuth()
   @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Get(':org_id/products')
-  @ApiOperation({ summary: 'Fetch all products' })
+  @ApiOperation({ summary: 'Fetch all products by Super Admin' })
   @ApiResponse({ status: 201, description: 'Products fetched successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 500, description: 'Internal server error' })

@@ -116,7 +116,7 @@ export class ProductsService {
     return {
       status_code: HttpStatus.OK,
       message: 'Products retrieved successfully',
-      data: allProucts,
+      products: allProucts,
     };
   }
 
