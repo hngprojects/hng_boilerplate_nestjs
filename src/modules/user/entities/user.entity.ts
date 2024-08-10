@@ -6,6 +6,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   OneToMany,
   OneToOne,
@@ -72,8 +73,8 @@ export class User extends AbstractBaseEntity {
   @OneToMany(() => Organisation, organisation => organisation.owner)
   owned_organisations: Organisation[];
 
-  @ManyToMany(() => Organisation, organisation => organisation.owner)
-  @JoinColumn()
+  @ManyToMany(() => Organisation, organisation => organisation.members)
+  @JoinTable()
   organisations: Organisation[];
 
   @OneToMany(() => Job, job => job.user)

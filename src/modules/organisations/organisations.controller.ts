@@ -58,8 +58,7 @@ export class OrganisationsController {
 
   @UseGuards(OwnershipGuard)
   @Delete(':org_id')
-  async delete(@Param('org_id') id: string, @Res() response: Response) {
-    this.organisationsService;
+  async delete(@Param('org_id') id: string) {
     return this.organisationsService.deleteorganisation(id);
   }
 
@@ -132,6 +131,25 @@ export class OrganisationsController {
     return this.organisationsService.getUserOrganisations(sub);
   }
 
+  @UseGuards(OwnershipGuard)
+  @ApiOperation({ summary: 'Add member to an organization' })
+  @ApiResponse({
+    status: 201,
+    description: 'Member added successfully',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User already added to organization.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @Post(':org_id/users')
+  async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
+    return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
+  }
+
   @ApiOperation({ summary: 'Assign roles to members of an organisation' })
   @ApiResponse({
     status: 200,
@@ -152,8 +170,8 @@ export class OrganisationsController {
     },
   })
   @ApiResponse({
-    status: 404,
-    description: 'Organisation not found',
+    status: 409,
+    description: 'User already added to organization.',
   })
   @ApiResponse({
     status: 403,

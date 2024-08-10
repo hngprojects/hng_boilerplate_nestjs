@@ -39,9 +39,8 @@ export class SuperAdminGuard implements CanActivate {
     });
 
     if (!userRole.length) {
-      throw new CustomHttpException('This is an admin route', HttpStatus.NOT_FOUND);
+      throw new CustomHttpException('Access denied', HttpStatus.FORBIDDEN);
     }
-
     return true;
   }
 }

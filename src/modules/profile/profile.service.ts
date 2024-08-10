@@ -1,5 +1,4 @@
-import { profile } from 'console';
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
