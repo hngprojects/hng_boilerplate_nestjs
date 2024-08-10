@@ -171,6 +171,7 @@ describe('AuthenticationService', () => {
             first_name: 'John',
             last_name: 'Doe',
             email: 'test@example.com',
+            is_superadmin: false,
             avatar_url: 'some_url',
           },
           oranisations: [
@@ -220,6 +221,14 @@ describe('AuthenticationService', () => {
 
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      organisationServiceMock.getAllUserOrganisations.mockResolvedValueOnce([
+        {
+          organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+          name: "Test's Organisation",
+          user_role: 'admin',
+          is_owner: true,
+        },
+      ]);
       jwtServiceMock.sign.mockReturnValue('jwt_token');
 
       const result = await service.loginUser(loginDto);
@@ -234,7 +243,16 @@ describe('AuthenticationService', () => {
             last_name: 'User',
             email: 'test@example.com',
             avatar_url: 'profile_url',
+            is_superadmin: false,
           },
+          organisations: [
+            {
+              organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+              name: "Test's Organisation",
+              user_role: 'admin',
+              is_owner: true,
+            },
+          ],
         },
       });
     });
