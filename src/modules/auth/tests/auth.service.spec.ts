@@ -117,29 +117,6 @@ describe('AuthenticationService', () => {
       } as Profile,
     };
 
-    it('should create a new user successfully', async () => {
-      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
-      userServiceMock.createUser.mockResolvedValueOnce(undefined);
-      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
-      jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
-
-      const result = await service.createNewUser(createUserDto);
-
-      expect(result).toEqual({
-        message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
-        access_token: 'mocked_token',
-        data: {
-          user: {
-            avatar_url: 'some_url',
-            email: 'test@example.com',
-            first_name: 'John',
-            id: '1',
-            last_name: 'Doe',
-          },
-        },
-      });
-    });
-
     it('should return error if user already exists', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
 

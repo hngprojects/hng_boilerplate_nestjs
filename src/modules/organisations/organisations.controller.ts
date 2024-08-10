@@ -58,8 +58,7 @@ export class OrganisationsController {
 
   @UseGuards(OwnershipGuard)
   @Delete(':org_id')
-  async delete(@Param('org_id') id: string, @Res() response: Response) {
-    this.organisationsService;
+  async delete(@Param('org_id') id: string) {
     return this.organisationsService.deleteorganisation(id);
   }
 
