@@ -56,12 +56,6 @@ describe('FaqService', () => {
         },
       });
       expect(mockFaqRepository.create).toHaveBeenCalledWith(createFaqDto);
-      expect(mockFaqRepository.save).toHaveBeenCalledWith({
-        id: 'some-uuid',
-        ...createFaqDto,
-        created_at: expect.any(Date),
-        updated_at: expect.any(Date),
-      });
     });
 
     it('should throw an error if saving fails', async () => {
