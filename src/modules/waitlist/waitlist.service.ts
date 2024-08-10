@@ -18,7 +18,6 @@ export default class WaitlistService {
   async createWaitlist(createWaitlistDto: CreateWaitlistDto): Promise<WaitlistResponseDto> {
     const errors = await validate(createWaitlistDto);
     if (errors.length > 0) {
-      console.log('here');
       const messages = errors.map(err => Object.values(err.constraints)).flat();
       throw new CustomHttpException(
         {
