@@ -1,18 +1,5 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  NotFoundException,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { RoleService } from './role.service';
 import {
@@ -20,12 +7,11 @@ import {
   AttachPermissionsDto,
   UpdateOrganisationRoleDto,
 } from './dto/update-organisation-role.dto';
-import { skipAuth } from '../../helpers/skipAuth';
+import { SuperAdminGuard } from 'src/guards/super-admin.guard';
 
 @ApiTags('organisation Settings')
-// @UseGuards(OwnershipGuard)
-// @ApiBearerAuth()
-@skipAuth()
+@UseGuards(SuperAdminGuard)
+@ApiBearerAuth()
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
@@ -41,18 +27,8 @@ export class RoleController {
     return await this.roleService.createRole(createRoleDto);
   }
 
-  // @Get(':id/roles')
-  // @ApiOperation({ summary: 'Get all organisation roles' })
-  // @ApiResponse({ status: 200, description: 'Success', type: [Object] })
-  // @ApiResponse({ status: 404, description: 'Organisation not found' })
-  // async getRoles(@Param('id') organisationID: string) {
-  //   const roles = await this.organisationRoleService.getAllRolesInOrganisation(organisationID);
-  //   return {
-  //     status_code: 200,
-  //     data: roles,
-  //   };
-  // }
-
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
   @Get('/:roleId')
   @ApiOperation({ summary: 'Fetch a single role ' })
   @ApiParam({ name: 'id', required: true, description: 'ID of the role' })
@@ -65,8 +41,10 @@ export class RoleController {
     return await this.roleService.findSingleRole(roleId);
   }
 
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
   @Patch('/:roleId')
-  @ApiOperation({ summary: 'update a role within an organization' })
+  @ApiOperation({ summary: 'Update a role ' })
   @ApiResponse({
     status: 200,
     description: 'The role has been successfully updated',
@@ -85,8 +63,10 @@ export class RoleController {
     };
   }
 
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
   @Post('permissions')
-  @ApiOperation({ summary: 'attach permissions to a role' })
+  @ApiOperation({ summary: 'Attach permissions to a role' })
   @ApiResponse({
     status: 200,
     description: 'The role has been successfully updated',

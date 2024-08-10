@@ -106,7 +106,6 @@ export class ProductsService {
       where: { id: organisationId },
       relations: ['products'],
     });
-
     if (!organisation) {
       throw new CustomHttpException('Invalid Organisation', HttpStatus.BAD_REQUEST);
     }
@@ -188,6 +187,7 @@ export class ProductsService {
         status_code: HttpStatus.NOT_FOUND,
       });
     }
+
     if (product.org.id !== org.id) {
       throw new ForbiddenException({
         status: 'fail',

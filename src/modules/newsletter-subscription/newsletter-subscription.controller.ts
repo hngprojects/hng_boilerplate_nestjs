@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, UseGu
 import { NewsletterSubscriptionService } from './newsletter-subscription.service';
 import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { skipAuth } from '../../helpers/skipAuth';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 
@@ -20,6 +20,7 @@ export class NewsletterSubscriptionController {
     return this.newsletterSubscriptionService.newsletterSubscription(createNewsletterDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -64,6 +65,7 @@ export class NewsletterSubscriptionController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
@@ -75,6 +77,7 @@ export class NewsletterSubscriptionController {
     return this.newsletterSubscriptionService.removeSubscriber(id);
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Get('deleted')
   @HttpCode(HttpStatus.OK)
@@ -102,6 +105,7 @@ export class NewsletterSubscriptionController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Post('restore/:id')
   @HttpCode(HttpStatus.OK)

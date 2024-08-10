@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfileService } from '../profile.service';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Profile } from '../entities/profile.entity';
 import { NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
@@ -19,11 +19,18 @@ describe('ProfileService', () => {
         ProfileService,
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useValue: {
+            findOne: jest.fn(),
+            softDelete: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(Profile),
-          useClass: Repository,
+          useValue: {
+            update: jest.fn(),
+            findOne: jest.fn(),
+            softDelete: jest.fn(),
+          },
         },
       ],
     }).compile();
