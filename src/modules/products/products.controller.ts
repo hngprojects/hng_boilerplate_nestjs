@@ -62,6 +62,18 @@ export class ProductsController {
     return await this.productsService.getSingleProduct(productId);
   }
 
+  @skipAuth()
+  @ApiBearerAuth()
+  @UseGuards(SuperAdminGuard)
+  @Get(':org_id/products')
+  @ApiOperation({ summary: 'Fetch all products' })
+  @ApiResponse({ status: 201, description: 'Products fetched successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getAllOrganisationProductsByAmin(@Param('org_id') organisationId: string) {
+    return await this.productsService.getAllOrganisationProducts(organisationId);
+  }
+
   @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Get('organisations/products/total')
