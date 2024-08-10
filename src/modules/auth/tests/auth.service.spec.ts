@@ -17,6 +17,7 @@ import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
+import { Organisation } from 'src/modules/organisations/entities/organisations.entity';
 
 jest.mock('speakeasy');
 
@@ -64,6 +65,7 @@ describe('AuthenticationService', () => {
           provide: OrganisationsService,
           useValue: {
             create: jest.fn(),
+            getAllUserOrganisations: jest.fn(),
           },
         },
         {
@@ -117,6 +119,72 @@ describe('AuthenticationService', () => {
       } as Profile,
     };
 
+    it('should create a new user successfully', async () => {
+      userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+
+      userServiceMock.createUser.mockResolvedValueOnce(undefined);
+
+      userServiceMock.getUserRecord.mockResolvedValueOnce({
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        profile: {
+          profile_pic_url: 'some_url',
+        },
+      } as User);
+
+      organisationServiceMock.create.mockResolvedValueOnce({
+        id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+        name: "John's Organisation",
+        description: '',
+        email: 'test@example.com',
+        industry: '',
+        type: '',
+        country: '',
+        address: '',
+        state: '',
+        owner_id: 'user-id',
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      organisationServiceMock.getAllUserOrganisations.mockResolvedValueOnce([
+        {
+          organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+          name: "John's Organisation",
+          user_role: 'admin',
+          is_owner: true,
+        },
+      ]);
+
+      jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
+
+      const result = await service.createNewUser(createUserDto);
+
+      expect(result).toEqual({
+        message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
+        access_token: 'mocked_token',
+        data: {
+          user: {
+            id: '1',
+            first_name: 'John',
+            last_name: 'Doe',
+            email: 'test@example.com',
+            avatar_url: 'some_url',
+          },
+          oranisations: [
+            {
+              organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+              name: "John's Organisation",
+              user_role: 'admin',
+              is_owner: true,
+            },
+          ],
+        },
+      });
+    });
+
     it('should return error if user already exists', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
 
@@ -133,6 +201,44 @@ describe('AuthenticationService', () => {
   });
 
   describe('loginUser', () => {
+    it('should return login response if credentials are valid', async () => {
+      const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
+      const user = {
+        id: '1',
+        email: loginDto.email,
+        first_name: 'Test',
+        last_name: 'User',
+        password: await bcrypt.hash('password123', 10),
+        is_active: true,
+        attempts_left: 2,
+        created_at: new Date(),
+        updated_at: new Date(),
+        profile: {
+          profile_pic_url: 'profile_url',
+        } as Profile,
+      };
+
+      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
+      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      jwtServiceMock.sign.mockReturnValue('jwt_token');
+
+      const result = await service.loginUser(loginDto);
+
+      expect(result).toEqual({
+        message: 'Login successful',
+        access_token: 'jwt_token',
+        data: {
+          user: {
+            id: '1',
+            first_name: 'Test',
+            last_name: 'User',
+            email: 'test@example.com',
+            avatar_url: 'profile_url',
+          },
+        },
+      });
+    });
+
     it('should throw an unauthorized error for invalid email', async () => {
       const loginDto: LoginDto = { email: 'invalid@example.com', password: 'password123' };
 
