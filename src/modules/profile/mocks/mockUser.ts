@@ -1,13 +1,16 @@
-import { mockProfile } from '../../../modules/profile/mocks/profileMock';
+import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
+import { Profile } from '../../../modules/profile/entities/profile.entity';
 import { User, UserType } from '../../user/entities/user.entity';
 
-export const mockUser: User = {
+const profile = new Profile();
+export const mockUserWithProfile: User = {
+  cart: null,
   email: 'tester@example.com',
+  status: null,
   first_name: 'John',
   last_name: 'Doe',
   is_active: true,
-  phone: '+1234567890',
-  status: 'Hello from the children of planet Earth',
+  phone: '+1234567891',
   id: 'some-uuid-value-here',
   attempts_left: 2,
   created_at: new Date(),
@@ -21,11 +24,9 @@ export const mockUser: User = {
   secret: 'secret',
   is_2fa_enabled: true,
   testimonials: [],
-  profile: mockProfile,
+  profile: null,
   notification_settings: [],
   notifications: [],
   blogs: [],
-  comments: [],
-  cart: [],
   organisations: null,
 };

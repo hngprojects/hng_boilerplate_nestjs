@@ -26,8 +26,8 @@ export class OwnershipGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const userId = request.user.sub;
-    const organisationId = request.params.orgId || request.params.org_id || request.query.org_id;
-    console.log(organisationId);
+    const organisationId = request.params.orgId || request.params.org_id || request.params.id;
+    
     const adminUserRole = await this.organisationMembersRole.find({ where: { userId }, relations: ['role'] });
     if (adminUserRole.length) {
       const roles = adminUserRole.map(instance => instance.role.name);
