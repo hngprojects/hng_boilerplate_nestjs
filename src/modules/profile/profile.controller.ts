@@ -54,5 +54,4 @@ export class ProfileController {
   async deleteUserProfile(@Param('userId', ParseUUIDPipe) userId: string) {
     return await this.profileService.deleteUserProfile(userId);
   }
-
 }
