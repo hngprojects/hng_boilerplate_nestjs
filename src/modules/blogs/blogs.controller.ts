@@ -17,7 +17,7 @@ import { BlogService } from './blogs.service';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { CreateBlogDto } from './dtos/create-blog.dto';
 import { BlogResponseDto } from './dtos/blog-response.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { BlogDto } from './dtos/blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
 import { UpdateBlogResponseDto } from './dtos/update-blog-response.dto';
@@ -28,6 +28,7 @@ import { BLOG_DELETED } from '../../helpers/SystemMessages';
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
+  @ApiBearerAuth()
   @Post()
   @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Create a new blog' })
@@ -53,6 +54,7 @@ export class BlogController {
     return result;
   }
 
+  @ApiBearerAuth()
   @Put(':id')
   @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Update a blog post by ID' })
@@ -81,6 +83,7 @@ export class BlogController {
     return await this.blogService.getSingleBlog(id, req.user);
   }
 
+  @ApiBearerAuth()
   @Delete(':id')
   @UseGuards(SuperAdminGuard)
   @HttpCode(HttpStatus.ACCEPTED)

@@ -17,7 +17,6 @@ import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
-import { DeleteProductDTO } from './dto/delete-product.dto';
 import { isUUID } from 'class-validator';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '../../helpers/SystemMessages';

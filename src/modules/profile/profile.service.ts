@@ -1,5 +1,7 @@
-import { profile } from 'console';
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+
+  Injectable,
+} from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,10 +13,12 @@ import { INVALID_CREDENTIALS, OK, REQUEST_SUCCESSFUL, USER_NOT_FOUND } from '../
 
 @Injectable()
 export class ProfileService {
+
   constructor(
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
     @InjectRepository(User) private userRepository: Repository<User>
-  ) {}
+  ) {
+  }
 
   async findOneProfile(userId: string) {
     if (!isUUID(userId, '4')) {
@@ -26,10 +30,10 @@ export class ProfileService {
       throw new CustomHttpException(USER_NOT_FOUND, 404);
     }
 
-    const userProfile = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['profile'],
-    });
+      const userProfile = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['profile'],
+      });
 
     const profile = userProfile.profile;
     if (!profile) {
@@ -89,4 +93,5 @@ export class ProfileService {
 
     return responseData;
   }
+
 }

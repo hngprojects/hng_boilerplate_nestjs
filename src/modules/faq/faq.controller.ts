@@ -41,6 +41,7 @@ export class FaqController {
     return this.faqService.findAllFaq();
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update an existing FAQ' })
@@ -51,6 +52,7 @@ export class FaqController {
     return this.faqService.updateFaq(id, updateFaqDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an FAQ' })
