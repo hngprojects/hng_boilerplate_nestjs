@@ -162,10 +162,10 @@ export class OrganisationsService {
         relations: ['organisation', 'organisation.owner', 'role'],
       })
     ).map(instance => ({
-      organisation_id: instance.organisation.id,
-      name: instance.organisation.name,
+      organisation_id: instance?.organisation?.id || '',
+      name: instance?.organisation?.name,
       user_role: instance.role.name,
-      is_owner: instance.organisation.owner.id === user.id,
+      is_owner: instance.organisation ? instance.organisation.owner.id === user.id : '',
     }));
 
     return userOrganisations;

@@ -3,7 +3,7 @@ import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { TeamMemberResponseDto } from './dto/team.response.dto';
 
 @ApiTags('Teams')
@@ -11,6 +11,7 @@ import { TeamMemberResponseDto } from './dto/team.response.dto';
 export class TeamsController {
   constructor(private readonly teamsService: TeamsService) {}
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new team member' })
@@ -72,6 +73,7 @@ export class TeamsController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a team member' })
@@ -85,6 +87,7 @@ export class TeamsController {
     return this.teamsService.updateTeamMember(id, updateTeamDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a team member' })
