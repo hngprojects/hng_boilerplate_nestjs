@@ -36,7 +36,7 @@ describe('FaqService', () => {
   });
 
   describe('create', () => {
-    it('should create a new FAQ and return it with createdBy set to ADMIN', async () => {
+    it('should create a new FAQ and return it with appropriate payload', async () => {
       const createFaqDto: CreateFaqDto = {
         question: 'What is the return policy?',
         answer: 'Our return policy allows returns within 30 days of purchase.',
@@ -57,14 +57,10 @@ describe('FaqService', () => {
       });
       expect(mockFaqRepository.create).toHaveBeenCalledWith(createFaqDto);
       expect(mockFaqRepository.save).toHaveBeenCalledWith({
-        status_code: 201,
-        message: 'FAQ created successfully',
-        data: {
-          id: 'some-uuid',
-          ...createFaqDto,
-          created_at: expect.any(Date),
-          updated_at: expect.any(Date),
-        },
+        id: 'some-uuid',
+        ...createFaqDto,
+        created_at: expect.any(Date),
+        updated_at: expect.any(Date),
       });
     });
 

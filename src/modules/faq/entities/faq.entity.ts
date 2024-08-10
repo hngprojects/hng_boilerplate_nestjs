@@ -12,7 +12,4 @@ export class Faq extends AbstractBaseEntity implements IFaq {
 
   @Column({ nullable: false })
   category: string;
-
-  @Column({ nullable: false, default: 'ADMIN' })
-  createdBy: string;
 }
