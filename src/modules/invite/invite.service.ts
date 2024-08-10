@@ -19,10 +19,7 @@ import { OrganisationsService } from '../organisations/organisations.service';
 import { CreateInvitationDto } from './dto/create-invite.dto';
 import { EmailService } from '../email/email.service';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
-
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class InviteService {
@@ -32,6 +29,7 @@ export class InviteService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly mailerService: MailerService,
     private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
     private readonly OrganisationService: OrganisationsService
   ) {}
 
@@ -78,9 +76,8 @@ export class InviteService {
 
     await this.inviteRepository.save(invite);
 
-    const link = `${process.env.FRONTEND_URL}/invite?token=${token}`;
-
-    console.log('Invite link:', link, '[]:', process.env.FRONTEND_URL);
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const link = `${frontendUrl}/invite?token=${token}`;
 
     const responseData = {
       status_code: HttpStatus.OK,

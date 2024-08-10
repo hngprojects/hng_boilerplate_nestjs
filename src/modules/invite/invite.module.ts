@@ -14,12 +14,16 @@ import { Role } from '../role/entities/role.entity';
 import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
 import UserService from '../user/user.service';
 import { Permissions } from '../../modules/permissions/entities/permissions.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Invite, Organisation, User, Profile, Role, Permissions, OrganisationUserRole]),
     BullModule.registerQueue({
       name: 'emailSending',
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
   ],
   controllers: [InviteController],

@@ -20,6 +20,7 @@ import { mockUser } from '../mocks/mockUser';
 import { orgMock } from '../../../modules/organisations/tests/mocks/organisation.mock';
 import { Role } from '../../../modules/role/entities/role.entity';
 import { Permissions } from '../../../modules/permissions/entities/permissions.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 jest.mock('uuid');
 
 describe('InviteService', () => {
@@ -31,12 +32,16 @@ describe('InviteService', () => {
   let userRepository: Repository<User>;
   let permissionRepository: Repository<Permissions>;
   let organisationService: OrganisationsService;
+  let configService: ConfigService;
+  let frontendUrl: string;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [ConfigModule.forRoot()],
       providers: [
         InviteService,
         OrganisationsService,
+        ConfigService,
         {
           provide: getRepositoryToken(Invite),
           useValue: {
@@ -143,6 +148,8 @@ describe('InviteService', () => {
     service = module.get<InviteService>(InviteService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     organisationService = module.get<OrganisationsService>(OrganisationsService);
+    configService = module.get<ConfigService>(ConfigService);
+    frontendUrl = configService.get<string>('FRONTEND_URL');
   });
 
   it('should fetch all invites', async () => {
@@ -178,7 +185,7 @@ describe('InviteService', () => {
       expect(result).toEqual({
         status_code: HttpStatus.OK,
         message: 'Invite link generated successfully',
-        link: `${process.env.FRONTEND_URL}/invite?token=${mockToken}`,
+        link: `${frontendUrl}/invite?token=${mockToken}`,
       });
 
       expect(organisationRepo.findOne).toHaveBeenCalledWith({ where: { id: '1' } });
@@ -267,7 +274,7 @@ describe('InviteService', () => {
       };
 
       const mockToken = 'mock-uuid';
-      const inviteLinkData = { link: `${process.env.FRONTEND_URL}/invite?token=${mockToken}` };
+      const inviteLinkData = { link: `${frontendUrl}/invite?token=${mockToken}` };
       const template = '<html>...</html>';
       const mockOrgData = { name: 'Test Org' };
 
@@ -278,7 +285,7 @@ describe('InviteService', () => {
       jest.spyOn(service, 'createInvite').mockResolvedValue({
         status_code: HttpStatus.OK,
         message: 'Invite link generated successfully',
-        link: `${process.env.FRONTEND_URL}/invite?token=${mockToken}`,
+        link: `${frontendUrl}/invite?token=${mockToken}`,
       });
       jest.spyOn(mailerService, 'sendMail').mockResolvedValue({});
 
