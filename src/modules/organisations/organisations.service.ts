@@ -21,6 +21,9 @@ import CreateOrganisationType from './dto/create-organisation-options';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { ORG_NOT_FOUND, ORG_UPDATE } from '../../helpers/SystemMessages';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
+import { createObjectCsvStringifier } from 'csv-writer';
+import { join } from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class OrganisationsService {
@@ -53,7 +56,7 @@ export class OrganisationsService {
     if (!members.length) {
       return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data: [] };
     }
-    let organisationMembers = members.map(instance => instance.user);
+    const organisationMembers = members.map(instance => instance.user);
 
     const isMember = organisationMembers.find(member => member.id === sub);
     if (!isMember) throw new ForbiddenException('User does not have access to the organisation');
@@ -300,23 +303,22 @@ export class OrganisationsService {
   //   return { message: 'Fetched Organization Details Successfully', data: orgDetails };
   // }
 
-  // async exportOrganisationMembers(orgId: string, userId: string): Promise<string> {
-  //   const membersResponse = await this.getOrganisationMembers(orgId, 1, Number.MAX_SAFE_INTEGER, userId);
+  async exportOrganisationMembers(orgId: string, userId: string): Promise<string> {
+    const membersResponse = await this.getOrganisationMembers(orgId, 1, Number.MAX_SAFE_INTEGER, userId);
 
-  //   const csvStringifier = createObjectCsvStringifier({
-  //     header: [
-  //       { id: 'id', title: 'ID' },
-  //       { id: 'name', title: 'Name' },
-  //       { id: 'email', title: 'Email' },
-  //       { id: 'role', title: 'Role' },
-  //     ],
-  //   });
+    const csvStringifier = createObjectCsvStringifier({
+      header: [
+        { id: 'id', title: 'ID' },
+        { id: 'name', title: 'Name' },
+        { id: 'email', title: 'Email' },
+      ],
+    });
 
-  //   const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(membersResponse.data);
+    const csvData = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(membersResponse.data);
 
-  //   const filePath = join(__dirname, `organisation-members-${orgId}.csv`);
-  //   fs.writeFileSync(filePath, csvData);
+    const filePath = join(__dirname, `organisation-members-${orgId}.csv`);
+    fs.writeFileSync(filePath, csvData);
 
-  //   return filePath;
-  // }
+    return filePath;
+  }
 }
