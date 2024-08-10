@@ -139,26 +139,33 @@ export class OrganisationsService {
   }
 
   async getUserOrganisations(userId: string) {
+    const organisations = await this.getAllUserOrganisations(userId);
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Organisations retrieved successfully',
+      data: organisations,
+    };
+  }
+
+  async getAllUserOrganisations(userId: string) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
+
     if (!user) {
       throw new CustomHttpException('Invalid Request', HttpStatus.BAD_REQUEST);
     }
     const userOrganisations = (
       await this.organisationUserRole.find({
         where: { userId },
-        relations: ['organisation', 'role'],
+        relations: ['organisation', 'organisation.owner', 'role'],
       })
     ).map(instance => ({
       organisation_id: instance.organisation.id,
       name: instance.organisation.name,
       user_role: instance.role.name,
+      is_owner: instance.organisation.owner.id === user.id,
     }));
 
-    return {
-      status_code: HttpStatus.OK,
-      message: 'Organisations retrieved successfully',
-      data: userOrganisations,
-    };
+    return userOrganisations;
   }
 
   // async updateMemberRole(orgId: string, memberId: string, updateMemberRoleDto: UpdateMemberRoleDto) {
