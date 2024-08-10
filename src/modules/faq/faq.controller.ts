@@ -31,12 +31,7 @@ export class FaqController {
   })
   @ApiBearerAuth()
   async create(@Body() createFaqDto: CreateFaqDto): Promise<ICreateFaqResponse> {
-    const faq: IFaq = await this.faqService.create(createFaqDto);
-    return {
-      status_code: 201,
-      success: true,
-      data: faq,
-    };
+    return this.faqService.create(createFaqDto);
   }
 
   @skipAuth()

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Faq } from './entities/faq.entity';
 import { CreateFaqDto } from './dto/create-faq.dto';
-import { IFaq } from './faq.interface';
+import { ICreateFaqResponse, IFaq } from './faq.interface';
 import { UpdateFaqDto } from './dto/update-faq.dto';
 
 @Injectable()
@@ -13,9 +13,18 @@ export class FaqService {
     private faqRepository: Repository<IFaq>
   ) {}
 
-  async create(createFaqDto: CreateFaqDto): Promise<IFaq> {
+  async create(createFaqDto: CreateFaqDto): Promise<ICreateFaqResponse> {
     const faq = this.faqRepository.create(createFaqDto);
-    return this.faqRepository.save(faq);
+    const faqResponse: IFaq = await this.faqRepository.save(faq);
+    const payload: IFaq = {
+      question: faqResponse.question,
+      answer: faqResponse.answer,
+      category: faqResponse.category,
+      id: faqResponse.id,
+      created_at: faqResponse.created_at,
+      updated_at: faqResponse.updated_at,
+    };
+    return { status_code: 201, message: 'FAQ created successfully', data: payload };
   }
   async findAllFaq() {
     try {

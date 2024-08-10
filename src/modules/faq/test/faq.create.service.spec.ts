@@ -46,19 +46,25 @@ describe('FaqService', () => {
       const result = await service.create(createFaqDto);
 
       expect(result).toEqual({
-        id: 'some-uuid',
-        ...createFaqDto,
-        createdBy: 'ADMIN',
-        created_at: expect.any(Date),
-        updated_at: expect.any(Date),
+        status_code: 201,
+        message: 'FAQ created successfully',
+        data: {
+          id: 'some-uuid',
+          ...createFaqDto,
+          created_at: expect.any(Date),
+          updated_at: expect.any(Date),
+        },
       });
       expect(mockFaqRepository.create).toHaveBeenCalledWith(createFaqDto);
       expect(mockFaqRepository.save).toHaveBeenCalledWith({
-        id: 'some-uuid',
-        ...createFaqDto,
-        createdBy: 'ADMIN',
-        created_at: expect.any(Date),
-        updated_at: expect.any(Date),
+        status_code: 201,
+        message: 'FAQ created successfully',
+        data: {
+          id: 'some-uuid',
+          ...createFaqDto,
+          created_at: expect.any(Date),
+          updated_at: expect.any(Date),
+        },
       });
     });
 
