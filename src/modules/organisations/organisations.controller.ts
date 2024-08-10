@@ -167,25 +167,42 @@ export class OrganisationsController {
   // ) {
   //   return await this.organisationsService.updateMemberRole(orgId, memberId, updateMemberRoleDto);
   // }
-  // @UseGuards(OwnershipGuard)
-  // @ApiOperation({ summary: 'Add member to an organization' })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'Member added successfully',
-  // })
-  // @ApiResponse({
-  //   status: 409,
-  //   description: 'User already added to organization.',
-  // })
-  // @ApiResponse({
-  //   status: 404,
-  //   description: 'Organisation not found',
-  // })
-  // @Post(':org_id/users')
-  // async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
-  //   return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
-  // }
 
+  @UseGuards(OwnershipGuard)
+  @ApiOperation({ summary: 'Add member to an organization' })
+  @ApiResponse({
+    status: 201,
+    description: 'Member added successfully',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User already added to organization.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Organisation not found',
+  })
+  @Post(':org_id/users')
+  async addMember(@Param('org_id', ParseUUIDPipe) org_id: string, @Body() addMemberDto: AddMemberDto) {
+    return this.organisationsService.addOrganisationMember(org_id, addMemberDto);
+  }
+
+  // @ApiOperation({ summary: "Gets a user's organizations" })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Organisations retrieved successfully',
+  //   type: UserOrganizationResponseDto,
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'Bad request',
+  //   type: UserOrganizationErrorResponseDto,
+  // })
+  // @Get('/')
+  // async getUserOrganisations(@Req() req) {
+  //   const { sub } = req.user;
+  //   return this.organisationsService.getUserOrganisations(sub);
+  // }
   // @ApiOperation({ summary: 'Get Organization details by Id' })
   // @ApiResponse({
   //   status: 200,
