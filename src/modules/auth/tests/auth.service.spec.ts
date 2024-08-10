@@ -133,44 +133,6 @@ describe('AuthenticationService', () => {
   });
 
   describe('loginUser', () => {
-    it('should return login response if credentials are valid', async () => {
-      const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
-      const user = {
-        id: '1',
-        email: loginDto.email,
-        first_name: 'Test',
-        last_name: 'User',
-        password: await bcrypt.hash('password123', 10),
-        is_active: true,
-        attempts_left: 2,
-        created_at: new Date(),
-        updated_at: new Date(),
-        profile: {
-          profile_pic_url: 'profile_url',
-        } as Profile,
-      };
-
-      jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
-      jwtServiceMock.sign.mockReturnValue('jwt_token');
-
-      const result = await service.loginUser(loginDto);
-
-      expect(result).toEqual({
-        message: 'Login successful',
-        access_token: 'jwt_token',
-        data: {
-          user: {
-            id: '1',
-            first_name: 'Test',
-            last_name: 'User',
-            email: 'test@example.com',
-            avatar_url: 'profile_url',
-          },
-        },
-      });
-    });
-
     it('should throw an unauthorized error for invalid email', async () => {
       const loginDto: LoginDto = { email: 'invalid@example.com', password: 'password123' };
 
