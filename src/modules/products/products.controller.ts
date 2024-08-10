@@ -1,31 +1,81 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  Query,
+  HttpStatus,
+  Req,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
+import { DeleteProductDTO } from './dto/delete-product.dto';
+import { isUUID } from 'class-validator';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '../../helpers/SystemMessages';
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { skipAuth } from 'src/helpers/skipAuth';
 
-@ApiBearerAuth()
 @ApiTags('Products')
-@Controller('organizations')
+@Controller('')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @skipAuth()
+  @Get('/products')
+  @ApiOperation({ summary: 'Fetch all products' })
+  @ApiResponse({ status: 201, description: 'Products fetched successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getAllProducts(@Query('page') page: number, @Query('page_size') pageSize: number) {
+    return await this.productsService.getAllProducts({ page, pageSize });
+  }
+
+  @UseGuards(OwnershipGuard)
+  @ApiBearerAuth()
+  @Get(':org_id/products')
+  @ApiOperation({ summary: 'Fetch all products' })
+  @ApiResponse({ status: 201, description: 'Products fetched successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getAllOrganisationProducts(@Param('org_id') organisationId: string) {
+    return await this.productsService.getAllOrganisationProducts(organisationId);
+  }
+
+  @skipAuth()
+  @Get('/products/:product_id')
+  @ApiOperation({ summary: 'fetches a single product' })
+  @ApiResponse({ status: 201, description: 'Product fetched successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async fetchSingleProduct(@Param('product_id') productId: string) {
+    return await this.productsService.getSingleProduct(productId);
+  }
+
+  @ApiBearerAuth()
   @UseGuards(SuperAdminGuard)
-  @Get('/products/total')
+  @Get('organisations/products/total')
   @ApiOkResponse({ type: GetTotalProductsResponseDto, description: 'Total Products fetched successfully' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async getTotalProducts() {
     return await this.productsService.getTotalProducts();
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
-  @Post('/:orgId/products')
+  @Post('organisations/:orgId/products')
   @ApiOperation({ summary: 'Creates a new product' })
-  @ApiParam({ name: 'id', description: 'organisation ID', example: '12345' })
+  @ApiParam({ name: 'orgId', description: 'organisation ID', example: '12345' })
   @ApiBody({ type: CreateProductRequestDto, description: 'Details of the product to be created' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -34,7 +84,8 @@ export class ProductsController {
     return this.productsService.createProduct(orgId, createProductDto);
   }
 
-  @Get('/:orgId/products/search')
+  @ApiBearerAuth()
+  @Get('organisations/:orgId/products/search')
   @ApiOperation({ summary: 'Search for products' })
   @ApiParam({ name: 'orgId', description: 'organisation ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Products found successfully' })
@@ -51,8 +102,9 @@ export class ProductsController {
     return this.productsService.searchProducts(orgId, { name, category, minPrice, maxPrice });
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
-  @Get('/:orgId/products/:productId')
+  @Get('organisations/:orgId/products/:productId')
   @ApiOperation({ summary: 'Gets a product by id' })
   @ApiParam({ name: 'orgId', description: 'Organization ID', example: '12345' })
   @ApiResponse({ status: 200, description: 'Product created successfully' })
@@ -63,8 +115,9 @@ export class ProductsController {
     return this.productsService.getProductById(productId);
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
-  @Patch('/:orgId/products/:productId')
+  @Patch('organisations/:orgId/products/:productId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Update product' })
   @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
@@ -80,8 +133,9 @@ export class ProductsController {
     return this.productsService.updateProduct(orgId, productId, updateProductDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
-  @Delete('/:orgId/products/:productId')
+  @Delete('organisations/:orgId/products/:productId')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
@@ -89,11 +143,18 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async deleteProduct(@Param('orgId') orgId: string, @Param('productId') productId: string) {
+    if (!isUUID(orgId)) {
+      throw new CustomHttpException(INVALID_ORG_ID, HttpStatus.BAD_REQUEST);
+    }
+    if (!isUUID(productId)) {
+      throw new CustomHttpException(INVALID_PRODUCT_ID, HttpStatus.BAD_REQUEST);
+    }
     return this.productsService.deleteProduct(orgId, productId);
   }
 
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
-  @Post('/:productId/comments')
+  @Post('organisations/:productId/comments')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Creates a comment for a product' })
   @ApiParam({ name: 'id', description: 'organisation ID', example: '870ccb14-d6b0-4a50-b459-9895af803i89' })
@@ -108,7 +169,9 @@ export class ProductsController {
     return this.productsService.addCommentToProduct(productId, commentDto, user.sub);
   }
 
-  @Get(':productId/stock')
+  @ApiBearerAuth()
+  @UseGuards(OwnershipGuard)
+  @Get('organisations/:productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
   @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
