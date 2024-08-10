@@ -26,6 +26,7 @@ import { Role } from '../../modules/role/entities/role.entity';
 import { User } from '../../modules/user/entities/user.entity';
 import { CreateAdminDto } from './dto/admin.dto';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
+import { OrganisationUserRole } from 'src/modules/role/entities/organisation-user-role.entity';
 
 @Injectable()
 export class SeedingService {
@@ -41,6 +42,7 @@ export class SeedingService {
     const defaultPermissionRepository = this.dataSource.getRepository(DefaultPermissions);
     const notificationRepository = this.dataSource.getRepository(Notification);
     const defaultRoleRepository = this.dataSource.getRepository(Role);
+    const organisationUserRoleRepository = this.dataSource.getRepository(OrganisationUserRole);
 
     try {
       const existingPermissions = await defaultPermissionRepository.count();
@@ -153,6 +155,26 @@ export class SeedingService {
         savedUsers[1].profile = savedProfiles[1];
 
         await userRepository.save(savedUsers);
+
+        const usr_org_rol1 = organisationUserRoleRepository.create({
+          userId: savedUsers[0].id,
+          roleId: savedRoles[0].id,
+        });
+        const usr_org_rol2 = organisationUserRoleRepository.create({
+          userId: savedUsers[1].id,
+          roleId: savedRoles[0].id,
+        });
+        const usr_org_rol3 = organisationUserRoleRepository.create({
+          userId: savedUsers[2].id,
+          roleId: savedRoles[0].id,
+        });
+
+        await organisationUserRoleRepository.save([usr_org_rol1, usr_org_rol2, usr_org_rol3]);
+        const savedUsrRole = await profileRepository.find();
+
+        if (savedUsrRole.length !== 3) {
+          throw new Error('Failed to create all User Org roles');
+        }
 
         const or1 = organisationRepository.create({
           name: 'Org 1',
