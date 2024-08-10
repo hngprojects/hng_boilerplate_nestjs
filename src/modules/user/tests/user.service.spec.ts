@@ -28,6 +28,12 @@ describe('UserService', () => {
     findAndCount: jest.fn(),
     count: jest.fn(),
     softDelete: jest.fn(),
+    metadata: {
+      relations: [
+        { relationType: 'one-to-many', propertyName: 'owned_organisations' },
+        { relationType: 'one-to-many', propertyName: 'jobs' },
+      ],
+    },
   };
 
   const mockResponse: Partial<Response> = {
