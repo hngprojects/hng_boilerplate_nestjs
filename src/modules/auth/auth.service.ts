@@ -62,7 +62,7 @@ export default class AuthenticationService {
     const newOrganisation = await this.organisationService.create(newOrganisationPaload, user.id);
 
     const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
-
+    const isSuperAdmin = userOranisations.map(instance => instance.name).includes('super-admin');
     const token = (await this.otpService.createOtp(user.id)).token;
 
     const access_token = this.jwtService.sign({
@@ -78,6 +78,7 @@ export default class AuthenticationService {
         last_name: user.last_name,
         email: user.email,
         avatar_url: user.profile.profile_pic_url,
+        is_superadmin: isSuperAdmin,
       },
       oranisations: userOranisations,
     };
@@ -296,6 +297,9 @@ export default class AuthenticationService {
       };
       return await this.createUserGoogle(userCreationPayload);
     }
+
+    const userOranisations = await this.organisationService.getAllUserOrganisations(userExists.id);
+    const isSuperAdmin = userOranisations.map(instance => instance.name).includes('super-admin');
     const accessToken = this.jwtService.sign({
       sub: userExists.id,
       id: userExists.id,
@@ -307,12 +311,15 @@ export default class AuthenticationService {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
       data: {
-        id: userExists.id,
-        email: userExists.email,
-        first_name: userExists.first_name,
-        last_name: userExists.last_name,
-        fullname: userExists.first_name + ' ' + userExists.last_name,
-        role: '',
+        user: {
+          id: userExists.id,
+          email: userExists.email,
+          first_name: userExists.first_name,
+          last_name: userExists.last_name,
+          avatar_url: userExists.profile.profile_pic_url,
+          is_superadmin: isSuperAdmin,
+        },
+        organisations: userOranisations,
       },
     };
   }
@@ -332,6 +339,9 @@ export default class AuthenticationService {
 
     await this.organisationService.create(newOrganisationPaload, newUser.id);
 
+    const userOranisations = await this.organisationService.getAllUserOrganisations(newUser.id);
+    const isSuperAdmin = userOranisations.map(instance => instance.name).includes('super-admin');
+
     const accessToken = await this.jwtService.sign({
       sub: newUser.id,
       id: newUser.id,
@@ -341,15 +351,18 @@ export default class AuthenticationService {
     });
 
     return {
+      status_code: HttpStatus.OK,
       message: SYS_MSG.USER_CREATED,
       access_token: accessToken,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        first_name: newUser.first_name,
-        last_name: newUser.last_name,
-        fullname: newUser.first_name + ' ' + newUser.last_name,
-        role: '',
+      data: {
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+          is_superadmin: isSuperAdmin,
+        },
+        organisations: userOranisations,
       },
     };
   }

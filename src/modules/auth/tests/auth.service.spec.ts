@@ -171,6 +171,7 @@ describe('AuthenticationService', () => {
             first_name: 'John',
             last_name: 'Doe',
             email: 'test@example.com',
+            is_superadmin: false,
             avatar_url: 'some_url',
           },
           oranisations: [

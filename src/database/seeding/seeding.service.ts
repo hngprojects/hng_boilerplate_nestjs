@@ -81,24 +81,55 @@ export class SeedingService {
       }
 
       try {
-        const u1 = userRepository.create({
-          first_name: 'John',
-          last_name: 'Smith',
-          email: 'john.smith@example.com',
-          password: 'password',
+        const roles1 = defaultRoleRepository.create({
+          name: 'super-admin',
+          description: '',
         });
-        const u2 = userRepository.create({
-          first_name: 'Jane',
-          last_name: 'Smith',
-          email: 'jane.smith@example.com',
-          password: 'password',
+        const roles2 = defaultRoleRepository.create({
+          name: 'admin',
+          description: '',
         });
 
-        await userRepository.save([u1, u2]);
+        await defaultRoleRepository.save([roles1, roles2]);
+        const savedRoles = await defaultRoleRepository.find();
+
+        if (savedRoles.length !== 2) {
+          throw new Error('Failed to create all roles');
+        }
+
+        const u1 = new User();
+        const userObject1 = {
+          first_name: 'Alpha',
+          last_name: 'Smith',
+          email: 'user1@admin.com',
+          password: 'Password@1',
+        };
+        Object.assign(u1, userObject1);
+        await userRepository.save(u1);
+
+        const u2 = new User();
+        const userObject2 = {
+          first_name: 'Admin',
+          last_name: 'User',
+          email: 'user2@admin.com',
+          password: 'Password@2',
+        };
+        Object.assign(u2, userObject2);
+        await userRepository.save(u2);
+
+        const u3 = new User();
+        const userObject = {
+          first_name: 'Jane',
+          last_name: 'Smith',
+          email: 'user3@admin.com',
+          password: 'Password@3',
+        };
+        Object.assign(u3, userObject);
+        await userRepository.save(u3);
 
         const savedUsers = await userRepository.find();
 
-        if (savedUsers.length !== 2) {
+        if (savedUsers.length !== 3) {
           throw new Error('Failed to create all users');
         }
 
