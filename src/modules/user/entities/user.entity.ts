@@ -1,5 +1,15 @@
 import * as bcrypt from 'bcryptjs';
-import { BeforeInsert, BeforeUpdate, Column, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Job } from '../../../modules/jobs/entities/job.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
@@ -61,6 +71,10 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Organisation, organisation => organisation.owner)
   owned_organisations: Organisation[];
+
+  @ManyToMany(() => Organisation, organisation => organisation.owner)
+  @JoinColumn()
+  organisations: Organisation[];
 
   @OneToMany(() => Job, job => job.user)
   jobs: Job[];

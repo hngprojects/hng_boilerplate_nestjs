@@ -32,4 +32,5 @@ export const mockUser = {
   blogs: null,
   comments: null,
   cart: [],
+  organisations: [],
 };

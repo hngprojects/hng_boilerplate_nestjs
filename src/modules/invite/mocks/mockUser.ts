@@ -26,4 +26,5 @@ export const mockUser: User = {
   blogs: [],
   comments: [],
   cart: [],
+  organisations: [],
 };

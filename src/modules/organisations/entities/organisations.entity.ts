@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, ManyToMany } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { OrganisationPreference } from './org-preferences.entity';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
@@ -31,6 +31,9 @@ export class Organisation extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.owned_organisations, { nullable: false })
   owner: User;
 
+  @ManyToMany(() => User, user => user.organisations, { nullable: false })
+  members: User[];
+
   @Column({ nullable: false })
   state: string;
 
@@ -45,7 +48,4 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => Invite, invite => invite.organisation.id)
   invites: Invite[];
-
-  // @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
-  // organisationMembers: OrganisationMember[];
 }
