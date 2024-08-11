@@ -1,4 +1,10 @@
-import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InviteDto } from './dto/invite.dto';
 import { Invite } from './entities/invite.entity';
 import { Organisation } from '../../modules/organisations/entities/organisations.entity';
@@ -6,16 +12,24 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
-import { User } from '../user/entities/user.entity';
-import { OrganisationsService } from '../organisations/organisations.service';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../helpers/SystemMessages';
+import { User } from '../user/entities/user.entity';
+import { MailerService } from '@nestjs-modules/mailer';
+import { OrganisationsService } from '../organisations/organisations.service';
+import { CreateInvitationDto } from './dto/create-invite.dto';
+import { EmailService } from '../email/email.service';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class InviteService {
   constructor(
     @InjectRepository(Invite) private inviteRepository: Repository<Invite>,
     @InjectRepository(Organisation) private organisationRepository: Repository<Organisation>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly mailerService: MailerService,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
     private readonly OrganisationService: OrganisationsService
   ) {}
 
@@ -62,7 +76,8 @@ export class InviteService {
 
     await this.inviteRepository.save(invite);
 
-    const link = `${process.env.FRONTEND_URL}/invite?token=${token}`;
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const link = `${frontendUrl}/invite?token=${token}`;
 
     const responseData = {
       status_code: HttpStatus.OK,
@@ -106,5 +121,58 @@ export class InviteService {
     } else {
       throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  async sendInvitations(createInvitationDto: CreateInvitationDto): Promise<any> {
+    if (!Array.isArray(createInvitationDto.emails) || createInvitationDto.emails.length === 0) {
+      throw new CustomHttpException('Emails field is required and must be an array.', HttpStatus.BAD_REQUEST);
+    }
+
+    const invalidEmails = createInvitationDto.emails.filter(
+      email => !/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(email)
+    );
+    if (invalidEmails.length > 0) {
+      throw new CustomHttpException('One or more email addresses are not valid', HttpStatus.BAD_REQUEST);
+    }
+
+    const organisation = await this.organisationRepository.findOne({ where: { id: createInvitationDto.org_id } });
+    if (!organisation) {
+      throw new CustomHttpException('Organization not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (createInvitationDto.emails.length > 50) {
+      throw new CustomHttpException('Cannot send more than 50 invitations at once', HttpStatus.BAD_REQUEST);
+    }
+
+    const templateResponse = await this.emailService.getTemplate({ templateName: 'organization-invitation' });
+    if (templateResponse.status_code !== 200) {
+      throw new CustomHttpException('Invitation template not found', HttpStatus.BAD_REQUEST);
+    }
+
+    const template = templateResponse.template.toString();
+
+    const invitations = [];
+    for (const email of createInvitationDto.emails) {
+      const inviteLinkData = await this.createInvite(createInvitationDto.org_id);
+      const inviteLink = inviteLinkData.link;
+
+      const personalizedContent = template
+        .replace(`{{organizationName}}`, organisation.name)
+        .replace('{{recipientName}}', email.split('@')[0])
+        .replace('{{invitationLink}}', inviteLink);
+
+      invitations.push({ email, inviteLink });
+
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Invitation to join an organization',
+        html: personalizedContent,
+      });
+    }
+
+    return {
+      message: 'Invitation(s) sent successfully',
+      invitations,
+    };
   }
 }

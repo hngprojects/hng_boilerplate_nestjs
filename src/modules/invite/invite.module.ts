@@ -4,32 +4,29 @@ import { InviteController } from './invite.controller';
 import { Invite } from './entities/invite.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Organisation } from '../organisations/entities/organisations.entity';
-import { User } from '../user/entities/user.entity';
-import { Profile } from '../profile/entities/profile.entity';
 import { OrganisationsService } from '../organisations/organisations.service';
-// import { OrganisationRole } from '../organisation-role/entities/organisation-role.entity';
-// import { DefaultRole } from '../organisation-role/entities/role.entity';
-// import { DefaultPermissions } from '../organisation-permissions/entities/default-permissions.entity';
-// import { Permissions } from '../organisation-permissions/entities/permissions.entity';
-import UserService from '../user/user.service';
+import { User } from '../user/entities/user.entity';
+import { EmailService } from '../email/email.service';
+import QueueService from '../email/queue.service';
+import { BullModule } from '@nestjs/bull';
+import { Profile } from '../profile/entities/profile.entity';
 import { Role } from '../role/entities/role.entity';
-import { Permissions } from '../permissions/entities/permissions.entity';
 import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
+import UserService from '../user/user.service';
+import { Permissions } from '../../modules/permissions/entities/permissions.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Invite,
-      Organisation,
-      User,
-      Profile,
-      Role,
-      Permissions,
-      Permissions,
-      OrganisationUserRole,
-    ]),
+    TypeOrmModule.forFeature([Invite, Organisation, User, Profile, Role, Permissions, OrganisationUserRole]),
+    BullModule.registerQueue({
+      name: 'emailSending',
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
   controllers: [InviteController],
-  providers: [InviteService, OrganisationsService, UserService],
+  providers: [InviteService, EmailService, QueueService, OrganisationsService, UserService],
 })
 export class InviteModule {}
