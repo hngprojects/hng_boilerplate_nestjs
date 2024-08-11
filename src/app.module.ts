@@ -44,7 +44,8 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
-
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   providers: [
     {
@@ -158,6 +159,13 @@ import { BlogCategoryModule } from './modules/blog-category/blog-category.module
     SubscriptionsModule,
     RevenueModule,
     BlogCategoryModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'uploads'),
+      serveRoot: '/uploads',
+      serveStaticOptions: {
+        index: false,
+      },
+    }),
   ],
   controllers: [HealthController, ProbeController],
 })
