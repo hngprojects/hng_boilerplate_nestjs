@@ -163,7 +163,7 @@ export class RoleService {
     }
 
     const newPermissions: Permissions[] = [];
-    for (let permission of permissions) {
+    for (const permission of permissions) {
       const permissionInstance = await this.permissionRepository.findOne({ where: { id: permission } });
       if (permissionInstance) {
         newPermissions.push(permissionInstance);

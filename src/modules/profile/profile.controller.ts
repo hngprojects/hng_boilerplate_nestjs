@@ -20,6 +20,9 @@ import { ResponseInterceptor } from '../../shared/inteceptors/response.intercept
 import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidator } from './dto/file.validator';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 @ApiBearerAuth()
 @ApiTags('Profile')
 @Controller('profile')
@@ -72,7 +75,7 @@ export class ProfileController {
     @UploadedFile(
       new FileValidator({
         maxSize: 2 * 1024 * 1024,
-        mimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+        mimeTypes: ['image/jpeg', 'image/png'],
       })
     )
     file: Express.Multer.File
@@ -80,7 +83,8 @@ export class ProfileController {
     status: number;
     message: string;
   }> {
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const baseUrl = isDevelopment ? `${req.protocol}://${req.get('host')}` : process.env.BASE_URL;
     const userId = req.user.id;
     const uploadProfilePicDto = new UploadProfilePicDto();
     uploadProfilePicDto.file = file;

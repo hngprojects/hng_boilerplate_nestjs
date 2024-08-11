@@ -40,7 +40,7 @@ export class ProfileService {
 
       const userProfile = await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['profile'],
+        relations: ['profile']
       });
 
       const profile = userProfile.profile;
@@ -129,7 +129,7 @@ export class ProfileService {
       throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const profile = user.profile;
+    const profile = user.profile
     if (!profile) {
       throw new CustomHttpException(SYS_MSG.PROFILE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
@@ -153,7 +153,7 @@ export class ProfileService {
     const fileName = `${userId}${fileExtension}`;
     const filePath = path.join(this.uploadsDir, fileName);
 
-    await sharp(uploadProfilePicDto.file.buffer).resize(200, 200).toFile(filePath);
+    await sharp(uploadProfilePicDto.file.buffer).resize({ width: 200, height: 200 }).toFile(filePath);
 
     profile.profile_pic_url = `${baseUrl}/uploads/${fileName}`;
 

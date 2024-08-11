@@ -88,6 +88,7 @@ export const INVALID_USER_ID = 'Provide a valid user Id';
 export const INVALID_PRODUCT_ID = 'Provide a valid user Id';
 export const REVENUE_FETCHED_SUCCESSFULLY = 'Revenue Fetched';
 export const QUESTION_ALREADY_EXISTS = 'This question already exists.';
+export const ROLE_ALREADY_EXISTS = 'A role with this name already exists in the organisation';
 export const NO_FILE_FOUND = 'No file uploaded.';
 export const PROFILE_NOT_FOUND = 'Profile not found';
 export const PROFILE_PIC_ERROR = 'Error deleting previous profile picture:';
