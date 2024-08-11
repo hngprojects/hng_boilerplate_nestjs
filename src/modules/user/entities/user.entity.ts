@@ -48,6 +48,9 @@ export class User extends AbstractBaseEntity {
   attempts_left: number;
 
   @Column({ nullable: true })
+  avatar_url?: string;
+
+  @Column({ nullable: true })
   time_left: number;
 
   @Column({ nullable: true })

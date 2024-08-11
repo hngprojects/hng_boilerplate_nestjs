@@ -4,10 +4,12 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { DataSource } from 'typeorm';
+import * as express from 'express';
 import { AppModule } from './app.module';
 import { initializeDataSource } from './database/data-source';
 import { SeedingService } from './database/seeding/seeding.service';
 import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -30,6 +32,7 @@ async function bootstrap() {
   app.enable('trust proxy');
   app.useLogger(logger);
   app.enableCors();
+  //app.useStaticAssets(join(__dirname, '../../client/dist'))
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs', 'probe'] });
   app.useGlobalInterceptors(new ResponseInterceptor());
 

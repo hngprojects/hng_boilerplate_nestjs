@@ -72,6 +72,8 @@ export const ROLE_CREATED_SUCCESSFULLY = 'Role created successfully';
 export const RESOURCE_NOT_FOUND = resource => {
   return `${resource} does not exist`;
 };
+
+export const UPLOAD_UNSUPPORTED_FORMAT = (types: any) => `Upload not allowed. Upload only files of type: ${types}`;
 export const INVALID_UUID_FORMAT = 'Invalid UUID format';
 export const MEMBER_ALREADY_EXISTS = 'User already added to organization';
 export const MEMBER_ALREADY_SUCCESSFULLY = 'Member added successfully';
@@ -89,3 +91,6 @@ export const INVALID_USER_ID = 'Provide a valid user Id';
 export const INVALID_PRODUCT_ID = 'Provide a valid user Id';
 export const REVENUE_FETCHED_SUCCESSFULLY = 'Revenue Fetched';
 export const QUESTION_ALREADY_EXISTS = 'This question already exists.';
+export const FILE_REQUIRED = 'File is required';
+export const PHOTO_UPLOAD_SUCCESSFUL = 'File upload successful';
+export const FAILED_TO_UPLOAD_PHOTO = 'Failed to upload photo';

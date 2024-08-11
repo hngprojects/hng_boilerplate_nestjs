@@ -14,6 +14,12 @@ import {
   Header,
   ParseEnumPipe,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  Post,
+  Put,
+  ParseFilePipeBuilder,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -39,6 +45,17 @@ import { skipAuth } from '../../helpers/skipAuth';
 import { Response } from 'express';
 import * as path from 'path';
 import { UserDataExportDto } from './dto/user-data-export.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  BASE_URL,
+  MAX_PROFILE_PICTURE_SIZE_IN_BYTES,
+  PROFILE_PHOTO_UPLOADS,
+  VALID_UPLOADS_MIME_TYPES,
+} from '../../helpers/app-constants';
+import { CustomUploadFileTypeValidator } from './validators/file-uploade.validator';
+import { diskStorage } from 'multer';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { FILE_REQUIRED, PHOTO_UPLOAD_SUCCESSFUL } from '../../helpers/SystemMessages';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -208,5 +225,36 @@ export class UserController {
     const authenticatedUserId = req['user'].id;
 
     return this.userService.softDeleteUser(userId, authenticatedUserId);
+  }
+
+  @Put('upload')
+  @UseInterceptors(FileInterceptor('avatar'))
+  public async uploadFile(
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addValidator(
+          new CustomUploadFileTypeValidator({
+            fileType: VALID_UPLOADS_MIME_TYPES,
+          })
+        )
+        .addMaxSizeValidator({ maxSize: MAX_PROFILE_PICTURE_SIZE_IN_BYTES })
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+    )
+    file: Express.Multer.File,
+    @Req() req
+  ): Promise<{ status_code: number; message: string; url: string }> {
+    if (!file) {
+      throw new CustomHttpException(FILE_REQUIRED, HttpStatus.BAD_REQUEST);
+    }
+
+    const { sub } = req.user;
+
+    const url = await this.userService.storeProfilePhoto(file, sub);
+
+    return {
+      status_code: 200,
+      message: PHOTO_UPLOAD_SUCCESSFUL,
+      url,
+    };
   }
 }

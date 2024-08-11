@@ -4,6 +4,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
@@ -23,12 +24,15 @@ import { ReactivateAccountDto } from './dto/reactivate-account.dto';
 import { pick } from '../../helpers/pick';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
 import * as SYS_MSG from '../../helpers/SystemMessages';
-import { Readable, Writable } from 'stream';
+import { pipeline, Readable, Writable } from 'stream';
 import * as xlsx from 'xlsx';
 import * as path from 'path';
 import { Response } from 'express';
 import { FileFormat, UserDataExportDto } from './dto/user-data-export.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { BASE_URL, PROFILE_PHOTO_UPLOADS } from '../../helpers/app-constants';
+import * as fs from 'fs';
+import { promisify } from 'util';
 
 @Injectable()
 export default class UserService {
@@ -410,5 +414,30 @@ export default class UserService {
       }
     }
     return xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+  }
+
+  async storeProfilePhoto(file: Express.Multer.File, userId: string): Promise<string> {
+    const filename = `user-${userId}.jpg`;
+    const filePath = path.join(PROFILE_PHOTO_UPLOADS, filename);
+    const dirPath = path.dirname(filePath);
+
+    await fs.promises.mkdir(dirPath, { recursive: true });
+
+    const fileStream = Readable.from(file.buffer);
+    const writeStream = fs.createWriteStream(filePath);
+
+    return new Promise((resolve, reject) => {
+      pipeline(fileStream, writeStream, async err => {
+        if (err) {
+          Logger.error(SYS_MSG.FAILED_TO_UPLOAD_PHOTO, err.stack);
+          reject(new CustomHttpException(SYS_MSG.FAILED_TO_UPLOAD_PHOTO, HttpStatus.INTERNAL_SERVER_ERROR));
+        } else {
+          const user = await this.userRepository.findOne({ where: { id: userId } });
+          user.avatar_url = `${BASE_URL}/${filePath}`;
+          await this.userRepository.save(user);
+          resolve(user.avatar_url);
+        }
+      });
+    });
   }
 }

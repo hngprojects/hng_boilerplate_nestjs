@@ -5,6 +5,7 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
 import authConfig from '../config/auth.config';
@@ -44,6 +45,7 @@ import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
+import { join } from 'path';
 
 @Module({
   providers: [
@@ -65,6 +67,13 @@ import { BlogCategoryModule } from './modules/blog-category/blog-category.module
     },
   ],
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/public',
+      serveStaticOptions: {
+        index: false,
+      },
+    }),
     ConfigModule.forRoot({
       /*
        * By default, the package looks for a env file in the root directory of the application.
