@@ -17,6 +17,7 @@ import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
+import { Organisation } from 'src/modules/organisations/entities/organisations.entity';
 
 jest.mock('speakeasy');
 
@@ -64,6 +65,7 @@ describe('AuthenticationService', () => {
           provide: OrganisationsService,
           useValue: {
             create: jest.fn(),
+            getAllUserOrganisations: jest.fn(),
           },
         },
         {
@@ -119,8 +121,43 @@ describe('AuthenticationService', () => {
 
     it('should create a new user successfully', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
-      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
+
+      userServiceMock.getUserRecord.mockResolvedValueOnce({
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        profile: {
+          profile_pic_url: 'some_url',
+        },
+      } as User);
+
+      organisationServiceMock.create.mockResolvedValueOnce({
+        id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+        name: "John's Organisation",
+        description: '',
+        email: 'test@example.com',
+        industry: '',
+        type: '',
+        country: '',
+        address: '',
+        state: '',
+        owner_id: 'user-id',
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      organisationServiceMock.getAllUserOrganisations.mockResolvedValueOnce([
+        {
+          organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+          name: "John's Organisation",
+          user_role: 'admin',
+          is_owner: true,
+        },
+      ]);
+
       jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
 
       const result = await service.createNewUser(createUserDto);
@@ -130,12 +167,21 @@ describe('AuthenticationService', () => {
         access_token: 'mocked_token',
         data: {
           user: {
-            avatar_url: 'some_url',
-            email: 'test@example.com',
-            first_name: 'John',
             id: '1',
+            first_name: 'John',
             last_name: 'Doe',
+            email: 'test@example.com',
+            is_superadmin: false,
+            avatar_url: 'some_url',
           },
+          oranisations: [
+            {
+              organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+              name: "John's Organisation",
+              user_role: 'admin',
+              is_owner: true,
+            },
+          ],
         },
       });
     });
@@ -175,6 +221,14 @@ describe('AuthenticationService', () => {
 
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      organisationServiceMock.getAllUserOrganisations.mockResolvedValueOnce([
+        {
+          organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+          name: "Test's Organisation",
+          user_role: 'admin',
+          is_owner: true,
+        },
+      ]);
       jwtServiceMock.sign.mockReturnValue('jwt_token');
 
       const result = await service.loginUser(loginDto);
@@ -189,7 +243,16 @@ describe('AuthenticationService', () => {
             last_name: 'User',
             email: 'test@example.com',
             avatar_url: 'profile_url',
+            is_superadmin: false,
           },
+          organisations: [
+            {
+              organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+              name: "Test's Organisation",
+              user_role: 'admin',
+              is_owner: true,
+            },
+          ],
         },
       });
     });

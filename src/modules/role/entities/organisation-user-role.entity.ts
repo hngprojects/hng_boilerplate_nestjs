@@ -12,7 +12,7 @@ export class OrganisationUserRole extends AbstractBaseEntity {
   @Column()
   roleId: string;
 
-  @Column()
+  @Column({ nullable: true })
   organisationId: string;
 
   @ManyToOne(() => Role)

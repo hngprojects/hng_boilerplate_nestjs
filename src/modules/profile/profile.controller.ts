@@ -1,12 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  ParseUUIDPipe,
+  UploadedFile,
+  Req,
+  ValidationPipe,
+  UsePipes,
+} from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ResponseInterceptor } from '../../shared/inteceptors/response.interceptor';
+import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileValidator } from './dto/file.validator';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 @ApiBearerAuth()
 @ApiTags('Profile')
 @Controller('profile')
+@UseInterceptors(ResponseInterceptor)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
@@ -27,7 +47,7 @@ export class ProfileController {
     description: 'The updated record',
   })
   @Patch(':userId')
-  updateProfile(@Param('userId') userId: string, @Body() body: UpdateProfileDto) {
+  updateProfile(@Param('userId', ParseUUIDPipe) userId: string, @Body() body: UpdateProfileDto) {
     const updatedProfile = this.profileService.updateProfile(userId, body);
     return updatedProfile;
   }
@@ -38,7 +58,36 @@ export class ProfileController {
     description: 'The deleted record',
   })
   @Delete(':userId')
-  async deleteUserProfile(@Param('userId') userId: string) {
+  async deleteUserProfile(@Param('userId', ParseUUIDPipe) userId: string) {
     return await this.profileService.deleteUserProfile(userId);
+  }
+
+  @ApiOperation({ summary: 'Upload Profile Picture' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile picture uploaded successfully',
+  })
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async uploadProfilePicture(
+    @Req() req: any,
+    @UploadedFile(
+      new FileValidator({
+        maxSize: 2 * 1024 * 1024,
+        mimeTypes: ['image/jpeg', 'image/png'],
+      })
+    )
+    file: Express.Multer.File
+  ): Promise<{
+    status: number;
+    message: string;
+  }> {
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const baseUrl = isDevelopment ? `${req.protocol}://${req.get('host')}` : process.env.BASE_URL;
+    const userId = req.user.id;
+    const uploadProfilePicDto = new UploadProfilePicDto();
+    uploadProfilePicDto.file = file;
+    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, baseUrl);
   }
 }
