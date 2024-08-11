@@ -14,13 +14,13 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseInterceptor } from '../../shared/inteceptors/response.interceptor';
 import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidator } from './dto/file.validator';
 import * as dotenv from 'dotenv';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 dotenv.config();
 @ApiBearerAuth()
@@ -69,6 +69,12 @@ export class ProfileController {
   })
   @Post('upload-image')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+  type: UploadProfilePicDto,
+  description: 'Profile picture file',
+})
+
   @UsePipes(new ValidationPipe({ transform: true }))
   async uploadProfilePicture(
     @Req() req: any,
@@ -85,7 +91,7 @@ export class ProfileController {
   }> {
     const baseUrl = process.env.BASE_URL;
     const userId = req.user.id;
-    const uploadProfilePicDto = new UploadProfilePicDto();
+    const uploadProfilePicDto = new UploadProfilePicDto()
     uploadProfilePicDto.file = file;
     return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, baseUrl);
   }
