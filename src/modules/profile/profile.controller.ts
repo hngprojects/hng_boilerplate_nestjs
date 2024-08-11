@@ -16,10 +16,14 @@ import {
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-
+import { ResponseInterceptor } from '../../shared/inteceptors/response.interceptor';
+import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileValidator } from './dto/file.validator';
 @ApiBearerAuth()
 @ApiTags('Profile')
 @Controller('profile')
+@UseInterceptors(ResponseInterceptor)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
@@ -55,4 +59,31 @@ export class ProfileController {
     return await this.profileService.deleteUserProfile(userId);
   }
 
+  @ApiOperation({ summary: 'Upload Profile Picture' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile picture uploaded successfully',
+  })
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async uploadProfilePicture(
+    @Req() req: any,
+    @UploadedFile(
+      new FileValidator({
+        maxSize: 2 * 1024 * 1024,
+        mimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+      })
+    )
+    file: Express.Multer.File
+  ): Promise<{
+    status: number;
+    message: string;
+  }> {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const userId = req.user.id;
+    const uploadProfilePicDto = new UploadProfilePicDto();
+    uploadProfilePicDto.file = file;
+    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, baseUrl);
+  }
 }

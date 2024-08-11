@@ -56,7 +56,6 @@ export class SeedingService {
             permission_list: false,
           })
         );
-        
 
         await defaultPermissionRepository.save(defaultPermissions);
       }
