@@ -153,7 +153,7 @@ export class ProfileService {
     const fileName = `${userId}${fileExtension}`;
     const filePath = path.join(this.uploadsDir, fileName);
 
-    await sharp(uploadProfilePicDto.file.buffer).resize(200, 200).toFile(filePath);
+    await sharp(uploadProfilePicDto.file.buffer).resize({ width: 200, height: 200 }).toFile(filePath);
 
     profile.profile_pic_url = `${baseUrl}/uploads/${fileName}`;
 
