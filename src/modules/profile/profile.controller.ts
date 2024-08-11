@@ -83,8 +83,7 @@ export class ProfileController {
     status: number;
     message: string;
   }> {
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const baseUrl = isDevelopment ? `${req.protocol}://${req.get('host')}` : process.env.BASE_URL;
+    const baseUrl = process.env.BASE_URL;
     const userId = req.user.id;
     const uploadProfilePicDto = new UploadProfilePicDto();
     uploadProfilePicDto.file = file;
