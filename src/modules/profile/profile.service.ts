@@ -40,7 +40,7 @@ export class ProfileService {
 
       const userProfile = await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['profile'],
+        relations: ['profile']
       });
 
       const profile = userProfile.profile;
@@ -129,7 +129,7 @@ export class ProfileService {
       throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const profile = user.profile;
+    const profile = user.profile
     if (!profile) {
       throw new CustomHttpException(SYS_MSG.PROFILE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
