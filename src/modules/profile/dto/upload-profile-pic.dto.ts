@@ -6,9 +6,9 @@ export class UploadProfilePicDto {
     type: 'string',
     format: 'binary',
     description: 'Profile picture file',
-    maxLength: 2 * 1024 * 1024, // 2MB
+    maxLength: 2 * 1024 * 1024,
   })
   @HasMimeType(['image/jpeg', 'image/png', 'image/gif'])
-  @MaxFileSize(2 * 1024 * 1024) // 2MB max file size
+  @MaxFileSize(2 * 1024 * 1024)
   file: Express.Multer.File;
 }
