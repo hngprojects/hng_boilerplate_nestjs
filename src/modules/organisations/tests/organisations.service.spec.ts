@@ -189,4 +189,81 @@ describe('OrganisationsService', () => {
       await expect(service.getOrganisationMembers('orgId', 1, 10, 'sub')).rejects.toThrow(ForbiddenException);
     });
   });
+
+  describe('updateMemberRole', () => {
+    it('should update member role successfully', async () => {
+      const orgId = 'org-id';
+      const memberId = 'member-id';
+      const updateMemberRoleDto = { role: 'new-role' };
+
+      const mockOrganisation = { id: orgId } as Organisation;
+      const mockUser = { id: memberId, first_name: 'John', last_name: 'Doe' } as User;
+      const mockOrgUserRole = {
+        userId: memberId,
+        organisationId: orgId,
+        user: mockUser,
+        organisation: mockOrganisation,
+        role: { name: 'old-role' },
+      } as OrganisationUserRole;
+      const mockNewRole = { name: 'new-role' } as Role;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(mockOrganisation);
+      jest.spyOn(organisationUserRole, 'findOne').mockResolvedValue(mockOrgUserRole);
+      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(mockNewRole);
+      jest.spyOn(organisationUserRole, 'save').mockResolvedValue({ ...mockOrgUserRole, role: mockNewRole });
+
+      const result = await service.updateMemberRole(orgId, memberId, updateMemberRoleDto);
+
+      expect(result.message).toContain('has successfully been assigned the new-role role');
+      expect(result.data).toEqual({
+        user: mockUser,
+        organisation: mockOrganisation,
+        role: mockNewRole,
+      });
+    });
+
+    it('should throw CustomHttpException if organisation is not found', async () => {
+      const orgId = 'non-existent-org-id';
+      const memberId = 'member-id';
+      const updateMemberRoleDto = { role: 'new-role' };
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should throw CustomHttpException if member does not belong to the organisation', async () => {
+      const orgId = 'org-id';
+      const memberId = 'non-member-id';
+      const updateMemberRoleDto = { role: 'new-role' };
+
+      const mockOrganisation = { id: orgId } as Organisation;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(mockOrganisation);
+      jest.spyOn(organisationUserRole, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should throw CustomHttpException if new role is not found', async () => {
+      const orgId = 'org-id';
+      const memberId = 'member-id';
+      const updateMemberRoleDto = { role: 'non-existent-role' };
+
+      const mockOrganisation = { id: orgId } as Organisation;
+      const mockOrgUserRole = {
+        userId: memberId,
+        organisationId: orgId,
+        user: { id: memberId } as User,
+        organisation: mockOrganisation,
+        role: { name: 'old-role' },
+      } as OrganisationUserRole;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(mockOrganisation);
+      jest.spyOn(organisationUserRole, 'findOne').mockResolvedValue(mockOrgUserRole);
+      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(CustomHttpException);
+    });
+  });
 });

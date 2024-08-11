@@ -31,7 +31,7 @@ export class Organisation extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.owned_organisations, { nullable: false })
   owner: User;
 
-  @ManyToMany(() => User, user => user.organisations)
+  @ManyToMany(() => User, user => user.organisations, { nullable: false })
   members: User[];
 
   @Column({ nullable: false })
@@ -48,7 +48,4 @@ export class Organisation extends AbstractBaseEntity {
 
   @OneToMany(() => Invite, invite => invite.organisation.id)
   invites: Invite[];
-
-  // @OneToMany(() => OrganisationMember, organisationMember => organisationMember.organisation_id)
-  // organisationMembers: OrganisationMember[];
 }
