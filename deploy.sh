@@ -16,7 +16,7 @@ elif [[ "$1" != "dev" && "$1" != "staging" && "$1" != "prod" ]]; then
     exit 1
 fi
 
-ENV=$1
+export ENV=$1
 BRANCH=$1
 PROJECT_NAME="nestjs_$ENV"
 
