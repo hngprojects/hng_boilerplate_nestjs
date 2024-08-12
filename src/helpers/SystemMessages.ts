@@ -96,3 +96,12 @@ export const PROFILE_PIC_NOT_FOUND = 'Previous profile picture pic not found';
 export const ERROR_DIRECTORY = 'Error creating uploads directory:';
 export const DIRECTORY_CREATED = 'Uploads directory created at:';
 export const PICTURE_UPDATED = 'Profile picture updated successfully';
+export const FILE_SAVE_ERROR = 'Error saving file to disk';
+export const FILE_EXCEEDS_SIZE = resource => {
+  return `File size exceeds ${resource} MB limit`
+  
+};
+export const INVALID_FILE_TYPE = resource => {
+  return `Invalid file type. Allowed types: ${resource}`;
+  
+};

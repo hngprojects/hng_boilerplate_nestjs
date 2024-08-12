@@ -8,6 +8,7 @@ import { User } from '../../user/entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { FileHandle } from 'fs/promises';
 import * as sharp from 'sharp';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { PICTURE_UPDATED } from '../../../helpers/SystemMessages';
@@ -192,6 +193,10 @@ describe('ProfileService', () => {
       originalname: 'test.jpg',
     };
     const mockUploadProfilePicDto = { file: mockFile as any };
+    const mockFileHandle = {
+      writeFile: jest.fn().mockResolvedValue(undefined),
+      close: jest.fn().mockResolvedValue(undefined),
+    } as unknown as FileHandle;
 
     it('should throw an exception if no file is provided', async () => {
       await expect(service.uploadProfilePicture(userId, { file: null }, baseUrl)).rejects.toThrow(CustomHttpException);
@@ -217,6 +222,8 @@ describe('ProfileService', () => {
     });
 
     it('should delete previous profile picture if it exists', async () => {
+      jest.spyOn(fs, 'open').mockResolvedValue(mockFileHandle);
+
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
@@ -238,6 +245,8 @@ describe('ProfileService', () => {
     });
 
     it('should handle non-existent previous profile picture', async () => {
+      jest.spyOn(fs, 'open').mockResolvedValue(mockFileHandle);
+
       const mockResult: UpdateResult = {
         generatedMaps: [],
         raw: [],
@@ -258,6 +267,9 @@ describe('ProfileService', () => {
     });
 
     it('should save new profile picture and update profile', async () => {
+
+      jest.spyOn(fs, 'open').mockResolvedValue(mockFileHandle);
+
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
 
       (sharp as jest.MockedFunction<typeof sharp>).mockReturnValue({
