@@ -12,9 +12,9 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: "wget -qO- http://app:5000"
-      interval: 5s
-      timeout: 5s
+      test: "wget -qO- http://app:${PORT}"
+      interval: 10s
+      timeout: 10s
       retries: 3
 
   db:
@@ -49,8 +49,6 @@ services:
 
   nginx:
     image: nginx:alpine
-    ports:
-      - 5000:80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:

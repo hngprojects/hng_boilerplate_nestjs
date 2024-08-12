@@ -1,0 +1,17 @@
+name: nestjs_prod
+
+services:
+  app:
+    env_file:
+      - .env.prod
+
+  db:
+    env_file:
+      - .env.prod
+
+  redis:
+    env_file:
+      - .env.prod
+  nginx:
+    ports:
+      - 5002:80
