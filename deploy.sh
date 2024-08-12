@@ -41,7 +41,10 @@ git pull origin $BRANCH
 echo -e "${BLUE}Starting Blue-Green deployment for environment: $ENV...${NC}"
 
 echo -e "${GREEN}Deploying the green version of the app...${NC}"
-docker compose -f compose.yaml -f compose/compose.$ENV.yaml -f compose/compose.green.yaml up -d
+docker compose -f compose.yaml -f compose/compose.$ENV.yaml -f compose/compose.green.yaml up -d --no-recreate
+
+echo -e "${GREEN}Transferring traffic to green environment...${NC}"
+docker compose -f compose.yaml -f compose/compose.$ENV.yaml -f compose/compose.green.yaml create nginx
         
 echo -e "${YELLOW}Cleaning up the blue (old) containers and image...${NC}"
 docker compose -f compose.yaml -f compose/compose.$ENV.yaml stop app
