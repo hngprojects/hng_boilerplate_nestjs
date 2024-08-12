@@ -44,4 +44,5 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         script: |
+          cd ~/hng_boilerplate_nestjs
           ./deploy.sh dev
