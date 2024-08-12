@@ -12,7 +12,7 @@ RUN npm install
 
 RUN npm run build
 
-EXPOSE 3100
+EXPOSE 5000
 
 # Command to run the application
 CMD ["npm", "run", "start:prod"]
