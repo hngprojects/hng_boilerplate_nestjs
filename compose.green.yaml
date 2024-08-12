@@ -1,0 +1,23 @@
+services:
+  app-green:
+    image: ${COMPOSE_PROJECT_NAME}:green
+    build: .
+    env_file:
+      - .env.${ENV}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: "wget -qO- http://localhost:${PORT}"
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    volumes:
+      - ./nginx-green.conf:/etc/nginx/nginx.conf
+    depends_on:
+      app-green:
+        condition: service_healthy
