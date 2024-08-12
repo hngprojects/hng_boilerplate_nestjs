@@ -23,7 +23,6 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import {
   BASE_URL,
   MAX_PROFILE_PICTURE_SIZE,
-  PROFILE_PHOTO_UPLOADS,
   VALID_UPLOADS_MIME_TYPES,
 } from '../../helpers/app-constants';
 

@@ -16,6 +16,7 @@ import * as path from 'path';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
+import { PROFILE_PHOTO_UPLOADS } from '../../helpers/app-constants';
 
 @Injectable()
 export class ProfileService {
@@ -25,7 +26,7 @@ export class ProfileService {
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
     @InjectRepository(User) private userRepository: Repository<User>
   ) {
-    this.uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+    this.uploadsDir = PROFILE_PHOTO_UPLOADS;
     this.createUploadsDirectory().catch(error => {
       console.error('Failed to create uploads directory:', error);
     });
@@ -149,9 +150,20 @@ export class ProfileService {
       }
     }
 
+
     const fileExtension = path.extname(uploadProfilePicDto.file.originalname);
     const fileName = `${userId}${fileExtension}`;
     const filePath = path.join(this.uploadsDir, fileName);
+
+  const writeStream = await fs.open(filePath, 'w');
+       try {
+         await writeStream.writeFile(uploadProfilePicDto.file.buffer);
+         await writeStream.close();
+       } catch (error) {
+         await writeStream.close();
+         throw new CustomHttpException(SYS_MSG.FILE_SAVE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+       }
+   
 
     await sharp(uploadProfilePicDto.file.buffer).resize({ width: 200, height: 200 }).toFile(filePath);
 
