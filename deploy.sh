@@ -33,7 +33,6 @@ gunzip -c /tmp/nestjs_${ENV}.tar.gz | docker load
 rm -f /tmp/nestjs_${ENV}.tar.gz
 
 echo -e "${GREEN}Stashing local changes and Pulling the latest changes from branch $BRANCH...${NC}"
-cd ~/hng_boilerplate_nestjs
 git add .
 git stash
 git checkout $BRANCH
