@@ -33,6 +33,9 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment:
+      name: "dev"
+      url: ${{ vars.URL }}
     steps:
     - name: Deploy on server
       uses: appleboy/ssh-action@master
