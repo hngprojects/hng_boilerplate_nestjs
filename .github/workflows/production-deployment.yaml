@@ -1,4 +1,4 @@
-name: Prod Deployment
+name: Production Deployment
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     environment:
-      name: "dev"
+      name: "production"
       url: ${{ vars.URL }}
     steps:
     - name: Deploy on server
