@@ -1,0 +1,17 @@
+name: nestjs_staging
+
+services:
+  app:
+    env_file:
+      - .env.staging
+
+  db:
+    env_file:
+      - .env.staging
+
+  redis:
+    env_file:
+      - .env.staging
+  nginx:
+    ports:
+      - 5001:80

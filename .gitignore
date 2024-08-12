@@ -389,7 +389,7 @@ Temporary Items
 # Local
 dist
 /.env
-/.env.*.local
+/.env.*
 *._local.ts
 
 # Migrations
