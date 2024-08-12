@@ -17,7 +17,7 @@ services:
 
   nginx:
     volumes:
-      - ./nginx-green.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx-green.conf:/etc/nginx/nginx.conf
     depends_on:
       app-green:
         condition: service_healthy
