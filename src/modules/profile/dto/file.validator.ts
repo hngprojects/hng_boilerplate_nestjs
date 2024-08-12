@@ -1,6 +1,7 @@
 import { PipeTransform, Injectable, ArgumentMetadata, HttpStatus } from '@nestjs/common';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import * as fileType from 'file-type-mime';
+import { FILE_EXCEEDS_SIZE, INVALID_FILE_TYPE } from '../../../helpers/SystemMessages';
 
 
 export interface CustomUploadTypeValidatorOptions {
@@ -27,7 +28,7 @@ export class FileValidator implements PipeTransform {
   private validateFileSize(size: number) {
     if (size > this.options.maxSize) {
         throw new CustomHttpException(
-        `File size exceeds ${this.options.maxSize / (1024 * 1024)}MB limit`,
+        FILE_EXCEEDS_SIZE(this.options.maxSize / (1024 * 1024)),
         HttpStatus.BAD_REQUEST
       );
     }
@@ -38,7 +39,7 @@ export class FileValidator implements PipeTransform {
     const response = await fileType.parse(buffer);
     if (!response || !this.options.mimeTypes.includes(response.mime)) {
         throw new CustomHttpException(
-        `Invalid file type. Allowed types: ${this.options.mimeTypes.join(', ')}`,
+        INVALID_FILE_TYPE(this.options.mimeTypes.join(', ')),
         HttpStatus.BAD_REQUEST
       );
     }
