@@ -8,7 +8,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 const dataSource = new DataSource({
   type: process.env.DB_TYPE as 'postgres',
-  username: process.env.DB_USERNAMES,
+  username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
