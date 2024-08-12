@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
@@ -11,11 +12,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as sharp from 'sharp';
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 import * as path from 'path';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
+import { PROFILE_PHOTO_UPLOADS } from '../../helpers/app-constants';
+import { pipeline, Readable } from 'stream';
 
 @Injectable()
 export class ProfileService {
@@ -25,7 +28,7 @@ export class ProfileService {
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
     @InjectRepository(User) private userRepository: Repository<User>
   ) {
-    this.uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+    this.uploadsDir = PROFILE_PHOTO_UPLOADS;
     this.createUploadsDirectory().catch(error => {
       console.error('Failed to create uploads directory:', error);
     });
@@ -40,7 +43,7 @@ export class ProfileService {
 
       const userProfile = await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['profile']
+        relations: ['profile'],
       });
 
       const profile = userProfile.profile;
@@ -129,7 +132,7 @@ export class ProfileService {
       throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    const profile = user.profile
+    const profile = user.profile;
     if (!profile) {
       throw new CustomHttpException(SYS_MSG.PROFILE_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
@@ -138,8 +141,8 @@ export class ProfileService {
       const previousFilePath = path.join(this.uploadsDir, path.basename(profile.profile_pic_url));
 
       try {
-        await fs.access(previousFilePath);
-        await fs.unlink(previousFilePath);
+        await fs.promises.access(previousFilePath);
+        await fs.promises.unlink(previousFilePath);
       } catch (error) {
         if (error.code === 'ENOENT') {
           console.error(SYS_MSG.PROFILE_PIC_NOT_FOUND, previousFilePath);
@@ -153,23 +156,35 @@ export class ProfileService {
     const fileName = `${userId}${fileExtension}`;
     const filePath = path.join(this.uploadsDir, fileName);
 
-    await sharp(uploadProfilePicDto.file.buffer).resize({ width: 200, height: 200 }).toFile(filePath);
+    const fileStream = Readable.from(uploadProfilePicDto.file.buffer);
+    const writeStream = fs.createWriteStream(filePath);
 
-    profile.profile_pic_url = `${baseUrl}/uploads/${fileName}`;
+    return new Promise((resolve, reject) => {
+      pipeline(fileStream, writeStream, async err => {
+        if (err) {
+          Logger.error(SYS_MSG.FILE_SAVE_ERROR, err.stack);
+          reject(new CustomHttpException(SYS_MSG.FILE_SAVE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR));
+        } else {
+          await sharp(uploadProfilePicDto.file.buffer).resize({ width: 200, height: 200 }).toFile(filePath);
 
-    await this.profileRepository.update(profile.id, profile);
-    const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
+          profile.profile_pic_url = `${baseUrl}/uploads/${fileName}`;
 
-    return {
-      status: HttpStatus.OK,
-      message: SYS_MSG.PICTURE_UPDATED,
-      data: { profile_picture_url: updatedProfile.profile_pic_url },
-    };
+          await this.profileRepository.update(profile.id, profile);
+          const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
+          resolve({
+            status: HttpStatus.OK,
+            message: SYS_MSG.PICTURE_UPDATED,
+            data: { profile_picture_url: updatedProfile.profile_pic_url },
+          });
+        }
+      });
+    });
+
   }
 
   private async createUploadsDirectory() {
     try {
-      await fs.mkdir(this.uploadsDir, { recursive: true });
+      await fs.promises.mkdir(this.uploadsDir, { recursive: true });
     } catch (error) {
       console.error(SYS_MSG.ERROR_DIRECTORY, error);
     }
