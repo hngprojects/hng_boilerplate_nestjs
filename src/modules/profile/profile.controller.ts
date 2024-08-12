@@ -72,7 +72,7 @@ export class ProfileController {
     description: 'Profile picture uploaded successfully',
   })
   @Post('upload-image')
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
   type: UploadProfilePicDto,
