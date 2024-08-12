@@ -21,6 +21,8 @@ services:
     image: postgres:16-alpine
     env_file:
       - .env
+    environment:
+      POSTGRES_USER=${DB_USER}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
