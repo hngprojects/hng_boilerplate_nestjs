@@ -9,7 +9,6 @@ import { REQUEST_SUCCESSFUL, QUESTION_ALREADY_EXISTS, USER_NOT_FOUND } from '../
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { User } from '../user/entities/user.entity';
 import { translateFields } from '../../translation.service';
-import { Language } from '../../helpers/language.decorator';
 
 @Injectable()
 export class HelpCenterService {
