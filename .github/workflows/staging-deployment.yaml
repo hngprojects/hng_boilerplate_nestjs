@@ -16,32 +16,33 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t nestjs_staging:green .
-    
+
       - name: Save and compress Docker image
         run: |
           docker save nestjs_staging:green | gzip > nestjs_staging.tar.gz
-      
+
       - name: Copy image to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "nestjs_staging.tar.gz"
-          target: "/tmp"
+          source: 'nestjs_staging.tar.gz'
+          target: '/tmp'
+          verbose: true
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
     environment:
-      name: "staging"
+      name: 'staging'
       url: ${{ vars.URL }}
     steps:
-    - name: Deploy on server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        script: |
-          ./deploy.sh staging
+      - name: Deploy on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            ./deploy.sh staging
