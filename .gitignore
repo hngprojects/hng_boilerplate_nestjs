@@ -395,3 +395,8 @@ dist
 # Migrations
 /db/migrations/*-migration.ts
 /db
+
+*.staging
+*.dev
+*.prod
+
