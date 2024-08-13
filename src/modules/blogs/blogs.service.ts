@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
