@@ -91,11 +91,11 @@ export class ProfileController {
     file: Express.Multer.File
   ): Promise<{
     status: string;
-    message: string;
+    message: string
   }> {
     const userId = req.user.id;
     const uploadProfilePicDto = new UploadProfilePicDto()
-    uploadProfilePicDto.avatar = file;
+    uploadProfilePicDto.avatar = file
     return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL)
   }
 }
