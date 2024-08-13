@@ -14,15 +14,19 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseInterceptor } from '../../shared/inteceptors/response.interceptor';
 import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidator } from './dto/file.validator';
-import * as dotenv from 'dotenv';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import {
+  BASE_URL,
+  MAX_PROFILE_PICTURE_SIZE,
+  VALID_UPLOADS_MIME_TYPES,
+} from '../../helpers/app-constants';
 
-dotenv.config();
+
 @ApiBearerAuth()
 @ApiTags('Profile')
 @Controller('profile')
@@ -64,30 +68,34 @@ export class ProfileController {
 
   @ApiOperation({ summary: 'Upload Profile Picture' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Profile picture uploaded successfully',
   })
   @Post('upload-image')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+  type: UploadProfilePicDto,
+  description: 'Profile picture file',
+})
+
   @UsePipes(new ValidationPipe({ transform: true }))
   async uploadProfilePicture(
     @Req() req: any,
     @UploadedFile(
       new FileValidator({
-        maxSize: 2 * 1024 * 1024,
-        mimeTypes: ['image/jpeg', 'image/png'],
+        maxSize:   MAX_PROFILE_PICTURE_SIZE,
+        mimeTypes: VALID_UPLOADS_MIME_TYPES,
       })
     )
     file: Express.Multer.File
   ): Promise<{
-    status: number;
-    message: string;
+    status: string;
+    message: string
   }> {
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const baseUrl = isDevelopment ? `${req.protocol}://${req.get('host')}` : process.env.BASE_URL;
     const userId = req.user.id;
-    const uploadProfilePicDto = new UploadProfilePicDto();
-    uploadProfilePicDto.file = file;
-    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, baseUrl);
+    const uploadProfilePicDto = new UploadProfilePicDto()
+    uploadProfilePicDto.avatar = file
+    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL)
   }
 }

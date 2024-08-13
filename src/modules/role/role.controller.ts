@@ -7,7 +7,7 @@ import {
   AttachPermissionsDto,
   UpdateOrganisationRoleDto,
 } from './dto/update-organisation-role.dto';
-import { SuperAdminGuard } from 'src/guards/super-admin.guard';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 
 @ApiTags('organisation Settings')
 @UseGuards(SuperAdminGuard)

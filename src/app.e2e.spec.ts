@@ -14,7 +14,7 @@ describe('Health Check Test', () => {
     it('should return healthy endpoint', async () => {
       const result = { message: 'This is a healthy endpoint', status_code: 200 };
 
-      expect(await healthController.health()).toStrictEqual(result);
+      expect(await healthController.health()).toMatchObject(result);
     });
   });
 

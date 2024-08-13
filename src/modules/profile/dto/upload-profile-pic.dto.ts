@@ -8,7 +8,7 @@ export class UploadProfilePicDto {
     description: 'Profile picture file',
     maxLength: 2 * 1024 * 1024,
   })
-  @HasMimeType(['image/jpeg', 'image/png', 'image/gif'])
+  @HasMimeType(['image/jpeg', 'image/png'])
   @MaxFileSize(2 * 1024 * 1024)
-  file: Express.Multer.File;
+  avatar: Express.Multer.File;
 }
