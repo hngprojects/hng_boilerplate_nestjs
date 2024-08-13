@@ -4,7 +4,7 @@ import { Permissions } from '../../permissions/entities/permissions.entity';
 
 @Entity({ name: 'roles' })
 export class Role extends AbstractBaseEntity {
-  @Column()
+  @Column({ default: 'Ezekiel' })
   name: string;
 
   @Column({ type: 'text', nullable: true })

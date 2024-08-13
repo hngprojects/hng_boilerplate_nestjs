@@ -33,6 +33,19 @@ export class InviteService {
     private readonly OrganisationService: OrganisationsService
   ) {}
 
+  async getPendingInvites() {
+    try {
+      const invites = await this.inviteRepository.find({ where: { isAccepted: false } });
+      return {
+        status_code: HttpStatus.OK,
+        message: 'Successfully fetched pending invites',
+        data: invites,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(`Internal server error: ${error.message}`);
+    }
+  }
+
   async findAllInvitations(): Promise<{ status_code: number; message: string; data: InviteDto[] }> {
     try {
       const invites = await this.inviteRepository.find();

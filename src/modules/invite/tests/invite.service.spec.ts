@@ -167,7 +167,7 @@ describe('InviteService', () => {
   it('should throw an internal server error if an exception occurs', async () => {
     jest.spyOn(repository, 'find').mockRejectedValue(new Error('Test error'));
 
-    await expect(service.findAllInvitations()).rejects.toThrow(InternalServerErrorException);
+    await expect(service.getPendingInvites()).rejects.toThrow(InternalServerErrorException);
   });
 
   describe('createInvite', () => {

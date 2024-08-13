@@ -46,7 +46,11 @@ export class InviteController {
     const allInvites = await this.inviteService.findAllInvitations();
     return allInvites;
   }
-
+  @Get('invites/pending')
+  async findAllPendingInvitations() {
+    const allPendingInvites = await this.inviteService.getPendingInvites();
+    return allPendingInvites;
+  }
   @ApiOperation({ summary: 'Generate Invite Link for an Organization' })
   @ApiResponse({
     status: 200,
