@@ -68,7 +68,7 @@ export class ProfileController {
 
   @ApiOperation({ summary: 'Upload Profile Picture' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Profile picture uploaded successfully',
   })
   @Post('upload-image')
