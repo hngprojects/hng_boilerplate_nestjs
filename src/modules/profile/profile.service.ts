@@ -51,9 +51,11 @@ export class ProfileService {
         throw new NotFoundException('Profile not found');
       }
 
+      const  profileData = {...profile, avatar_url:profile.profile_pic_url}
+
       const responseData = {
         message: 'Successfully fetched profile',
-        data: profile,
+        data:profileData,
       };
 
       return responseData;
@@ -122,7 +124,7 @@ export class ProfileService {
     userId: string,
     uploadProfilePicDto: UploadProfilePicDto,
     baseUrl: string
-  ): Promise<{ status: string; message: string; data: { profile_picture_url: string } }> {
+  ): Promise<{ status: string; message: string; data: { avatar_url: string } }> {
     if (!uploadProfilePicDto.avatar) {
       throw new CustomHttpException(SYS_MSG.NO_FILE_FOUND, HttpStatus.BAD_REQUEST);
     }
@@ -174,7 +176,7 @@ export class ProfileService {
           resolve({
             status: "success",
             message: SYS_MSG.PICTURE_UPDATED,
-            data: { profile_picture_url: updatedProfile.profile_pic_url },
+            data: { avatar_url: updatedProfile.profile_pic_url },
           });
         }
       });

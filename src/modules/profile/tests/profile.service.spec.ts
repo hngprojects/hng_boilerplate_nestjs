@@ -279,7 +279,7 @@ describe('ProfileService', () => {
       expect(result).toEqual({
         status: 'success',
         message: PICTURE_UPDATED,
-        data: { profile_picture_url: `${baseUrl}/uploads/${userId}.jpg` },
+        data: { avatar_url: `${baseUrl}/uploads/${userId}.jpg` },
       });
       expect(sharp).toHaveBeenCalled();
       expect(profileRepository.update).toHaveBeenCalled();
