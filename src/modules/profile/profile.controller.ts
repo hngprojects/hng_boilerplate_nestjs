@@ -96,6 +96,6 @@ export class ProfileController {
     const userId = req.user.id;
     const uploadProfilePicDto = new UploadProfilePicDto()
     uploadProfilePicDto.avatar = file;
-    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL);
+    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL)
   }
 }
