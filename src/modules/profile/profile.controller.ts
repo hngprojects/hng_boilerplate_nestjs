@@ -72,7 +72,7 @@ export class ProfileController {
     description: 'Profile picture uploaded successfully',
   })
   @Post('upload-image')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('avatar'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
   type: UploadProfilePicDto,
@@ -90,12 +90,12 @@ export class ProfileController {
     )
     file: Express.Multer.File
   ): Promise<{
-    status: number;
+    status: string;
     message: string;
   }> {
     const userId = req.user.id;
     const uploadProfilePicDto = new UploadProfilePicDto()
-    uploadProfilePicDto.file = file;
+    uploadProfilePicDto.avatar = file;
     return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL);
   }
 }
