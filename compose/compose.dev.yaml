@@ -1,0 +1,17 @@
+name: nestjs_dev
+
+services:
+  app:
+    env_file:
+      - .env.dev
+
+  db:
+    env_file:
+      - .env.dev
+
+  redis:
+    env_file:
+      - .env.dev
+  nginx:
+    ports:
+      - 5000:80

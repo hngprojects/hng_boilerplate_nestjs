@@ -1,5 +1,5 @@
 # Use the official Node.js image as the base image
-FROM node:20-slim
+FROM node:20-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -12,8 +12,7 @@ RUN npm install
 
 RUN npm run build
 
-EXPOSE 3100
+EXPOSE 5000
 
 # Command to run the application
-# CMD ["npm", "run", "start:prod"]
-CMD [ "./start.sh" ]
+CMD ["npm", "run", "start:prod"]

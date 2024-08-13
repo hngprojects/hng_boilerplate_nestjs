@@ -389,14 +389,14 @@ Temporary Items
 # Local
 dist
 /.env
-/.env.*.local
+/.env.*
 *._local.ts
 
 # Migrations
 /db/migrations/*-migration.ts
 /db
 
-
 *.staging
 *.dev
 *.prod
+
