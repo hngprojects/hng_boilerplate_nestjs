@@ -29,7 +29,6 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           source: 'nestjs_staging.tar.gz'
           target: '/tmp'
-          verbose: true
 
   deploy:
     needs: build-and-push
@@ -45,4 +44,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
+            cd ~/hng_boilerplate_nestjs
             ./deploy.sh staging
