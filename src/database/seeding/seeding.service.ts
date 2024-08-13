@@ -26,7 +26,7 @@ import { Role } from '../../modules/role/entities/role.entity';
 import { User } from '../../modules/user/entities/user.entity';
 import { CreateAdminDto } from './dto/admin.dto';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
-import { OrganisationUserRole } from 'src/modules/role/entities/organisation-user-role.entity';
+import { OrganisationUserRole } from '../../modules/role/entities/organisation-user-role.entity';
 
 @Injectable()
 export class SeedingService {

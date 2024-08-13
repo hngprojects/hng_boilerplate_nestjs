@@ -17,7 +17,7 @@ import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
-import { Organisation } from 'src/modules/organisations/entities/organisations.entity';
+import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 
 jest.mock('speakeasy');
 
