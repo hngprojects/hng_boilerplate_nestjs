@@ -8,6 +8,8 @@ import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { REQUEST_SUCCESSFUL, QUESTION_ALREADY_EXISTS, USER_NOT_FOUND } from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { User } from '../user/entities/user.entity';
+import { translateFields } from '../../translation.service';
+import { Language } from '../../helpers/language.decorator';
 
 @Injectable()
 export class HelpCenterService {
@@ -18,7 +20,7 @@ export class HelpCenterService {
     private userRepository: Repository<User>
   ) {}
 
-  async create(createHelpCenterDto: CreateHelpCenterDto, user: User) {
+  async create(createHelpCenterDto: CreateHelpCenterDto, user: User, language?: string) {
     const existingTopic = await this.helpCenterRepository.findOne({
       where: { title: createHelpCenterDto.title },
     });
@@ -42,36 +44,65 @@ export class HelpCenterService {
     });
     const newEntity = await this.helpCenterRepository.save(helpCenter);
 
+    const { translatedTitle, translatedContent } = await translateFields(newEntity.title, newEntity.content, language);
+
     return {
       status_code: HttpStatus.CREATED,
       message: 'Request successful',
-      data: newEntity,
+      data: {
+        ...newEntity,
+        title: translatedTitle,
+        content: translatedContent,
+      },
     };
   }
 
-  async findAll(): Promise<any> {
+  async findAll(language?: string): Promise<any> {
     const centres = await this.helpCenterRepository.find();
 
+    const translatedCentres = await Promise.all(
+      centres.map(async centre => {
+        const { translatedTitle, translatedContent } = await translateFields(centre.title, centre.content, language);
+
+        return {
+          ...centre,
+          title: translatedTitle,
+          content: translatedContent,
+        };
+      })
+    );
+
     return {
-      data: centres,
+      data: translatedCentres,
       status_code: HttpStatus.OK,
-      message: REQUEST_SUCCESSFUL,
+      message: 'Request completed successfully',
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, language?: string) {
     const helpCenter = await this.helpCenterRepository.findOne({ where: { id } });
     if (!helpCenter) {
       throw new NotFoundException(`Help center topic with ID ${id} not found`);
     }
+
+    const { translatedTitle, translatedContent } = await translateFields(
+      helpCenter.title,
+      helpCenter.content,
+      language
+    );
+
     return {
       status_code: HttpStatus.OK,
       message: REQUEST_SUCCESSFUL,
-      data: helpCenter,
+      data: {
+        ...helpCenter,
+        title: translatedTitle,
+        content: translatedContent,
+      },
     };
   }
 
-  async search(criteria: SearchHelpCenterDto) {
+  async search(criteria: SearchHelpCenterDto, language?: string) {
     const queryBuilder = this.helpCenterRepository.createQueryBuilder('help_center');
     if (criteria.title) {
       queryBuilder.andWhere('help_center.title LIKE :title', { title: `%${criteria.title}%` });
@@ -80,14 +111,27 @@ export class HelpCenterService {
       queryBuilder.andWhere('help_center.content LIKE :content', { content: `%${criteria.content}%` });
     }
     const query = await queryBuilder.getMany();
+
+    const translatedQuery = await Promise.all(
+      query.map(async centre => {
+        const { translatedTitle, translatedContent } = await translateFields(centre.title, centre.content, language);
+
+        return {
+          ...centre,
+          title: translatedTitle,
+          content: translatedContent,
+        };
+      })
+    );
+
     return {
       status_code: HttpStatus.OK,
       message: REQUEST_SUCCESSFUL,
-      data: query,
+      data: translatedQuery,
     };
   }
 
-  async updateTopic(id: string, updateHelpCenterDto: UpdateHelpCenterDto) {
+  async updateTopic(id: string, updateHelpCenterDto: UpdateHelpCenterDto, language?: string) {
     const existingTopic = await this.helpCenterRepository.findOneBy({ id });
     if (!existingTopic) {
       throw new HttpException(
@@ -102,14 +146,23 @@ export class HelpCenterService {
 
     await this.helpCenterRepository.update(id, updateHelpCenterDto);
     const updatedTopic = await this.helpCenterRepository.findOneBy({ id });
-  
+
+    const { translatedTitle, translatedContent } = await translateFields(
+      updatedTopic.title,
+      updatedTopic.content,
+      language
+    );
+
     return {
       status_code: HttpStatus.OK,
       message: REQUEST_SUCCESSFUL,
-      data: updatedTopic,
+      data: {
+        ...updatedTopic,
+        title: translatedTitle,
+        content: translatedContent,
+      },
     };
   }
-  
 
   async removeTopic(id: string): Promise<void> {
     const existingTopic = await this.helpCenterRepository.findOneBy({ id });
@@ -125,5 +178,4 @@ export class HelpCenterService {
     }
     await this.helpCenterRepository.delete(id);
   }
-  
 }
