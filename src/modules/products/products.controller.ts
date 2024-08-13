@@ -23,7 +23,7 @@ import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '../../helpers/SystemMessages
 import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '../../helpers/skipAuth';
 
 @ApiTags('Products')
 @Controller('')
