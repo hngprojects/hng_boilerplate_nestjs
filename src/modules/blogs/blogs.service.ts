@@ -226,7 +226,7 @@ export class BlogService {
 
   private validateEmptyValues(query: any): void {
     for (const key in query) {
-      if (query.hasOwnProperty(key) && query[key] !== undefined) {
+      if (Object.prototype.hasOwnProperty.call(query, key) && query[key] !== undefined) {
         const value = query[key];
         if (typeof value === 'string' && !value.trim()) {
           throw new CustomHttpException(`${key.replace(/_/g, ' ')} value is empty`, HttpStatus.BAD_REQUEST);

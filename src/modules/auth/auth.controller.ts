@@ -32,7 +32,7 @@ import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { UpdateUserPasswordResponseDTO } from './dto/update-user-password.dto';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @ApiTags('Authentication')
 @Controller('auth')

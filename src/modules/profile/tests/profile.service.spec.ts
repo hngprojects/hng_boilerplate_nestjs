@@ -189,11 +189,12 @@ describe('ProfileService', () => {
       buffer: Buffer.from('test'),
       originalname: 'test.jpg',
     };
-    const mockUploadProfilePicDto = { file: mockFile as any };
-
+    const mockUploadProfilePicDto = { avatar: mockFile as any };
 
     it('should throw an exception if no file is provided', async () => {
-      await expect(service.uploadProfilePicture(userId, { file: null }, baseUrl)).rejects.toThrow(CustomHttpException);
+      await expect(service.uploadProfilePicture(userId, { avatar: null }, baseUrl)).rejects.toThrow(
+        CustomHttpException
+      );
     });
 
     it('should throw an exception if user is not found', async () => {
@@ -216,7 +217,6 @@ describe('ProfileService', () => {
     });
 
     it('should delete previous profile picture if it exists', async () => {
-
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
@@ -238,7 +238,6 @@ describe('ProfileService', () => {
     });
 
     it('should handle non-existent previous profile picture', async () => {
-
       const mockResult: UpdateResult = {
         generatedMaps: [],
         raw: [],
@@ -259,7 +258,6 @@ describe('ProfileService', () => {
     });
 
     it('should save new profile picture and update profile', async () => {
-
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
 
       (sharp as jest.MockedFunction<typeof sharp>).mockReturnValue({
@@ -279,9 +277,9 @@ describe('ProfileService', () => {
       const result = await service.uploadProfilePicture(userId, mockUploadProfilePicDto, baseUrl);
 
       expect(result).toEqual({
-        status: HttpStatus.OK,
+        status: 'success',
         message: PICTURE_UPDATED,
-        data: { profile_picture_url: `${baseUrl}/uploads/${userId}.jpg` },
+        data: { avatar_url: `${baseUrl}/uploads/${userId}.jpg` },
       });
       expect(sharp).toHaveBeenCalled();
       expect(profileRepository.update).toHaveBeenCalled();

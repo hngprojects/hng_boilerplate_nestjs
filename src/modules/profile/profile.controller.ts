@@ -68,7 +68,7 @@ export class ProfileController {
 
   @ApiOperation({ summary: 'Upload Profile Picture' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Profile picture uploaded successfully',
   })
   @Post('upload-image')
@@ -90,12 +90,12 @@ export class ProfileController {
     )
     file: Express.Multer.File
   ): Promise<{
-    status: number;
-    message: string;
+    status: string;
+    message: string
   }> {
     const userId = req.user.id;
     const uploadProfilePicDto = new UploadProfilePicDto()
-    uploadProfilePicDto.file = file;
-    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL);
+    uploadProfilePicDto.avatar = file
+    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL)
   }
 }

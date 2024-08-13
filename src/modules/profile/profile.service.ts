@@ -51,9 +51,11 @@ export class ProfileService {
         throw new NotFoundException('Profile not found');
       }
 
+      const  profileData = {...profile, avatar_url:profile.profile_pic_url}
+
       const responseData = {
         message: 'Successfully fetched profile',
-        data: profile,
+        data:profileData,
       };
 
       return responseData;
@@ -122,8 +124,8 @@ export class ProfileService {
     userId: string,
     uploadProfilePicDto: UploadProfilePicDto,
     baseUrl: string
-  ): Promise<{ status: number; message: string; data: { profile_picture_url: string } }> {
-    if (!uploadProfilePicDto.file) {
+  ): Promise<{ status: string; message: string; data: { avatar_url: string } }> {
+    if (!uploadProfilePicDto.avatar) {
       throw new CustomHttpException(SYS_MSG.NO_FILE_FOUND, HttpStatus.BAD_REQUEST);
     }
 
@@ -152,11 +154,11 @@ export class ProfileService {
       }
     }
 
-    const fileExtension = path.extname(uploadProfilePicDto.file.originalname);
+    const fileExtension = path.extname(uploadProfilePicDto.avatar.originalname);
     const fileName = `${userId}${fileExtension}`;
     const filePath = path.join(this.uploadsDir, fileName);
 
-    const fileStream = Readable.from(uploadProfilePicDto.file.buffer);
+    const fileStream = Readable.from(uploadProfilePicDto.avatar.buffer);
     const writeStream = fs.createWriteStream(filePath);
 
     return new Promise((resolve, reject) => {
@@ -165,16 +167,16 @@ export class ProfileService {
           Logger.error(SYS_MSG.FILE_SAVE_ERROR, err.stack);
           reject(new CustomHttpException(SYS_MSG.FILE_SAVE_ERROR, HttpStatus.INTERNAL_SERVER_ERROR));
         } else {
-          await sharp(uploadProfilePicDto.file.buffer).resize({ width: 200, height: 200 }).toFile(filePath);
+          await sharp(uploadProfilePicDto.avatar.buffer).resize({ width: 200, height: 200 }).toFile(filePath);
 
           profile.profile_pic_url = `${baseUrl}/uploads/${fileName}`;
 
           await this.profileRepository.update(profile.id, profile);
           const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
           resolve({
-            status: HttpStatus.OK,
+            status: "success",
             message: SYS_MSG.PICTURE_UPDATED,
-            data: { profile_picture_url: updatedProfile.profile_pic_url },
+            data: { avatar_url: updatedProfile.profile_pic_url },
           });
         }
       });
