@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HelpCenterEntity } from '../help-center/entities/help-center.entity';
@@ -88,16 +88,40 @@ export class HelpCenterService {
   }
 
   async updateTopic(id: string, updateHelpCenterDto: UpdateHelpCenterDto) {
+    const existingTopic = await this.helpCenterRepository.findOneBy({ id });
+    if (!existingTopic) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Topic not found, please check and try again',
+          status_code: HttpStatus.NOT_FOUND,
+        },
+        HttpStatus.NOT_FOUND
+      );
+    }
+
     await this.helpCenterRepository.update(id, updateHelpCenterDto);
-    const query = await this.helpCenterRepository.findOneBy({ id });
+    const updatedTopic = await this.helpCenterRepository.findOneBy({ id });
+
     return {
       status_code: HttpStatus.OK,
       message: REQUEST_SUCCESSFUL,
-      data: query,
+      data: updatedTopic,
     };
   }
 
   async removeTopic(id: string): Promise<void> {
+    const existingTopic = await this.helpCenterRepository.findOneBy({ id });
+    if (!existingTopic) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Topic not found, unable to delete',
+          status_code: HttpStatus.NOT_FOUND,
+        },
+        HttpStatus.NOT_FOUND
+      );
+    }
     await this.helpCenterRepository.delete(id);
   }
 }
