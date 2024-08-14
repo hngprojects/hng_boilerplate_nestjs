@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy-staging:
-    runs-on: bingo-server
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy on server
         uses: appleboy/ssh-action@master
