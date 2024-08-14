@@ -7,10 +7,11 @@ import { Testimonial } from './entities/testimonials.entity';
 import { TestimonialsController } from './testimonials.controller';
 import { TestimonialsService } from './testimonials.service';
 import { Profile } from '../profile/entities/profile.entity';
+import { TextService } from 'src/translation/translation.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Testimonial, User, Profile])],
   controllers: [TestimonialsController],
-  providers: [TestimonialsService, Repository, UserService],
+  providers: [TestimonialsService, Repository, UserService, TextService],
 })
 export class TestimonialsModule {}
