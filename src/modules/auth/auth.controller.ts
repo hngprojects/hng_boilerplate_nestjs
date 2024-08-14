@@ -8,7 +8,20 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import * as SYS_MSG from '../../helpers/SystemMessages';
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards, Get, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Request,
+  Res,
+  UseGuards,
+  Get,
+  Patch,
+  Query,
+} from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '../../helpers/skipAuth';
 import AuthenticationService from './auth.service';
@@ -106,8 +119,8 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: AuthResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid Google token' })
   @HttpCode(200)
-  async googleAuth(@Body() body: GoogleAuthPayload) {
-    return this.authService.googleAuth(body);
+  async googleAuth(@Body() body: GoogleAuthPayload, @Query('mobile') isMobile: string) {
+    return this.authService.googleAuth({ googleAuthPayload: body, isMobile });
   }
 
   @skipAuth()
