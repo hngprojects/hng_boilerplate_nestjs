@@ -1,12 +1,12 @@
-name: Staging Deployment
+name: Production Deployment
 
 on:
   push:
     branches:
-      - staging
+      - main
 
 jobs:
-  deploy-staging:
+  deploy-prod:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy on server
@@ -16,6 +16,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd staging
+            cd main
             chmod +x deployment.sh
-            ./deployment.sh staging
+            ./deployment.sh main
