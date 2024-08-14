@@ -7,7 +7,7 @@ import { Testimonial } from './entities/testimonials.entity';
 import { TestimonialsController } from './testimonials.controller';
 import { TestimonialsService } from './testimonials.service';
 import { Profile } from '../profile/entities/profile.entity';
-import { TextService } from 'src/translation/translation.service';
+import { TextService } from '../../translation/translation.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Testimonial, User, Profile])],
