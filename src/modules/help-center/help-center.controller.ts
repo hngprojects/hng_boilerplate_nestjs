@@ -27,7 +27,6 @@ import {
 } from './dto/help-center.response.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { User } from '../user/entities/user.entity';
-import { Language } from '../../helpers/language.decorator';
 
 @ApiTags('help-center')
 @Controller('help-center')
@@ -43,19 +42,18 @@ export class HelpCenterController {
   @ApiResponse({ status: 400, description: 'This question already exists.' })
   async create(
     @Body() createHelpCenterDto: CreateHelpCenterDto,
-    @Req() req: { user: User },
-    @Language() language: string
+    @Req() req: { user: User }
   ): Promise<HelpCenterSingleInstancResponseType> {
     const user: User = req.user;
-    return this.helpCenterService.create(createHelpCenterDto, user, language);
+    return this.helpCenterService.create(createHelpCenterDto, user);
   }
 
   @skipAuth()
   @Get('topics')
   @ApiOperation({ summary: 'Get all help center topics' })
   @ApiResponse({ status: 200, description: 'The found records' })
-  async findAll(@Language() language: string): Promise<HelpCenter[]> {
-    return this.helpCenterService.findAll(language);
+  async findAll(): Promise<HelpCenter[]> {
+    return this.helpCenterService.findAll();
   }
 
   @skipAuth()
@@ -63,11 +61,8 @@ export class HelpCenterController {
   @ApiOperation({ summary: 'Get a help center topic by ID' })
   @ApiResponse({ status: 200, description: 'The found record' })
   @ApiResponse({ status: 404, description: 'Topic not found' })
-  async findOne(
-    @Param() params: GetHelpCenterDto,
-    @Language() language: string
-  ): Promise<HelpCenterSingleInstancResponseType> {
-    const helpCenter = await this.helpCenterService.findOne(params.id, language);
+  async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
+    const helpCenter = await this.helpCenterService.findOne(params.id);
     if (!helpCenter) {
       throw new NotFoundException(`Help center topic with ID ${params.id} not found`);
     }
@@ -79,11 +74,8 @@ export class HelpCenterController {
   @ApiOperation({ summary: 'Search help center topics' })
   @ApiResponse({ status: 200, description: 'The found records' })
   @ApiResponse({ status: 422, description: 'Invalid search criteria.' })
-  async search(
-    @Query() query: SearchHelpCenterDto,
-    @Language() language: string
-  ): Promise<HelpCenterMultipleInstancResponseType> {
-    return this.helpCenterService.search(query, language);
+  async search(@Query() query: SearchHelpCenterDto): Promise<HelpCenterMultipleInstancResponseType> {
+    return this.helpCenterService.search(query);
   }
 
   @ApiBearerAuth()
@@ -94,13 +86,9 @@ export class HelpCenterController {
   @ApiResponse({ status: 403, description: 'Access denied, only authorized users can access this endpoint' })
   @ApiResponse({ status: 404, description: 'Topic not found, please check and try again' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateHelpCenterDto: UpdateHelpCenterDto,
-    @Language() language: string
-  ) {
+  async update(@Param('id') id: string, @Body() updateHelpCenterDto: UpdateHelpCenterDto) {
     try {
-      const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto, language);
+      const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
       return {
         success: true,
         message: 'Topic updated successfully',
