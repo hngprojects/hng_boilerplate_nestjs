@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "team-alpha-prod",
+      "name": "nestjs-prod",
       "script": "npm run start:prod",
       "log_file": "~/.pm2/logs/team-alpha-prod-out.log",
       "combine_logs": true,

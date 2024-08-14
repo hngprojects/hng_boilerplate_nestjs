@@ -1,13 +1,13 @@
-name: Staging Deployment
+name: Production Deployment
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - staging
+      - main
 
 jobs:
-  deploy-staging:
+  deploy-prod:
     runs-on: bingo-server
     steps:
       - name: Deploy on server
@@ -17,6 +17,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd staging
+            cd main
             chmod +x deployment.sh
-            ./deployment.sh staging
+            ./deployment.sh main
