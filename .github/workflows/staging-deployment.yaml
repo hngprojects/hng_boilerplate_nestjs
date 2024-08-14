@@ -1,7 +1,6 @@
 name: Staging Deployment
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - staging
