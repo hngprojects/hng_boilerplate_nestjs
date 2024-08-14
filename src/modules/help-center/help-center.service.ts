@@ -8,7 +8,7 @@ import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { REQUEST_SUCCESSFUL, QUESTION_ALREADY_EXISTS, USER_NOT_FOUND } from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { User } from '../user/entities/user.entity';
-import { translateFields } from '../../translation.service';
+import { translateFields } from '../../translation/translation.service';
 
 @Injectable()
 export class HelpCenterService {
