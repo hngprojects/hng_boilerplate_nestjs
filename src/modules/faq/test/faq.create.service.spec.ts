@@ -4,6 +4,14 @@ import { Repository } from 'typeorm';
 import { Faq } from '../entities/faq.entity';
 import { CreateFaqDto } from '../dto/create-faq.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { TextService } from '../../../translation/translation.service';
+
+
+class MockTextService {
+  translateText(text: string, targetLang: string) {
+    return Promise.resolve(text);
+  }
+}
 
 describe('FaqService', () => {
   let service: FaqService;
@@ -24,6 +32,10 @@ describe('FaqService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FaqService,
+        {
+          provide: TextService,
+          useClass: MockTextService,
+        },
         {
           provide: getRepositoryToken(Faq),
           useValue: mockFaqRepository,
