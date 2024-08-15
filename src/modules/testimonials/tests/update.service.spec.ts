@@ -8,17 +8,26 @@ import UserService from '../../user/user.service';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from '../entities/testimonials.entity';
 import { TestimonialsService } from '../testimonials.service';
+import { TextService } from '../../../translation/translation.service';
 
 describe('TestimonialsService', () => {
   let service: TestimonialsService;
   let userService: UserService;
   let testimonialRepository: Repository<Testimonial>;
-
+  class MockTextService {
+    translateText(text: string, targetLang: string) {
+      return Promise.resolve(text);
+    }
+  }
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TestimonialsService,
         UserService,
+        {
+          provide: TextService, 
+          useClass: MockTextService,
+        },
         {
           provide: getRepositoryToken(Testimonial),
           useClass: Repository,

@@ -46,8 +46,13 @@ import { RunTestsModule } from './run-tests/run-tests.module';
 import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { LanguageGuard } from './guards/language.guard';
 @Module({
   providers: [
+    {
+      provide: 'APP_GUARD',
+      useClass: LanguageGuard,
+    },
     {
       provide: 'CONFIG',
       useClass: ConfigService,
