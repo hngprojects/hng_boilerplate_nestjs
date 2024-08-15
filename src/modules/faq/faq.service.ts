@@ -24,47 +24,39 @@ export class FaqService {
   }
 
   async create(createFaqDto: CreateFaqDto, language?: string): Promise<IFaq> {
-    try {
-      const { question, answer, category } = createFaqDto;
+    const { question, answer, category } = createFaqDto;
 
-      const translatedQuestion = await this.translateContent(question, language);
-      const translatedAnswer = await this.translateContent(answer, language);
-      const translatedCategory = await this.translateContent(category, language);
+    const translatedQuestion = await this.translateContent(question, language);
+    const translatedAnswer = await this.translateContent(answer, language);
+    const translatedCategory = await this.translateContent(category, language);
 
-      const faq = this.faqRepository.create({
-        ...createFaqDto,
-        question: translatedQuestion,
-        answer: translatedAnswer,
-        category: translatedCategory,
-      });
+    const faq = this.faqRepository.create({
+      ...createFaqDto,
+      question: translatedQuestion,
+      answer: translatedAnswer,
+      category: translatedCategory,
+    });
 
-      return await this.faqRepository.save(faq);
-    } catch (error) {
-      throw new InternalServerErrorException(`Failed to create FAQ: ${error.message}`);
-    }
+    return this.faqRepository.save(faq);
   }
 
   async findAllFaq(language?: string) {
-    try {
-      const faqs = await this.faqRepository.find();
+    const faqs = await this.faqRepository.find();
 
-      const translatedFaqs = await Promise.all(
-        faqs.map(async (faq) => {
-          faq.question = await this.translateContent(faq.question, language);
-          faq.answer = await this.translateContent(faq.answer, language);
-          faq.category = await this.translateContent(faq.category, language);
-          return faq;
-        }),
-      );
+    const translatedFaqs = await Promise.all(
+      faqs.map(async (faq) => {
+        faq.question = await this.translateContent(faq.question, language);
+        faq.answer = await this.translateContent(faq.answer, language);
+        faq.category = await this.translateContent(faq.category, language);
+        return faq;
+      }),
+    );
 
-      return {
-        message: 'Faq fetched successfully',
-        status_code: 200,
-        data: translatedFaqs,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(`Failed to fetch FAQs: ${error.message}`);
-    }
+    return {
+      message: 'Faq fetched successfully',
+      status_code: 200,
+      data: translatedFaqs,
+    };
   }
 
   async updateFaq(id: string, updateFaqDto: UpdateFaqDto, language?: string) {
@@ -76,35 +68,31 @@ export class FaqService {
       });
     }
 
-    try {
-      const updatedFaq = {
-        ...faq,
-        ...updateFaqDto,
-      };
+    const updatedFaq = {
+      ...faq,
+      ...updateFaqDto,
+    };
 
-      if (updateFaqDto.question) {
-        updatedFaq.question = await this.translateContent(updateFaqDto.question, language);
-      }
-
-      if (updateFaqDto.answer) {
-        updatedFaq.answer = await this.translateContent(updateFaqDto.answer, language);
-      }
-
-      if (updateFaqDto.category) {
-        updatedFaq.category = await this.translateContent(updateFaqDto.category, language);
-      }
-
-      await this.faqRepository.save(updatedFaq);
-
-      return {
-        id: updatedFaq.id,
-        question: updatedFaq.question,
-        answer: updatedFaq.answer,
-        category: updatedFaq.category,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(`Failed to update FAQ: ${error.message}`);
+    if (updateFaqDto.question) {
+      updatedFaq.question = await this.translateContent(updateFaqDto.question, language);
     }
+
+    if (updateFaqDto.answer) {
+      updatedFaq.answer = await this.translateContent(updateFaqDto.answer, language);
+    }
+
+    if (updateFaqDto.category) {
+      updatedFaq.category = await this.translateContent(updateFaqDto.category, language);
+    }
+
+    await this.faqRepository.save(updatedFaq);
+
+    return {
+      id: updatedFaq.id,
+      question: updatedFaq.question,
+      answer: updatedFaq.answer,
+      category: updatedFaq.category,
+    };
   }
 
   async removeFaq(id: string) {
