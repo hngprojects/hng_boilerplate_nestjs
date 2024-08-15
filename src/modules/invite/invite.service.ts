@@ -32,6 +32,7 @@ export class InviteService {
     private readonly configService: ConfigService,
     private readonly OrganisationService: OrganisationsService
   ) {}
+
   async getPendingInvites(): Promise<{ message: string; data: InviteDto[] }> {
     try {
       const pendingInvites = await this.inviteRepository.find({

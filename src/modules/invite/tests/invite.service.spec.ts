@@ -169,7 +169,6 @@ describe('InviteService', () => {
 
     await expect(service.getPendingInvites()).rejects.toThrow(InternalServerErrorException);
   });
-
   it('should fetch all pending invites where isAccepted is false', async () => {
     const pendingInvitesMock = mockInvites.filter(invite => invite.isAccepted === false);
 
@@ -178,8 +177,7 @@ describe('InviteService', () => {
     const result = await service.getPendingInvites();
 
     expect(result).toEqual({
-      status_code: HttpStatus.OK,
-      message: 'Successfully fetched pending invites',
+      message: 'Successfully fetched pending Invites',
       data: pendingInvitesMock.map(invite => ({
         token: invite.token,
         id: invite.id,
@@ -190,7 +188,6 @@ describe('InviteService', () => {
       })),
     });
   });
-
   describe('createInvite', () => {
     it('should create an invite and return a link', async () => {
       const mockToken = 'mock-uuid';
