@@ -32,8 +32,7 @@ export class InviteService {
     private readonly configService: ConfigService,
     private readonly OrganisationService: OrganisationsService
   ) {}
-
-  async getPendingInvites(): Promise<{ status_code: number; message: string; data: InviteDto[] }> {
+  async getPendingInvites(): Promise<{ message: string; data: InviteDto[] }> {
     try {
       const pendingInvites = await this.inviteRepository.find({
         where: { isAccepted: false },
@@ -49,18 +48,14 @@ export class InviteService {
           email: invite.email,
         };
       });
-      const responseData = {
-        status_code: HttpStatus.OK,
-        message: 'Successfully fetched pending invites',
+      return {
+        message: 'Successfully fetched pending Invites',
         data: pendingInvitesDto,
       };
-
-      return responseData;
     } catch (error) {
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);
     }
   }
-
   async findAllInvitations(): Promise<{ status_code: number; message: string; data: InviteDto[] }> {
     try {
       const invites = await this.inviteRepository.find();
@@ -87,7 +82,6 @@ export class InviteService {
       throw new InternalServerErrorException(`Internal server error: ${error.message}`);
     }
   }
-
   async createInvite(organisationId: string) {
     const organisation = await this.organisationRepository.findOne({ where: { id: organisationId } });
     if (!organisation) {
