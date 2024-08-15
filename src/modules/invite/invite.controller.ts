@@ -18,6 +18,7 @@ import { CreateInvitationDto } from './dto/create-invite.dto';
 import { Response } from 'express';
 import { CreateInviteResponseDto } from './dto/creat-invite-response.dto';
 import { FindAllInvitationsResponseDto } from './dto/all-invitations-response.dto';
+import { FindAllPendingInvitationsResponseDto } from './dto/pending-invitations';
 import { ErrorResponseDto } from './dto/invite-error-response.dto';
 import { SendInvitationsResponseDto } from './dto/send-invitations-response.dto';
 
@@ -46,6 +47,17 @@ export class InviteController {
     const allInvites = await this.inviteService.findAllInvitations();
     return allInvites;
   }
+  @ApiOperation({ summary: 'Get All Pending Invitations' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully fetched all pending invitations',
+    type: FindAllPendingInvitationsResponseDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    type: ErrorResponseDto,
+  })
   @Get('invites/pending')
   async findAllPendingInvitations() {
     const allPendingInvites = await this.inviteService.getPendingInvites();
