@@ -7,10 +7,12 @@ import { User } from '../user/entities/user.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
 import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
 import { Role } from '../role/entities/role.entity';
+import { TextService } from '../../translation/translation.service';
+
 
 @Module({
   imports: [TypeOrmModule.forFeature([Faq, User, Organisation, OrganisationUserRole, Role])],
   controllers: [FaqController],
-  providers: [FaqService],
+  providers: [FaqService,TextService],
 })
 export class FaqModule {}

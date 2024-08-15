@@ -1,43 +1,73 @@
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Faq } from './entities/faq.entity';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { IFaq } from './faq.interface';
 import { UpdateFaqDto } from './dto/update-faq.dto';
+import { TextService } from '../../translation/translation.service';
 
 @Injectable()
 export class FaqService {
   constructor(
     @InjectRepository(Faq)
-    private faqRepository: Repository<IFaq>
+    private faqRepository: Repository<Faq>,
+    private readonly textService: TextService,
   ) {}
 
-  async create(createFaqDto: CreateFaqDto): Promise<IFaq> {
-    const faq = this.faqRepository.create(createFaqDto);
-    return this.faqRepository.save(faq);
+  private async translateContent(content: string, lang: string) {
+    return this.textService.translateText(content, lang);
   }
-  async findAllFaq() {
+
+  async create(createFaqDto: CreateFaqDto, language?: string): Promise<IFaq> {
     try {
-      const faqs = await this.faqRepository.find();
-      return {
-        message: 'Faq fetched successfully',
-        status_code: 200,
-        data: faqs,
-      };
+      const { question, answer, category } = createFaqDto;
+
+      const translatedQuestion = await this.translateContent(question, language);
+      const translatedAnswer = await this.translateContent(answer, language);
+      const translatedCategory = await this.translateContent(category, language);
+
+      const faq = this.faqRepository.create({
+        ...createFaqDto,
+        question: translatedQuestion,
+        answer: translatedAnswer,
+        category: translatedCategory,
+      });
+
+      return await this.faqRepository.save(faq);
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        return {
-          message: 'Invalid request',
-          status_code: 400,
-        };
-      } else if (error instanceof InternalServerErrorException) {
-        throw error;
-      }
+      throw new InternalServerErrorException(`Failed to create FAQ: ${error.message}`);
     }
   }
 
-  async updateFaq(id: string, updateFaqDto: UpdateFaqDto) {
+  async findAllFaq(language?: string) {
+    try {
+      const faqs = await this.faqRepository.find();
+
+      const translatedFaqs = await Promise.all(
+        faqs.map(async (faq) => {
+          faq.question = await this.translateContent(faq.question, language);
+          faq.answer = await this.translateContent(faq.answer, language);
+          faq.category = await this.translateContent(faq.category, language);
+          return faq;
+        }),
+      );
+
+      return {
+        message: 'Faq fetched successfully',
+        status_code: 200,
+        data: translatedFaqs,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(`Failed to fetch FAQs: ${error.message}`);
+    }
+  }
+
+  async updateFaq(id: string, updateFaqDto: UpdateFaqDto, language?: string) {
     const faq = await this.faqRepository.findOne({ where: { id } });
     if (!faq) {
       throw new BadRequestException({
@@ -45,9 +75,27 @@ export class FaqService {
         status_code: 400,
       });
     }
+
     try {
-      Object.assign(faq, updateFaqDto);
-      const updatedFaq = await this.faqRepository.save(faq);
+      const updatedFaq = {
+        ...faq,
+        ...updateFaqDto,
+      };
+
+      if (updateFaqDto.question) {
+        updatedFaq.question = await this.translateContent(updateFaqDto.question, language);
+      }
+
+      if (updateFaqDto.answer) {
+        updatedFaq.answer = await this.translateContent(updateFaqDto.answer, language);
+      }
+
+      if (updateFaqDto.category) {
+        updatedFaq.category = await this.translateContent(updateFaqDto.category, language);
+      }
+
+      await this.faqRepository.save(updatedFaq);
+
       return {
         id: updatedFaq.id,
         question: updatedFaq.question,
@@ -55,17 +103,7 @@ export class FaqService {
         category: updatedFaq.category,
       };
     } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        return {
-          message: 'Unauthorized access',
-          status_code: 401,
-        };
-      } else if (error instanceof BadRequestException) {
-        return {
-          message: 'Invalid request data',
-          status_code: 400,
-        };
-      }
+      throw new InternalServerErrorException(`Failed to update FAQ: ${error.message}`);
     }
   }
 
