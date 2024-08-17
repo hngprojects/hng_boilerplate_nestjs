@@ -1,20 +1,17 @@
-import HealthController from './health.controller';
-import ProbeController from './probe.controller';
+import AppController from "./app.controller";
 
-describe('Health Check Test', () => {
-  let healthController: HealthController;
-  let probeController: ProbeController;
+describe('App Check Test', () => {
+  let appController: AppController;
 
   beforeEach(() => {
-    healthController = new HealthController();
-    probeController = new ProbeController();
+    appController = new AppController();
   });
 
   describe('Get Health endpoint', () => {
     it('should return healthy endpoint', async () => {
       const result = { message: 'This is a healthy endpoint', status_code: 200 };
 
-      expect(await healthController.health()).toMatchObject(result);
+      expect(await appController.health()).toMatchObject(result);
     });
   });
 
@@ -22,7 +19,7 @@ describe('Health Check Test', () => {
     it('should return nest js api', async () => {
       const result = { message: 'I am the NestJs api responding', status_code: 200 };
 
-      expect(await probeController.test()).toStrictEqual(result);
+      expect(await appController.probe()).toStrictEqual(result);
     });
   });
 });
