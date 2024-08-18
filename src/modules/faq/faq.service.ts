@@ -1,21 +1,18 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Faq } from './entities/faq.entity';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { IFaq } from './faq.interface';
 import { UpdateFaqDto } from './dto/update-faq.dto';
-import { TextService } from '../../translation/translation.service';
+import { TextService } from '../translation/translation.service';
 
 @Injectable()
 export class FaqService {
   constructor(
     @InjectRepository(Faq)
     private faqRepository: Repository<Faq>,
-    private readonly textService: TextService,
+    private readonly textService: TextService
   ) {}
 
   private async translateContent(content: string, lang: string) {
@@ -43,12 +40,12 @@ export class FaqService {
     const faqs = await this.faqRepository.find();
 
     const translatedFaqs = await Promise.all(
-      faqs.map(async (faq) => {
+      faqs.map(async faq => {
         faq.question = await this.translateContent(faq.question, language);
         faq.answer = await this.translateContent(faq.answer, language);
         faq.category = await this.translateContent(faq.category, language);
         return faq;
-      }),
+      })
     );
 
     return {
