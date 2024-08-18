@@ -8,7 +8,7 @@ import UserService from '../../user/user.service';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from '../entities/testimonials.entity';
 import { TestimonialsService } from '../testimonials.service';
-import { TextService } from '../../../translation/translation.service';
+import { TextService } from '../../translation/translation.service';
 
 describe('TestimonialsService', () => {
   let service: TestimonialsService;
@@ -25,7 +25,7 @@ describe('TestimonialsService', () => {
         TestimonialsService,
         UserService,
         {
-          provide: TextService, 
+          provide: TextService,
           useClass: MockTextService,
         },
         {

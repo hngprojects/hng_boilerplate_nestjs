@@ -16,7 +16,7 @@ import { TestimonialMapper } from './mappers/testimonial.mapper';
 import { TestimonialResponseMapper } from './mappers/testimonial-response.mapper';
 import { TestimonialResponse } from './interfaces/testimonial-response.interface';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
-import { TextService } from '../../translation/translation.service';
+import { TextService } from '../translation/translation.service';
 
 @Injectable()
 export class TestimonialsService {
