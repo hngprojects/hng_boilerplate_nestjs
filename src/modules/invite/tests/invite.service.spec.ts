@@ -167,9 +167,27 @@ describe('InviteService', () => {
   it('should throw an internal server error if an exception occurs', async () => {
     jest.spyOn(repository, 'find').mockRejectedValue(new Error('Test error'));
 
-    await expect(service.findAllInvitations()).rejects.toThrow(InternalServerErrorException);
+    await expect(service.getPendingInvites()).rejects.toThrow(InternalServerErrorException);
   });
+  it('should fetch all pending invites where isAccepted is false', async () => {
+    const pendingInvitesMock = mockInvites.filter(invite => invite.isAccepted === false);
 
+    jest.spyOn(repository, 'find').mockResolvedValue(pendingInvitesMock);
+
+    const result = await service.getPendingInvites();
+
+    expect(result).toEqual({
+      message: 'Successfully fetched pending Invites',
+      data: pendingInvitesMock.map(invite => ({
+        token: invite.token,
+        id: invite.id,
+        isAccepted: invite.isAccepted,
+        isGeneric: invite.isGeneric,
+        organisation: invite.organisation,
+        email: invite.email,
+      })),
+    });
+  });
   describe('createInvite', () => {
     it('should create an invite and return a link', async () => {
       const mockToken = 'mock-uuid';
