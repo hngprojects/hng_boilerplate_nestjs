@@ -119,7 +119,7 @@ export class ProductsController {
   @Patch('organisations/:orgId/products/:productId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Update product' })
-  @ApiParam({ name: 'productId', type: String, description: 'Product ID' })
+  @ApiBody({ type: UpdateProductDTO })
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Product not found' })
