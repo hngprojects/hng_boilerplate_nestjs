@@ -47,6 +47,7 @@ describe('ContactUsService', () => {
       const createContactDto: CreateContactDto = {
         name: 'John Doe',
         email: 'john@example.com',
+        phone: 123456789,
         message: 'Test message',
       };
 
@@ -66,6 +67,7 @@ describe('ContactUsService', () => {
       const createContactDto: CreateContactDto = {
         name: 'John Doe',
         email: 'john@example.com',
+        phone: 123456789,
         message: 'Test message',
       };
 
