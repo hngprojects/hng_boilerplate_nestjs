@@ -3,8 +3,9 @@ import { BillingPlanService } from '../billing-plan.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BillingPlan } from '../entities/billing-plan.entity';
-import { NotFoundException, HttpException, BadRequestException } from '@nestjs/common';
-import { BillingPlanDto } from '../dto/billing-plan.dto';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import * as SYS_MSG from "../../../helpers/SystemMessages";
 
 describe('BillingPlanService', () => {
   let service: BillingPlanService;
@@ -26,21 +27,15 @@ describe('BillingPlanService', () => {
   });
 
   describe('createBillingPlan', () => {
-    it('should return existing billing plans if they already exist', async () => {
-      const billingPlans = [
-        { id: '1', name: 'Free', price: 0 },
-        { id: '2', name: 'Basic', price: 20 },
-      ];
+    it('should throw an error if they already exist', async () => {
+      const createPlanDto = { name: 'Free', amount: 0, frequency: 'never', is_active: true }
+      const billingPlans = { id: '1', name: 'Free', price: 0 };
 
       jest.spyOn(repository, 'find').mockResolvedValue(billingPlans as BillingPlan[]);
 
-      const result = await service.createBillingPlan();
+      const result = await service.createBillingPlan(createPlanDto);
 
-      expect(result).toEqual({
-        status_code: 200,
-        message: 'Billing plans already exist in the database',
-        data: billingPlans,
-      });
+      expect(result).rejects.toThrow(new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST))
     });
   });
 

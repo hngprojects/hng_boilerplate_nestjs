@@ -2,7 +2,9 @@ import { Injectable, HttpStatus, HttpException, BadRequestException, NotFoundExc
 import { Repository } from 'typeorm';
 import { BillingPlan } from './entities/billing-plan.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
+import { BillingPlanDto } from "./dto/billing-plan.dto";
+import * as SYS_MSG from "../../helpers/SystemMessages";
+ 
 @Injectable()
 export class BillingPlanService {
   constructor(
@@ -10,37 +12,25 @@ export class BillingPlanService {
     private readonly billingPlanRepository: Repository<BillingPlan>
   ) {}
 
-  async createBillingPlan() {
-    try {
-      const billingPlans = await this.billingPlanRepository.find();
-
-      if (billingPlans.length > 0) {
-        const plans = billingPlans.map(plan => ({ id: plan.id, name: plan.name, price: plan.price }));
-
-        return {
-          status_code: HttpStatus.OK,
-          message: 'Billing plans already exist in the database',
-          data: plans,
-        };
+  async createBillingPlan(createBillingPlanDto: BillingPlanDto  ) {
+    const billingPlan = await this.billingPlanRepository.findOne({
+      where: {
+        name: createBillingPlanDto.name
       }
+    });
 
-      const newPlans = this.createBillingPlanEntities();
-      const createdPlans = await this.billingPlanRepository.save(newPlans);
-      const plans = createdPlans.map(plan => ({ id: plan.id, name: plan.name, price: plan.price }));
-
-      return {
-        message: 'Billing plans created successfully',
-        data: plans,
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          message: `Internal server error: ${error.message}`,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+    if (billingPlan.length > 0) {
+      throw new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
     }
+
+    const newPlan = this.billingPlanRepository.create(createBillingPlanDto);
+    const createdPlan = await this.billingPlanRepository.save(newPlan);
+    const plan = BillingPlanMapper.mapToEntity(createdPlan)
+
+    return {
+      message: SYS_MSG.BILLING_PLAN_CREATED,
+      data: plan,
+    };
   }
 
   async getAllBillingPlans() {

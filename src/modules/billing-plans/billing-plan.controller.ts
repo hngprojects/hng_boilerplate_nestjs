@@ -11,10 +11,11 @@ export class BillingPlanController {
 
   @Post('/')
   @ApiOperation({ summary: 'Create billing plans' })
-  @ApiResponse({ status: 201, description: 'Billing plans created successfully.', type: [BillingPlanDto] })
-  @ApiResponse({ status: 200, description: 'Billing plans already exist in the database.', type: [BillingPlanDto] })
-  async createBillingPlan() {
-    return this.billingPlanService.createBillingPlan();
+  @ApiBody({ type: BillingPlanDto })
+  @ApiResponse({ status: 201, description: 'Billing plan created successfully.', type: BillingPlanDto })
+  @ApiResponse({ status: 200, description: 'Billing plan already exists in the database.', type: [BillingPlanDto] })
+  async createBillingPlan(@Body() createBillingPlanDto: BillingPlanDto) {
+    return this.billingPlanService.createBillingPlan(createBillingPlanDto);
   }
 
   @skipAuth()
