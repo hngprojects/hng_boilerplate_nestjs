@@ -84,6 +84,23 @@ export class ProductsService {
     };
   }
 
+  async getProducts({ page = 1, pageSize = 2 }: { page: number; pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const allProucts = await this.productRepository.find({ skip, take: pageSize });
+    const totalProducts = await this.productRepository.count();
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Product retrieved successfully',
+      data: {
+        products: allProucts,
+        total: totalProducts,
+        page,
+        pageSize,
+      },
+    };
+  }
+
   async getAllProducts({ page = 1, pageSize = 2 }: { page: number; pageSize: number }) {
     const skip = (page - 1) * pageSize;
     const allProucts = await this.productRepository.find({ skip, take: pageSize });
