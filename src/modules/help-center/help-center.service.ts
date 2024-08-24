@@ -93,7 +93,7 @@ export class HelpCenterService {
   async findHelpCenter(id: string) {
     const helpCenter = await this.findOne(id);
     if (!helpCenter) {
-      throw new NotFoundException(`Help center topic with ID ${id} not found`);
+      throw new CustomHttpException(`Help center topic with ID ${id} not found`, HttpStatus.NOT_FOUND);
     }
     return helpCenter;
   }
