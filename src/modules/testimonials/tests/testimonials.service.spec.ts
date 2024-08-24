@@ -12,8 +12,7 @@ import * as SYS_MSG from '../../../helpers/SystemMessages';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { mockUser } from '../../organisations/tests/mocks/user.mock';
 import { testimonialsMock } from './mocks/testimonials.mock';
-import { TextService } from '../../../translation/translation.service';
-
+import { TextService } from '../../translation/translation.service';
 
 class MockTextService {
   translateText(text: string, targetLang: string) {

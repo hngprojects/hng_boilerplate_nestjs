@@ -6,7 +6,6 @@ import { Role } from '../../../modules/role/entities/role.entity';
 export class Permissions extends AbstractBaseEntity {
   @Column()
   title: string;
-
   @ManyToMany(() => Role, role => role.permissions)
   roles: Role[];
 }

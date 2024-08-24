@@ -1,43 +1,61 @@
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Faq } from './entities/faq.entity';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { IFaq } from './faq.interface';
 import { UpdateFaqDto } from './dto/update-faq.dto';
+import { TextService } from '../translation/translation.service';
 
 @Injectable()
 export class FaqService {
   constructor(
     @InjectRepository(Faq)
-    private faqRepository: Repository<IFaq>
+    private faqRepository: Repository<Faq>,
+    private readonly textService: TextService
   ) {}
 
-  async create(createFaqDto: CreateFaqDto): Promise<IFaq> {
-    const faq = this.faqRepository.create(createFaqDto);
-    return this.faqRepository.save(faq);
-  }
-  async findAllFaq() {
-    try {
-      const faqs = await this.faqRepository.find();
-      return {
-        message: 'Faq fetched successfully',
-        status_code: 200,
-        data: faqs,
-      };
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        return {
-          message: 'Invalid request',
-          status_code: 400,
-        };
-      } else if (error instanceof InternalServerErrorException) {
-        throw error;
-      }
-    }
+  private async translateContent(content: string, lang: string) {
+    return this.textService.translateText(content, lang);
   }
 
-  async updateFaq(id: string, updateFaqDto: UpdateFaqDto) {
+  async create(createFaqDto: CreateFaqDto, language?: string): Promise<IFaq> {
+    const { question, answer, category } = createFaqDto;
+
+    const translatedQuestion = await this.translateContent(question, language);
+    const translatedAnswer = await this.translateContent(answer, language);
+    const translatedCategory = await this.translateContent(category, language);
+
+    const faq = this.faqRepository.create({
+      ...createFaqDto,
+      question: translatedQuestion,
+      answer: translatedAnswer,
+      category: translatedCategory,
+    });
+
+    return this.faqRepository.save(faq);
+  }
+
+  async findAllFaq(language?: string) {
+    const faqs = await this.faqRepository.find();
+
+    const translatedFaqs = await Promise.all(
+      faqs.map(async faq => {
+        faq.question = await this.translateContent(faq.question, language);
+        faq.answer = await this.translateContent(faq.answer, language);
+        faq.category = await this.translateContent(faq.category, language);
+        return faq;
+      })
+    );
+
+    return {
+      message: 'Faq fetched successfully',
+      status_code: 200,
+      data: translatedFaqs,
+    };
+  }
+
+  async updateFaq(id: string, updateFaqDto: UpdateFaqDto, language?: string) {
     const faq = await this.faqRepository.findOne({ where: { id } });
     if (!faq) {
       throw new BadRequestException({
@@ -45,28 +63,32 @@ export class FaqService {
         status_code: 400,
       });
     }
-    try {
-      Object.assign(faq, updateFaqDto);
-      const updatedFaq = await this.faqRepository.save(faq);
-      return {
-        id: updatedFaq.id,
-        question: updatedFaq.question,
-        answer: updatedFaq.answer,
-        category: updatedFaq.category,
-      };
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        return {
-          message: 'Unauthorized access',
-          status_code: 401,
-        };
-      } else if (error instanceof BadRequestException) {
-        return {
-          message: 'Invalid request data',
-          status_code: 400,
-        };
-      }
+
+    const updatedFaq = {
+      ...faq,
+      ...updateFaqDto,
+    };
+
+    if (updateFaqDto.question) {
+      updatedFaq.question = await this.translateContent(updateFaqDto.question, language);
     }
+
+    if (updateFaqDto.answer) {
+      updatedFaq.answer = await this.translateContent(updateFaqDto.answer, language);
+    }
+
+    if (updateFaqDto.category) {
+      updatedFaq.category = await this.translateContent(updateFaqDto.category, language);
+    }
+
+    await this.faqRepository.save(updatedFaq);
+
+    return {
+      id: updatedFaq.id,
+      question: updatedFaq.question,
+      answer: updatedFaq.answer,
+      category: updatedFaq.category,
+    };
   }
 
   async removeFaq(id: string) {
