@@ -127,7 +127,7 @@ describe('BillingPlanService', () => {
 
       expect(result).toEqual({
         message: 'Billing plan retrieved successfully',
-        data: BillingPlanMapper.mapToResponseFormat(result),
+        data: BillingPlanMapper.mapToResponseFormat(billingPlan),
       });
     });
 
