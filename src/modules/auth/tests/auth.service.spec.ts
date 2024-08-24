@@ -262,7 +262,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(null);
 
-      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw an unauthorized error for invalid password', async () => {
@@ -281,12 +281,12 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
   describe('verify2fa', () => {
-    it('should throw error if totp code is incorrect', () => {
+    it('should throw error if totp code is incorrect', async () => {
       const verify2faDto: Verify2FADto = { totp_code: '12345' };
       const userId = 'some-uuid-here';
 
@@ -305,7 +305,7 @@ describe('AuthenticationService', () => {
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(user);
       (speakeasy.totp.verify as jest.Mock).mockReturnValue(false);
 
-      expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(CustomHttpException);
+      await expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(CustomHttpException);
     });
 
     it('should enable 2fa if successful', async () => {
