@@ -9,6 +9,9 @@ export class ContactUs extends AbstractBaseEntity {
   @Column('varchar', { nullable: false })
   email: string;
 
+  @Column('int', { nullable: true })
+  phone: number;
+
   @Column('text', { nullable: false })
   message: string;
 
