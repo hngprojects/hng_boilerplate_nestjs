@@ -35,7 +35,7 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Post('topics')
-  // @UseGuards(SuperAdminGuard)
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
