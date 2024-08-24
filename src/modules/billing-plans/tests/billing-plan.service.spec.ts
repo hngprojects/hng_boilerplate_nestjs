@@ -50,9 +50,9 @@ describe('BillingPlanService', () => {
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(billingPlan as BillingPlan);
 
-      await service
-        .createBillingPlan(createPlanDto)
-        .rejects.toThrow(new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST));
+      await expect(service.createBillingPlan(createPlanDto)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST)
+      );
     });
   });
 
