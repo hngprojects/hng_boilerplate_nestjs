@@ -2,11 +2,11 @@ import { Injectable, HttpStatus, HttpException, BadRequestException, NotFoundExc
 import { Repository } from 'typeorm';
 import { BillingPlan } from './entities/billing-plan.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BillingPlanDto } from "./dto/billing-plan.dto";
-import * as SYS_MSG from "../../helpers/SystemMessages";
+import { BillingPlanDto } from './dto/billing-plan.dto';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { BillingPlanMapper } from './mapper/billing-plan.mapper';
- 
+
 @Injectable()
 export class BillingPlanService {
   constructor(
@@ -14,20 +14,20 @@ export class BillingPlanService {
     private readonly billingPlanRepository: Repository<BillingPlan>
   ) {}
 
-  async createBillingPlan(createBillingPlanDto: BillingPlanDto  ) {
+  async createBillingPlan(createBillingPlanDto: BillingPlanDto) {
     const billingPlan = await this.billingPlanRepository.findOne({
       where: {
-        name: createBillingPlanDto.name
-      }
+        name: createBillingPlanDto.name,
+      },
     });
 
-    if (!billingPlan) {
+    if (billingPlan) {
       throw new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
     }
 
     const newPlan = this.billingPlanRepository.create(createBillingPlanDto);
     const createdPlan = await this.billingPlanRepository.save(newPlan);
-    const plan = BillingPlanMapper.mapToResponseFormat(createdPlan)
+    const plan = BillingPlanMapper.mapToResponseFormat(createdPlan);
 
     return {
       message: SYS_MSG.BILLING_PLAN_CREATED,
@@ -96,5 +96,4 @@ export class BillingPlanService {
       );
     }
   }
-
 }
