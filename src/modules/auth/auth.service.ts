@@ -325,11 +325,12 @@ export default class AuthenticationService {
       last_name: userExists.last_name,
     });
 
-    if (userExists.profile.profile_pic_url === null) {
+    if (!userExists.profile.profile_pic_url || userExists.profile.profile_pic_url !== verifyTokenResponse.picture) {
       const updateDto = new UpdateProfileDto();
-      updateDto.profile_pic_url = verifyTokenResponse?.picture;
+      updateDto.profile_pic_url = verifyTokenResponse.picture;
       await this.profileService.updateProfile(userExists.profile.id, updateDto);
     }
+
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
