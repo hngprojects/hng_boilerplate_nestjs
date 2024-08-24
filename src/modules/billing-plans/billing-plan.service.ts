@@ -4,6 +4,8 @@ import { BillingPlan } from './entities/billing-plan.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BillingPlanDto } from "./dto/billing-plan.dto";
 import * as SYS_MSG from "../../helpers/SystemMessages";
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { BillingPlanMapper } from './mapper/billing-plan.mapper';
  
 @Injectable()
 export class BillingPlanService {
@@ -19,7 +21,7 @@ export class BillingPlanService {
       }
     });
 
-    if (billingPlan.length > 0) {
+    if (!billingPlan) {
       throw new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
     }
 
@@ -41,7 +43,7 @@ export class BillingPlanService {
         throw new NotFoundException('No billing plans found');
       }
 
-      const plans = allPlans.map(plan => ({ id: plan.id, name: plan.name, price: plan.price }));
+      const plans = allPlans.map(plan => BillingPlanMapper.mapToEntity(plan));
 
       return {
         message: 'Billing plans retrieved successfully',
@@ -74,7 +76,7 @@ export class BillingPlanService {
         throw new NotFoundException('Billing plan not found');
       }
 
-      const plan = { id: billingPlan.id, name: billingPlan.name, price: billingPlan.price };
+      const plan = BillingPlanMapper.mapToEntity(billingPlan);
 
       return {
         message: 'Billing plan retrieved successfully',
@@ -95,24 +97,4 @@ export class BillingPlanService {
     }
   }
 
-  private createBillingPlanEntities() {
-    const freePlan = this.billingPlanRepository.create({
-      name: 'Free',
-      price: 0,
-    });
-    const basicPlan = this.billingPlanRepository.create({
-      name: 'Basic',
-      price: 20,
-    });
-    const advancedPlan = this.billingPlanRepository.create({
-      name: 'Advanced',
-      price: 50,
-    });
-    const premiumPlan = this.billingPlanRepository.create({
-      name: 'Premium',
-      price: 100,
-    });
-
-    return [freePlan, basicPlan, advancedPlan, premiumPlan];
-  }
 }

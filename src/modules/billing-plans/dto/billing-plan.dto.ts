@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsNumberString } from "class-validator";
 
-export class CreateBillingPlanDto {
+export class BillingPlanDto {
   @ApiProperty({ example: "Free" })
   @IsString()
   name: string;
