@@ -285,10 +285,9 @@ export default class AuthenticationService {
 
   async googleAuth({ googleAuthPayload, isMobile }: { googleAuthPayload: GoogleAuthPayload; isMobile: string }) {
     const idToken = googleAuthPayload.id_token;
-    let verifyTokenResponse: GoogleVerificationPayloadInterface;
 
     const request = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`);
-    verifyTokenResponse = await request.json();
+    const verifyTokenResponse: GoogleVerificationPayloadInterface = await request.json();
 
     const userEmail = verifyTokenResponse.email;
     const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
