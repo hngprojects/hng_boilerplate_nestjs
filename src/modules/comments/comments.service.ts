@@ -42,4 +42,19 @@ export class CommentsService {
       commentedBy,
     };
   }
+
+  async getAComment(commentId: string, userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new CustomHttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    const comment = await this.commentRepository.findOneBy({ id: commentId });
+    if (!comment) {
+      throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      message: 'Comment retrieved successfully',
+      data: { comment },
+    };
+  }
 }
