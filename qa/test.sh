@@ -1,3 +1,3 @@
-npm install dot-env
+npm install dotenv
 npm install newman
 node ./index.js
