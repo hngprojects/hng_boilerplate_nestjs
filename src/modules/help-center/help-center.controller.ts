@@ -91,7 +91,7 @@ export class HelpCenterController {
   @ApiBearerAuth()
   @Delete('topics/:id')
   @UseGuards(SuperAdminGuard)
-  @DeleteHelpCenterDocs(
+  @DeleteHelpCenterDocs()
   async remove(@Param('id') id: string) {
     return this.helpCenterService.removeTopic(id);
     }
