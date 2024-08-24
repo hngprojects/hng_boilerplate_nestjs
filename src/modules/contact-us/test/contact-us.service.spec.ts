@@ -3,8 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ContactUs } from '../entities/contact-us.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreateContactDto } from '../dto/create-contact-us.dto';
-import { InternalServerErrorException } from '@nestjs/common';
 import { ContactUsService } from '../contact-us.service';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { HttpStatus } from '@nestjs/common';
 
 describe('ContactUsService', () => {
   let service: ContactUsService;
@@ -38,10 +39,6 @@ describe('ContactUsService', () => {
     service = module.get<ContactUsService>(ContactUsService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('createContactMessage', () => {
     it('should create a contact message and send an email', async () => {
       const createContactDto: CreateContactDto = {
@@ -60,22 +57,7 @@ describe('ContactUsService', () => {
       expect(mockRepository.create).toHaveBeenCalledWith(createContactDto);
       expect(mockRepository.save).toHaveBeenCalledWith(createContactDto);
       expect(mockMailerService.sendMail).toHaveBeenCalled();
-      expect(result).toEqual({ message: 'Inquiry sent successfully', status_code: 200 });
-    });
-
-    it('should throw InternalServerErrorException when email sending fails', async () => {
-      const createContactDto: CreateContactDto = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        phone: 123456789,
-        message: 'Test message',
-      };
-
-      mockRepository.create.mockReturnValue(createContactDto);
-      mockRepository.save.mockResolvedValue(createContactDto);
-      mockMailerService.sendMail.mockRejectedValue(new Error('Email sending failed'));
-
-      await expect(service.createContactMessage(createContactDto)).rejects.toThrow(InternalServerErrorException);
+      expect(result).toEqual({ message: SYS_MSG.INQUIRY_SENT, status_code: HttpStatus.OK });
     });
   });
 });

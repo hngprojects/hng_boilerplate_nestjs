@@ -5,7 +5,7 @@ import { HelpCenterEntity } from '../help-center/entities/help-center.entity';
 import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
-import { REQUEST_SUCCESSFUL, QUESTION_ALREADY_EXISTS, USER_NOT_FOUND } from '../../helpers/SystemMessages';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { User } from '../user/entities/user.entity';
 import { TextService } from '../translation/translation.service';
@@ -30,7 +30,7 @@ export class HelpCenterService {
     });
 
     if (existingTopic) {
-      throw new CustomHttpException(QUESTION_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(SYS_MSG.QUESTION_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
     }
 
     const fullUser = await this.userRepository.findOne({
@@ -39,7 +39,7 @@ export class HelpCenterService {
     });
 
     if (!fullUser) {
-      throw new CustomHttpException(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(SYS_MSG.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     let translatedContent = createHelpCenterDto.content;
@@ -74,7 +74,7 @@ export class HelpCenterService {
     return {
       data: translatedhCTopics,
       status_code: HttpStatus.OK,
-      message: REQUEST_SUCCESSFUL,
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
     };
   }
 
@@ -85,7 +85,7 @@ export class HelpCenterService {
     }
     return {
       status_code: HttpStatus.OK,
-      message: REQUEST_SUCCESSFUL,
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
       data: helpCenter,
     };
   }
@@ -101,7 +101,7 @@ export class HelpCenterService {
     const query = await queryBuilder.getMany();
     return {
       status_code: HttpStatus.OK,
-      message: REQUEST_SUCCESSFUL,
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
       data: query,
     };
   }
@@ -112,7 +112,7 @@ export class HelpCenterService {
       throw new HttpException(
         {
           status: 'error',
-          message: 'Topic not found, please check and try again',
+          message: SYS_MSG.TOPIC_NOT_FOUND,
           status_code: HttpStatus.NOT_FOUND,
         },
         HttpStatus.NOT_FOUND
@@ -124,7 +124,7 @@ export class HelpCenterService {
 
     return {
       status_code: HttpStatus.OK,
-      message: REQUEST_SUCCESSFUL,
+      message: SYS_MSG.REQUEST_SUCCESSFUL,
       data: updatedTopic,
     };
   }
@@ -135,7 +135,7 @@ export class HelpCenterService {
       throw new HttpException(
         {
           status: 'error',
-          message: 'Topic not found, unable to delete',
+          message: SYS_MSG.TOPIC_NOT_FOUND,
           status_code: HttpStatus.NOT_FOUND,
         },
         HttpStatus.NOT_FOUND

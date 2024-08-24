@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateContactDto } from '../contact-us/dto/create-contact-us.dto';
@@ -18,17 +18,10 @@ export class ContactUsService {
   async createContactMessage(createContactDto: CreateContactDto) {
     const contact = this.contactRepository.create(createContactDto);
     await this.contactRepository.save(contact);
-
-    try {
-      await this.sendEmail(createContactDto);
-    } catch (error) {
-      console.log(error.message);
-      throw new InternalServerErrorException(SYS_MSG.INQUIRY_NOT_SENT);
-    }
-
+    await this.sendEmail(createContactDto);
     return {
       message: SYS_MSG.INQUIRY_SENT,
-      status_code: 200,
+      status_code: HttpStatus.OK,
     };
   }
 

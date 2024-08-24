@@ -104,5 +104,6 @@ export const INVALID_FILE_TYPE = resource => {
   return `Invalid file type. Allowed types: ${resource}`;
 };
 export const INQUIRY_SENT = 'Inquiry sent successfully';
-export const INQUIRY_NOT_SENT = 'Failed to send contact inquiry email';
 export const TOPIC_NOT_FOUND = `Help center topic with ID not found`;
+export const TOPIC_UPDATE_SUCCESS = 'Topic updated successfully';
+export const TOPIC_DELETED = 'Topic deleted successfully';

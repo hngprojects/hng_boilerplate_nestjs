@@ -32,3 +32,25 @@ export function SearchHelpCenterDocs() {
     ApiResponse({ status: 422, description: 'Invalid search criteria.' })
   );
 }
+
+export function UpdateHelpCenterDocs() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Update a help center topic by id' }),
+    ApiResponse({ status: 200, description: 'Topic updated successfully' }),
+    ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' }),
+    ApiResponse({ status: 403, description: 'Access denied, only authorized users can access this endpoint' }),
+    ApiResponse({ status: 404, description: 'Topic not found, please check and try again' }),
+    ApiResponse({ status: 500, description: 'Internal Server Error' })
+  );
+}
+
+export function DeleteHelpCenterDocs() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Delete a help center topic by id' }),
+    ApiResponse({ status: 200, description: 'Topic deleted successfully' }),
+    ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' }),
+    ApiResponse({ status: 403, description: 'Access denied, only authorized users can access this endpoint' }),
+    ApiResponse({ status: 404, description: 'Topic not found, please check and try again' }),
+    ApiResponse({ status: 500, description: 'Internal Server Error' })
+  );
+}

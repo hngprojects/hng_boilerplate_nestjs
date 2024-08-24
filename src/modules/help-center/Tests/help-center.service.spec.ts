@@ -7,6 +7,7 @@ import { HelpCenterEntity } from '../entities/help-center.entity';
 import { REQUEST_SUCCESSFUL } from '../../../helpers/SystemMessages';
 import { User } from '../../user/entities/user.entity';
 import { TextService } from '../../translation/translation.service';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
 
 class MockTextService {
   translateText(text: string, targetLang: string) {
