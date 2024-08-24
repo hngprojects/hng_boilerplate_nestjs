@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const resultFilePath = path.resolve(__dirname, 'result.json');
+const resultFilePath = path.resolve(__dirname, 'boilerplate_report.json');
 
 const postmanApiKey = process.env.POSTMAN_API_KEY;
 
@@ -15,9 +15,9 @@ const runTasks = async () => {
     const newmanProcess = spawn('npx', [
       'newman',
       'run',
-      `https://api.getpostman.com/collections/37678338-b29374aa-a7b1-43e9-bdc8-fc3bcf39871b?apikey=${postmanApiKey}`,
+      `https://api.getpostman.com/collections/37678338-3145218a-98a5-49f6-87be-18ec1ca6e0db?apikey=${postmanApiKey}`,
       '-e',
-      `https://api.getpostman.com/environments/37678787-5f6cbeff-c9d9-44c3-b670-7887cf48fc12?apikey=${postmanApiKey}`,
+      `https://api.getpostman.com/environments/37678338-5b07d664-877b-40d0-ae8f-fddc791af401?apikey=${postmanApiKey}`,
       '--reporters',
       'cli,json',
       '--reporter-json-export',
