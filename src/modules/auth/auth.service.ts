@@ -13,12 +13,13 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { OtpDto } from '../otp/dto/otp.dto';
-import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
-import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
+import { TokenPayload } from 'google-auth-library';
 import { OrganisationsService } from '../organisations/organisations.service';
+import { ProfileService } from '../profile/profile.service';
+import { UpdateProfileDto } from '../profile/dto/update-profile.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -27,8 +28,8 @@ export default class AuthenticationService {
     private jwtService: JwtService,
     private otpService: OtpService,
     private emailService: EmailService,
-    private googleAuthService: GoogleAuthService,
-    private organisationService: OrganisationsService
+    private organisationService: OrganisationsService,
+    private profileService: ProfileService
   ) {}
 
   async createNewUser(createUserDto: CreateUserDTO) {
@@ -48,7 +49,7 @@ export default class AuthenticationService {
     if (!user) {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
-    const newOrganisationPaload = {
+    const newOrganisationPayload = {
       name: `${user.first_name}'s Organisation`,
       description: '',
       email: user.email,
@@ -59,7 +60,7 @@ export default class AuthenticationService {
       state: '',
     };
 
-    const newOrganisation = await this.organisationService.create(newOrganisationPaload, user.id);
+    const newOrganisation = await this.organisationService.create(newOrganisationPayload, user.id);
 
     const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
@@ -283,11 +284,22 @@ export default class AuthenticationService {
     };
   }
 
-  async googleAuth({ googleAuthPayload, isMobile }: { googleAuthPayload: GoogleAuthPayload; isMobile: string }) {
+  async googleAuth(googleAuthPayload: GoogleAuthPayload) {
     const idToken = googleAuthPayload.id_token;
 
+    if (!idToken) {
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+
     const request = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`);
-    const verifyTokenResponse: GoogleVerificationPayloadInterface = await request.json();
+
+    if (request.status === 400) {
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+    if (request.status === 500) {
+      throw new CustomHttpException(SYS_MSG.SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const verifyTokenResponse: TokenPayload = await request.json();
 
     const userEmail = verifyTokenResponse.email;
     const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
@@ -298,6 +310,7 @@ export default class AuthenticationService {
         first_name: verifyTokenResponse.given_name || '',
         last_name: verifyTokenResponse?.family_name || '',
         password: '',
+        profile_pic_url: verifyTokenResponse?.picture || '',
       };
       return await this.createUserGoogle(userCreationPayload);
     }
@@ -311,6 +324,13 @@ export default class AuthenticationService {
       first_name: userExists.first_name,
       last_name: userExists.last_name,
     });
+
+    if (!userExists.profile.profile_pic_url || userExists.profile.profile_pic_url !== verifyTokenResponse.picture) {
+      const updateDto = new UpdateProfileDto();
+      updateDto.profile_pic_url = verifyTokenResponse.picture;
+      await this.profileService.updateProfile(userExists.profile.id, updateDto);
+    }
+
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
@@ -353,9 +373,14 @@ export default class AuthenticationService {
       first_name: userPayload.first_name,
       last_name: userPayload.last_name,
     });
+    if (userPayload.profile_pic_url) {
+      const updateDto = new UpdateProfileDto();
+      updateDto.profile_pic_url = userPayload.profile_pic_url;
 
+      await this.profileService.updateProfile(newUser.profile.id, updateDto);
+    }
     return {
-      status_code: HttpStatus.OK,
+      status_code: HttpStatus.CREATED,
       message: SYS_MSG.USER_CREATED,
       access_token: accessToken,
       data: {
@@ -365,6 +390,7 @@ export default class AuthenticationService {
           first_name: newUser.first_name,
           last_name: newUser.last_name,
           is_superadmin: isSuperAdmin,
+          avatar_url: newUser.profile.profile_pic_url,
         },
         organisations: userOranisations,
       },
