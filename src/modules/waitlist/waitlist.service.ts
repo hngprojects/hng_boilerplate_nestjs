@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreateWaitlistDto } from './dto/create-waitlist.dto';
 import { WaitlistResponseDto } from './dto/create-waitlist-response.dto';
-import { validate } from 'class-validator';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 
 @Injectable()
@@ -16,59 +16,26 @@ export default class WaitlistService {
   ) {}
 
   async createWaitlist(createWaitlistDto: CreateWaitlistDto): Promise<WaitlistResponseDto> {
-    const errors = await validate(createWaitlistDto);
-    if (errors.length > 0) {
-      const messages = errors.map(err => Object.values(err.constraints)).flat();
-      throw new CustomHttpException(
-        {
-          status_code: HttpStatus.BAD_REQUEST,
-          message: messages,
-          error: 'Bad Request',
-        },
-        HttpStatus.BAD_REQUEST
-      );
-    }
+    const { full_name: name, email } = createWaitlistDto;
 
-    const { full_name, email } = createWaitlistDto;
+    const alreadyWaitlisted = await this.waitlistRepository.findOne({ where: { email } });
+    if (alreadyWaitlisted) throw new CustomHttpException(SYS_MSG.USER_ALREADY_WAITLISTED, HttpStatus.CONFLICT);
 
-    const url_slug = full_name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-
-    const waitlist = this.waitlistRepository.create({
-      name: full_name,
-      email,
-      status: false,
-      url_slug,
-    });
-
+    const waitlist = this.waitlistRepository.create({ name, email });
     await this.waitlistRepository.save(waitlist);
-
-    const template = `<p>Hello {{recipientName}},</p><p>Thank you for signing up for our waitlist! We will notify you once you are selected.</p>`;
-
-    const personalizedContent = template.replace('{{recipientName}}', full_name);
 
     await this.mailerService.sendMail({
       to: email,
       subject: 'Waitlist Confirmation',
-      html: personalizedContent,
+      template: 'waitlist-confirmation',
+      context: { recipientName: name },
     });
 
-    return {
-      message: 'You are all signed up!',
-    };
+    return { message: 'You are all signed up!' };
   }
 
   async getAllWaitlist() {
     const waitlist = await this.waitlistRepository.find();
-    return {
-      status_code: HttpStatus.OK,
-      status: HttpStatus.OK,
-      message: 'Added to waitlist',
-      data: {
-        waitlist,
-      },
-    };
+    return { message: 'Waitlist found successfully', data: { waitlist } };
   }
 }
