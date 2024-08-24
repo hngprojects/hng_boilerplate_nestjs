@@ -83,6 +83,9 @@ export const INVITE_NOT_FOUND = 'Invite link not found';
 export const BLOG_DELETED = 'Blog post has been successfully deleted';
 export const NO_USER_TESTIMONIALS = 'User has no testimonials';
 export const USER_TESTIMONIALS_FETCHED = 'User testimonials retrieved successfully';
+export const HELP_CENTER_TOPIC_NOT_FOUND = 'Topic not found';
+export const HELP_CENTER_TOPIC_DELETED = 'Topic deleted successfully';
+export const HELP_CENTER_TOPIC_UPDATED = 'Topic updated successfully';
 export const INVALID_ORG_ID = 'Provide a valid organization Id';
 export const INVALID_USER_ID = 'Provide a valid user Id';
 export const INVALID_PRODUCT_ID = 'Provide a valid user Id';
@@ -98,10 +101,8 @@ export const DIRECTORY_CREATED = 'Uploads directory created at:';
 export const PICTURE_UPDATED = 'Profile picture updated successfully';
 export const FILE_SAVE_ERROR = 'Error saving file to disk';
 export const FILE_EXCEEDS_SIZE = resource => {
-  return `File size exceeds ${resource} MB limit`
-  
+  return `File size exceeds ${resource} MB limit`;
 };
 export const INVALID_FILE_TYPE = resource => {
   return `Invalid file type. Allowed types: ${resource}`;
-  
 };

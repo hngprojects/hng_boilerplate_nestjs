@@ -4,8 +4,6 @@ import {
   Patch,
   Param,
   Delete,
-  HttpException,
-  HttpStatus,
   Get,
   NotFoundException,
   Post,
@@ -80,6 +78,7 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Patch('topics/:id')
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Update a help center topic by id' })
   @ApiResponse({ status: 200, description: 'Topic updated successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' })
@@ -87,56 +86,12 @@ export class HelpCenterController {
   @ApiResponse({ status: 404, description: 'Topic not found, please check and try again' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async update(@Param('id') id: string, @Body() updateHelpCenterDto: UpdateHelpCenterDto) {
-    try {
-      const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
-      return {
-        success: true,
-        message: 'Topic updated successfully',
-        data: updatedHelpCenter,
-        status_code: HttpStatus.OK,
-      };
-    } catch (error) {
-      if (error.status === HttpStatus.UNAUTHORIZED) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Unauthorized, please provide valid credentials',
-            status_code: HttpStatus.UNAUTHORIZED,
-          },
-          HttpStatus.UNAUTHORIZED
-        );
-      } else if (error.status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Access denied, only authorized users can access this endpoint',
-            status_code: HttpStatus.FORBIDDEN,
-          },
-          HttpStatus.FORBIDDEN
-        );
-      } else if (error.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Topic not found, please check and try again',
-            status_code: HttpStatus.NOT_FOUND,
-          },
-          HttpStatus.NOT_FOUND
-        );
-      } else {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Internal Server Error',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
+    return this.helpCenterService.updateTopic(id, updateHelpCenterDto);
   }
 
   @ApiBearerAuth()
   @Delete('topics/:id')
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Delete a help center topic by id' })
   @ApiResponse({ status: 200, description: 'Topic deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' })
@@ -144,50 +99,6 @@ export class HelpCenterController {
   @ApiResponse({ status: 404, description: 'Topic not found, please check and try again' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async remove(@Param('id') id: string) {
-    try {
-      await this.helpCenterService.removeTopic(id);
-      return {
-        success: true,
-        message: 'Topic deleted successfully',
-        status_code: HttpStatus.OK,
-      };
-    } catch (error) {
-      if (error.status === HttpStatus.UNAUTHORIZED) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Unauthorized, please provide valid credentials',
-            status_code: HttpStatus.UNAUTHORIZED,
-          },
-          HttpStatus.UNAUTHORIZED
-        );
-      } else if (error.status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Access denied, only authorized users can access this endpoint',
-            status_code: HttpStatus.FORBIDDEN,
-          },
-          HttpStatus.FORBIDDEN
-        );
-      } else if (error.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Topic not found, please check and try again',
-            status_code: HttpStatus.NOT_FOUND,
-          },
-          HttpStatus.NOT_FOUND
-        );
-      } else {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Internal Server Error',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
+    return this.helpCenterService.removeTopic(id);
   }
 }

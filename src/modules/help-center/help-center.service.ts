@@ -5,7 +5,14 @@ import { HelpCenterEntity } from '../help-center/entities/help-center.entity';
 import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
-import { REQUEST_SUCCESSFUL, QUESTION_ALREADY_EXISTS, USER_NOT_FOUND } from '../../helpers/SystemMessages';
+import {
+  REQUEST_SUCCESSFUL,
+  QUESTION_ALREADY_EXISTS,
+  USER_NOT_FOUND,
+  HELP_CENTER_TOPIC_NOT_FOUND,
+  HELP_CENTER_TOPIC_UPDATED,
+  HELP_CENTER_TOPIC_DELETED,
+} from '../../helpers/SystemMessages';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { User } from '../user/entities/user.entity';
 
@@ -92,8 +99,7 @@ export class HelpCenterService {
     if (!existingTopic) {
       throw new HttpException(
         {
-          status: 'error',
-          message: 'Topic not found, please check and try again',
+          message: HELP_CENTER_TOPIC_NOT_FOUND,
           status_code: HttpStatus.NOT_FOUND,
         },
         HttpStatus.NOT_FOUND
@@ -105,23 +111,26 @@ export class HelpCenterService {
 
     return {
       status_code: HttpStatus.OK,
-      message: REQUEST_SUCCESSFUL,
+      message: HELP_CENTER_TOPIC_UPDATED,
       data: updatedTopic,
     };
   }
 
-  async removeTopic(id: string): Promise<void> {
+  async removeTopic(id: string) {
     const existingTopic = await this.helpCenterRepository.findOneBy({ id });
     if (!existingTopic) {
       throw new HttpException(
         {
-          status: 'error',
-          message: 'Topic not found, unable to delete',
+          message: HELP_CENTER_TOPIC_NOT_FOUND,
           status_code: HttpStatus.NOT_FOUND,
         },
         HttpStatus.NOT_FOUND
       );
     }
     await this.helpCenterRepository.delete(id);
+    return {
+      status_code: HttpStatus.OK,
+      message: HELP_CENTER_TOPIC_DELETED,
+    };
   }
 }

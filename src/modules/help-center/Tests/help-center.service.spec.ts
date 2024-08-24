@@ -4,7 +4,7 @@ import { HelpCenterService } from '../help-center.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { HelpCenterEntity } from '../entities/help-center.entity';
 import { User } from '../../user/entities/user.entity';
-import { REQUEST_SUCCESSFUL } from '../../../helpers/SystemMessages';
+import { HELP_CENTER_TOPIC_UPDATED } from '../../../helpers/SystemMessages';
 
 describe('HelpCenterService', () => {
   let service: HelpCenterService;
@@ -106,7 +106,7 @@ describe('HelpCenterService', () => {
       };
       const responseBody = {
         status_code: 200,
-        message: REQUEST_SUCCESSFUL,
+        message: HELP_CENTER_TOPIC_UPDATED,
         data: { ...updateHelpCenterDto, id },
       };
       const updatedHelpCenter = { id, ...updateHelpCenterDto };
