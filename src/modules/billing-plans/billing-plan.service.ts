@@ -27,7 +27,7 @@ export class BillingPlanService {
 
     const newPlan = this.billingPlanRepository.create(createBillingPlanDto);
     const createdPlan = await this.billingPlanRepository.save(newPlan);
-    const plan = BillingPlanMapper.mapToEntity(createdPlan)
+    const plan = BillingPlanMapper.mapToResponseFormat(createdPlan)
 
     return {
       message: SYS_MSG.BILLING_PLAN_CREATED,
@@ -43,7 +43,7 @@ export class BillingPlanService {
         throw new NotFoundException('No billing plans found');
       }
 
-      const plans = allPlans.map(plan => BillingPlanMapper.mapToEntity(plan));
+      const plans = allPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan));
 
       return {
         message: 'Billing plans retrieved successfully',
@@ -76,7 +76,7 @@ export class BillingPlanService {
         throw new NotFoundException('Billing plan not found');
       }
 
-      const plan = BillingPlanMapper.mapToEntity(billingPlan);
+      const plan = BillingPlanMapper.mapToResponseFormat(billingPlan);
 
       return {
         message: 'Billing plan retrieved successfully',
