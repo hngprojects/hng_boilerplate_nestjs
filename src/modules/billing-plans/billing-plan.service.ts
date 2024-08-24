@@ -67,7 +67,6 @@ export class BillingPlanService {
 
   async updateBillingPlan(id: string, updateBillingPlanDto: UpdateBillingPlanDto): Promise<BillingPlan> {
     const billing_plan = await this.billingPlanRepository.findOneBy({ id });
-    console.log(billing_plan);
     if (!billing_plan) {
       throw new CustomHttpException(SYS_MSG.BILLING_PLAN_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
