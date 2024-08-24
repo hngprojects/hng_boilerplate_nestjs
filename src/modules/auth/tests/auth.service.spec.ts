@@ -33,13 +33,18 @@ describe('AuthenticationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
-        ProfileService,
         {
           provide: UserService,
           useValue: {
             getUserRecord: jest.fn(),
             updateUserRecord: jest.fn(),
             createUser: jest.fn(),
+          },
+        },
+        {
+          provide: ProfileService,
+          useValue: {
+            updateProfile: jest.fn(),
           },
         },
         {
