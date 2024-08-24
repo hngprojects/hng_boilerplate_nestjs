@@ -20,6 +20,7 @@ export class ContactUsService {
     try {
       await this.sendEmail(createContactDto);
     } catch (error) {
+      console.error(error);
       throw new InternalServerErrorException('Failed to send email');
     }
 
@@ -31,7 +32,7 @@ export class ContactUsService {
 
   private async sendEmail(contactDto: CreateContactDto) {
     await this.mailerService.sendMail({
-      to: 'amal_salam@yahoo.com',
+      to: [contactDto.email, 'amal_salam@yahoo.com'],
       subject: 'New Contact Inquiry',
       template: 'contact-inquiry',
       context: {

@@ -10,6 +10,7 @@ import { skipAuth } from '../..//helpers/skipAuth';
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 
+  @skipAuth()
   @ApiOperation({ summary: 'Post a Contact us Message' })
   @ApiBearerAuth()
   @Post()

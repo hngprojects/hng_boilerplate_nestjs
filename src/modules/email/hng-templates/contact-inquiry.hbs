@@ -1,0 +1,37 @@
+<html lang='en'>
+
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>New Contact Inquiry</title>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; } .container { max-width: 600px; margin: 0
+      auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; } h1 { color: #0056b3; } .field { margin-bottom:
+      10px; } .label { font-weight: bold; }
+    </style>
+  </head>
+
+  <body>
+    <div class='container'>
+      <h1>New Contact Inquiry</h1>
+      <p>A new inquiry has been submitted through the contact form:</p>
+
+      <div class='field'>
+        <span class='label'>Name:</span>
+        {{name}}
+      </div>
+      <div class='field'>
+        <span class='label'>Email:</span>
+        {{email}}
+      </div>
+      <div class='field'>
+        <span class='label'>Message:</span>
+        <p>{{message}}</p>
+      </div>
+      <div class='field'>
+        <span class='label'>Submitted on:</span>
+        {{date}}
+      </div>
+    </div>
+  </body>
+</html>
