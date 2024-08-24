@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumberString } from "class-validator";
+import { IsString, IsOptional, IsNumberString, IsBoolean } from 'class-validator';
 
 export class BillingPlanDto {
-  @ApiProperty({ example: "Free" })
+  @ApiProperty({ example: 'Free' })
   @IsString()
   name: string;
 
@@ -20,5 +20,6 @@ export class BillingPlanDto {
   amount: number;
 
   @ApiProperty({ example: 'true' })
+  @IsBoolean()
   is_active: boolean;
 }
