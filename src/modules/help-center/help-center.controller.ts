@@ -5,6 +5,8 @@ import {
   Param,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   NotFoundException,
   Post,
   Query,
@@ -95,6 +97,4 @@ export class HelpCenterController {
   async remove(@Param('id') id: string) {
     return this.helpCenterService.removeTopic(id);
     }
-
-  
 }
