@@ -109,3 +109,4 @@ export const BILLING_PLAN_CREATED = 'Billing plan successfully created';
 export const TOPIC_NOT_FOUND = `Help center topic with ID not found`;
 export const TOPIC_UPDATE_SUCCESS = 'Topic updated successfully';
 export const TOPIC_DELETED = 'Topic deleted successfully';
+export const BILLING_PLAN_NOT_FOUND = 'Billing plan not found';
