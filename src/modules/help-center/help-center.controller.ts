@@ -35,25 +35,27 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Post('topics')
-  @UseGuards(SuperAdminGuard)
+  // @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Create a new help center topic' })
   @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 400, description: 'This question already exists.' })
   async create(
     @Body() createHelpCenterDto: CreateHelpCenterDto,
-    @Req() req: { user: User }
+    @Req() req: { user: User; language: string }
   ): Promise<HelpCenterSingleInstancResponseType> {
     const user: User = req.user;
-    return this.helpCenterService.create(createHelpCenterDto, user);
+    const language = req.language;
+    return this.helpCenterService.create(createHelpCenterDto, user, language);
   }
 
   @skipAuth()
   @Get('topics')
   @ApiOperation({ summary: 'Get all help center topics' })
   @ApiResponse({ status: 200, description: 'The found records' })
-  async findAll(): Promise<HelpCenter[]> {
-    return this.helpCenterService.findAll();
+  async findAll(@Req() req: any): Promise<HelpCenter[]> {
+    const language = req.language;
+    return this.helpCenterService.findAll(language);
   }
 
   @skipAuth()
