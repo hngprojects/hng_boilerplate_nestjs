@@ -2,10 +2,6 @@ import { Injectable, HttpStatus, HttpException, BadRequestException, NotFoundExc
 import { Repository } from 'typeorm';
 import { BillingPlan } from './entities/billing-plan.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BillingPlanDto } from './dto/billing-plan.dto';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { BillingPlanMapper } from './mapper/billing-plan.mapper';
 
 @Injectable()
 export class BillingPlanService {
@@ -14,25 +10,37 @@ export class BillingPlanService {
     private readonly billingPlanRepository: Repository<BillingPlan>
   ) {}
 
-  async createBillingPlan(createBillingPlanDto: BillingPlanDto) {
-    const billingPlan = await this.billingPlanRepository.findOne({
-      where: {
-        name: createBillingPlanDto.name,
-      },
-    });
+  async createBillingPlan() {
+    try {
+      const billingPlans = await this.billingPlanRepository.find();
 
-    if (billingPlan) {
-      throw new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
+      if (billingPlans.length > 0) {
+        const plans = billingPlans.map(plan => ({ id: plan.id, name: plan.name, price: plan.price }));
+
+        return {
+          status_code: HttpStatus.OK,
+          message: 'Billing plans already exist in the database',
+          data: plans,
+        };
+      }
+
+      const newPlans = this.createBillingPlanEntities();
+      const createdPlans = await this.billingPlanRepository.save(newPlans);
+      const plans = createdPlans.map(plan => ({ id: plan.id, name: plan.name, price: plan.price }));
+
+      return {
+        message: 'Billing plans created successfully',
+        data: plans,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          message: `Internal server error: ${error.message}`,
+          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
-
-    const newPlan = this.billingPlanRepository.create(createBillingPlanDto);
-    const createdPlan = await this.billingPlanRepository.save(newPlan);
-    const plan = BillingPlanMapper.mapToResponseFormat(createdPlan);
-
-    return {
-      message: SYS_MSG.BILLING_PLAN_CREATED,
-      data: plan,
-    };
   }
 
   async getAllBillingPlans() {
@@ -43,7 +51,7 @@ export class BillingPlanService {
         throw new NotFoundException('No billing plans found');
       }
 
-      const plans = allPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan));
+      const plans = allPlans.map(plan => ({ id: plan.id, name: plan.name, price: plan.price }));
 
       return {
         message: 'Billing plans retrieved successfully',
@@ -76,7 +84,7 @@ export class BillingPlanService {
         throw new NotFoundException('Billing plan not found');
       }
 
-      const plan = BillingPlanMapper.mapToResponseFormat(billingPlan);
+      const plan = { id: billingPlan.id, name: billingPlan.name, price: billingPlan.price };
 
       return {
         message: 'Billing plan retrieved successfully',
@@ -95,5 +103,26 @@ export class BillingPlanService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private createBillingPlanEntities() {
+    const freePlan = this.billingPlanRepository.create({
+      name: 'Free',
+      price: 0,
+    });
+    const basicPlan = this.billingPlanRepository.create({
+      name: 'Basic',
+      price: 20,
+    });
+    const advancedPlan = this.billingPlanRepository.create({
+      name: 'Advanced',
+      price: 50,
+    });
+    const premiumPlan = this.billingPlanRepository.create({
+      name: 'Premium',
+      price: 100,
+    });
+
+    return [freePlan, basicPlan, advancedPlan, premiumPlan];
   }
 }

@@ -1,24 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumberString } from "class-validator";
+import { randomUUID } from 'crypto';
 
 export class BillingPlanDto {
-  @ApiProperty({ example: "Free" })
-  @IsString()
-  name: string;
+  @ApiProperty({ example: randomUUID() })
+  id: string;
 
   @ApiProperty({ example: 'Free' })
-  @IsString()
-  @IsOptional()
-  description: string;
-
-  @ApiProperty({ example: 'monthly' })
-  @IsString()
-  frequency: string;
+  name: string;
 
   @ApiProperty({ example: 0 })
-  @IsNumberString()
-  amount: number;
-
-  @ApiProperty({ example: 'true' })
-  is_active: boolean;
+  price: number;
 }

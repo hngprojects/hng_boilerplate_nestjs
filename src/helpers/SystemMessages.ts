@@ -104,5 +104,3 @@ export const INVALID_FILE_TYPE = resource => {
   return `Invalid file type. Allowed types: ${resource}`;
 };
 export const INQUIRY_SENT = 'Inquiry sent successfully';
-export const BILLING_PLAN_ALREADY_EXISTS = "Billing plan already exists";
-export const BILLING_PLAN_CREATED = "Billing plan successfully created";
