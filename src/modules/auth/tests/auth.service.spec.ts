@@ -16,6 +16,7 @@ import { LoginDto } from '../dto/login.dto';
 import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
+import { ProfileService } from '../../profile/profile.service';
 
 jest.mock('speakeasy');
 
@@ -31,7 +32,7 @@ describe('AuthenticationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
-
+        ProfileService,
         {
           provide: UserService,
           useValue: {

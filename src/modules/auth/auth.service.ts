@@ -297,7 +297,7 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
     if (request.status === 500) {
-      throw new CustomHttpException(SYS_MSG.SERVER_ERROR, HttpStatus.UNAUTHORIZED);
+      throw new CustomHttpException(SYS_MSG.SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     const verifyTokenResponse: TokenPayload = await request.json();
 
