@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { BillingPlanDto } from '../dto/billing-plan.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { BillingPlan } from '../entities/billing-plan.entity';
 
 export function createBillingPlanDocs() {
   return applyDecorators(
@@ -26,5 +27,21 @@ export function getSingleBillingPlan() {
     ApiResponse({ status: 200, description: 'Billing plan retrieved successfully', type: BillingPlanDto }),
     ApiResponse({ status: 400, description: 'Invalid billing plan ID' }),
     ApiResponse({ status: 404, description: 'Billing plan not found' })
+  );
+}
+
+export function updateBillingPlan() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Update a billing plan by ID' }),
+    ApiResponse({ status: 200, description: 'Billing plan updated successfully.', type: BillingPlan }),
+    ApiResponse({ status: 404, description: 'Billing plan not found.' })
+  );
+}
+
+export function deleteBillingPlan() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Delete a billing plan by ID' }),
+    ApiResponse({ status: 204, description: 'Billing plan deleted successfully.' }),
+    ApiResponse({ status: 404, description: 'Billing plan not found.' })
   );
 }
