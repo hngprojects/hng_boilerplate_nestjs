@@ -142,7 +142,7 @@ export class HelpCenterService {
     await this.helpCenterRepository.delete(id);
     return {
       status_code: HttpStatus.OK,
-      message: HELP_CENTER_TOPIC_DELETED,
+      message: SYS_MSG.HELP_CENTER_TOPIC_DELETED,
     };
   }
 }
