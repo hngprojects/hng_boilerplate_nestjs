@@ -24,15 +24,16 @@ export class ApiStatusService {
 
       if (!apiHealth) {
         const apiRequestList = [];
-        const apiHealth = await this.apiHealthRepository.save(eachApiStatus);
+        const savedApiHealth = await this.apiHealthRepository.save(eachApiStatus);
         await Promise.all(
-          eachApiStatus.requests.map(request => {
-            this.requestRepository.save({
+          eachApiStatus.requests.map(async request => {
+            const savedRequest = await this.requestRepository.save({
               ...request,
-              api_health: apiHealth,
+              api_health: savedApiHealth,
               updated_at: new Date(),
             });
-            apiRequestList.push(request);
+            apiRequestList.push(savedRequest);
+            return savedRequest;
           })
         );
 
@@ -50,9 +51,10 @@ export class ApiStatusService {
         await this.requestRepository.clear();
 
         await Promise.all(
-          eachApiStatus.requests.map(request => {
-            this.requestRepository.save(request);
-            apiRequestList.push(request);
+          eachApiStatus.requests.map(async request => {
+            const savedRequest = await this.requestRepository.save(request);
+            apiRequestList.push(savedRequest);
+            return savedRequest;
           })
         );
 
