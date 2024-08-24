@@ -21,7 +21,7 @@ export class ContactUsService {
     await this.sendEmail(createContactDto);
     return {
       message: SYS_MSG.INQUIRY_SENT,
-      status_code: HttpStatus.OK,
+      status_code: HttpStatus.CREATED,
     };
   }
 
