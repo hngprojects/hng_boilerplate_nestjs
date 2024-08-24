@@ -8,10 +8,11 @@ import { Role } from '../role/entities/role.entity';
 import { Profile } from '../profile/entities/profile.entity';
 import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
 import { Organisation } from '../organisations/entities/organisations.entity';
+import { TextService } from '../translation/translation.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([HelpCenterEntity, User, Organisation, OrganisationUserRole, Profile, Role])],
-  providers: [HelpCenterService],
+  providers: [HelpCenterService, TextService],
   controllers: [HelpCenterController],
   exports: [HelpCenterService],
 })

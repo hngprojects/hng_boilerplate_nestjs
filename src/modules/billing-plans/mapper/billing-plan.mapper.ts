@@ -1,4 +1,4 @@
-import { BillingPlan } from "../entities/billing-plan.entity";
+import { BillingPlan } from '../entities/billing-plan.entity';
 
 export class BillingPlanMapper {
   static mapToResponseFormat(billingPlan: BillingPlan) {
@@ -11,7 +11,7 @@ export class BillingPlanMapper {
       name: billingPlan.name,
       amount: billingPlan.amount,
       frequency: billingPlan.frequency,
-      is_active: billingPlan.is_active
+      is_active: billingPlan.is_active,
     };
   }
 }
