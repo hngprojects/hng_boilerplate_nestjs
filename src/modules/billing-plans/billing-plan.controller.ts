@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Post, Body, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BillingPlanService } from './billing-plan.service';
 import { skipAuth } from '../../helpers/skipAuth';
@@ -14,10 +14,11 @@ export class BillingPlanController {
   @UseGuards(SuperAdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create billing plans' })
-  @ApiResponse({ status: 201, description: 'Billing plans created successfully.', type: [BillingPlanDto] })
-  @ApiResponse({ status: 200, description: 'Billing plans already exist in the database.', type: [BillingPlanDto] })
-  async createBillingPlan() {
-    return this.billingPlanService.createBillingPlan();
+  @ApiBody({ type: BillingPlanDto })
+  @ApiResponse({ status: 201, description: 'Billing plan created successfully.', type: BillingPlanDto })
+  @ApiResponse({ status: 200, description: 'Billing plan already exists in the database.', type: [BillingPlanDto] })
+  async createBillingPlan(@Body() createBillingPlanDto: BillingPlanDto) {
+    return this.billingPlanService.createBillingPlan(createBillingPlanDto);
   }
 
   @skipAuth()
