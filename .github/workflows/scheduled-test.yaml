@@ -12,7 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Run a script
+      - name: Run a test script
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          API_URL: ${{ secrets.API_URL }}
         run: |
           cd qa
           chmod +x test.sh
