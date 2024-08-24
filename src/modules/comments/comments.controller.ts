@@ -22,8 +22,7 @@ export class CommentsController {
   @ApiOperation({ summary: 'Get a comment' })
   @ApiResponse({ status: 200, description: 'The comment has been retrieved successfully.' })
   @Get(':id')
-  async getAComment(@Param('id') id: string, @Request() req): Promise<any> {
-    const { userId } = req.user;
-    return await this.commentsService.getAComment(id, userId);
+  async getAComment(@Param('id') id: string): Promise<any> {
+    return await this.commentsService.getAComment(id);
   }
 }
