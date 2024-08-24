@@ -1,0 +1,16 @@
+name: Scheduled Test
+
+on:
+  schedule:
+    - cron: '* * * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Run a script
+      run: echo "hello"
