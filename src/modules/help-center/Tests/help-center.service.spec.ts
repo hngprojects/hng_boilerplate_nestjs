@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { HelpCenterEntity } from '../entities/help-center.entity';
-import { HELP_CENTER_TOPIC_UPDATED } from '../../../helpers/SystemMessages';
+import { HELP_CENTER_TOPIC_UPDATED,REQUEST_SUCCESSFUL } from '../../../helpers/SystemMessages';
 import { User } from '../../user/entities/user.entity';
 import { TextService } from '../../translation/translation.service';
 import * as SYS_MSG from '../../../helpers/SystemMessages';
