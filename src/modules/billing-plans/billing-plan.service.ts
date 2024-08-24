@@ -36,64 +36,31 @@ export class BillingPlanService {
   }
 
   async getAllBillingPlans() {
-    try {
-      const allPlans = await this.billingPlanRepository.find();
-
-      if (allPlans.length === 0) {
-        throw new NotFoundException('No billing plans found');
-      }
-
-      const plans = allPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan));
-
-      return {
-        message: 'Billing plans retrieved successfully',
-        data: plans,
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
-
-      throw new HttpException(
-        {
-          message: `Internal server error: ${error.message}`,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+    const allPlans = await this.billingPlanRepository.find();
+    if (allPlans.length === 0) {
+      throw new NotFoundException('No billing plans found');
     }
+    const plans = allPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan));
+
+    return {
+      message: 'Billing plans retrieved successfully',
+      data: plans,
+    };
   }
 
   async getSingleBillingPlan(id: string) {
-    try {
-      if (!id) {
-        throw new BadRequestException('Invalid billing plan ID');
-      }
-
-      const billingPlan = await this.billingPlanRepository.findOneBy({ id });
-
-      if (!billingPlan) {
-        throw new NotFoundException('Billing plan not found');
-      }
-
-      const plan = BillingPlanMapper.mapToResponseFormat(billingPlan);
-
-      return {
-        message: 'Billing plan retrieved successfully',
-        data: plan,
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
-        throw error;
-      }
-
-      throw new HttpException(
-        {
-          message: `Internal server error: ${error.message}`,
-          status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+    if (!id) {
+      throw new BadRequestException('Invalid billing plan ID');
     }
+    const billingPlan = await this.billingPlanRepository.findOneBy({ id });
+
+    if (!billingPlan) {
+      throw new NotFoundException('Billing plan not found');
+    }
+    const plan = BillingPlanMapper.mapToResponseFormat(billingPlan);
+    return {
+      message: 'Billing plan retrieved successfully',
+      data: plan,
+    };
   }
 }
