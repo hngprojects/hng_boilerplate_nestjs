@@ -23,6 +23,7 @@ jest.mock('speakeasy');
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userServiceMock: jest.Mocked<UserService>;
+  let profileServiceMock: jest.Mocked<ProfileService>;
   let jwtServiceMock: jest.Mocked<JwtService>;
   let otpServiceMock: jest.Mocked<OtpService>;
   let emailServiceMock: jest.Mocked<EmailService>;
@@ -73,6 +74,7 @@ describe('AuthenticationService', () => {
 
     service = module.get<AuthenticationService>(AuthenticationService);
     userServiceMock = module.get(UserService) as jest.Mocked<UserService>;
+    profileServiceMock = module.get(ProfileService) as jest.Mocked<ProfileService>;
     jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;
     otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
