@@ -46,8 +46,15 @@ import { RunTestsModule } from './run-tests/run-tests.module';
 import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { LanguageGuard } from './guards/language.guard';
+import { ApiStatusModule } from './modules/api-status/api-status.module';
+
 @Module({
   providers: [
+    {
+      provide: 'APP_GUARD',
+      useClass: LanguageGuard,
+    },
     {
       provide: 'CONFIG',
       useClass: ConfigService,
@@ -166,6 +173,7 @@ import { join } from 'path';
         index: false,
       },
     }),
+    ApiStatusModule,
   ],
   controllers: [HealthController, ProbeController],
 })

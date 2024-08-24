@@ -97,7 +97,7 @@ export default class AuthenticationService {
     }
 
     const token = (await this.otpService.createOtp(user.id)).token;
-    await this.emailService.sendForgotPasswordMail(user.email, `${process.env.BASE_URL}/auth/reset-password`, token);
+    await this.emailService.sendForgotPasswordMail(user.email, `${process.env.FRONTEND_URL}/reset-password`, token);
 
     return {
       message: SYS_MSG.EMAIL_SENT,
@@ -285,14 +285,9 @@ export default class AuthenticationService {
 
   async googleAuth({ googleAuthPayload, isMobile }: { googleAuthPayload: GoogleAuthPayload; isMobile: string }) {
     const idToken = googleAuthPayload.id_token;
-    let verifyTokenResponse: GoogleVerificationPayloadInterface;
 
-    if (isMobile === 'true') {
-      const request = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`);
-      verifyTokenResponse = await request.json();
-    } else {
-      verifyTokenResponse = await this.googleAuthService.verifyToken(idToken);
-    }
+    const request = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`);
+    const verifyTokenResponse: GoogleVerificationPayloadInterface = await request.json();
 
     const userEmail = verifyTokenResponse.email;
     const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });

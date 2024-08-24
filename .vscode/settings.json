@@ -10,9 +10,14 @@
     "statusBar.background": "#1a1f15",
     "statusBarItem.hoverBackground": "#333d2a",
     "statusBar.foreground": "#e7e7e7",
-    "panel.border": "#333d2a",
-    "sideBar.border": "#333d2a",
-    "editorGroup.border": "#333d2a"
+    "commandCenter.border": "#e7e7e799",
+    "sash.hoverBorder": "#333d2a",
+    "statusBarItem.remoteBackground": "#1a1f15",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "titleBar.activeBackground": "#1a1f15",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#1a1f1599",
+    "titleBar.inactiveForeground": "#e7e7e799"
   },
   "peacock.color": "#1a1f15",
   "eslint.validate": [
@@ -28,6 +33,6 @@
     "source.fixAll": "explicit"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   }
 }

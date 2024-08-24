@@ -16,36 +16,46 @@ import { TestimonialMapper } from './mappers/testimonial.mapper';
 import { TestimonialResponseMapper } from './mappers/testimonial-response.mapper';
 import { TestimonialResponse } from './interfaces/testimonial-response.interface';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
+import { TextService } from '../translation/translation.service';
 
 @Injectable()
 export class TestimonialsService {
   constructor(
     @InjectRepository(Testimonial)
     private readonly testimonialRepository: Repository<Testimonial>,
-    private userService: UserService
+    private userService: UserService,
+    private readonly textService: TextService
   ) {}
-  async createTestimonial(createTestimonialDto: CreateTestimonialDto, user) {
+
+  private async translateContent(content: string, lang: string) {
+    return this.textService.translateText(content, lang);
+  }
+
+  async createTestimonial(createTestimonialDto: CreateTestimonialDto, user, language?: string) {
     try {
       const { content, name } = createTestimonialDto;
 
       if (!user) {
         throw new NotFoundException({
           status: 'error',
-          error: 'Not Found',
+          error: 'User not found',
           status_code: HttpStatus.NOT_FOUND,
         });
       }
 
+      const translatedContent = await this.translateContent(content, language);
+
       const newTestimonial = await this.testimonialRepository.save({
         user,
         name,
-        content,
+        content: translatedContent,
       });
 
       return {
         id: newTestimonial.id,
         user_id: user.id,
-        ...createTestimonialDto,
+        name: name,
+        content: translatedContent,
         created_at: new Date(),
       };
     } catch (error) {
@@ -59,7 +69,7 @@ export class TestimonialsService {
     }
   }
 
-  async getAllTestimonials(userId: string, page: number, pageSize: number) {
+  async getAllTestimonials(userId: string, page: number, pageSize: number, lang?: string) {
     const user = await this.userService.getUserRecord({
       identifier: userId,
       identifierType: 'id',
@@ -80,7 +90,12 @@ export class TestimonialsService {
 
     testimonials = testimonials.slice((page - 1) * pageSize, page * pageSize);
 
-    const data = testimonials.map(testimonial => TestimonialMapper.mapToEntity(testimonial));
+    const data = await Promise.all(
+      testimonials.map(async testimonial => {
+        testimonial.content = await this.translateContent(testimonial.content, lang);
+        return TestimonialMapper.mapToEntity(testimonial);
+      })
+    );
 
     return {
       message: SYS_MSG.USER_TESTIMONIALS_FETCHED,
@@ -95,7 +110,8 @@ export class TestimonialsService {
       },
     };
   }
-  async getTestimonialById(testimonialId: string): Promise<TestimonialResponse> {
+
+  async getTestimonialById(testimonialId: string, lang: string): Promise<TestimonialResponse> {
     const testimonial = await this.testimonialRepository.findOne({
       where: { id: testimonialId },
       relations: ['user'],
@@ -105,19 +121,26 @@ export class TestimonialsService {
       throw new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND);
     }
 
+    testimonial.content = await this.translateContent(testimonial.content, lang);
+
     return TestimonialResponseMapper.mapToEntity(testimonial);
   }
 
-  async updateTestimonial(id: string, updateTestimonialDto: UpdateTestimonialDto, userId: string) {
+  async updateTestimonial(id: string, updateTestimonialDto: UpdateTestimonialDto, userId: string, lang?: string) {
     const testimonial = await this.testimonialRepository.findOne({ where: { id, user: { id: userId } } });
-  
+
     if (!testimonial) {
       throw new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND);
     }
-  
+
     Object.assign(testimonial, updateTestimonialDto);
+
+    if (updateTestimonialDto.content) {
+      testimonial.content = await this.translateContent(updateTestimonialDto.content, lang);
+    }
+
     await this.testimonialRepository.save(testimonial);
-  
+
     return {
       id: testimonial.id,
       user_id: userId,
@@ -125,7 +148,7 @@ export class TestimonialsService {
       name: testimonial.name,
       updated_at: new Date(),
     };
-  } 
+  }
 
   async deleteTestimonial(id: string) {
     const testimonial = await this.testimonialRepository.findOne({ where: { id } });
