@@ -57,7 +57,7 @@ describe('ContactUsService', () => {
       expect(mockRepository.create).toHaveBeenCalledWith(createContactDto);
       expect(mockRepository.save).toHaveBeenCalledWith(createContactDto);
       expect(mockMailerService.sendMail).toHaveBeenCalled();
-      expect(result).toEqual({ message: SYS_MSG.INQUIRY_SENT, status_code: HttpStatus.OK });
+      expect(result).toEqual({ message: SYS_MSG.INQUIRY_SENT, status_code: HttpStatus.CREATED });
     });
   });
 });

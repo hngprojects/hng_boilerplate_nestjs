@@ -74,7 +74,7 @@
     "pg": "^8.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "sharp": "^0.33.4",
+    "sharp": "^0.33.5",
     "speakeasy": "^2.0.0",
     "supertest": "^7.0.0",
     "typeorm": "^0.3.20",
