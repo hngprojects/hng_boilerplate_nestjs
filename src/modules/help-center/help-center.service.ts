@@ -90,6 +90,14 @@ export class HelpCenterService {
     };
   }
 
+  async findHelpCenter(id: string) {
+    const helpCenter = await this.findOne(id);
+    if (!helpCenter) {
+      throw new NotFoundException(`Help center topic with ID ${id} not found`);
+    }
+    return helpCenter;
+  }
+
   async search(criteria: SearchHelpCenterDto) {
     const queryBuilder = this.helpCenterRepository.createQueryBuilder('help_center');
     if (criteria.title) {
