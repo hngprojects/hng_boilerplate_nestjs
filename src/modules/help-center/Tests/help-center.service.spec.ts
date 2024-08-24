@@ -138,7 +138,7 @@ describe('HelpCenterService', () => {
       const responseBody = {
         data: mockHelpCenter,
         status_code: 200,
-        message: HELP_CENTER_TOPIC_UPDATED,
+        message: REQUEST_SUCCESSFUL,
       };
       expect(result).toEqual(responseBody);
       expect(helpCenterRepository.findOne).toHaveBeenCalledWith({ where: { id: '1234' } });
