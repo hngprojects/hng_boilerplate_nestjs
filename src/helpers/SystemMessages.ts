@@ -104,4 +104,3 @@ export const INVALID_FILE_TYPE = resource => {
   return `Invalid file type. Allowed types: ${resource}`;
 };
 export const INQUIRY_SENT = 'Inquiry sent successfully';
-export const INQUIRY_NOT_SENT = 'Failed to send contact inquiry email';
