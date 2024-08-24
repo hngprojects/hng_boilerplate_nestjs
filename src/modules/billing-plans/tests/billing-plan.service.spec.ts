@@ -3,7 +3,7 @@ import { BillingPlanService } from '../billing-plan.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BillingPlan } from '../entities/billing-plan.entity';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, HttpStatus } from '@nestjs/common';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import * as SYS_MSG from "../../../helpers/SystemMessages";
 
@@ -28,10 +28,26 @@ describe('BillingPlanService', () => {
 
   describe('createBillingPlan', () => {
     it('should throw an error if they already exist', async () => {
-      const createPlanDto = { name: 'Free', amount: 0, frequency: 'never', is_active: true }
-      const billingPlans = { id: '1', name: 'Free', price: 0 };
+      const createPlanDto = { 
+        name: 'Free', 
+        description: 'free plan', 
+        amount: 0, 
+        frequency: 'never', 
+        is_active: true 
+      };
+      
+      const billingPlan = { 
+        id: '1', 
+        name: 'Free', 
+        description: 'free plan', 
+        amount: 0, 
+        frequency: 'never', 
+        is_active: true, 
+        created_at: new Date(), 
+        updated_at: new Date() 
+      };
 
-      jest.spyOn(repository, 'find').mockResolvedValue(billingPlans as BillingPlan[]);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(billingPlan as BillingPlan);
 
       const result = await service.createBillingPlan(createPlanDto);
 
