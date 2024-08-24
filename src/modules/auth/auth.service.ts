@@ -288,16 +288,16 @@ export default class AuthenticationService {
     const idToken = googleAuthPayload.id_token;
 
     if (!idToken) {
-      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
 
     const request = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`);
 
     if (request.status === 400) {
-      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
     if (request.status === 500) {
-      throw new CustomHttpException(SYS_MSG.SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new CustomHttpException(SYS_MSG.SERVER_ERROR, HttpStatus.UNAUTHORIZED);
     }
     const verifyTokenResponse: TokenPayload = await request.json();
 
