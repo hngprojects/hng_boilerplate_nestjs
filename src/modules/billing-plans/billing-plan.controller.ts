@@ -1,5 +1,7 @@
-import { Controller, Get, Param, Post, Body } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
+
+import { Controller, Get, Param, Post,Body, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BillingPlanService } from './billing-plan.service';
 import { skipAuth } from '../../helpers/skipAuth';
 import { BillingPlanDto } from './dto/billing-plan.dto';
@@ -10,6 +12,8 @@ export class BillingPlanController {
   constructor(private readonly billingPlanService: BillingPlanService) {}
 
   @Post('/')
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create billing plans' })
   @ApiBody({ type: BillingPlanDto })
   @ApiResponse({ status: 201, description: 'Billing plan created successfully.', type: BillingPlanDto })

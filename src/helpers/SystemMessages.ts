@@ -98,12 +98,11 @@ export const DIRECTORY_CREATED = 'Uploads directory created at:';
 export const PICTURE_UPDATED = 'Profile picture updated successfully';
 export const FILE_SAVE_ERROR = 'Error saving file to disk';
 export const FILE_EXCEEDS_SIZE = resource => {
-  return `File size exceeds ${resource} MB limit`
-  
+  return `File size exceeds ${resource} MB limit`;
 };
 export const INVALID_FILE_TYPE = resource => {
   return `Invalid file type. Allowed types: ${resource}`;
-  
 };
+export const INQUIRY_SENT = 'Inquiry sent successfully';
 export const BILLING_PLAN_ALREADY_EXISTS = "Billing plan already exists";
 export const BILLING_PLAN_CREATED = "Billing plan successfully created";
