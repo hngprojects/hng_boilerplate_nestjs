@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
   Req,
+  HttpCode,
 } from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
@@ -68,10 +69,7 @@ export class HelpCenterController {
   @Get('topics/:id')
   @GetByIdHelpCenterDocs()
   async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
-    const helpCenter = await this.helpCenterService.findOne(params.id);
-    if (!helpCenter) {
-      throw new CustomHttpException(SYS_MSG.TOPIC_NOT_FOUND, HttpStatus.NOT_FOUND);
-    }
+    const helpCenter = await this.helpCenterService.findHelpCenter(params.id);
     return helpCenter;
   }
 
@@ -86,86 +84,14 @@ export class HelpCenterController {
   @Patch('topics/:id')
   @UpdateHelpCenterDocs()
   async update(@Param('id') id: string, @Body() updateHelpCenterDto: UpdateHelpCenterDto) {
-    try {
-      const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
-      return {
-        success: true,
-        message: SYS_MSG.TOPIC_UPDATE_SUCCESS,
-        data: updatedHelpCenter,
-        status_code: HttpStatus.OK,
-      };
-    } catch (error) {
-      if (error.status === HttpStatus.UNAUTHORIZED) {
-        throw new HttpException(
-          {
-            success: false,
-            message: SYS_MSG.UNAUTHENTICATED_MESSAGE,
-            status_code: HttpStatus.UNAUTHORIZED,
-          },
-          HttpStatus.UNAUTHORIZED
-        );
-      } else if (error.status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(
-          {
-            success: false,
-            message: SYS_MSG.FORBIDDEN_ACTION,
-            status_code: HttpStatus.FORBIDDEN,
-          },
-          HttpStatus.FORBIDDEN
-        );
-      } else if (error.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException(
-          {
-            success: false,
-            message: SYS_MSG.TOPIC_NOT_FOUND,
-            status_code: HttpStatus.NOT_FOUND,
-          },
-          HttpStatus.NOT_FOUND
-        );
-      }
-    }
+    const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
+    return updatedHelpCenter;
   }
 
   @ApiBearerAuth()
   @Delete('topics/:id')
   @DeleteHelpCenterDocs()
   async remove(@Param('id') id: string) {
-    try {
-      await this.helpCenterService.removeTopic(id);
-      return {
-        success: true,
-        message: SYS_MSG.TOPIC_DELETED,
-        status_code: HttpStatus.OK,
-      };
-    } catch (error) {
-      if (error.status === HttpStatus.UNAUTHORIZED) {
-        throw new HttpException(
-          {
-            success: false,
-            message: SYS_MSG.UNAUTHENTICATED_MESSAGE,
-            status_code: HttpStatus.UNAUTHORIZED,
-          },
-          HttpStatus.UNAUTHORIZED
-        );
-      } else if (error.status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(
-          {
-            success: false,
-            message: SYS_MSG.FORBIDDEN_ACTION,
-            status_code: HttpStatus.FORBIDDEN,
-          },
-          HttpStatus.FORBIDDEN
-        );
-      } else if (error.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException(
-          {
-            success: false,
-            message: SYS_MSG.TOPIC_NOT_FOUND,
-            status_code: HttpStatus.NOT_FOUND,
-          },
-          HttpStatus.NOT_FOUND
-        );
-      }
-    }
+    return await this.helpCenterService.removeTopic(id);
   }
 }
