@@ -3,8 +3,6 @@ import { Waitlist } from '../entities/waitlist.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
-import { de } from '@faker-js/faker';
-import { request } from 'http';
 import { CreateWaitlistDto } from '../dto/create-waitlist.dto';
 import { WaitlistResponseDto } from '../dto/create-waitlist-response.dto';
 import WaitlistService from '../waitlist.service';
@@ -15,17 +13,18 @@ describe('WaitlistService', () => {
   let mailerService: MailerService;
   let waitlistService: WaitlistService;
 
-  const mockUserRepository = {
+  const mockWaitlistRepository = {
     find: jest.fn(),
     save: jest.fn(),
     create: jest.fn(),
+    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WaitlistService,
-        { provide: getRepositoryToken(Waitlist), useValue: mockUserRepository },
+        { provide: getRepositoryToken(Waitlist), useValue: mockWaitlistRepository },
         {
           provide: MailerService,
           useValue: {
@@ -63,16 +62,19 @@ describe('WaitlistService', () => {
         email: 'johndoe@gmail.com',
       };
 
+      const findOneSpy = jest.spyOn(waitlistRepository, 'findOne').mockResolvedValue(null);
       const saveSpy = jest.spyOn(waitlistRepository, 'save').mockResolvedValue(undefined);
       const sendMailSpy = jest.spyOn(mailerService, 'sendMail').mockResolvedValue(undefined);
 
       const result: WaitlistResponseDto = await waitlistService.createWaitlist(createWaitlistDto);
 
+      expect(findOneSpy).toHaveBeenCalledWith({ where: { email: createWaitlistDto.email } });
       expect(saveSpy).toHaveBeenCalled();
       expect(sendMailSpy).toHaveBeenCalledWith({
         to: createWaitlistDto.email,
         subject: 'Waitlist Confirmation',
-        html: `<p>Hello John Doe,</p><p>Thank you for signing up for our waitlist! We will notify you once you are selected.</p>`,
+        template: 'waitlist-confirmation',
+        context: { recipientName: createWaitlistDto.full_name },
       });
       expect(result).toEqual({ message: 'You are all signed up!' });
     });
