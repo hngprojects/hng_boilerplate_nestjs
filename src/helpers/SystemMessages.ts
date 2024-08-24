@@ -105,3 +105,4 @@ export const INVALID_FILE_TYPE = resource => {
 };
 export const INQUIRY_SENT = 'Inquiry sent successfully';
 export const INQUIRY_NOT_SENT = 'Failed to send contact inquiry email';
+export const TOPIC_NOT_FOUND = `Help center topic with ID not found`;
