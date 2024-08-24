@@ -4,20 +4,8 @@ import { HttpStatus } from '@nestjs/common';
 
 export class GetWaitlistResponseDto {
   @ApiProperty({
-    description: 'HTTP status code indicating success.',
-    example: HttpStatus.OK,
-  })
-  status_code: number;
-
-  @ApiProperty({
-    description: 'HTTP status code indicating success.',
-    example: HttpStatus.OK,
-  })
-  status: number;
-
-  @ApiProperty({
     description: 'Success message indicating the result of the operation.',
-    example: 'Added to waitlist',
+    example: 'Waitlist found successfully',
   })
   message: string;
 

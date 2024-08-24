@@ -117,10 +117,10 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'Google Authentication' })
   @ApiBody({ type: GoogleAuthPayloadDto })
   @ApiResponse({ status: 200, description: 'Verify Payload sent from google', type: AuthResponseDto })
-  @ApiBadRequestResponse({ description: 'Invalid Google token' })
+  @ApiBadRequestResponse({ description: 'Google authentication failed' })
   @HttpCode(200)
-  async googleAuth(@Body() body: GoogleAuthPayload, @Query('mobile') isMobile: string) {
-    return this.authService.googleAuth({ googleAuthPayload: body, isMobile });
+  async googleAuth(@Body() body: GoogleAuthPayload) {
+    return this.authService.googleAuth(body);
   }
 
   @skipAuth()

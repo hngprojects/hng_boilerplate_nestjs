@@ -26,6 +26,15 @@ export class CreateUserDTO {
   last_name: string;
 
   @ApiProperty({
+    description: 'The URL for the user profile picture',
+    example: 'https://example.com/profile-pic.jpg',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  profile_pic_url?: string;
+
+  @ApiProperty({
     description:
       'The password for the user account.\
     It must contain at least one uppercase letter, one lowercase letter,\

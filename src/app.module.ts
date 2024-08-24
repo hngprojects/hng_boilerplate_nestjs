@@ -45,6 +45,8 @@ import { BlogCategoryModule } from './modules/blog-category/blog-category.module
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { LanguageGuard } from './guards/language.guard';
+import { ApiStatusModule } from './modules/api-status/api-status.module';
+
 import AppController from './app.controller';
 @Module({
   providers: [
@@ -170,6 +172,7 @@ import AppController from './app.controller';
         index: false,
       },
     }),
+    ApiStatusModule,
   ],
   controllers: [AppController],
 })

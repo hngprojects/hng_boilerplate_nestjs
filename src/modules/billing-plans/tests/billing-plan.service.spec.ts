@@ -3,8 +3,10 @@ import { BillingPlanService } from '../billing-plan.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BillingPlan } from '../entities/billing-plan.entity';
-import { NotFoundException, HttpException, BadRequestException } from '@nestjs/common';
-import { BillingPlanDto } from '../dto/billing-plan.dto';
+import { NotFoundException, BadRequestException, HttpStatus } from '@nestjs/common';
+import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { BillingPlanMapper } from '../mapper/billing-plan.mapper';
 
 describe('BillingPlanService', () => {
   let service: BillingPlanService;
@@ -26,29 +28,67 @@ describe('BillingPlanService', () => {
   });
 
   describe('createBillingPlan', () => {
-    it('should return existing billing plans if they already exist', async () => {
-      const billingPlans = [
-        { id: '1', name: 'Free', price: 0 },
-        { id: '2', name: 'Basic', price: 20 },
-      ];
+    it('should throw an error if they already exist', async () => {
+      const createPlanDto = {
+        name: 'Free',
+        description: 'free plan',
+        amount: 0,
+        frequency: 'never',
+        is_active: true,
+      };
 
-      jest.spyOn(repository, 'find').mockResolvedValue(billingPlans as BillingPlan[]);
+      const billingPlan = {
+        id: '1',
+        name: 'Free',
+        description: 'free plan',
+        amount: 0,
+        frequency: 'never',
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
 
-      const result = await service.createBillingPlan();
+      jest.spyOn(repository, 'findOne').mockResolvedValue(billingPlan as BillingPlan);
 
-      expect(result).toEqual({
-        status_code: 200,
-        message: 'Billing plans already exist in the database',
-        data: billingPlans,
-      });
+      await expect(service.createBillingPlan(createPlanDto)).rejects.toThrow(
+        new CustomHttpException(SYS_MSG.BILLING_PLAN_ALREADY_EXISTS, HttpStatus.BAD_REQUEST)
+      );
     });
   });
 
   describe('getAllBillingPlans', () => {
     it('should return all billing plans', async () => {
       const billingPlans = [
-        { id: '1', name: 'Free', price: 0 },
-        { id: '2', name: 'Basic', price: 20 },
+        {
+          id: '1',
+          name: 'Free',
+          description: 'free plan',
+          amount: 0,
+          frequency: 'never',
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: '2',
+          name: 'Standard',
+          description: 'standard plan',
+          amount: 50,
+          frequency: 'monthly',
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: '1',
+          name: 'Premium',
+          description: 'premium plan',
+          amount: 120,
+          frequency: 'monthly',
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
       ];
 
       jest.spyOn(repository, 'find').mockResolvedValue(billingPlans as BillingPlan[]);
@@ -57,7 +97,7 @@ describe('BillingPlanService', () => {
 
       expect(result).toEqual({
         message: 'Billing plans retrieved successfully',
-        data: billingPlans.map(plan => ({ id: plan.id, name: plan.name, price: plan.price })),
+        data: billingPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan)),
       });
     });
 
@@ -70,7 +110,16 @@ describe('BillingPlanService', () => {
 
   describe('getSingleBillingPlan', () => {
     it('should return a single billing plan', async () => {
-      const billingPlan = { id: '1', name: 'Free', price: 0 };
+      const billingPlan = {
+        id: '1',
+        name: 'Free',
+        description: 'free plan',
+        amount: 0,
+        frequency: 'never',
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
 
       jest.spyOn(repository, 'findOneBy').mockResolvedValue(billingPlan as BillingPlan);
 
@@ -78,7 +127,7 @@ describe('BillingPlanService', () => {
 
       expect(result).toEqual({
         message: 'Billing plan retrieved successfully',
-        data: { id: billingPlan.id, name: billingPlan.name, price: billingPlan.price },
+        data: BillingPlanMapper.mapToResponseFormat(billingPlan),
       });
     });
 
