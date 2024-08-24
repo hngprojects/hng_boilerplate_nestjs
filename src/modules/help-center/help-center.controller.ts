@@ -82,6 +82,7 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Patch('topics/:id')
+  @UseGuards(SuperAdminGuard)
   @UpdateHelpCenterDocs()
   async update(@Param('id') id: string, @Body() updateHelpCenterDto: UpdateHelpCenterDto) {
     const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
@@ -90,6 +91,7 @@ export class HelpCenterController {
 
   @ApiBearerAuth()
   @Delete('topics/:id')
+  @UseGuards(SuperAdminGuard)
   @DeleteHelpCenterDocs()
   async remove(@Param('id') id: string) {
     return await this.helpCenterService.removeTopic(id);
