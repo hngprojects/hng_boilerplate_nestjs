@@ -21,7 +21,7 @@ export function getAllBillingPlansDocs() {
   );
 }
 
-export function getSingleBillingPlan() {
+export function getSingleBillingPlanDocs() {
   return applyDecorators(
     ApiOperation({ summary: 'Get single billing plan by ID' }),
     ApiResponse({ status: 200, description: 'Billing plan retrieved successfully', type: BillingPlanDto }),
@@ -30,7 +30,7 @@ export function getSingleBillingPlan() {
   );
 }
 
-export function updateBillingPlan() {
+export function updateBillingPlanDocs() {
   return applyDecorators(
     ApiOperation({ summary: 'Update a billing plan by ID' }),
     ApiResponse({ status: 200, description: 'Billing plan updated successfully.', type: BillingPlan }),
@@ -38,7 +38,7 @@ export function updateBillingPlan() {
   );
 }
 
-export function deleteBillingPlan() {
+export function deleteBillingPlanDocs() {
   return applyDecorators(
     ApiOperation({ summary: 'Delete a billing plan by ID' }),
     ApiResponse({ status: 204, description: 'Billing plan deleted successfully.' }),

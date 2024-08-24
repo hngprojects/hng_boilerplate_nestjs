@@ -18,10 +18,10 @@ import { skipAuth } from '../../helpers/skipAuth';
 import { BillingPlanDto } from './dto/billing-plan.dto';
 import {
   createBillingPlanDocs,
-  deleteBillingPlan,
+  deleteBillingPlanDocs,
   getAllBillingPlansDocs,
-  getSingleBillingPlan,
-  updateBillingPlan,
+  getSingleBillingPlanDocs,
+  updateBillingPlanDocs,
 } from './docs/billing-plan-docs';
 import { UpdateBillingPlanDto } from './dto/update-billing-plan.dto';
 
@@ -45,14 +45,14 @@ export class BillingPlanController {
   }
 
   @skipAuth()
-  @getSingleBillingPlan()
+  @getSingleBillingPlanDocs()
   @Get('/:id')
   async getSingleBillingPlan(@Param('id') id: string) {
     return this.billingPlanService.getSingleBillingPlan(id);
   }
 
   @UseGuards(SuperAdminGuard)
-  @updateBillingPlan()
+  @updateBillingPlanDocs()
   @Patch('/:id')
   async updateBillingPlan(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -62,7 +62,7 @@ export class BillingPlanController {
   }
 
   @UseGuards(SuperAdminGuard)
-  @deleteBillingPlan()
+  @deleteBillingPlanDocs()
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBillingPlan(@Param('id', ParseUUIDPipe) id: string) {
