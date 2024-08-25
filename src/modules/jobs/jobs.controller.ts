@@ -87,6 +87,7 @@ export class JobsController {
     return this.jobService.searchJobs(otherSearchParams, page, limit);
   }
 
+  @skipAuth()
   @Get('/')
   @ApiOperation({ summary: 'Gets all jobs' })
   @ApiResponse({ status: 200, description: 'Jobs returned successfully' })
@@ -95,6 +96,7 @@ export class JobsController {
     return this.jobService.getJobs();
   }
 
+  @skipAuth()
   @Get('/:id')
   @ApiOperation({ summary: 'Gets a job by ID' })
   @ApiResponse({ status: 200, description: 'Job returned successfully' })
