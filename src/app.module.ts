@@ -12,7 +12,6 @@ import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import { AuthGuard } from './guards/auth.guard';
-import HealthController from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
 import { BlogModule } from './modules/blogs/blogs.module';
@@ -41,7 +40,6 @@ import { TestimonialsModule } from './modules/testimonials/testimonials.module';
 import { TimezonesModule } from './modules/timezones/timezones.module';
 import { UserModule } from './modules/user/user.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
-import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
 import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -49,6 +47,7 @@ import { join } from 'path';
 import { LanguageGuard } from './guards/language.guard';
 import { ApiStatusModule } from './modules/api-status/api-status.module';
 
+import AppController from './app.controller';
 @Module({
   providers: [
     {
@@ -175,6 +174,6 @@ import { ApiStatusModule } from './modules/api-status/api-status.module';
     }),
     ApiStatusModule,
   ],
-  controllers: [HealthController, ProbeController],
+  controllers: [AppController],
 })
 export class AppModule {}

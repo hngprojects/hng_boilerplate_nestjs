@@ -3,7 +3,7 @@ import { skipAuth } from './helpers/skipAuth';
 import * as os from 'os';
 
 @Controller()
-export default class HealthController {
+export default class AppController {
   @skipAuth()
   @Get('/')
   public home() {
@@ -41,6 +41,12 @@ export default class HealthController {
     }
 
     return { status_code: 200, message: 'This is a healthy endpoint', ip: localIpAddress };
+  }
+
+  @skipAuth()
+  @Get('/probe')
+  public probe() {
+    return { status_code: 200, message: 'I am the NestJs api responding' };
   }
 }
 
