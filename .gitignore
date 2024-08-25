@@ -388,6 +388,7 @@ Temporary Items
 =======
 # Local
 dist
+package-lock.json
 /.env
 /.env.*
 *._local.ts
