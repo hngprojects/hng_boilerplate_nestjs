@@ -33,7 +33,6 @@ import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { JobSearchDto } from './dto/jobSearch.dto';
 
 @ApiTags('Jobs')
-@ApiBearerAuth()
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobService: JobsService) {}
@@ -62,6 +61,7 @@ export class JobsController {
 
   @UseGuards(SuperAdminGuard)
   @Post('/')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new job' })
   @ApiResponse({ status: 201, description: 'Job created successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -70,6 +70,7 @@ export class JobsController {
     return this.jobService.create(createJobDto, user.sub);
   }
 
+  @skipAuth()
   @Get('search')
   @ApiOperation({ summary: 'Search for job listings' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -107,6 +108,7 @@ export class JobsController {
 
   @UseGuards(SuperAdminGuard)
   @Delete('/:id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a job' })
   @ApiResponse({ status: 200, description: 'Job deleted successfully' })
   @ApiResponse({ status: 403, description: 'You do not have permission to perform this action' })
