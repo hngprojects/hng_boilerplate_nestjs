@@ -119,7 +119,6 @@ export class HelpCenterService {
     if (!existingTopic) {
       throw new HttpException(
         {
-          status: 'error',
           message: SYS_MSG.TOPIC_NOT_FOUND,
           status_code: HttpStatus.NOT_FOUND,
         },
@@ -137,12 +136,11 @@ export class HelpCenterService {
     };
   }
 
-  async removeTopic(id: string): Promise<void> {
+  async removeTopic(id: string) {
     const existingTopic = await this.helpCenterRepository.findOneBy({ id });
     if (!existingTopic) {
       throw new HttpException(
         {
-          status: 'error',
           message: SYS_MSG.TOPIC_NOT_FOUND,
           status_code: HttpStatus.NOT_FOUND,
         },
@@ -150,5 +148,9 @@ export class HelpCenterService {
       );
     }
     await this.helpCenterRepository.delete(id);
+    return {
+      status_code: HttpStatus.OK,
+      message: SYS_MSG.HELP_CENTER_TOPIC_DELETED,
+    };
   }
 }

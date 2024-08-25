@@ -83,6 +83,9 @@ export const INVITE_NOT_FOUND = 'Invite link not found';
 export const BLOG_DELETED = 'Blog post has been successfully deleted';
 export const NO_USER_TESTIMONIALS = 'User has no testimonials';
 export const USER_TESTIMONIALS_FETCHED = 'User testimonials retrieved successfully';
+export const HELP_CENTER_TOPIC_NOT_FOUND = 'Topic not found';
+export const HELP_CENTER_TOPIC_DELETED = 'Topic deleted successfully';
+export const HELP_CENTER_TOPIC_UPDATED = 'Topic updated successfully';
 export const INVALID_ORG_ID = 'Provide a valid organization Id';
 export const INVALID_USER_ID = 'Provide a valid user Id';
 export const INVALID_PRODUCT_ID = 'Provide a valid user Id';
@@ -111,3 +114,4 @@ export const TOPIC_NOT_FOUND = `Help center topic with ID not found`;
 export const TOPIC_UPDATE_SUCCESS = 'Topic updated successfully';
 export const TOPIC_DELETED = 'Topic deleted successfully';
 export const BILLING_PLAN_NOT_FOUND = 'Billing plan not found';
+

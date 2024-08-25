@@ -4,9 +4,9 @@ import {
   Patch,
   Param,
   Delete,
+  Get,
   HttpException,
   HttpStatus,
-  Get,
   NotFoundException,
   Post,
   Query,
@@ -85,8 +85,7 @@ export class HelpCenterController {
   @UseGuards(SuperAdminGuard)
   @UpdateHelpCenterDocs()
   async update(@Param('id') id: string, @Body() updateHelpCenterDto: UpdateHelpCenterDto) {
-    const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
-    return updatedHelpCenter;
+    return this.helpCenterService.updateTopic(id, updateHelpCenterDto);
   }
 
   @ApiBearerAuth()
@@ -94,6 +93,6 @@ export class HelpCenterController {
   @UseGuards(SuperAdminGuard)
   @DeleteHelpCenterDocs()
   async remove(@Param('id') id: string) {
-    return await this.helpCenterService.removeTopic(id);
-  }
+    return this.helpCenterService.removeTopic(id);
+    }
 }
