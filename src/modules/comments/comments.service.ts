@@ -42,4 +42,15 @@ export class CommentsService {
       commentedBy,
     };
   }
+
+  async getAComment(commentId: string) {
+    const comment = await this.commentRepository.findOneBy({ id: commentId });
+    if (!comment) {
+      throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      message: 'Comment retrieved successfully',
+      data: { comment },
+    };
+  }
 }
