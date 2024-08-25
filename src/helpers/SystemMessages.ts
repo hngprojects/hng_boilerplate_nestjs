@@ -109,7 +109,9 @@ export const INVALID_FILE_TYPE = resource => {
 export const INQUIRY_SENT = 'Inquiry sent successfully';
 export const BILLING_PLAN_ALREADY_EXISTS = 'Billing plan already exists';
 export const BILLING_PLAN_CREATED = 'Billing plan successfully created';
+export const USER_ALREADY_WAITLISTED = 'User already on the waitlist';
 export const TOPIC_NOT_FOUND = `Help center topic with ID not found`;
 export const TOPIC_UPDATE_SUCCESS = 'Topic updated successfully';
 export const TOPIC_DELETED = 'Topic deleted successfully';
+export const BILLING_PLAN_NOT_FOUND = 'Billing plan not found';
 

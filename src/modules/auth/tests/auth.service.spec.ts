@@ -13,28 +13,26 @@ import { User, UserType } from '../../user/entities/user.entity';
 import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
-import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
-import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { ProfileService } from '../../profile/profile.service';
 
 jest.mock('speakeasy');
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userServiceMock: jest.Mocked<UserService>;
+  let profileServiceMock: jest.Mocked<ProfileService>;
   let jwtServiceMock: jest.Mocked<JwtService>;
   let otpServiceMock: jest.Mocked<OtpService>;
   let emailServiceMock: jest.Mocked<EmailService>;
-  let googleAuthServiceMock: jest.Mocked<GoogleAuthService>;
   let organisationServiceMock: jest.Mocked<OrganisationsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
-
         {
           provide: UserService,
           useValue: {
@@ -44,9 +42,9 @@ describe('AuthenticationService', () => {
           },
         },
         {
-          provide: GoogleAuthService,
+          provide: ProfileService,
           useValue: {
-            verifyToken: jest.fn(),
+            updateProfile: jest.fn(),
           },
         },
         {
@@ -81,10 +79,10 @@ describe('AuthenticationService', () => {
 
     service = module.get<AuthenticationService>(AuthenticationService);
     userServiceMock = module.get(UserService) as jest.Mocked<UserService>;
+    profileServiceMock = module.get(ProfileService) as jest.Mocked<ProfileService>;
     jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;
     otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
-    googleAuthServiceMock = module.get(GoogleAuthService) as jest.Mocked<GoogleAuthService>;
     organisationServiceMock = module.get(OrganisationsService) as jest.Mocked<OrganisationsService>;
   });
 
@@ -262,7 +260,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(null);
 
-      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw an unauthorized error for invalid password', async () => {
@@ -281,12 +279,12 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
   describe('verify2fa', () => {
-    it('should throw error if totp code is incorrect', () => {
+    it('should throw error if totp code is incorrect', async () => {
       const verify2faDto: Verify2FADto = { totp_code: '12345' };
       const userId = 'some-uuid-here';
 
@@ -305,7 +303,7 @@ describe('AuthenticationService', () => {
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(user);
       (speakeasy.totp.verify as jest.Mock).mockReturnValue(false);
 
-      expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(CustomHttpException);
+      await expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(CustomHttpException);
     });
 
     it('should enable 2fa if successful', async () => {

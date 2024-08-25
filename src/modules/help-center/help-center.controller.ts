@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
   Req,
+  HttpCode,
 } from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
@@ -68,10 +69,7 @@ export class HelpCenterController {
   @Get('topics/:id')
   @GetByIdHelpCenterDocs()
   async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
-    const helpCenter = await this.helpCenterService.findOne(params.id);
-    if (!helpCenter) {
-      throw new CustomHttpException(SYS_MSG.TOPIC_NOT_FOUND, HttpStatus.NOT_FOUND);
-    }
+    const helpCenter = await this.helpCenterService.findHelpCenter(params.id);
     return helpCenter;
   }
 
