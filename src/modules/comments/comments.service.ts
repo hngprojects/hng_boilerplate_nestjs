@@ -66,6 +66,15 @@ export class CommentsService {
       message: 'Comment updated successfully!',
       savedComment: updatedComment,
       commentedBy: user.first_name + ' ' + user.last_name,
+
+  async getAComment(commentId: string) {
+    const comment = await this.commentRepository.findOneBy({ id: commentId });
+    if (!comment) {
+      throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      message: 'Comment retrieved successfully',
+      data: { comment },
     };
   }
 }

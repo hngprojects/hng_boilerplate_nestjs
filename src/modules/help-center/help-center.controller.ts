@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
   Req,
+  HttpCode,
 } from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
@@ -27,6 +28,16 @@ import {
 } from './dto/help-center.response.dto';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { User } from '../user/entities/user.entity';
+import {
+  CreateHelpCenterDocs,
+  DeleteHelpCenterDocs,
+  GetAllHelpCenterDocs,
+  GetByIdHelpCenterDocs,
+  SearchHelpCenterDocs,
+  UpdateHelpCenterDocs,
+} from './docs/helpCenter-swagger';
+import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @ApiTags('help-center')
 @Controller('help-center')
@@ -36,158 +47,53 @@ export class HelpCenterController {
   @ApiBearerAuth()
   @Post('topics')
   @UseGuards(SuperAdminGuard)
-  @ApiOperation({ summary: 'Create a new help center topic' })
-  @ApiResponse({ status: 201, description: 'The topic has been successfully created.' })
-  @ApiResponse({ status: 400, description: 'Invalid input data.' })
-  @ApiResponse({ status: 400, description: 'This question already exists.' })
+  @CreateHelpCenterDocs()
   async create(
     @Body() createHelpCenterDto: CreateHelpCenterDto,
-    @Req() req: { user: User }
+    @Req() req: { user: User; language: string }
   ): Promise<HelpCenterSingleInstancResponseType> {
     const user: User = req.user;
-    return this.helpCenterService.create(createHelpCenterDto, user);
+    const language = req.language;
+    return this.helpCenterService.create(createHelpCenterDto, user, language);
   }
 
   @skipAuth()
   @Get('topics')
-  @ApiOperation({ summary: 'Get all help center topics' })
-  @ApiResponse({ status: 200, description: 'The found records' })
-  async findAll(): Promise<HelpCenter[]> {
-    return this.helpCenterService.findAll();
+  @GetAllHelpCenterDocs()
+  async findAll(@Req() req: any): Promise<HelpCenter[]> {
+    const language = req.language;
+    return this.helpCenterService.findAll(language);
   }
 
   @skipAuth()
   @Get('topics/:id')
-  @ApiOperation({ summary: 'Get a help center topic by ID' })
-  @ApiResponse({ status: 200, description: 'The found record' })
-  @ApiResponse({ status: 404, description: 'Topic not found' })
+  @GetByIdHelpCenterDocs()
   async findOne(@Param() params: GetHelpCenterDto): Promise<HelpCenterSingleInstancResponseType> {
-    const helpCenter = await this.helpCenterService.findOne(params.id);
-    if (!helpCenter) {
-      throw new NotFoundException(`Help center topic with ID ${params.id} not found`);
-    }
+    const helpCenter = await this.helpCenterService.findHelpCenter(params.id);
     return helpCenter;
   }
 
   @skipAuth()
   @Get('topics/search')
-  @ApiOperation({ summary: 'Search help center topics' })
-  @ApiResponse({ status: 200, description: 'The found records' })
-  @ApiResponse({ status: 422, description: 'Invalid search criteria.' })
+  @SearchHelpCenterDocs()
   async search(@Query() query: SearchHelpCenterDto): Promise<HelpCenterMultipleInstancResponseType> {
     return this.helpCenterService.search(query);
   }
 
   @ApiBearerAuth()
   @Patch('topics/:id')
-  @ApiOperation({ summary: 'Update a help center topic by id' })
-  @ApiResponse({ status: 200, description: 'Topic updated successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' })
-  @ApiResponse({ status: 403, description: 'Access denied, only authorized users can access this endpoint' })
-  @ApiResponse({ status: 404, description: 'Topic not found, please check and try again' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @UseGuards(SuperAdminGuard)
+  @UpdateHelpCenterDocs()
   async update(@Param('id') id: string, @Body() updateHelpCenterDto: UpdateHelpCenterDto) {
-    try {
-      const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
-      return {
-        success: true,
-        message: 'Topic updated successfully',
-        data: updatedHelpCenter,
-        status_code: HttpStatus.OK,
-      };
-    } catch (error) {
-      if (error.status === HttpStatus.UNAUTHORIZED) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Unauthorized, please provide valid credentials',
-            status_code: HttpStatus.UNAUTHORIZED,
-          },
-          HttpStatus.UNAUTHORIZED
-        );
-      } else if (error.status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Access denied, only authorized users can access this endpoint',
-            status_code: HttpStatus.FORBIDDEN,
-          },
-          HttpStatus.FORBIDDEN
-        );
-      } else if (error.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Topic not found, please check and try again',
-            status_code: HttpStatus.NOT_FOUND,
-          },
-          HttpStatus.NOT_FOUND
-        );
-      } else {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Internal Server Error',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
+    const updatedHelpCenter = await this.helpCenterService.updateTopic(id, updateHelpCenterDto);
+    return updatedHelpCenter;
   }
 
   @ApiBearerAuth()
   @Delete('topics/:id')
-  @ApiOperation({ summary: 'Delete a help center topic by id' })
-  @ApiResponse({ status: 200, description: 'Topic deleted successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized, please provide valid credentials' })
-  @ApiResponse({ status: 403, description: 'Access denied, only authorized users can access this endpoint' })
-  @ApiResponse({ status: 404, description: 'Topic not found, please check and try again' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error' })
+  @UseGuards(SuperAdminGuard)
+  @DeleteHelpCenterDocs()
   async remove(@Param('id') id: string) {
-    try {
-      await this.helpCenterService.removeTopic(id);
-      return {
-        success: true,
-        message: 'Topic deleted successfully',
-        status_code: HttpStatus.OK,
-      };
-    } catch (error) {
-      if (error.status === HttpStatus.UNAUTHORIZED) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Unauthorized, please provide valid credentials',
-            status_code: HttpStatus.UNAUTHORIZED,
-          },
-          HttpStatus.UNAUTHORIZED
-        );
-      } else if (error.status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Access denied, only authorized users can access this endpoint',
-            status_code: HttpStatus.FORBIDDEN,
-          },
-          HttpStatus.FORBIDDEN
-        );
-      } else if (error.status === HttpStatus.NOT_FOUND) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Topic not found, please check and try again',
-            status_code: HttpStatus.NOT_FOUND,
-          },
-          HttpStatus.NOT_FOUND
-        );
-      } else {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Internal Server Error',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
+    return await this.helpCenterService.removeTopic(id);
   }
 }

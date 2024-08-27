@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Request, Param, Patch } from '@nestjs/common';
+import { Controller, Body, Post, Request, Get, Param, Patch } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentResponseDto } from './dtos/comment-response.dto';
@@ -32,5 +32,11 @@ export class CommentsController {
   ): Promise<CommentResponseDto> {
     const { userId } = req.user;
     return await this.commentsService.updateComment(id, userId, updateCommentDto);
+
+  @ApiOperation({ summary: 'Get a comment' })
+  @ApiResponse({ status: 200, description: 'The comment has been retrieved successfully.' })
+  @Get(':id')
+  async getAComment(@Param('id') id: string): Promise<any> {
+    return await this.commentsService.getAComment(id);
   }
 }
