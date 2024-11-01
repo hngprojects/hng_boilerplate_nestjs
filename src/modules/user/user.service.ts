@@ -355,7 +355,6 @@ export default class UserService {
     const omitColumns: Array<keyof User> = ['password'];
     const relations = [
       'profile',
-      'organisationMembers',
       'created_organisations',
       'owned_organisations',
       'blogs',
@@ -364,7 +363,9 @@ export default class UserService {
     ];
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations,
+      relations: this.userRepository.metadata.relations
+        .filter(relation => relation.relationType === 'one-to-many')
+        .map(relation => relation.propertyName),
     });
 
     for (const i in user) {
