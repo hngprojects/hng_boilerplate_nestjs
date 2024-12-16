@@ -43,6 +43,7 @@ import { UserModule } from './modules/user/user.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -164,6 +165,7 @@ import { ApiStatusModule } from './modules/api-status/api-status.module';
     BlogModule,
     CommentsModule,
     SubscriptionsModule,
+    PaymentsModule,
     RevenueModule,
     BlogCategoryModule,
     ServeStaticModule.forRoot({
