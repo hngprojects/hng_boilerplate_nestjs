@@ -1,0 +1,22 @@
+name: Scheduled Test
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run test script
+        env:
+          POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+          API_URL: ${{ secrets.API_URL }}
+        run: |
+          cd qa
+          chmod +x test.sh
+          ./test.sh

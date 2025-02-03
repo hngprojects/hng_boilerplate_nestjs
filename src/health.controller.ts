@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { skipAuth } from './helpers/skipAuth';
+import * as os from 'os';
 
 @Controller()
 export default class HealthController {
@@ -24,6 +25,22 @@ export default class HealthController {
   @skipAuth()
   @Get('health')
   public health() {
-    return { status_code: 200, message: 'This is a healthy endpoint' };
+    const networkInterfaces = os.networkInterfaces();
+    let localIpAddress = 'Not available';
+
+    // Iterate over network interfaces to find the first non-internal IPv4 address
+    for (const interfaceKey in networkInterfaces) {
+      const interfaceDetails = networkInterfaces[interfaceKey];
+      for (const detail of interfaceDetails) {
+        if (detail.family === 'IPv4' && !detail.internal) {
+          localIpAddress = detail.address;
+          break;
+        }
+      }
+      if (localIpAddress !== 'Not available') break;
+    }
+
+    return { status_code: 200, message: 'This is a healthy endpoint', ip: localIpAddress };
   }
 }
+

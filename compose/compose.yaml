@@ -1,0 +1,65 @@
+name: nestjs
+
+services:
+  app:
+    image: ${COMPOSE_PROJECT_NAME}
+    build: .
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: 'wget -qO- http://app:${PORT}'
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  db:
+    image: postgres:16-alpine
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: 'pg_isready -U postgres'
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    env_file:
+      - .env
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: 'redis-cli ping | grep PONG'
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: 'wget -qO- http://nginx:80'
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:

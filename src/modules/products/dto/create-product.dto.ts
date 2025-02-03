@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { ProductSizeType } from '../entities/product.entity';
 
 export class CreateProductRequestDto {
   @ApiProperty({
@@ -12,12 +13,40 @@ export class CreateProductRequestDto {
   name: string;
 
   @ApiProperty({
+    description: 'The description of the product',
+    minimum: 0,
+    example: 10,
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiProperty({
+    description: 'The size of the product',
+    minimum: 0,
+    example: 10,
+  })
+  @IsEnum(ProductSizeType)
+  @IsString()
+  @IsOptional()
+  size?: string;
+
+  @ApiProperty({
+    description: 'The image of the product',
+    minimum: 0,
+    example: 10,
+  })
+  @IsString()
+  @IsOptional()
+  image_url?: string;
+
+  @ApiProperty({
     description: 'The quantity of the product',
     minimum: 0,
     example: 10,
   })
   @IsNumber()
-  @Min(0)
+  @IsOptional()
   quantity: number;
 
   @ApiProperty({
@@ -25,7 +54,7 @@ export class CreateProductRequestDto {
     minimum: 0,
     example: 99.99,
   })
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price: number;
 

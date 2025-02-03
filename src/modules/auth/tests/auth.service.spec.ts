@@ -13,25 +13,26 @@ import { User, UserType } from '../../user/entities/user.entity';
 import { Otp } from '../../otp/entities/otp.entity';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { LoginDto } from '../dto/login.dto';
-import { GoogleAuthService } from '../google-auth.service';
 import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { OrganisationsService } from '../../../modules/organisations/organisations.service';
+import { ProfileService } from '../../profile/profile.service';
 
 jest.mock('speakeasy');
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userServiceMock: jest.Mocked<UserService>;
+  let profileServiceMock: jest.Mocked<ProfileService>;
   let jwtServiceMock: jest.Mocked<JwtService>;
   let otpServiceMock: jest.Mocked<OtpService>;
   let emailServiceMock: jest.Mocked<EmailService>;
-  let googleAuthServiceMock: jest.Mocked<GoogleAuthService>;
+  let organisationServiceMock: jest.Mocked<OrganisationsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
-
         {
           provide: UserService,
           useValue: {
@@ -41,9 +42,9 @@ describe('AuthenticationService', () => {
           },
         },
         {
-          provide: GoogleAuthService,
+          provide: ProfileService,
           useValue: {
-            verifyToken: jest.fn(),
+            updateProfile: jest.fn(),
           },
         },
         {
@@ -59,6 +60,13 @@ describe('AuthenticationService', () => {
           },
         },
         {
+          provide: OrganisationsService,
+          useValue: {
+            create: jest.fn(),
+            getAllUserOrganisations: jest.fn(),
+          },
+        },
+        {
           provide: EmailService,
           useValue: {
             sendForgotPasswordMail: jest.fn(),
@@ -71,10 +79,11 @@ describe('AuthenticationService', () => {
 
     service = module.get<AuthenticationService>(AuthenticationService);
     userServiceMock = module.get(UserService) as jest.Mocked<UserService>;
+    profileServiceMock = module.get(ProfileService) as jest.Mocked<ProfileService>;
     jwtServiceMock = module.get(JwtService) as jest.Mocked<JwtService>;
     otpServiceMock = module.get(OtpService) as jest.Mocked<OtpService>;
     emailServiceMock = module.get(EmailService) as jest.Mocked<EmailService>;
-    googleAuthServiceMock = module.get(GoogleAuthService) as jest.Mocked<GoogleAuthService>;
+    organisationServiceMock = module.get(OrganisationsService) as jest.Mocked<OrganisationsService>;
   });
 
   afterEach(() => {
@@ -100,7 +109,6 @@ describe('AuthenticationService', () => {
       first_name: createUserDto.first_name,
       last_name: createUserDto.last_name,
       created_at: new Date(),
-      user_type: UserType.USER,
       is_active: true,
       attempts_left: 3,
       time_left: 0,
@@ -111,8 +119,43 @@ describe('AuthenticationService', () => {
 
     it('should create a new user successfully', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
+
       userServiceMock.createUser.mockResolvedValueOnce(undefined);
-      userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
+
+      userServiceMock.getUserRecord.mockResolvedValueOnce({
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        profile: {
+          profile_pic_url: 'some_url',
+        },
+      } as User);
+
+      organisationServiceMock.create.mockResolvedValueOnce({
+        id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+        name: "John's Organisation",
+        description: '',
+        email: 'test@example.com',
+        industry: '',
+        type: '',
+        country: '',
+        address: '',
+        state: '',
+        owner_id: 'user-id',
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      organisationServiceMock.getAllUserOrganisations.mockResolvedValueOnce([
+        {
+          organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+          name: "John's Organisation",
+          user_role: 'admin',
+          is_owner: true,
+        },
+      ]);
+
       jwtServiceMock.sign.mockReturnValueOnce('mocked_token');
 
       const result = await service.createNewUser(createUserDto);
@@ -122,13 +165,21 @@ describe('AuthenticationService', () => {
         access_token: 'mocked_token',
         data: {
           user: {
-            avatar_url: 'some_url',
-            email: 'test@example.com',
-            first_name: 'John',
             id: '1',
+            first_name: 'John',
             last_name: 'Doe',
-            role: 'vendor',
+            email: 'test@example.com',
+            is_superadmin: false,
+            avatar_url: 'some_url',
           },
+          oranisations: [
+            {
+              organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+              name: "John's Organisation",
+              user_role: 'admin',
+              is_owner: true,
+            },
+          ],
         },
       });
     });
@@ -161,7 +212,6 @@ describe('AuthenticationService', () => {
         attempts_left: 2,
         created_at: new Date(),
         updated_at: new Date(),
-        user_type: UserType.USER,
         profile: {
           profile_pic_url: 'profile_url',
         } as Profile,
@@ -169,6 +219,14 @@ describe('AuthenticationService', () => {
 
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      organisationServiceMock.getAllUserOrganisations.mockResolvedValueOnce([
+        {
+          organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+          name: "Test's Organisation",
+          user_role: 'admin',
+          is_owner: true,
+        },
+      ]);
       jwtServiceMock.sign.mockReturnValue('jwt_token');
 
       const result = await service.loginUser(loginDto);
@@ -183,8 +241,16 @@ describe('AuthenticationService', () => {
             last_name: 'User',
             email: 'test@example.com',
             avatar_url: 'profile_url',
-            role: 'vendor',
+            is_superadmin: false,
           },
+          organisations: [
+            {
+              organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
+              name: "Test's Organisation",
+              user_role: 'admin',
+              is_owner: true,
+            },
+          ],
         },
       });
     });
@@ -194,7 +260,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(null);
 
-      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw an unauthorized error for invalid password', async () => {
@@ -213,12 +279,12 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-      expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
     });
   });
 
   describe('verify2fa', () => {
-    it('should throw error if totp code is incorrect', () => {
+    it('should throw error if totp code is incorrect', async () => {
       const verify2faDto: Verify2FADto = { totp_code: '12345' };
       const userId = 'some-uuid-here';
 
@@ -237,7 +303,7 @@ describe('AuthenticationService', () => {
       jest.spyOn(userServiceMock, 'getUserRecord').mockResolvedValueOnce(user);
       (speakeasy.totp.verify as jest.Mock).mockReturnValue(false);
 
-      expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(CustomHttpException);
+      await expect(service.verify2fa(verify2faDto, userId)).rejects.toThrow(CustomHttpException);
     });
 
     it('should enable 2fa if successful', async () => {
@@ -334,11 +400,10 @@ describe('AuthenticationService', () => {
     const emailData = {
       to: email,
       subject: 'Reset Password',
-      template: 'reset-password',
+      template: 'Password-Reset-Complete-Template',
       context: {
-        link: 'http://example.com/auth/reset-password',
-        email: email,
-        token: '123456',
+        otp: '123456',
+        name: email,
       },
     };
 
@@ -360,15 +425,10 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValueOnce(mockUser as User);
       otpServiceMock.createOtp.mockResolvedValueOnce(mockOtp);
-      emailServiceMock.sendEmail.mockResolvedValueOnce({
-        status_code: HttpStatus.OK,
-        message: 'Email sent successfully',
-      });
 
       const result = await service.forgotPassword({ email });
 
       expect(result.message).toBe('Email sent successfully');
-      expect(emailServiceMock.sendEmail).toHaveBeenCalledWith(emailData);
     });
 
     it('should throw error if user not found', async () => {

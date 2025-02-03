@@ -10,15 +10,15 @@ export class OrganisationMapper {
       id: organisation.id,
       name: organisation.name,
       description: organisation.description,
-      owner_id: organisation.creator.id,
+      owner_id: organisation?.owner.id,
       email: organisation.email,
       industry: organisation.industry,
       type: organisation.type,
       country: organisation.country,
       address: organisation.address,
       state: organisation.state,
-      created_at: organisation.created_at.toISOString(),
-      updated_at: organisation.updated_at.toISOString(),
+      created_at: organisation.created_at,
+      updated_at: organisation.updated_at,
     };
   }
 }

@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import * as speakeasy from 'speakeasy';
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
@@ -13,12 +13,13 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { OtpDto } from '../otp/dto/otp.dto';
-import { GoogleAuthService } from './google-auth.service';
 import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
-import { GoogleVerificationPayloadInterface } from './interfaces/GoogleVerificationPayloadInterface';
-import { SendEmailDto } from '../email/dto/email.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
+import { TokenPayload } from 'google-auth-library';
+import { OrganisationsService } from '../organisations/organisations.service';
+import { ProfileService } from '../profile/profile.service';
+import { UpdateProfileDto } from '../profile/dto/update-profile.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -27,12 +28,13 @@ export default class AuthenticationService {
     private jwtService: JwtService,
     private otpService: OtpService,
     private emailService: EmailService,
-    private googleAuthService: GoogleAuthService
+    private organisationService: OrganisationsService,
+    private profileService: ProfileService
   ) {}
 
-  async createNewUser(creatUserDto: CreateUserDTO) {
+  async createNewUser(createUserDto: CreateUserDTO) {
     const userExists = await this.userService.getUserRecord({
-      identifier: creatUserDto.email,
+      identifier: createUserDto.email,
       identifierType: 'email',
     });
 
@@ -40,17 +42,35 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
     }
 
-    await this.userService.createUser(creatUserDto);
+    await this.userService.createUser(createUserDto);
 
-    const user = await this.userService.getUserRecord({ identifier: creatUserDto.email, identifierType: 'email' });
+    const user = await this.userService.getUserRecord({ identifier: createUserDto.email, identifierType: 'email' });
 
     if (!user) {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
+    const newOrganisationPayload = {
+      name: `${user.first_name}'s Organisation`,
+      description: '',
+      email: user.email,
+      industry: '',
+      type: '',
+      country: '',
+      address: '',
+      state: '',
+    };
 
-    await this.otpService.createOtp(user.id);
+    const newOrganisation = await this.organisationService.create(newOrganisationPayload, user.id);
 
-    const access_token = this.jwtService.sign({ id: user.id, sub: user.id, email: user.email });
+    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
+    const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
+    const token = (await this.otpService.createOtp(user.id)).token;
+
+    const access_token = this.jwtService.sign({
+      id: user.id,
+      sub: user.id,
+      email: user.email,
+    });
 
     const responsePayload = {
       user: {
@@ -59,8 +79,9 @@ export default class AuthenticationService {
         last_name: user.last_name,
         email: user.email,
         avatar_url: user.profile.profile_pic_url,
-        role: user.user_type,
+        is_superadmin: isSuperAdmin,
       },
+      oranisations: userOranisations,
     };
 
     return {
@@ -77,12 +98,7 @@ export default class AuthenticationService {
     }
 
     const token = (await this.otpService.createOtp(user.id)).token;
-    const emailData = new SendEmailDto();
-    emailData.to = dto.email;
-    emailData.subject = 'Reset Password';
-    emailData.template = 'reset-password';
-    emailData.context = { link: `${process.env.BASE_URL}/auth/reset-password`, email: dto.email, token: token };
-    await this.emailService.sendEmail(emailData);
+    await this.emailService.sendForgotPasswordMail(user.email, `${process.env.FRONTEND_URL}/reset-password`, token);
 
     return {
       message: SYS_MSG.EMAIL_SENT,
@@ -97,7 +113,7 @@ export default class AuthenticationService {
 
     const user = await this.otpService.retrieveUserAndOtp(exists.id, otp);
 
-    return this.userService.updateUser(user.id, { password: newPassword }, user);
+    // return this.userService.updateUser(user.id, { password: newPassword }, user);
   }
 
   async changePassword(user_id: string, oldPassword: string, newPassword: string) {
@@ -145,9 +161,9 @@ export default class AuthenticationService {
     if (!isMatch) {
       throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
-
+    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
-
+    const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
     const responsePayload = {
       access_token,
       data: {
@@ -156,9 +172,10 @@ export default class AuthenticationService {
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
-          role: user.user_type,
           avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
+          is_superadmin: isSuperAdmin,
         },
+        organisations: userOranisations,
       },
     };
 
@@ -188,6 +205,10 @@ export default class AuthenticationService {
 
     if (!isValid) {
       throw new InternalServerErrorException(SYS_MSG.ENABLE_2FA_ERROR);
+    }
+
+    if (user.is_2fa_enabled) {
+      throw new CustomHttpException(SYS_MSG.ALREADY_ENABLED_2FA, HttpStatus.BAD_REQUEST);
     }
 
     const secret = speakeasy.generateSecret({ length: 32 });
@@ -265,7 +286,21 @@ export default class AuthenticationService {
 
   async googleAuth(googleAuthPayload: GoogleAuthPayload) {
     const idToken = googleAuthPayload.id_token;
-    const verifyTokenResponse: GoogleVerificationPayloadInterface = await this.googleAuthService.verifyToken(idToken);
+
+    if (!idToken) {
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+
+    const request = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`);
+
+    if (request.status === 400) {
+      throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+    }
+    if (request.status === 500) {
+      throw new CustomHttpException(SYS_MSG.SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const verifyTokenResponse: TokenPayload = await request.json();
+
     const userEmail = verifyTokenResponse.email;
     const userExists = await this.userService.getUserRecord({ identifier: userEmail, identifierType: 'email' });
 
@@ -275,9 +310,13 @@ export default class AuthenticationService {
         first_name: verifyTokenResponse.given_name || '',
         last_name: verifyTokenResponse?.family_name || '',
         password: '',
+        profile_pic_url: verifyTokenResponse?.picture || '',
       };
       return await this.createUserGoogle(userCreationPayload);
     }
+
+    const userOranisations = await this.organisationService.getAllUserOrganisations(userExists.id);
+    const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
     const accessToken = this.jwtService.sign({
       sub: userExists.id,
       id: userExists.id,
@@ -285,22 +324,48 @@ export default class AuthenticationService {
       first_name: userExists.first_name,
       last_name: userExists.last_name,
     });
+
+    if (!userExists.profile.profile_pic_url || userExists.profile.profile_pic_url !== verifyTokenResponse.picture) {
+      const updateDto = new UpdateProfileDto();
+      updateDto.profile_pic_url = verifyTokenResponse.picture;
+      await this.profileService.updateProfile(userExists.profile.id, updateDto);
+    }
+
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: {
-        id: userExists.id,
-        email: userExists.email,
-        first_name: userExists.first_name,
-        last_name: userExists.last_name,
-        fullname: userExists.first_name + ' ' + userExists.last_name,
-        role: '',
+      data: {
+        user: {
+          id: userExists.id,
+          email: userExists.email,
+          first_name: userExists.first_name,
+          last_name: userExists.last_name,
+          avatar_url: userExists.profile.profile_pic_url,
+          is_superadmin: isSuperAdmin,
+        },
+        organisations: userOranisations,
       },
     };
   }
 
   public async createUserGoogle(userPayload: CreateUserDTO) {
     const newUser = await this.userService.createUser(userPayload);
+    const newOrganisationPaload = {
+      name: `${newUser.first_name}'s Organisation`,
+      description: '',
+      email: newUser.email,
+      industry: '',
+      type: '',
+      country: '',
+      address: '',
+      state: '',
+    };
+
+    await this.organisationService.create(newOrganisationPaload, newUser.id);
+
+    const userOranisations = await this.organisationService.getAllUserOrganisations(newUser.id);
+    const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
+
     const accessToken = await this.jwtService.sign({
       sub: newUser.id,
       id: newUser.id,
@@ -308,17 +373,26 @@ export default class AuthenticationService {
       first_name: userPayload.first_name,
       last_name: userPayload.last_name,
     });
+    if (userPayload.profile_pic_url) {
+      const updateDto = new UpdateProfileDto();
+      updateDto.profile_pic_url = userPayload.profile_pic_url;
 
+      await this.profileService.updateProfile(newUser.profile.id, updateDto);
+    }
     return {
+      status_code: HttpStatus.CREATED,
       message: SYS_MSG.USER_CREATED,
       access_token: accessToken,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        first_name: newUser.first_name,
-        last_name: newUser.last_name,
-        fullname: newUser.first_name + ' ' + newUser.last_name,
-        role: '',
+      data: {
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+          is_superadmin: isSuperAdmin,
+          avatar_url: newUser.profile.profile_pic_url,
+        },
+        organisations: userOranisations,
       },
     };
   }
@@ -340,12 +414,7 @@ export default class AuthenticationService {
 
     const otp = await this.otpService.createOtp(user.id);
 
-    const emailData = new SendEmailDto();
-    emailData.to = user.email;
-    emailData.subject = 'Login with OTP';
-    emailData.template = 'login-otp';
-    emailData.context = { token: otp.token, email: user.email };
-    await this.emailService.sendEmail(emailData);
+    await this.emailService.sendLoginOtp(user.email, otp.token);
 
     return {
       message: SYS_MSG.SIGN_IN_OTP_SENT,
@@ -379,7 +448,7 @@ export default class AuthenticationService {
     return {
       message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token: accessToken,
-      user: responsePayload,
+      data: responsePayload,
     };
   }
 }
