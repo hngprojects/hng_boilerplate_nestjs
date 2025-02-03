@@ -1,14 +1,44 @@
 name: Production Deployment
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     steps:
+      - name : Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Application
+        run: | 
+          npm run build
+          cp package.json deployment.sh main-ecosystem-config.json dist
+
+      - name: Archive application build
+        run: |
+          tar -czf nestjs.tar.gz dist
+          
+      - name: Copy Artifacts to server
+        run: |
+          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no nestjs.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/nestjs
+          rm -f nestjs.tar.gz
+          
       - name: Deploy on server
         uses: appleboy/ssh-action@master
         with:
@@ -16,6 +46,13 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd main
+            cd backend/nestjs
+            tar -xzf /tmp/nestjs/nestjs.tar.gz -C .
+            rm -f /tmp/nestjs/nestjs.tar.gz
+            mv dist/package.json .
+            mv dist/main-ecosystem-config.json .
+            mv dist/deployment.sh .
+            
             chmod +x deployment.sh
             ./deployment.sh main
+          
