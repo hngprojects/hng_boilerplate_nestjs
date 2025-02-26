@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Comment } from '../comments/entities/comments.entity';
-import { Cart } from '../dashboard/entities/cart.entity';
-import { OrderItem } from '../dashboard/entities/order-items.entity';
-import { Order } from '../dashboard/entities/order.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { User } from '../user/entities/user.entity';
-import { UserModule } from '../user/user.module';
-import { ProductVariant } from './entities/product-variant.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import { Role } from '../role/entities/role.entity';
 import { Product } from './entities/product.entity';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
+import { UserModule } from '@modules/user/user.module';
+import { Cart } from '@modules/dashboard/entities/cart.entity';
+import { OrderItem } from '@modules/dashboard/entities/order-items.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { ProductVariant } from './entities/product-variant.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { Order } from '@modules/dashboard/entities/order.entity';
+import { Comment } from '@modules/comments/entities/comments.entity';
 
 @Module({
   imports: [

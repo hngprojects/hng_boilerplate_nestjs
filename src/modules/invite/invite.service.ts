@@ -1,25 +1,19 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InviteDto } from './dto/invite.dto';
 import { Invite } from './entities/invite.entity';
-import { Organisation } from '../../modules/organisations/entities/organisations.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { User } from '../user/entities/user.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { MailerService } from '@nestjs-modules/mailer';
-import { OrganisationsService } from '../organisations/organisations.service';
 import { CreateInvitationDto } from './dto/create-invite.dto';
-import { EmailService } from '../email/email.service';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { ConfigService } from '@nestjs/config';
+import { User } from '@modules/user/entities/user.entity';
+import { EmailService } from '@modules/email/email.service';
+import { OrganisationsService } from '@modules/organisations/organisations.service';
 
 @Injectable()
 export class InviteService {

@@ -17,7 +17,7 @@ import {
   TIMEZONE_CREATED_SUCCESSFULLY,
   SUCCESS,
   FETCH_TIMEZONE_FAILURE,
-} from '../../helpers/SystemMessages';
+} from '@shared/constants/SystemMessages';
 
 @Injectable()
 export class TimezonesService {

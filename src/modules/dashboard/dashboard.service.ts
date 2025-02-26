@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { NewsletterSubscription } from '../newsletter-subscription/entities/newsletter-subscription.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { GetRevenueResponseDto } from './dto/get-revenue-response.dto';
 import { GetStatisticsDto } from './dto/get-statistics.dto';
 import { GetSubscriptionCountDto } from './dto/get-subscription-count.dto';
 import { Transaction } from './entities/transaction.entity';
+import { NewsletterSubscription } from '@modules/newsletter-subscription/entities/newsletter-subscription.entity';
 
 @Injectable()
 export class DashboardService {

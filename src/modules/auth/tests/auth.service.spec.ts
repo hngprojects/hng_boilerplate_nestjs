@@ -1,22 +1,24 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import AuthenticationService from '../auth.service';
-import { Verify2FADto } from '../dto/verify-2fa.dto';
-import UserService from '../../user/user.service';
-import { OtpService } from '../../otp/otp.service';
-import { EmailService } from '../../email/email.service';
-import { User, UserType } from '../../user/entities/user.entity';
-import { Otp } from '../../otp/entities/otp.entity';
-import UserResponseDTO from '../../user/dto/user-response.dto';
+import UserService from '@modules/user/user.service';
+import { ProfileService } from '@modules/profile/profile.service';
+import { OtpService } from '@modules/otp/otp.service';
+import { EmailService } from '@modules/email/email.service';
+import { OrganisationsService } from '@modules/organisations/organisations.service';
+import { User } from '@modules/user/entities/user.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
 import { LoginDto } from '../dto/login.dto';
-import { Profile } from '../../profile/entities/profile.entity';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import { OrganisationsService } from '../../../modules/organisations/organisations.service';
-import { ProfileService } from '../../profile/profile.service';
+import UserResponseDTO from '@modules/user/dto/user-response.dto';
+import { Otp } from '@modules/otp/entities/otp.entity';
+import { Verify2FADto } from '../dto/verify-2fa.dto';
 
 jest.mock('speakeasy');
 

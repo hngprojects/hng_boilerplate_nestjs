@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { CreateAdminDto } from './dto/admin.dto';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
 import { SeedingService } from './seeding.service';

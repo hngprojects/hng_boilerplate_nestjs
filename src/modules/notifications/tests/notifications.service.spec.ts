@@ -7,12 +7,11 @@ import { NotificationSettings } from '../../notification-settings/entities/notif
 import { mockUser, mockNotificationRepository } from './mocks/notification-repo.mock';
 import { BadRequestException, HttpStatus, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { User } from '../../../modules/user/entities/user.entity';
-import { NotificationSettingsDto } from '../../../modules/notification-settings/dto/notification-settings.dto';
 import { NotificationSettingsService } from '../../../modules/notification-settings/notification-settings.service';
 import { EmailService } from '../../../modules/email/email.service';
 import UserService from '../../../modules/user/user.service';
 import { CreateNotificationForAllUsersDto } from '../dtos/create-notifiction-all-users.dto';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 const mockRepository = {
   save: jest.fn(),

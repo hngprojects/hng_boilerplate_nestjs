@@ -1,10 +1,11 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BlogCategory } from '../entities/blog-category.entity';
-import { CreateBlogCategoryDto } from '../dto/create-blog-category.dto';
 import { BlogCategoryService } from '../blog-category.service';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 describe('BlogCategoryService', () => {
   let service: BlogCategoryService;

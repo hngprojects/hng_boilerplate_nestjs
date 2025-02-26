@@ -1,3 +1,5 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -5,9 +7,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { DataSource } from 'typeorm';
 import { AppModule } from './app.module';
-import { initializeDataSource } from './database/data-source';
-import { SeedingService } from './database/seeding/seeding.service';
-import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
+import { initializeDataSource } from '@database/data-source';
+import { SeedingService } from '@database/seeding/seeding.service';
+import { ResponseInterceptor } from '@shared/inteceptors/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });

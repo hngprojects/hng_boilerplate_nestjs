@@ -2,17 +2,17 @@ import { InternalServerErrorException, NotFoundException, HttpStatus } from '@ne
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Profile } from '../../profile/entities/profile.entity';
-import { User } from '../../user/entities/user.entity';
-import UserService from '../../user/user.service';
-import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
-import { Testimonial } from '../entities/testimonials.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { TestimonialsService } from '../testimonials.service';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import { mockUser } from '../../organisations/tests/mocks/user.mock';
+import { Testimonial } from '../entities/testimonials.entity';
+import UserService from '@modules/user/user.service';
+import { TextService } from '@modules/translation/translation.service';
+import { User } from '@modules/user/entities/user.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { mockUser } from '@modules/invite/mocks/mockUser';
 import { testimonialsMock } from './mocks/testimonials.mock';
-import { TextService } from '../../translation/translation.service';
 
 class MockTextService {
   translateText(text: string, targetLang: string) {

@@ -1,10 +1,11 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommentsService } from '../comments.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Comment } from '../entities/comments.entity';
 import { User } from '../../user/entities/user.entity';
-import { Repository } from 'typeorm';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { HttpStatus } from '@nestjs/common';
 
 const mockCommentRepository = () => ({

@@ -29,15 +29,14 @@ jobs:
         run: | 
           npm run build
           cp package.json deployment.sh main-ecosystem-config.json dist
-
       - name: Archive application build
         run: |
-          tar -czf nestjs.tar.gz dist
+          tar -czf nestjs-prod.tar.gz dist
           
       - name: Copy Artifacts to server
         run: |
-          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no nestjs.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/nestjs
-          rm -f nestjs.tar.gz
+          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no nestjs-prod.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/nestjs
+          rm -f nestjs-prod.tar.gz
           
       - name: Deploy on server
         uses: appleboy/ssh-action@master
@@ -46,13 +45,12 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd backend/nestjs
-            tar -xzf /tmp/nestjs/nestjs.tar.gz -C .
-            rm -f /tmp/nestjs/nestjs.tar.gz
+            cd boilerplate/nestjs/prod
+            tar -xzf /tmp/nestjs/nestjs-prod.tar.gz -C .
+            rm -f /tmp/nestjs/nestjs-prod.tar.gz
             mv dist/package.json .
             mv dist/main-ecosystem-config.json .
             mv dist/deployment.sh .
-            
+
             chmod +x deployment.sh
             ./deployment.sh main
-          

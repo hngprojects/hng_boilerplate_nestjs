@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Faq } from '../entities/faq.entity';
 import { CreateFaqDto } from '../dto/create-faq.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { TextService } from '../../translation/translation.service';
+import { TextService } from '@modules/translation/translation.service';
 
 class MockTextService {
   translateText(text: string, targetLang: string) {

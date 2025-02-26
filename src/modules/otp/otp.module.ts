@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
 import { OtpService } from './otp.service';
 import { Repository } from 'typeorm';
-import { User } from '../user/entities/user.entity';
+import { User } from '@modules/user/entities/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Otp, User])],

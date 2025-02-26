@@ -1,10 +1,12 @@
-import * as SYS_MSG from '../../../helpers/SystemMessages';
+import 'module-alias/register';
+import 'reflect-metadata';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, Like, MoreThanOrEqual } from 'typeorm';
-import { BlogService } from '../blogs.service';
 import { Blog } from '../entities/blog.entity';
-import { User } from '../../user/entities/user.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { BlogService } from '../blogs.service';
 
 describe('BlogService', () => {
   let service: BlogService;

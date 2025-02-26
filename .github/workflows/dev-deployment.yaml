@@ -1,0 +1,56 @@
+name: Development Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name : Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Application
+        run: | 
+          npm run build
+          cp package.json deployment.sh dev-ecosystem-config.json dist
+      - name: Archive application build
+        run: |
+          tar -czf nestjs-dev.tar.gz dist
+          
+      - name: Copy Artifacts to server
+        run: |
+          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no nestjs-dev.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/nestjs
+          rm -f nestjs-dev.tar.gz
+          
+      - name: Deploy on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd boilerplate/nestjs/dev
+            tar -xzf /tmp/nestjs/nestjs-dev.tar.gz -C .
+            rm -f /tmp/nestjs/nestjs-dev.tar.gz
+            mv dist/package.json .
+            mv dist/dev-ecosystem-config.json .
+            mv dist/deployment.sh .
+
+            chmod +x deployment.sh
+            ./deployment.sh dev

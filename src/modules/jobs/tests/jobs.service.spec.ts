@@ -2,7 +2,7 @@ import { HttpStatus, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import UserResponseDTO from '../../user/dto/user-response.dto';
 import { User } from '../../user/entities/user.entity';
 import { JobApplicationDto } from '../dto/job-application.dto';

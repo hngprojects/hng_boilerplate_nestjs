@@ -1,19 +1,17 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { validateOrReject } from 'class-validator';
 import * as Handlebars from 'handlebars';
 import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
 import { promisify } from 'util';
 import * as path from 'path';
-import { MailerService } from '@nestjs-modules/mailer';
 import { MailInterface } from './interfaces/MailInterface';
 import QueueService from './queue.service';
 import { ArticleInterface } from './interface/article.interface';
 import { createTemplateDto, getTemplateDto, UpdateTemplateDto } from './dto/email.dto';
 import { IMessageInterface } from './interface/message.interface';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { getFile, createFile, deleteFile } from '../../helpers/fileHelpers';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { getFile, createFile, deleteFile } from '@shared/helpers/fileHelpers';
 
 @Injectable()
 export class EmailService {

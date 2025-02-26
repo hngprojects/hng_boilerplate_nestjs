@@ -1,12 +1,12 @@
-import { Controller, Post, Body, Get, Put, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FaqService } from './faq.service';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { Faq } from './entities/faq.entity';
 import { ICreateFaqResponse, IFaq } from './faq.interface';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { UpdateFaqDto } from './dto/update-faq.dto';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 
 @ApiTags('Faqs')
 @Controller('faqs')
@@ -30,10 +30,7 @@ export class FaqController {
     description: 'Internal Server Error if an unexpected error occurs.',
   })
   @ApiBearerAuth()
-  async create(
-    @Body() createFaqDto: CreateFaqDto,
-    @Req() req: any
-  ): Promise<ICreateFaqResponse> {
+  async create(@Body() createFaqDto: CreateFaqDto, @Req() req: any): Promise<ICreateFaqResponse> {
     const language = req.language;
     const faq: IFaq = await this.faqService.create(createFaqDto, language);
     return {
@@ -58,11 +55,7 @@ export class FaqController {
   @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({ status: 200, description: 'The FAQ has been successfully updated.', type: Faq })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateFaqDto: UpdateFaqDto,
-    @Req() req: any
-  ) {
+  async update(@Param('id') id: string, @Body() updateFaqDto: UpdateFaqDto, @Req() req: any) {
     const language = req.language;
     return this.faqService.updateFaq(id, updateFaqDto, language);
   }

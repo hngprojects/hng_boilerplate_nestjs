@@ -2,10 +2,10 @@ import { CanActivate, ExecutionContext, HttpStatus, Injectable } from '@nestjs/c
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import appConfig from '../../config/auth.config';
-import { IS_PUBLIC_KEY } from '../helpers/skipAuth';
-import * as SYS_MSG from '../helpers/SystemMessages';
-import { CustomHttpException } from '../helpers/custom-http-filter';
+import appConfig from '@config/auth.config';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { IS_PUBLIC_KEY } from '@shared/helpers/skipAuth';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

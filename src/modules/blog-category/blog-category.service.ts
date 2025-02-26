@@ -1,10 +1,10 @@
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
+import { CATEGORY_NOT_FOUND } from '@shared/constants/SystemMessages';
 import { BlogCategory } from './entities/blog-category.entity';
 import { Repository } from 'typeorm';
-import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { CATEGORY_NOT_FOUND, ORG_NOT_FOUND } from '../../helpers/SystemMessages';
 
 @Injectable()
 export class BlogCategoryService {

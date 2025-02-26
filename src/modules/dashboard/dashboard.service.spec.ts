@@ -1,10 +1,12 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { NewsletterSubscription } from '../newsletter-subscription/entities/newsletter-subscription.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { DashboardService } from './dashboard.service';
 import { Transaction } from './entities/transaction.entity';
+import { NewsletterSubscription } from '@modules/newsletter-subscription/entities/newsletter-subscription.entity';
 
 describe('DashboardService', () => {
   let service: DashboardService;

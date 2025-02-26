@@ -5,10 +5,10 @@ import { HelpCenterEntity } from '../help-center/entities/help-center.entity';
 import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { User } from '../user/entities/user.entity';
-import { TextService } from '../translation/translation.service';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { User } from '@modules/user/entities/user.entity';
+import { TextService } from '@modules/translation/translation.service';
 
 @Injectable()
 export class HelpCenterService {

@@ -5,7 +5,7 @@ import { Faq } from './entities/faq.entity';
 import { CreateFaqDto } from './dto/create-faq.dto';
 import { IFaq } from './faq.interface';
 import { UpdateFaqDto } from './dto/update-faq.dto';
-import { TextService } from '../translation/translation.service';
+import { TextService } from '@modules/translation/translation.service';
 
 @Injectable()
 export class FaqService {

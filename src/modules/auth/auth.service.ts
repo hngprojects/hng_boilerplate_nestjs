@@ -1,25 +1,25 @@
 import { HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as speakeasy from 'speakeasy';
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { JwtService } from '@nestjs/jwt';
-import { LoginResponseDto } from './dto/login-response.dto';
+import UserService from '@modules/user/user.service';
+import { OtpService } from '@modules/otp/otp.service';
+import { EmailService } from '@modules/email/email.service';
+import { OrganisationsService } from '@modules/organisations/organisations.service';
+import { ProfileService } from '@modules/profile/profile.service';
 import { CreateUserDTO } from './dto/create-user.dto';
-import UserService from '../user/user.service';
-import { Verify2FADto } from './dto/verify-2fa.dto';
-import { OtpService } from '../otp/otp.service';
-import { EmailService } from '../email/email.service';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { LoginDto } from './dto/login.dto';
-import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
-import { OtpDto } from '../otp/dto/otp.dto';
-import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
+import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { Verify2FADto } from './dto/verify-2fa.dto';
+import GoogleAuthPayload from './interfaces/GoogleAuthPayloadInterface';
 import { TokenPayload } from 'google-auth-library';
-import { OrganisationsService } from '../organisations/organisations.service';
-import { ProfileService } from '../profile/profile.service';
-import { UpdateProfileDto } from '../profile/dto/update-profile.dto';
+import { UpdateProfileDto } from '@modules/profile/dto/update-profile.dto';
+import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
+import { OtpDto } from '@modules/otp/dto/otp.dto';
 
 @Injectable()
 export default class AuthenticationService {
@@ -366,7 +366,7 @@ export default class AuthenticationService {
     const userOranisations = await this.organisationService.getAllUserOrganisations(newUser.id);
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
 
-    const accessToken = await this.jwtService.sign({
+    const accessToken = this.jwtService.sign({
       sub: newUser.id,
       id: newUser.id,
       email: userPayload.email,

@@ -3,12 +3,12 @@ import { HttpService } from '@nestjs/axios';
 import { CreateFlutterwavePaymentDto } from './dto/create-flutterwave-payment.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ConfigService } from '@nestjs/config';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { v4 as uuid4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
-import { PAYMENT_NOTFOUND } from '../../helpers/SystemMessages';
+import { PAYMENT_NOTFOUND } from '@shared/constants/SystemMessages';
 
 @Injectable()
 export class FlutterwaveService {

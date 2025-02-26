@@ -15,17 +15,12 @@ import {
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ResponseInterceptor } from '../../shared/inteceptors/response.interceptor';
 import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidator } from './dto/file.validator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import {
-  BASE_URL,
-  MAX_PROFILE_PICTURE_SIZE,
-  VALID_UPLOADS_MIME_TYPES,
-} from '../../helpers/app-constants';
-
+import { BASE_URL, MAX_PROFILE_PICTURE_SIZE, VALID_UPLOADS_MIME_TYPES } from '@shared/constants/app-constants';
+import { ResponseInterceptor } from '@shared/inteceptors/response.interceptor';
 
 @ApiBearerAuth()
 @ApiTags('Profile')
@@ -75,27 +70,26 @@ export class ProfileController {
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-  type: UploadProfilePicDto,
-  description: 'Profile picture file',
-})
-
+    type: UploadProfilePicDto,
+    description: 'Profile picture file',
+  })
   @UsePipes(new ValidationPipe({ transform: true }))
   async uploadProfilePicture(
     @Req() req: any,
     @UploadedFile(
       new FileValidator({
-        maxSize:   MAX_PROFILE_PICTURE_SIZE,
+        maxSize: MAX_PROFILE_PICTURE_SIZE,
         mimeTypes: VALID_UPLOADS_MIME_TYPES,
       })
     )
     file: Express.Multer.File
   ): Promise<{
     status: string;
-    message: string
+    message: string;
   }> {
     const userId = req.user.id;
-    const uploadProfilePicDto = new UploadProfilePicDto()
-    uploadProfilePicDto.avatar = file
-    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL)
+    const uploadProfilePicDto = new UploadProfilePicDto();
+    uploadProfilePicDto.avatar = file;
+    return await this.profileService.uploadProfilePicture(userId, uploadProfilePicDto, BASE_URL);
   }
 }

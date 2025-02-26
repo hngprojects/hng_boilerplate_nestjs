@@ -12,10 +12,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BillingPlanService } from './billing-plan.service';
-import { skipAuth } from '../../helpers/skipAuth';
-import { BillingPlanDto } from './dto/billing-plan.dto';
 import {
   createBillingPlanDocs,
   deleteBillingPlanDocs,
@@ -23,6 +20,9 @@ import {
   getSingleBillingPlanDocs,
   updateBillingPlanDocs,
 } from './docs/billing-plan-docs';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
+import { BillingPlanDto } from './dto/billing-plan.dto';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { UpdateBillingPlanDto } from './dto/update-billing-plan.dto';
 
 @ApiTags('Billing Plans')

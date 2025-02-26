@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
