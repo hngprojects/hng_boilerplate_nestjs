@@ -400,3 +400,5 @@ dist
 *.dev
 *.prod
 
+package-lock.json
+
