@@ -4,17 +4,22 @@ import { BullModule } from '@nestjs/bull';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { join } from 'path';
 import authConfig from '../config/auth.config';
 import serverConfig from '../config/server.config';
 import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import { AuthGuard } from './guards/auth.guard';
+import { LanguageGuard } from './guards/language.guard';
 import HealthController from './health.controller';
+import { ApiStatusModule } from './modules/api-status/api-status.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingPlanModule } from './modules/billing-plans/billing-plan.module';
+import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
 import { BlogModule } from './modules/blogs/blogs.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
@@ -43,11 +48,6 @@ import { UserModule } from './modules/user/user.module';
 import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import ProbeController from './probe.controller';
 import { RunTestsModule } from './run-tests/run-tests.module';
-import { BlogCategoryModule } from './modules/blog-category/blog-category.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { LanguageGuard } from './guards/language.guard';
-import { ApiStatusModule } from './modules/api-status/api-status.module';
 
 @Module({
   providers: [
@@ -91,10 +91,24 @@ import { ApiStatusModule } from './modules/api-status/api-status.module';
     }),
     LoggerModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      useFactory: async () => ({
-        ...dataSource.options,
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_NAME'),
+        entities: [configService.get<string>('DB_ENTITIES')],
+        migrations: [configService.get<string>('DB_MIGRATIONS')],
+        synchronize: configService.get<string>('NODE_ENV') === 'development',
+        migrationsTableName: 'migrations',
+        ssl:
+          configService.get<string>('NODE_ENV') !== 'development' && configService.get<string>('DB_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
       }),
-      dataSourceFactory: async () => dataSource,
+      inject: [ConfigService],
     }),
     SeedingModule,
     AuthModule,
