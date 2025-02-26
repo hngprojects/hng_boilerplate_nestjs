@@ -8,9 +8,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 import { Repository } from 'typeorm';
-import { Language } from './entities/language.entity';
+import { User } from '../user/entities/user.entity';
 import { CreateLanguageDto, UpdateLanguageDto } from './dto/create-language.dto';
+import { Language } from './entities/language.entity';
 
 @Injectable()
 export class LanguagesService {
@@ -70,6 +72,33 @@ export class LanguagesService {
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
+  }
+
+  async getLanguagesById(userId: string): Promise<any> {
+    try {
+      const languages = await this.languageRepository
+        .createQueryBuilder('language')
+        .innerJoin('language.users', 'user')
+        .where('user.id = :userId', { userId })
+        .getMany();
+
+      if (!languages || languages.length === 0) {
+        throw new CustomHttpException('Languages associated with this user not found', HttpStatus.NOT_FOUND);
+      }
+
+      const formattedLanguages = languages.map(language => ({
+        id: language.id,
+        language: language.language,
+        description: language.description,
+      }));
+
+      return {
+        status: 'OK',
+        status_code: HttpStatus.OK,
+        message: 'Languages fetched successfully',
+        languages: formattedLanguages,
+      };
+    } catch (error) {}
   }
 
   async updateLanguage(id: string, updateLanguageDto: UpdateLanguageDto): Promise<any> {

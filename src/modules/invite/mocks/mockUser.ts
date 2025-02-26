@@ -14,6 +14,7 @@ export const mockUser: User = {
   updated_at: new Date(),
   backup_codes: [],
   owned_organisations: [],
+  languages: [],
   jobs: [],
   hashPassword: () => null,
   password: 'password123',

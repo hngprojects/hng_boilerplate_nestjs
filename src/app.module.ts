@@ -11,7 +11,6 @@ import { LoggerModule } from 'nestjs-pino';
 import { join } from 'path';
 import authConfig from '../config/auth.config';
 import serverConfig from '../config/server.config';
-import dataSource from './database/data-source';
 import { SeedingModule } from './database/seeding/seeding.module';
 import { AuthGuard } from './guards/auth.guard';
 import { LanguageGuard } from './guards/language.guard';
