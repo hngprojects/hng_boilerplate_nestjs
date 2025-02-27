@@ -31,7 +31,7 @@ export class FlutterwaveService {
     };
     const payment_plan = await this.httpService
       .get(`${this.baseUrl}/payment-plans/${createFlutterwavePaymentDto.plan_id}`, { headers })
-      .toPromise();
+      .toPromise(); // update deprecated
     if (!payment_plan) {
       throw new CustomHttpException(PAYMENT_NOTFOUND, 404);
     }
@@ -56,7 +56,7 @@ export class FlutterwaveService {
         billing_option: createFlutterwavePaymentDto.billing_option,
       },
     };
-    const response = await this.httpService.post(`${this.baseUrl}/payments`, paymentData, { headers }).toPromise();
+    const response = await this.httpService.post(`${this.baseUrl}/payments`, paymentData, { headers }).toPromise(); // update deprecated
     const createPaymentDto: CreatePaymentDto = {
       user_id: userId,
       transaction_id: uuid4(),
@@ -82,7 +82,7 @@ export class FlutterwaveService {
     };
     const response = await this.httpService
       .get(`${this.baseUrl}/transactions/${transactionId}/verify`, { headers })
-      .toPromise();
+      .toPromise(); // update deprecated
     const payment = await this.paymentRepo.findOne({ where: { transaction_id: transactionId } });
     payment.status = PaymentStatus.APPROVED;
     await this.paymentRepo.save(payment);

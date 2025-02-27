@@ -42,11 +42,12 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
     }
 
-    const user = await this.userService.createUser(createUserDto);
+    const user = await this.userService.getUserRecord({ identifier: createUserDto.email, identifierType: 'email' });
 
     if (!user) {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
     }
+
     const newOrganisationPayload = {
       name: `${user.first_name}'s Organisation`,
       description: '',

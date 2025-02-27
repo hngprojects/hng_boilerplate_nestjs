@@ -40,6 +40,15 @@ export default class UserService {
 
   async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
     const profile = await this.profileRepository.save({ email: createUserPayload.email, username: '' });
+
+    if (!createUserPayload) {
+      throw new BadRequestException({
+        error: 'Bad Request',
+        message: 'user payload required',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
+    }
+
     const newUser = new User();
     Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
@@ -96,6 +105,14 @@ export default class UserService {
 
   async getUserRecord(identifierOptions: UserIdentifierOptionsType) {
     const { identifier, identifierType } = identifierOptions;
+
+    if (!identifier || !identifierType) {
+      throw new BadRequestException({
+        error: 'Bad Request',
+        message: 'Identifier and Identifier Type are required',
+        status_code: HttpStatus.BAD_REQUEST,
+      });
+    }
 
     const GetRecord = {
       id: async () => this.getUserById(String(identifier)),

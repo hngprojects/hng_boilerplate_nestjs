@@ -41,6 +41,7 @@ export class BillingPlanService {
     if (allPlans.length === 0) {
       throw new NotFoundException('No billing plans found');
     }
+
     const plans = allPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan));
 
     return {
