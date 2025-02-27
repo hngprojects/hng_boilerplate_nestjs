@@ -42,9 +42,7 @@ export default class AuthenticationService {
       throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
     }
 
-    await this.userService.createUser(createUserDto);
-
-    const user = await this.userService.getUserRecord({ identifier: createUserDto.email, identifierType: 'email' });
+    const user = await this.userService.createUser(createUserDto);
 
     if (!user) {
       throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
@@ -60,11 +58,11 @@ export default class AuthenticationService {
       state: '',
     };
 
-    const newOrganisation = await this.organisationService.create(newOrganisationPayload, user.id);
+    await this.organisationService.create(newOrganisationPayload, user.id);
 
     const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
-    const token = (await this.otpService.createOtp(user.id)).token;
+    (await this.otpService.createOtp(user.id)).token;
 
     const access_token = this.jwtService.sign({
       id: user.id,
