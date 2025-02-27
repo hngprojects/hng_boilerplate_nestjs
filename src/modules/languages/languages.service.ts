@@ -106,6 +106,7 @@ export class LanguagesService {
         id: language.id,
         language: language.language,
         description: language.description,
+        code: language.code,
       }));
 
       return {
