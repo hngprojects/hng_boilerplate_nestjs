@@ -10,7 +10,7 @@ import { AppModule } from './app.module';
 import { initializeDataSource } from '@database/data-source';
 import { SeedingService } from '@database/seeding/seeding.service';
 import { ResponseInterceptor } from '@shared/inteceptors/response.interceptor';
-
+import { Request, Response } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 
@@ -44,6 +44,10 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api/docs', app, document);
+
+  app.use('api/docs-json', (req: Request, res: Response) => {
+    res.json(document);
+  });
 
   const port = app.get<ConfigService>(ConfigService).get<number>('server.port');
   await app.listen(port);

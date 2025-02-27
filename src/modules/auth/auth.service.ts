@@ -328,7 +328,7 @@ export default class AuthenticationService {
     if (!userExists.profile.profile_pic_url || userExists.profile.profile_pic_url !== verifyTokenResponse.picture) {
       const updateDto = new UpdateProfileDto();
       updateDto.profile_pic_url = verifyTokenResponse.picture;
-      await this.profileService.updateProfile(userExists.profile.id, updateDto);
+      await this.profileService.updateProfile(userExists.id, updateDto);
     }
 
     return {
