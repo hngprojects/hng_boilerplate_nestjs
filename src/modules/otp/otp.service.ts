@@ -1,11 +1,10 @@
-import { HttpStatus, Injectable, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Otp } from './entities/otp.entity';
-import { User } from '../user/entities/user.entity';
-import { generateSixDigitToken } from '../../utils/generate-token';
-import { isInstance } from 'class-validator';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { User } from '@modules/user/entities/user.entity';
+import { generateSixDigitToken } from '@utils/generate-token';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @Injectable()
 export class OtpService {

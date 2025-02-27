@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comments.entity';
 import { CreateCommentDto } from './dtos/create-comment.dto';
-import { User } from '../user/entities/user.entity';
 import { CommentResponseDto } from './dtos/comment-response.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { User } from '@modules/user/entities/user.entity';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 @Injectable()
 export class CommentsService {
   constructor(

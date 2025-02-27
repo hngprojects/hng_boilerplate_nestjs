@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
 import { NewsletterSubscriptionService } from './newsletter-subscription.service';
 import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 
 @ApiTags('Newsletter Subscription')
 @Controller('newsletter-subscription')

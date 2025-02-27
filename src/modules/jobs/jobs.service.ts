@@ -1,10 +1,7 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { pick } from '../../helpers/pick';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { User } from '../user/entities/user.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { FindJobResponseDto } from './dto/find-job-response.dto';
 import { JobApplicationResponseDto } from './dto/job-application-response.dto';
 import { JobApplicationDto } from './dto/job-application.dto';
@@ -13,6 +10,9 @@ import { JobApplication } from './entities/job-application.entity';
 import { Job } from './entities/job.entity';
 import { isPassed } from './utils/helpers';
 import { JobSearchDto } from './dto/jobSearch.dto';
+import { User } from '@modules/user/entities/user.entity';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { pick } from '@shared/helpers/pick';
 
 @Injectable()
 export class JobsService {

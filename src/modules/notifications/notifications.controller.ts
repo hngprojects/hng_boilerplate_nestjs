@@ -20,9 +20,9 @@ import { ErrorDto } from './dtos/unread-response-error.dto';
 import { notificationPropDto } from './dtos/notification-prop.dto';
 import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
 import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
 import { CreateNotificationForAllUsersResDto } from './dtos/create-notification-all-users-res.dto';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
@@ -38,7 +38,6 @@ export class NotificationsController {
     type: CreateNotificationForAllUsersResDto,
   })
   @ApiInternalServerErrorResponse({
-    status: 500,
     description: 'Failed to create the notification.',
   })
   async createNotificationsForAllUsers(@Body() dto: CreateNotificationForAllUsersDto) {
@@ -52,7 +51,6 @@ export class NotificationsController {
     type: notificationPropDto,
   })
   @ApiInternalServerErrorResponse({
-    status: 500,
     description: 'Failed to retrieve notifications.',
   })
   async getNotifications(@Req() req: { user: UserPayload }) {

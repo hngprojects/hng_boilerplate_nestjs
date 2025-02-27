@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatu
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { TeamMemberResponseDto } from './dto/team.response.dto';
 

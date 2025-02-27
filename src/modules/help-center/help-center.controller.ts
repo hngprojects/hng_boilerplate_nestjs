@@ -1,27 +1,12 @@
-import {
-  Controller,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpException,
-  HttpStatus,
-  Get,
-  NotFoundException,
-  Post,
-  Query,
-  UseGuards,
-  Req,
-  HttpCode,
-} from '@nestjs/common';
+import { Controller, Body, Patch, Param, Delete, Get, Post, Query, UseGuards, Req } from '@nestjs/common';
 import { HelpCenterService } from './help-center.service';
 import { UpdateHelpCenterDto } from './dto/update-help-center.dto';
-import { ApiTags, ApiBearerAuth, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateHelpCenterDto } from './dto/create-help-center.dto';
 import { GetHelpCenterDto } from './dto/get-help-center.dto';
 import { SearchHelpCenterDto } from './dto/search-help-center.dto';
 import { HelpCenter } from './interface/help-center.interface';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import {
   HelpCenterMultipleInstancResponseType,
   HelpCenterSingleInstancResponseType,
@@ -36,8 +21,6 @@ import {
   SearchHelpCenterDocs,
   UpdateHelpCenterDocs,
 } from './docs/helpCenter-swagger';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import * as SYS_MSG from '../../helpers/SystemMessages';
 
 @ApiTags('help-center')
 @Controller('help-center')

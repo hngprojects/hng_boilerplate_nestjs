@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NewsletterSubscription } from '../newsletter-subscription/entities/newsletter-subscription.entity';
-import { NewsletterSubscriptionService } from '../newsletter-subscription/newsletter-subscription.service';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { User } from '../user/entities/user.entity';
 import { SubscriptionsController } from './subscriptions.controller';
 import { SubscriptionsService } from './subscriptions.service';
+import { NewsletterSubscriptionService } from '@modules/newsletter-subscription/newsletter-subscription.service';
+import { User } from '@modules/user/entities/user.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { NewsletterSubscription } from '@modules/newsletter-subscription/entities/newsletter-subscription.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([NewsletterSubscription, Organisation, User])],

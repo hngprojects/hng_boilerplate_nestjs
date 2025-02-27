@@ -23,13 +23,13 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { JobApplicationErrorDto } from './dto/job-application-error.dto';
 import { JobApplicationResponseDto } from './dto/job-application-response.dto';
 import { JobApplicationDto } from './dto/job-application.dto';
 import { JobDto } from './dto/job.dto';
 import { JobsService } from './jobs.service';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { JobSearchDto } from './dto/jobSearch.dto';
 
 @ApiTags('Jobs')
@@ -44,16 +44,14 @@ export class JobsController {
     description: 'Job application request body',
   })
   @ApiCreatedResponse({
-    status: 201,
     description: 'Job application submitted successfully',
     type: JobApplicationResponseDto,
   })
   @ApiUnprocessableEntityResponse({
     description: 'Job application deadline passed',
-    status: 422,
   })
-  @ApiBadRequestResponse({ status: 400, description: 'Invalid request body', type: JobApplicationErrorDto })
-  @ApiInternalServerErrorResponse({ status: 500, description: 'Internal server error', type: JobApplicationErrorDto })
+  @ApiBadRequestResponse({ description: 'Invalid request body', type: JobApplicationErrorDto })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error', type: JobApplicationErrorDto })
   @Post('/:id/applications')
   async applyForJob(@Param('id') id: string, @Body() jobApplicationDto: JobApplicationDto) {
     return this.jobService.applyForJob(id, jobApplicationDto);

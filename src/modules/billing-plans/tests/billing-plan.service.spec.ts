@@ -1,11 +1,13 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BillingPlanService } from '../billing-plan.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BillingPlan } from '../entities/billing-plan.entity';
 import { NotFoundException, BadRequestException, HttpStatus } from '@nestjs/common';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { BillingPlanMapper } from '../mapper/billing-plan.mapper';
 
 describe('BillingPlanService', () => {

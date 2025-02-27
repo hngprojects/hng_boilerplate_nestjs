@@ -4,10 +4,9 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { HelpCenterEntity } from '../entities/help-center.entity';
-import { REQUEST_SUCCESSFUL } from '../../../helpers/SystemMessages';
+import { REQUEST_SUCCESSFUL } from '@shared/constants/SystemMessages';
 import { User } from '../../user/entities/user.entity';
 import { TextService } from '../../translation/translation.service';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
 
 class MockTextService {
   translateText(text: string, targetLang: string) {

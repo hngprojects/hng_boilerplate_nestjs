@@ -13,17 +13,17 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { OwnershipGuard } from '../../guards/authorization.guard';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { isUUID } from 'class-validator';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '../../helpers/SystemMessages';
-import { AddCommentDto } from '../comments/dto/add-comment.dto';
 import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
+import { OwnershipGuard } from '@guards/authorization.guard';
+import { AddCommentDto } from '@modules/comments/dto/add-comment.dto';
+import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '@shared/constants/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 
 @ApiTags('Products')
 @Controller('')

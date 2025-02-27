@@ -6,12 +6,9 @@ import { OrganisationPermissionsService } from '../permissions.service';
 
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Permissions } from '../entities/permissions.entity';
-import { mockUpdatePermissionDto } from '../mocks/organisation-permissions.mock';
-import { mockOrganisation } from '../mocks/organisation.mock';
-import { mockRole } from '../mocks/role.mock';
 import { Role } from '../../../modules/role/entities/role.entity';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import { RESOURCE_NOT_FOUND } from '../../../helpers/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { RESOURCE_NOT_FOUND } from '@shared/constants/SystemMessages';
 describe('OrganisationPermissionsService', () => {
   let service: OrganisationPermissionsService;
   let permissionRepository: Repository<Permissions>;

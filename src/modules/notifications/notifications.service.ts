@@ -1,7 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notifications.entity';
-import { User } from '../user/entities/user.entity';
 import { MarkNotificationAsReadDto } from './dtos/mark-notification-as-read.dto';
 import {
   BadRequestException,
@@ -12,18 +11,18 @@ import {
   NotFoundException,
   Logger,
 } from '@nestjs/common';
-import { EmailService } from '../email/email.service';
-import { IMessageInterface } from '../email/interface/message.interface';
-import { NotificationSettingsDto } from '../notification-settings/dto/notification-settings.dto';
 import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
-import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
-import UserInterface from '../user/interfaces/UserInterface';
-import UserService from '../user/user.service';
 import { CreateNotificationError } from './dtos/create-notification-error.dto';
 import { CreateNotificationPropsDto } from './dtos/create-notification-props.dto';
 import { CreateNotificationResponseDto } from './dtos/create-notification-response.dto';
 import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import UserInterface from '@modules/user/interfaces/UserInterface';
+import { IMessageInterface } from '@modules/email/interface/message.interface';
+import { EmailService } from '@modules/email/email.service';
+import UserService from '@modules/user/user.service';
+import { NotificationSettingsService } from '@modules/notification-settings/notification-settings.service';
+import { User } from '@modules/user/entities/user.entity';
+import { NotificationSettingsDto } from '@modules/notification-settings/dto/notification-settings.dto';
 @Injectable()
 export class NotificationsService {
   constructor(
@@ -281,16 +280,8 @@ export class NotificationsService {
     notificationSettings: NotificationSettingsDto
   ): Promise<void> {
     const { email, first_name, last_name } = user; // TODO: Implement mobile_push_notification using firebase
-    const {
-      mobile_push_notifications,
-      email_notification_activity_in_workspace,
-      email_notification_always_send_email_notifications,
-      email_notification_email_digest,
-      email_notification_announcement_and_update_emails,
-      slack_notifications_activity_on_your_workspace,
-      slack_notifications_always_send_email_notifications,
-      slack_notifications_announcement_and_update_emails,
-    } = notificationSettings;
+    const { email_notification_activity_in_workspace, email_notification_always_send_email_notifications } =
+      notificationSettings;
 
     const notificationEmailProps: IMessageInterface = {
       recipient_name: `${first_name} ${last_name}`,

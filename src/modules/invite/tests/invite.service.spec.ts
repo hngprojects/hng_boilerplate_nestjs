@@ -13,7 +13,7 @@ import { mockOrg } from '../mocks/mockOrg';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from '../../../modules/email/email.service';
 import { CreateInvitationDto } from '../dto/create-invite.dto';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
 import { mockUser } from '../mocks/mockUser';

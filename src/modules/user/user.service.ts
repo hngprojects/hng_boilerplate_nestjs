@@ -14,21 +14,20 @@ import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import UpdateUserResponseDTO from './dto/update-user-response.dto';
 import UserResponseDTO from './dto/user-response.dto';
-import { User, UserType } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { UserPayload } from './interfaces/user-payload.interface';
 import CreateNewUserOptions from './options/CreateNewUserOptions';
 import UpdateUserRecordOption from './options/UpdateUserRecordOption';
 import UserIdentifierOptionsType from './options/UserIdentifierOptions';
 import { ReactivateAccountDto } from './dto/reactivate-account.dto';
-import { pick } from '../../helpers/pick';
+import { pick } from '@shared/helpers/pick';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { Readable, Writable } from 'stream';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { Readable } from 'stream';
 import * as xlsx from 'xlsx';
-import * as path from 'path';
 import { Response } from 'express';
-import { FileFormat, UserDataExportDto } from './dto/user-data-export.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { FileFormat } from './dto/user-data-export.dto';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @Injectable()
 export default class UserService {

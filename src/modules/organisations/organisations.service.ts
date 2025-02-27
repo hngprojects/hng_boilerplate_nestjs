@@ -9,18 +9,18 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../user/entities/user.entity';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { Organisation } from './entities/organisations.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
-import { Role } from '../role/entities/role.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
 import CreateOrganisationType from './dto/create-organisation-options';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { AddMemberDto } from './dto/add-member.dto';
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { User } from '@modules/user/entities/user.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @Injectable()
 export class OrganisationsService {

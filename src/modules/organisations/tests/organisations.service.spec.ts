@@ -4,23 +4,15 @@ import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { validate } from 'class-validator';
-import { orgMock } from '../tests/mocks/organisation.mock';
-import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
 import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
   ForbiddenException,
-  ConflictException,
-  HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationUserRole } from '../../../modules/role/entities/organisation-user-role.entity';
 import { Role } from '../../../modules/role/entities/role.entity';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 describe('OrganisationsService', () => {
   let service: OrganisationsService;

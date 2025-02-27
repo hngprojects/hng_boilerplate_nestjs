@@ -99,6 +99,7 @@ BenchmarkDotNet.Artifacts/
 
 # .NET Core
 project.lock.json
+package-lock.json
 project.fragment.lock.json
 artifacts/
 **/Properties/launchSettings.json
@@ -399,5 +400,6 @@ dist
 *.staging
 *.dev
 *.prod
+
 
 package-lock.json

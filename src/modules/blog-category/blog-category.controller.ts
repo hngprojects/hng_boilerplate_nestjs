@@ -1,7 +1,7 @@
-import { Body, Controller, Post, UseGuards, Request, Patch, Param } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Patch, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BlogCategoryService } from './blog-category.service';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
 import { UpdateBlogCategoryDto } from './dto/update-blog-category.dto';
 

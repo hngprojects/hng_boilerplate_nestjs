@@ -1,10 +1,12 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ContactUs } from '../entities/contact-us.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreateContactDto } from '../dto/create-contact-us.dto';
 import { ContactUsService } from '../contact-us.service';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { HttpStatus } from '@nestjs/common';
 
 describe('ContactUsService', () => {
