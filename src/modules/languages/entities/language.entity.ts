@@ -15,5 +15,5 @@ export class Language extends AbstractBaseEntity {
 
   @ManyToMany(() => User, user => user.languages)
   @JoinTable()
-  users: User[];
+  users?: User[];
 }

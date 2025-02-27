@@ -113,5 +113,6 @@ export class User extends AbstractBaseEntity {
   cart: Cart[];
 
   @ManyToMany(() => Language, language => language.users)
-  languages: Language[];
+  @JoinTable()
+  languages?: Language[];
 }

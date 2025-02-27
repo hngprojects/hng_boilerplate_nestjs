@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -8,7 +10,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CustomHttpException } from 'src/helpers/custom-http-filter';
+import { isUUID } from 'class-validator';
 import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { CreateLanguageDto, UpdateLanguageDto } from './dto/create-language.dto';
@@ -74,8 +76,19 @@ export class LanguagesService {
     }
   }
 
-  async getLanguagesById(userId: string): Promise<any> {
+  async getLanguagesById(userId: string, user: User): Promise<any> {
     try {
+      if (!isUUID(userId)) {
+        throw new BadRequestException('Invalid user Id');
+      }
+
+      if (user.id !== userId) {
+        throw new ForbiddenException({
+          status_code: HttpStatus.FORBIDDEN,
+          message: 'You are not authorized to access this resource',
+        });
+      }
+
       const languages = await this.languageRepository
         .createQueryBuilder('language')
         .innerJoin('language.users', 'user')
@@ -83,7 +96,10 @@ export class LanguagesService {
         .getMany();
 
       if (!languages || languages.length === 0) {
-        throw new CustomHttpException('Languages associated with this user not found', HttpStatus.NOT_FOUND);
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: 'Languages associated with this user not found',
+        });
       }
 
       const formattedLanguages = languages.map(language => ({
@@ -96,9 +112,22 @@ export class LanguagesService {
         status: 'OK',
         status_code: HttpStatus.OK,
         message: 'Languages fetched successfully',
-        languages: formattedLanguages,
+        data: formattedLanguages,
       };
-    } catch (error) {}
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      Logger.error('LanguagesServiceError ~ getLanguagesById ~', error);
+      throw new InternalServerErrorException({
+        message: 'An error occurred',
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
 
   async updateLanguage(id: string, updateLanguageDto: UpdateLanguageDto): Promise<any> {

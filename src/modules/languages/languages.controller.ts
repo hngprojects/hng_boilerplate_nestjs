@@ -1,8 +1,8 @@
-import { Controller, Post, Body, Get, Patch, Param, Res, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Request, Res } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { response, Response } from 'express';
 import { CreateLanguageDto, UpdateLanguageDto } from './dto/create-language.dto';
 import { LanguagesService } from './languages.service';
-import { Response } from 'express';
 
 @ApiTags('Languages')
 @Controller('languages')
@@ -27,6 +27,19 @@ export class LanguagesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getLanguages(@Res() response: Response): Promise<any> {
     const result = await this.languagesService.getSupportedLanguages();
+    return response.status(result.status_code).json(result);
+  }
+
+  @Get(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all languages from a userId' })
+  @ApiResponse({ status: 200, description: 'List of  languages by the user.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Invalid UserId' })
+  @ApiResponse({ status: 404, description: 'No languages found for the specified user' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getLanguagesByUserId(@Param('id') id: string, @Request() req): Promise<any> {
+    const result = await this.languagesService.getLanguagesById(id, req.user);
     return response.status(result.status_code).json(result);
   }
 
