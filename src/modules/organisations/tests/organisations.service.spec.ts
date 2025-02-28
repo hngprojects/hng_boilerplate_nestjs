@@ -5,10 +5,7 @@ import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import UserService from '../../user/user.service';
-import {
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationUserRole } from '../../../modules/role/entities/organisation-user-role.entity';
 import { Role } from '../../../modules/role/entities/role.entity';
@@ -256,6 +253,35 @@ describe('OrganisationsService', () => {
       jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(CustomHttpException);
+    });
+  });
+
+  describe('deleteOrganisation', () => {
+    it('should mark an organisation as deleted', async () => {
+      const orgId = 'org-id';
+      const mockOrganisation = { id: orgId, isDeleted: false } as Organisation;
+
+      jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(mockOrganisation);
+      jest.spyOn(organisationRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+
+      const result = await service.deleteOrganisation(orgId);
+
+      expect(result.message).toBe('Organisation deleted successfully');
+      expect(organisationRepository.update).toHaveBeenCalledWith({ id: orgId }, { isDeleted: true });
+    });
+
+    it('should exclude deleted organisations from queries', async () => {
+      const mockOrganisations = [
+        { id: 'org1', name: 'Active Org', isDeleted: false },
+        { id: 'org2', name: 'Deleted Org', isDeleted: true },
+      ] as Organisation[];
+
+      jest.spyOn(organisationRepository, 'find').mockResolvedValue(mockOrganisations);
+
+      const result = await service.getOrganisations();
+
+      expect(result).toEqual(expect.arrayContaining([{ id: 'org1', name: 'Active Org' }]));
+      expect(result).not.toEqual(expect.arrayContaining([{ id: 'org2', name: 'Deleted Org' }]));
     });
   });
 });

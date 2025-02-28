@@ -40,7 +40,7 @@ export class OrganisationsService {
   async getOrganisationMembers(orgId: string, page: number, page_size: number, sub: string) {
     const skip = (page - 1) * page_size;
     const organisation = await this.organisationRepository.findOne({
-      where: { id: orgId },
+      where: { id: orgId, isDeleted: false },
     });
 
     if (!organisation) throw new NotFoundException('No organisation found');
@@ -140,7 +140,10 @@ export class OrganisationsService {
   }
 
   async getUserOrganisations(userId: string) {
-    const organisations = await this.getAllUserOrganisations(userId);
+    // const organisations = await this.getAllUserOrganisations(userId);
+    const organisations = await this.organisationRepository.find({
+      where: { isDeleted: false },
+    });
     return {
       status_code: HttpStatus.OK,
       message: 'Organisations retrieved successfully',
@@ -159,12 +162,14 @@ export class OrganisationsService {
         where: { userId },
         relations: ['organisation', 'organisation.owner', 'role'],
       })
-    ).map(instance => ({
-      organisation_id: instance?.organisation?.id || '',
-      name: instance?.organisation?.name,
-      user_role: instance.role.name,
-      is_owner: instance.organisation ? instance.organisation.owner.id === user.id : '',
-    }));
+    )
+      .filter(instance => !instance.organisation.isDeleted)
+      .map(instance => ({
+        organisation_id: instance?.organisation?.id || '',
+        name: instance?.organisation?.name,
+        user_role: instance.role.name,
+        is_owner: instance.organisation ? instance.organisation.owner.id === user.id : '',
+      }));
 
     return userOrganisations;
   }

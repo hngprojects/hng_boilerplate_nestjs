@@ -57,6 +57,7 @@
     "class-validator": "^0.14.1",
     "csv-writer": "^1.6.0",
     "date-fns": "^4.1.0",
+    "express": "^4.21.2",
     "file-type-mime": "^0.4.6",
     "google-auth-library": "^9.15.1",
     "handlebars": "^4.7.8",
@@ -85,7 +86,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
-    "@nestjs-modules/mailer": "^2.0.2",
+    "@nestjs-modules/mailer": "^1.6.1",
     "@nestjs/cli": "^11.0.5",
     "@nestjs/common": "^11.0.10",
     "@nestjs/schematics": "^11.0.1",
