@@ -8,7 +8,8 @@ import { v4 as uuid4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
-import { PAYMENT_NOTFOUND } from '@shared/constants/SystemMessages';
+import { BILLING_PLAN_NOT_FOUND, PAYMENT_NOTFOUND } from '@shared/constants/SystemMessages';
+import { BillingPlan } from '@modules/billing-plans/entities/billing-plan.entity';
 
 @Injectable()
 export class FlutterwaveService {
@@ -18,7 +19,9 @@ export class FlutterwaveService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     @InjectRepository(Payment)
-    private readonly paymentRepo: Repository<Payment>
+    private readonly paymentRepo: Repository<Payment>,
+    @InjectRepository(BillingPlan)
+    private readonly billingPlanRepository: Repository<BillingPlan>
   ) {
     this.secretkey = configService.get<string>('FLUTTERWAVE_SECRET_KEY');
     this.baseUrl = configService.get<string>('FLUTTERWAVE_BASE_URL');
@@ -29,13 +32,49 @@ export class FlutterwaveService {
       Authorization: `Bearer ${this.secretkey}`,
       'Content-Type': 'application/json',
     };
-    const payment_plan = await this.httpService
-      .get(`${this.baseUrl}/payment-plans/${createFlutterwavePaymentDto.plan_id}`, { headers })
-      .toPromise();
-    if (!payment_plan) {
-      throw new CustomHttpException(PAYMENT_NOTFOUND, 404);
+    const billingPlan = await this.billingPlanRepository.findOneBy({ id: createFlutterwavePaymentDto.plan_id });
+    if (!billingPlan) {
+      throw new CustomHttpException(BILLING_PLAN_NOT_FOUND, 404);
     }
-    const { amount, currency } = payment_plan.data.data;
+    let flutterwavePlanId = billingPlan.flutterwave_plan_id;
+    if (!flutterwavePlanId) {
+      const flutterwavePlan = await this.httpService
+        .post(
+          `${this.baseUrl}/payment-plans`,
+          {
+            name: billingPlan.name,
+            amount: billingPlan.amount,
+            interval: billingPlan.frequency,
+            duration: 24,
+          },
+          { headers }
+        )
+        .toPromise();
+      billingPlan.flutterwave_plan_id = flutterwavePlan.data.data.id;
+      await this.billingPlanRepository.save(billingPlan);
+      flutterwavePlanId = billingPlan.flutterwave_plan_id;
+    }
+    let paymentPlan = await this.httpService
+      .get(`${this.baseUrl}/payment-plans/${flutterwavePlanId}`, { headers })
+      .toPromise();
+    if (!paymentPlan) {
+      const newPaymentPlan = await this.httpService
+        .post(
+          `${this.baseUrl}/payment-plans`,
+          {
+            name: billingPlan.name,
+            amount: billingPlan.amount,
+            interval: billingPlan.frequency,
+            duration: 24,
+          },
+          { headers }
+        )
+        .toPromise();
+      billingPlan.flutterwave_plan_id = newPaymentPlan.data.data.id;
+      await this.billingPlanRepository.save(billingPlan);
+      paymentPlan = newPaymentPlan;
+    }
+    const { amount, currency } = paymentPlan.data.data;
     const { email, first_name, last_name } = createFlutterwavePaymentDto;
     const paymentData = {
       tx_ref: uuid4(),
@@ -47,8 +86,8 @@ export class FlutterwaveService {
         name: `${first_name} ${last_name}`,
       },
       customizations: {
-        title: 'Payment for Goods/Services',
-        description: 'Payment for the purchase of goods or services',
+        title: billingPlan.name,
+        description: billingPlan.description,
       },
       meta: {
         organization_id: createFlutterwavePaymentDto.organisation_id,

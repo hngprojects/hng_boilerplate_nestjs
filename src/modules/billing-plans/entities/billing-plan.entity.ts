@@ -17,4 +17,7 @@ export class BillingPlan extends AbstractBaseEntity {
 
   @Column({ type: 'int', nullable: true })
   amount: number;
+
+  @Column({ type: 'text', nullable: true })
+  flutterwave_plan_id: string;
 }
