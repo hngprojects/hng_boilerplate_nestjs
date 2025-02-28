@@ -12,6 +12,7 @@ import { Job } from '../entities/job.entity';
 import { JobsService } from '../jobs.service';
 import { jobsMock } from './mocks/jobs.mock';
 import { JobSearchDto } from '../dto/jobSearch.dto';
+import { UpdateJobDto } from '../dto/update-job.dto';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -269,6 +270,190 @@ describe('JobsService', () => {
       const result = await service.searchJobs(searchDto, page, limit);
       expect(result.status_code).toBe(200);
       expect(result.data).toHaveLength(2);
+    });
+  });
+
+  // Add a mock user with all required properties
+  const mockUser: User = {
+    id: 'user_id',
+    created_at: new Date(),
+    updated_at: new Date(),
+    first_name: 'John',
+    last_name: 'Doe',
+    email: 'john@example.com',
+    status: 'active',
+    password: 'hashedPassword123',
+    phone: '+1234567890',
+    is_active: true,
+    backup_codes: [],
+    attempts_left: 3,
+    time_left: 0,
+    secret: 'secret123',
+    is_2fa_enabled: false,
+    deletedAt: null,
+    owned_organisations: [],
+    organisations: [],
+    jobs: [],
+    profile: null,
+    testimonials: [],
+    blogs: [],
+    notifications: [],
+    notification_settings: [],
+    comments: [],
+    orders: [],
+    cart: null,
+  } as User;
+
+  describe('updateJob', () => {
+    const updateDto: UpdateJobDto = {
+      title: 'Updated Job Title',
+      salary_range: SalaryRange['50k_to_70k'],
+    };
+
+    it('should update job successfully', async () => {
+      const mockJob = {
+        ...jobsMock[0],
+        user: mockUser as User,
+      } as Job;
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(mockJob);
+      jest.spyOn(jobRepository, 'save').mockResolvedValue({
+        ...mockJob,
+        ...updateDto,
+      } as Job);
+
+      const result = await service.update('job-id', updateDto, 'user_id');
+
+      expect(result.status).toBe('success');
+      expect(result.status_code).toBe(200);
+      expect((result.data as Job).title).toBe(updateDto.title);
+    });
+
+    it('should throw error if job not found', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.update('non-existent', updateDto, 'user_id')).rejects.toThrow(
+        new CustomHttpException('Job not found', HttpStatus.NOT_FOUND)
+      );
+    });
+
+    it('should throw error if user is not authorized', async () => {
+      const mockJob = {
+        ...jobsMock[0],
+        user: { ...mockUser, id: 'different_user_id' } as User,
+      } as Job;
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(mockJob);
+
+      await expect(service.update('job-id', updateDto, 'user_id')).rejects.toThrow(
+        new CustomHttpException('Unauthorized to update this job', HttpStatus.FORBIDDEN)
+      );
+    });
+
+    it('should throw error when updating with invalid data', async () => {
+      const invalidUpdateDto = {
+        salary_range: 'invalid_range', // invalid enum value
+      };
+
+      const mockJob = {
+        ...jobsMock[0],
+        user: mockUser as User,
+      } as Job;
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(mockJob);
+      // Mock validation error
+      jest
+        .spyOn(jobRepository, 'save')
+        .mockRejectedValue(new CustomHttpException('Invalid salary range', HttpStatus.BAD_REQUEST));
+
+      await expect(service.update('job-id', invalidUpdateDto as UpdateJobDto, 'user_id')).rejects.toThrow(
+        CustomHttpException
+      );
+    });
+
+    it('should throw error when updating job with empty data', async () => {
+      const emptyUpdateDto = {};
+
+      // Mock the service to check for empty update
+      jest.spyOn(service as any, 'validateUpdateData').mockImplementation(dto => {
+        if (Object.keys(dto).length === 0) {
+          throw new CustomHttpException('No updates provided', HttpStatus.BAD_REQUEST);
+        }
+      });
+
+      await expect(service.update('job-id', emptyUpdateDto as UpdateJobDto, 'user_id')).rejects.toThrow(
+        new CustomHttpException('No updates provided', HttpStatus.BAD_REQUEST)
+      );
+    });
+
+    it("should throw error when trying to update someone else's job", async () => {
+      const mockJob = {
+        ...jobsMock[0],
+        user: { ...mockUser, id: 'different_user_id' } as User,
+      } as Job;
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(mockJob);
+
+      await expect(service.update('job-id', updateDto, 'user_id')).rejects.toThrow(
+        new CustomHttpException('Unauthorized to update this job', HttpStatus.FORBIDDEN)
+      );
+    });
+
+    it('should throw error when job ID is invalid UUID', async () => {
+      // Mock the findOne to throw for invalid UUID
+      jest
+        .spyOn(jobRepository, 'findOne')
+        .mockRejectedValue(new CustomHttpException('Invalid UUID', HttpStatus.BAD_REQUEST));
+
+      await expect(service.update('invalid-uuid', updateDto, 'user_id')).rejects.toThrow(CustomHttpException);
+    });
+
+    it('should throw error when updating without user ID', async () => {
+      // Mock the service to check for userId first
+      jest.spyOn(service as any, 'validateUserId').mockImplementation(userId => {
+        if (!userId) {
+          throw new CustomHttpException('User ID is required', HttpStatus.UNAUTHORIZED);
+        }
+      });
+
+      await expect(service.update('job-id', updateDto, undefined)).rejects.toThrow(
+        new CustomHttpException('User ID is required', HttpStatus.UNAUTHORIZED)
+      );
+    });
+
+    it('should maintain data integrity after update', async () => {
+      const created_at = new Date();
+      const originalJob = {
+        ...jobsMock[0],
+        user: mockUser as User,
+        created_at,
+        job_application: [],
+        id: 'job-id',
+      } as Job;
+
+      const updateDtoWithPartialData = {
+        title: 'Updated Title',
+      };
+
+      const updatedJob = {
+        ...originalJob,
+        ...updateDtoWithPartialData,
+        created_at,
+        job_application: [],
+      };
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(originalJob);
+      jest.spyOn(jobRepository, 'save').mockResolvedValue(updatedJob);
+
+      const result = await service.update('job-id', updateDtoWithPartialData as UpdateJobDto, 'user_id');
+
+      expect(result.data).toEqual(
+        expect.objectContaining({
+          created_at: originalJob.created_at,
+          job_application: originalJob.job_application,
+          title: updateDtoWithPartialData.title,
+        })
+      );
     });
   });
 });

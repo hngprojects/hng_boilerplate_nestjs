@@ -10,6 +10,7 @@ import {
   UseGuards,
   ValidationPipe,
   ParseUUIDPipe,
+  Patch,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -22,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
   ApiUnprocessableEntityResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { skipAuth } from '@shared/helpers/skipAuth';
 import { JobApplicationErrorDto } from './dto/job-application-error.dto';
@@ -31,6 +33,9 @@ import { JobDto } from './dto/job.dto';
 import { JobsService } from './jobs.service';
 import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { JobSearchDto } from './dto/jobSearch.dto';
+import { UpdateJobDto } from './dto/update-job.dto';
+import { JobOwnerGuard } from '../../guards/job-owner.guard';
+import { AuthGuard } from '../../guards/auth.guard';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -57,7 +62,7 @@ export class JobsController {
     return this.jobService.applyForJob(id, jobApplicationDto);
   }
 
-  @UseGuards(SuperAdminGuard)
+  @UseGuards(AuthGuard)
   @Post('/')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new job' })
@@ -102,6 +107,21 @@ export class JobsController {
   @ApiResponse({ status: 404, description: 'Job not found' })
   async getJob(@Param('id', ParseUUIDPipe) id) {
     return this.jobService.getJob(id);
+  }
+
+  @Patch('/:id')
+  @UseGuards(AuthGuard)
+  @UseGuards(SuperAdminGuard, JobOwnerGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a job posting' })
+  @ApiResponse({ status: 200, description: 'Job updated successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Job not found' })
+  @ApiBody({ type: UpdateJobDto })
+  @ApiParam({ name: 'id', type: 'string', description: 'Job ID' })
+  async updateJob(@Param('id', ParseUUIDPipe) id: string, @Body() updateJobDto: UpdateJobDto, @Request() req: any) {
+    const user = req.user;
+    return this.jobService.update(id, updateJobDto, user.sub);
   }
 
   @UseGuards(SuperAdminGuard)

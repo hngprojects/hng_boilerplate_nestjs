@@ -33,9 +33,6 @@
     "postinstall": "npm install --platform=linux --arch=x64 sharp"
   },
   "dependencies": {
-    "@css-inline/css-inline": "^0.14.3",
-    "@css-inline/css-inline-linux-x64-gnu": "^0.14.3",
-    "@faker-js/faker": "^9.5.0",
     "@google/generative-ai": "^0.22.0",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/bull": "^11.0.2",
@@ -78,7 +75,6 @@
     "speakeasy": "^2.0.0",
     "supertest": "^7.0.0",
     "typeorm": "^0.3.20",
-    "typeorm-extension": "^3.6.3",
     "types-joi": "^2.1.0",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5"
