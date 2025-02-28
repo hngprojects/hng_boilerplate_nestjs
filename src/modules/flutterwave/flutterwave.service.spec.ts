@@ -4,6 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
+import { BillingPlan } from '@modules/billing-plans/entities/billing-plan.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
@@ -13,6 +14,7 @@ describe('FlutterwaveService', () => {
   let service: FlutterwaveService;
   let httpService: HttpService;
   let paymentRepo: Repository<Payment>;
+  let billingPlanRepo: Repository<BillingPlan>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,12 +37,20 @@ describe('FlutterwaveService', () => {
           provide: getRepositoryToken(Payment),
           useClass: Repository,
         },
+        {
+          provide: getRepositoryToken(BillingPlan),
+          useValue: {
+            findOneBy: jest.fn(),
+            save: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<FlutterwaveService>(FlutterwaveService);
     httpService = module.get<HttpService>(HttpService);
     paymentRepo = module.get<Repository<Payment>>(getRepositoryToken(Payment));
+    billingPlanRepo = module.get<Repository<BillingPlan>>(getRepositoryToken(BillingPlan));
   });
 
   it('should initiate a payment successfully', async () => {
@@ -79,6 +89,15 @@ describe('FlutterwaveService', () => {
     jest.spyOn(paymentRepo, 'create').mockImplementation(dto => dto as Payment);
     jest.spyOn(paymentRepo, 'save').mockResolvedValue({} as Payment);
 
+    jest.spyOn(billingPlanRepo, 'findOneBy').mockResolvedValue({
+      id: 'plan-id',
+      flutterwave_plan_id: 'plan-id',
+      name: 'Test Plan',
+      amount: 5000,
+      frequency: 'monthly',
+      description: 'Description for the plan',
+    } as BillingPlan);
+
     const createFlutterwavePaymentDto: CreateFlutterwavePaymentDto = {
       plan_id: 'plan-id',
       email: 'test@example.com',
@@ -107,5 +126,6 @@ describe('FlutterwaveService', () => {
       })
     );
     expect(paymentRepo.save).toHaveBeenCalled();
+    expect(billingPlanRepo.findOneBy).toHaveBeenCalledWith({ id: 'plan-id' });
   });
 });
