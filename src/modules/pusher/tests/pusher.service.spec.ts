@@ -38,7 +38,7 @@ describe('PusherService', () => {
     expect(pusherService).toBeDefined();
   });
 
-  it('should call pusher trigger method with correct parameters', async () => {
+  it('should trigger event successfully', async () => {
     const channel = 'test-channel';
     const event = 'test-event';
     const data = { message: 'test message' };
@@ -49,18 +49,14 @@ describe('PusherService', () => {
     expect(pusherInstance.trigger).toHaveBeenCalledTimes(1);
   });
 
-  it('should trigger event successfully', async () => {
-    const result = await pusherService.triggerEvent('test-channel', 'test-event', { message: 'new notification' });
-    expect(result).toBeUndefined();
-    expect(pusherInstance.trigger).toHaveBeenCalledWith('test-channel', 'test-event', { message: 'new notification' });
-  });
-
   it('should throw an error if Pusher fails', async () => {
-    (pusherInstance.trigger as jest.Mock).mockRejectedValue(new Error('Pusher Error'));
-    await expect(async () => {
-      await pusherService.triggerEvent('test-channel', 'test-event', { message: 'new notification' });
-    }).rejects.toThrow('Pusher Error');
+    const channel = 'test-channel';
+    const event = 'test-event';
+    const data = { message: 'new notification' };
 
-    expect(pusherInstance.trigger).toHaveBeenCalledWith('test-channel', 'test-event', { message: 'new notification' });
+    (pusherInstance.trigger as jest.Mock).mockRejectedValue(new Error('Pusher Error'));
+    await expect(pusherService.triggerEvent(channel, event, data)).rejects.toThrow('Pusher Error');
+
+    expect(pusherInstance.trigger).toHaveBeenCalledWith(channel, event, data);
   });
 });
