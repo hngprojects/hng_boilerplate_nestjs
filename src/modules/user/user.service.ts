@@ -8,7 +8,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Profile } from '../profile/entities/profile.entity';
 import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
@@ -38,13 +38,14 @@ export default class UserService {
     private profileRepository: Repository<Profile>
   ) {}
 
-  async createUser(createUserPayload: CreateNewUserOptions): Promise<any> {
+  async createUser(createUserPayload: CreateNewUserOptions, manager?: EntityManager): Promise<User> {
+    const repo = manager ? manager.getRepository(User) : this.userRepository;
     const profile = await this.profileRepository.save({ email: createUserPayload.email, username: '' });
     const newUser = new User();
     Object.assign(newUser, createUserPayload);
     newUser.is_active = true;
     newUser.profile = profile;
-    return await this.userRepository.save(newUser);
+    return await repo.save<User>(newUser);
   }
 
   async updateUserRecord(userUpdateOptions: UpdateUserRecordOption) {
@@ -78,28 +79,32 @@ export default class UserService {
     return this.userRepository.save(newUser);
   }
 
-  private async getUserByEmail(email: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({
+  private getRepo(manager?: EntityManager) {
+    return manager || this.userRepository;
+  }
+
+  private async getUserByEmail(email: string, manager?: EntityManager) {
+    const user: UserResponseDTO = await this.getRepo(manager).findOne(User, {
       where: { email: email },
       relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
 
-  private async getUserById(identifier: string) {
-    const user: UserResponseDTO = await this.userRepository.findOne({
+  private async getUserById(identifier: string, manager?: EntityManager) {
+    const user: UserResponseDTO = await this.getRepo(manager).findOne(User, {
       where: { id: identifier },
       relations: ['profile', 'owned_organisations'],
     });
     return user;
   }
 
-  async getUserRecord(identifierOptions: UserIdentifierOptionsType) {
+  async getUserRecord(identifierOptions: UserIdentifierOptionsType, manager?: EntityManager) {
     const { identifier, identifierType } = identifierOptions;
 
     const GetRecord = {
-      id: async () => this.getUserById(String(identifier)),
-      email: async () => this.getUserByEmail(String(identifier)),
+      id: async () => this.getUserById(String(identifier), manager),
+      email: async () => this.getUserByEmail(String(identifier), manager),
     };
 
     return await GetRecord[identifierType]();

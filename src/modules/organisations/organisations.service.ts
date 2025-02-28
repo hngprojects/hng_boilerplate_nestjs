@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { Organisation } from './entities/organisations.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
@@ -65,35 +65,40 @@ export class OrganisationsService {
     return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
   }
 
-  async createOrganisation(createOrganisationDto: CreateOrganisationType, userId: string) {
-    const query = await this.create(createOrganisationDto, userId);
+  async createOrganisation(createOrganisationDto: CreateOrganisationType, userId: string, manager?: EntityManager) {
+    const query = await this.create(createOrganisationDto, userId, manager);
     return { status_code: HttpStatus.CREATED, messge: 'Organisation created', data: query };
   }
 
-  async create(createOrganisationDto: CreateOrganisationType, userId: string) {
+  async create(createOrganisationDto: CreateOrganisationType, userId: string, manager?: EntityManager) {
+    const userRepo = manager ? manager.getRepository(User) : this.userRepository;
+    const repo = manager ? manager.getRepository(Organisation) : this.organisationRepository;
+    const orgUserRoleRepo = manager ? manager.getRepository(OrganisationUserRole) : this.organisationUserRole;
     if (createOrganisationDto.email) {
       const emailFound = await this.emailExists(createOrganisationDto.email);
       if (emailFound) throw new ConflictException('Organisation with this email already exists');
     }
 
-    const owner = await this.userRepository.findOne({
+    const owner = await userRepo.findOne({
       where: { id: userId },
     });
 
-    const vendorRole = await this.roleRepository.findOne({ where: { name: 'admin' } });
+    const vendorRole = await (manager ? manager.getRepository(Role) : this.roleRepository).findOne({
+      where: { name: 'admin' },
+    });
 
     const organisationInstance = new Organisation();
     Object.assign(organisationInstance, createOrganisationDto);
     organisationInstance.owner = owner;
     organisationInstance.members = [owner];
-    const newOrganisation = await this.organisationRepository.save(organisationInstance);
+    const newOrganisation = await repo.save(organisationInstance);
 
     const adminRole = new OrganisationUserRole();
     adminRole.userId = owner.id;
     adminRole.organisationId = newOrganisation.id;
     adminRole.roleId = vendorRole.id;
 
-    await this.organisationUserRole.save(adminRole);
+    await orgUserRoleRepo.save(adminRole);
 
     const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
 
@@ -148,8 +153,9 @@ export class OrganisationsService {
     };
   }
 
-  async getAllUserOrganisations(userId: string) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  async getAllUserOrganisations(userId: string, manager?: EntityManager) {
+    const repo = manager ? manager.getRepository(User) : this.userRepository;
+    const user = await repo.findOne({ where: { id: userId } });
 
     if (!user) {
       throw new CustomHttpException('Invalid Request', HttpStatus.BAD_REQUEST);

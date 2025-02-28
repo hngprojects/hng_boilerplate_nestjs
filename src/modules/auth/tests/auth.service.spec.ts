@@ -19,19 +19,24 @@ import { LoginDto } from '../dto/login.dto';
 import UserResponseDTO from '@modules/user/dto/user-response.dto';
 import { Otp } from '@modules/otp/entities/otp.entity';
 import { Verify2FADto } from '../dto/verify-2fa.dto';
-
+import { DataSource, EntityManager } from 'typeorm';
 jest.mock('speakeasy');
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let userServiceMock: jest.Mocked<UserService>;
   let profileServiceMock: jest.Mocked<ProfileService>;
+  let dataSourceMock: jest.Mocked<DataSource>;
   let jwtServiceMock: jest.Mocked<JwtService>;
   let otpServiceMock: jest.Mocked<OtpService>;
   let emailServiceMock: jest.Mocked<EmailService>;
   let organisationServiceMock: jest.Mocked<OrganisationsService>;
 
   beforeEach(async () => {
+    dataSourceMock = {
+      transaction: jest.fn().mockImplementation(async cb => cb({} as EntityManager)),
+      manager: {} as EntityManager,
+    } as unknown as jest.Mocked<DataSource>;
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthenticationService,
@@ -76,6 +81,10 @@ describe('AuthenticationService', () => {
             sendUserConfirmationMail: jest.fn(),
             sendEmail: jest.fn(),
           },
+        },
+        {
+          provide: DataSource,
+          useValue: dataSourceMock,
         },
       ],
     }).compile();
@@ -123,7 +132,7 @@ describe('AuthenticationService', () => {
     it('should create a new user successfully', async () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
 
-      userServiceMock.createUser.mockResolvedValueOnce(undefined);
+      userServiceMock.createUser.mockResolvedValueOnce(mockUser as User);
 
       userServiceMock.getUserRecord.mockResolvedValueOnce({
         id: '1',
@@ -175,7 +184,7 @@ describe('AuthenticationService', () => {
             is_superadmin: false,
             avatar_url: 'some_url',
           },
-          oranisations: [
+          organisations: [
             {
               organisation_id: 'e12973d1-cbc3-45f8-ba13-14991e4490fa',
               name: "John's Organisation",
