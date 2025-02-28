@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, Delete, UseGuards, HttpStatus } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { TeamMemberResponseDto } from './dto/team.response.dto';
-
 @ApiTags('Teams')
 @Controller('teams')
 export class TeamsController {
@@ -40,12 +39,8 @@ export class TeamsController {
       },
     },
   })
-  async findAll(): Promise<{ message: string; data: TeamMemberResponseDto[] }> {
-    const teamMembers = await this.teamsService.findAllTeamMembers();
-    return {
-      message: 'Team members retrieved successfully',
-      data: teamMembers,
-    };
+  async findAllTeamMembers(@Query('page') page: number, @Query('page_size') pageSize: number) {
+    return await this.teamsService.findAllTeamMembers({ page, pageSize });
   }
 
   @Get(':id')

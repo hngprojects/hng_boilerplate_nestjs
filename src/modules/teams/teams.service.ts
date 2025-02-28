@@ -24,9 +24,33 @@ export class TeamsService {
     }
   }
 
-  async findAllTeamMembers(): Promise<TeamMemberResponseDto[]> {
-    const teamMembers = await this.teamRepository.find();
-    return teamMembers.map(this.mapTeamToResponseDto);
+  async findAllTeamMembers({ page = 1, pageSize = 10 }: { page: number; pageSize: number }) {
+    const skip = (page - 1) * pageSize;
+    const [teamMembers, total] = await this.teamRepository.findAndCount({ skip, take: pageSize });
+
+    const transformedTeamMembers: TeamMemberResponseDto[] = teamMembers.map(member => ({
+      id: member.id,
+      name: member.name,
+      title: member.title,
+      description: member.description,
+      image: member.image,
+      socials: {
+        facebook: member.facebook,
+        twitter: member.twitter,
+        instagram: member.instagram,
+      },
+    }));
+
+    return {
+      status_code: HttpStatus.OK,
+      message: 'Team members retrieved successfully',
+      data: {
+        team_members: transformedTeamMembers,
+        total,
+        page,
+        pageSize,
+      },
+    };
   }
 
   async findOneTeamMember(id: string): Promise<TeamMemberResponseDto> {
