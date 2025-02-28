@@ -403,6 +403,11 @@ dist
 # User specific ignores 
 todo.txt
 .vscode/
+<<<<<<< HEAD
+
+docker-compose.yml
+docker-compose.override.yml
+=======
 data/
 docker-compose.yml
 package-lock.json
@@ -412,3 +417,4 @@ data/
 
 
 
+>>>>>>> fd432623e76f82227175dc0916e2c61a9b3530cc
