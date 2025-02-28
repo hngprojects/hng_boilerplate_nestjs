@@ -6,6 +6,8 @@ import { CreateCommentDto } from './dtos/create-comment.dto';
 import { User } from '../user/entities/user.entity';
 import { CommentResponseDto } from './dtos/comment-response.dto';
 import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { UserType } from '../user/entities/user.entity';
+
 @Injectable()
 export class CommentsService {
   constructor(
@@ -51,6 +53,27 @@ export class CommentsService {
     return {
       message: 'Comment retrieved successfully',
       data: { comment },
+    };
+  }
+
+  async delAComment(commentId: string, userId: string, role: string) {
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId },
+      relations: ['user'],
+    });
+
+    if (!comment) {
+      throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (role !== UserType.ADMIN) {
+      throw new CustomHttpException('Unauthorized action', HttpStatus.FORBIDDEN);
+    }
+
+    await this.commentRepository.delete(commentId);
+
+    return {
+      message: 'Comment deleted successfully (soft delete)',
     };
   }
 }

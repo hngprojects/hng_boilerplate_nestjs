@@ -1,8 +1,10 @@
-import { Controller, Body, Post, Request, Get, Param } from '@nestjs/common';
+import { Controller, Body, Post, Request, Get, Param, UseGuards, Delete } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentResponseDto } from './dtos/comment-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+// import { AuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from '../../guards/auth.guard';
 
 @ApiBearerAuth()
 @ApiTags('Comments')
@@ -14,6 +16,7 @@ export class CommentsController {
   @ApiResponse({ status: 201, description: 'The comment has been successfully created.', type: CommentResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  @UseGuards(AuthGuard)
   async addComment(@Body() createCommentDto: CreateCommentDto, @Request() req): Promise<CommentResponseDto> {
     const { userId } = req.user;
     return await this.commentsService.addComment(createCommentDto, userId);
@@ -24,5 +27,16 @@ export class CommentsController {
   @Get(':id')
   async getAComment(@Param('id') id: string): Promise<any> {
     return await this.commentsService.getAComment(id);
+  }
+
+  @ApiOperation({ summary: 'Delete a comment' })
+  @ApiResponse({ status: 201, description: 'The comment has been deleted sucessfully', type: CommentResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  async delAComment(@Param('id') id: string, @Request() req): Promise<any> {
+    const { userId, role } = req.user;
+    return await this.commentsService.delAComment(id, userId, role);
   }
 }
