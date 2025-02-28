@@ -408,10 +408,7 @@ docker-compose.yml
 package-lock.json
 .dev.env
 
-
-package-lock.json
-docker-compose.yml
 data/
-.dev.env
+
 
 
