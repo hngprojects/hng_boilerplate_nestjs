@@ -401,6 +401,7 @@ dist
 *.dev
 *.prod
 
+data/db/
 
 # User specific ignores 
 todo.txt
