@@ -68,7 +68,7 @@ describe('TeamsService', () => {
   });
 
   describe('findAllTeamMembers', () => {
-    it('should return an array of team members', async () => {
+    it('should return a paginated response of team members', async () => {
       const teams = [
         {
           id: '1',
@@ -95,27 +95,37 @@ describe('TeamsService', () => {
           updated_at: new Date(),
         },
       ];
-      const teamResponseDtos: TeamMemberResponseDto[] = [
-        {
-          id: '1',
-          name: 'John Doe',
-          title: '',
-          description: '',
-          image: '',
-          socials: { facebook: '', twitter: '', instagram: '' },
-        },
-        {
-          id: '2',
-          name: 'Jane Doe',
-          title: '',
-          description: '',
-          image: '',
-          socials: { facebook: '', twitter: '', instagram: '' },
-        },
-      ];
-      jest.spyOn(repo, 'find').mockResolvedValue(teams as Team[]);
 
-      expect(await service.findAllTeamMembers()).toEqual(teamResponseDtos);
+      const total = 2;
+      const page = 1;
+      const pageSize = 10;
+
+      const expectedResponse = {
+        status_code: HttpStatus.OK,
+        message: 'Team members retrieved successfully',
+        data: {
+          team_members: teams.map(member => ({
+            id: member.id,
+            name: member.name,
+            title: member.title,
+            description: member.description,
+            image: member.image,
+            socials: {
+              facebook: member.facebook,
+              twitter: member.twitter,
+              instagram: member.instagram,
+            },
+          })) as TeamMemberResponseDto[],
+          total,
+          page,
+          pageSize,
+        },
+      };
+
+      jest.spyOn(repo, 'findAndCount').mockResolvedValue([teams as Team[], total]);
+
+      const result = await service.findAllTeamMembers({ page, pageSize });
+      expect(result).toEqual(expectedResponse);
     });
   });
 
