@@ -70,6 +70,7 @@ export class JobsService {
     const newJob = this.jobRepository.create(Object.assign(new Job(), { ...createJobDto, user }));
 
     await this.jobRepository.save(newJob);
+
     return {
       status: 'success',
       status_code: 201,
@@ -85,6 +86,7 @@ export class JobsService {
     const jobs = await this.jobRepository.find({ where: { is_deleted: false } });
 
     jobs.map(x => delete x.is_deleted);
+
     return {
       message: SYS_MSG.JOB_LISTING_RETRIEVAL_SUCCESSFUL,
       status_code: 200,

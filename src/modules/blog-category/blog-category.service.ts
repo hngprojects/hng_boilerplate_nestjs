@@ -38,7 +38,7 @@ export class BlogCategoryService {
       throw new CustomHttpException(CATEGORY_NOT_FOUND, 404);
     }
 
-    await this.blogCategoryRepository.delete({ id });
+    await this.blogCategoryRepository.remove(category);
 
     return {
       message: 'Organisation category deleted successfully',

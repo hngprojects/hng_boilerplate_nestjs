@@ -8,8 +8,6 @@ import { NewsletterSubscriptionService } from '@modules/newsletter-subscription/
 @Injectable()
 export class SubscriptionsService {
   constructor(
-    private readonly newsletterSubscriptionService: NewsletterSubscriptionService,
-
     @InjectRepository(NewsletterSubscription)
     private readonly newsletterSubscriptionRepository: Repository<NewsletterSubscription>
   ) {}

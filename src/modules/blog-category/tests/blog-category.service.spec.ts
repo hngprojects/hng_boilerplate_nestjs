@@ -49,6 +49,19 @@ describe('BlogCategoryService', () => {
     });
   });
 
+  it('should successfully delete a blog category', async () => {
+    const blogCategory = new BlogCategory();
+    blogCategory.id = 'blog-category-id';
+
+    jest.spyOn(repository, 'findOne').mockResolvedValue(blogCategory);
+    jest.spyOn(repository, 'remove').mockResolvedValue(undefined);
+
+    await service.deleteOrganisationCategory('blog-id');
+
+    expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'blog-id' } });
+    expect(repository.remove).toHaveBeenCalledWith(blogCategory);
+  });
+
   it('should throw an error if repository save fails', async () => {
     const createBlogCategoryDto: CreateBlogCategoryDto = {
       name: 'Tech',
