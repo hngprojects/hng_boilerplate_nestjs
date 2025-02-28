@@ -5,6 +5,7 @@ import { skipAuth } from '@shared/helpers/skipAuth';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 import { SuperAdminGuard } from '@guards/super-admin.guard';
+import { UnsubscribeNewsletterDto } from './dto/unsubscribe-newsletter.dto';
 
 @ApiTags('Newsletter Subscription')
 @Controller('newsletter-subscription')
@@ -114,5 +115,15 @@ export class NewsletterSubscriptionController {
   @ApiResponse({ status: 404, description: 'Subscriber with ID ${id} not found or already restored' })
   restore(@Param('id') id: string) {
     return this.newsletterSubscriptionService.restore(id);
+  }
+
+  @Post('unsubscribe')
+  @skipAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Unsubscribe from the newsletter' })
+  @ApiResponse({ status: 200, description: 'User has been unsubscribed successfully.' })
+  @ApiResponse({ status: 404, description: 'Email not found' })
+  unsubscribe(@Body() unsubscribeDto: UnsubscribeNewsletterDto) {
+    return this.newsletterSubscriptionService.unsubscribe(unsubscribeDto.email);
   }
 }

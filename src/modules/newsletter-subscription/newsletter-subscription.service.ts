@@ -72,4 +72,17 @@ export class NewsletterSubscriptionService {
       email: newsletterSubscription.email,
     };
   }
+
+  async unsubscribe(email: string) {
+    const subscription = await this.newsletterSubscriptionRepository.findOne({ where: { email } });
+
+    if (!subscription) {
+      throw new NotFoundException(`Email ${email} not found in the subscription list`);
+    }
+
+    subscription.isUnsubscribed = true;
+    await this.newsletterSubscriptionRepository.save(subscription);
+
+    return { message: `Email ${email} has been unsubscribed successfully` };
+  }
 }

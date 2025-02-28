@@ -403,10 +403,22 @@ dist
 # User specific ignores 
 todo.txt
 .vscode/
+
+# Docker compose
+docker-compose.yml
+data/
+
+# Docker compose
+docker-compose.yml
+data/
+
 data/
 docker-compose.yml
 package-lock.json
 .dev.env
-data
 
-/data/db/base
+
+package-lock.json
+docker-compose.yml
+data/
+.dev.env

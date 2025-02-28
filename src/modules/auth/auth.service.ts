@@ -62,7 +62,7 @@ export default class AuthenticationService {
 
     const newOrganisation = await this.organisationService.create(newOrganisationPayload, user.id);
 
-    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
+    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id, 1, 10);
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
     const token = (await this.otpService.createOtp(user.id)).token;
 
@@ -174,7 +174,7 @@ export default class AuthenticationService {
     if (!isMatch) {
       throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
-    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
+    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id, 1, 10);
     const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
     const responsePayload = {
@@ -328,7 +328,7 @@ export default class AuthenticationService {
       return await this.createUserGoogle(userCreationPayload);
     }
 
-    const userOranisations = await this.organisationService.getAllUserOrganisations(userExists.id);
+    const userOranisations = await this.organisationService.getAllUserOrganisations(userExists.id, 1, 10);
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
     const accessToken = this.jwtService.sign({
       sub: userExists.id,
@@ -376,7 +376,7 @@ export default class AuthenticationService {
 
     await this.organisationService.create(newOrganisationPaload, newUser.id);
 
-    const userOranisations = await this.organisationService.getAllUserOrganisations(newUser.id);
+    const userOranisations = await this.organisationService.getAllUserOrganisations(newUser.id, 1, 10);
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
 
     const accessToken = this.jwtService.sign({

@@ -139,25 +139,37 @@ export class OrganisationsService {
     };
   }
 
-  async getUserOrganisations(userId: string) {
-    const organisations = await this.getAllUserOrganisations(userId);
+  async getUserOrganisations(userId: string, page: number, page_size: number) {
+    const organisations = await this.getAllUserOrganisations(userId, page, page_size);
+    const total_count = await this.organisationUserRole.count({ where: { userId } });
+
     return {
       status_code: HttpStatus.OK,
       message: 'Organisations retrieved successfully',
-      data: organisations,
+      data: {
+        organisations,
+        total_count,
+        current_page: page,
+        page_size,
+      },
     };
   }
 
-  async getAllUserOrganisations(userId: string) {
+  async getAllUserOrganisations(userId: string, page: number, page_size: number) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
       throw new CustomHttpException('Invalid Request', HttpStatus.BAD_REQUEST);
     }
+
+    const skip = (page - 1) * page_size;
+
     const userOrganisations = (
       await this.organisationUserRole.find({
         where: { userId },
         relations: ['organisation', 'organisation.owner', 'role'],
+        skip,
+        take: page_size,
       })
     ).map(instance => ({
       organisation_id: instance?.organisation?.id || '',

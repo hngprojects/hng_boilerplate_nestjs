@@ -8,4 +8,7 @@ export class NewsletterSubscription extends AbstractBaseEntity {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @Column({ default: false })
+  isUnsubscribed: boolean;
 }

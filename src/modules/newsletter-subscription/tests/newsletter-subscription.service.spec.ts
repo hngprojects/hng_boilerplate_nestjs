@@ -146,4 +146,47 @@ describe('NewsletterService', () => {
       await expect(service.restore(id)).rejects.toThrow(NotFoundException);
     });
   });
+
+  describe('unsubscribe', () => {
+    it('should successfully unsubscribe a user', async () => {
+      const email = 'test@example.com';
+      const mockSubscription = { id: '1', email, isUnsubscribed: false } as NewsletterSubscription;
+
+      // Mock `findOne` to return a subscribed user
+      jest.spyOn(repository, 'findOne').mockResolvedValue(mockSubscription);
+      // Mock `save` to return updated object
+      jest.spyOn(repository, 'save').mockImplementation(
+        async sub =>
+          ({
+            ...sub,
+            isUnsubscribed: true,
+            email: sub.email,
+            deletedAt: sub.deletedAt || new Date(),
+            id: sub.id,
+            created_at: sub.created_at || new Date(),
+            updated_at: new Date(),
+          }) as NewsletterSubscription
+      );
+
+      const result = await service.unsubscribe(email);
+      expect(result).toEqual({ message: `Email ${email} has been unsubscribed successfully` });
+
+      // Ensure `isUnsubscribed` was updated
+      expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({ isUnsubscribed: true }));
+    });
+
+    it('should throw NotFoundException if email is not found', async () => {
+      const email = 'notfound@example.com';
+
+      // Mock `findOne` to return null
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+      // Expecting an error
+      await expect(service.unsubscribe(email)).rejects.toThrow(
+        new NotFoundException(`Email ${email} not found in the subscription list`)
+      );
+
+      expect(repository.findOne).toHaveBeenCalledWith({ where: { email } });
+    });
+  });
 });
