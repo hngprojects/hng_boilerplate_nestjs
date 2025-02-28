@@ -24,6 +24,7 @@ describe('TeamsService', () => {
             find: jest.fn(),
             findOne: jest.fn(),
             delete: jest.fn(),
+            findAndCount: jest.fn(),
           },
         },
       ],
