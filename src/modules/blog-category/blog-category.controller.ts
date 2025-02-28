@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Patch, Param } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Patch, Param, Delete } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BlogCategoryService } from './blog-category.service';
 import { SuperAdminGuard } from '@guards/super-admin.guard';
@@ -37,7 +37,7 @@ export class BlogCategoryController {
     return await this.blogCategoryService.updateOrganisationCategory(id, updateBlogCategoryDto);
   }
 
-  @Patch(':id')
+  @Delete(':id')
   @UseGuards(SuperAdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an organisation category' })
