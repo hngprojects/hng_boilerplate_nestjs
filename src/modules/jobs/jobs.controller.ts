@@ -10,6 +10,7 @@ import {
   UseGuards,
   ValidationPipe,
   ParseUUIDPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -88,11 +89,23 @@ export class JobsController {
 
   @skipAuth()
   @Get('/')
-  @ApiOperation({ summary: 'Gets all jobs' })
+  @ApiOperation({ summary: 'Gets all jobs with pagination' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number (default: 1)' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Number of jobs per page (default: 10, max: 100)',
+  })
   @ApiResponse({ status: 200, description: 'Jobs returned successfully' })
-  @ApiResponse({ status: 404, description: 'Job not found' })
-  async getAllJobs() {
-    return this.jobService.getJobs();
+  @ApiResponse({ status: 400, description: 'Invalid pagination parameters' })
+  @ApiResponse({ status: 404, description: 'No jobs found' })
+  async getAllJobs(
+    @Query('page', new ParseIntPipe({ errorHttpStatusCode: 400 })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ errorHttpStatusCode: 400 })) limit: number = 10
+  ) {
+    return this.jobService.getJobs(page, limit);
   }
 
   @skipAuth()

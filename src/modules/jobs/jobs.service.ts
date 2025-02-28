@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as SYS_MSG from '@shared/constants/SystemMessages';
@@ -81,14 +81,34 @@ export class JobsService {
     };
   }
 
-  async getJobs() {
-    const jobs = await this.jobRepository.find({ where: { is_deleted: false } });
+  async getJobs(page: number = 1, limit: number = 10) {
+    if (!Number.isInteger(page) || page < 1) {
+      throw new BadRequestException('Page must be a positive integer.');
+    }
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('Limit must be a positive integer between 1 and 100.');
+    }
 
-    jobs.map(x => delete x.is_deleted);
+    limit = limit > 100 ? 100 : limit;
+
+    const [jobs, total] = await this.jobRepository.findAndCount({
+      where: { is_deleted: false },
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+
+    jobs.forEach(job => delete job.is_deleted);
+
     return {
       message: SYS_MSG.JOB_LISTING_RETRIEVAL_SUCCESSFUL,
       status_code: 200,
       data: jobs,
+      meta: {
+        total_jobs: total,
+        total_pages: Math.ceil(total / limit),
+        current_page: page,
+        per_page: limit,
+      },
     };
   }
 
