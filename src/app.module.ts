@@ -48,6 +48,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { LanguageGuard } from '@guards/language.guard';
 import { ApiStatusModule } from '@modules/api-status/api-status.module';
+import { PusherModule } from '@modules/pusher/pusher.module';
 
 @Module({
   providers: [
@@ -174,6 +175,7 @@ import { ApiStatusModule } from '@modules/api-status/api-status.module';
       },
     }),
     ApiStatusModule,
+    PusherModule,
   ],
   controllers: [HealthController, ProbeController],
 })
