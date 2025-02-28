@@ -13,6 +13,7 @@ import { JobSearchDto } from './dto/jobSearch.dto';
 import { User } from '@modules/user/entities/user.entity';
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { pick } from '@shared/helpers/pick';
+import { UpdateJobDto } from './dto/update-job.dto';
 
 @Injectable()
 export class JobsService {
@@ -149,6 +150,48 @@ export class JobsService {
     return {
       status_code: HttpStatus.OK,
       data: jobs,
+    };
+  }
+
+  private validateUserId(userId: string) {
+    if (!userId) {
+      throw new CustomHttpException('User ID is required', HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  private validateUpdateData(updateDto: UpdateJobDto) {
+    if (Object.keys(updateDto).length === 0) {
+      throw new CustomHttpException('No updates provided', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async update(id: string, updateJobDto: UpdateJobDto, userId: string) {
+    this.validateUserId(userId);
+    this.validateUpdateData(updateJobDto);
+
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!job) {
+      throw new CustomHttpException('Job not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (job.user.id !== userId) {
+      throw new CustomHttpException('Unauthorized to update this job', HttpStatus.FORBIDDEN);
+    }
+
+    const updatedJob = await this.jobRepository.save({
+      ...job,
+      ...updateJobDto,
+    });
+
+    return {
+      status: 'success',
+      status_code: 200,
+      message: 'Job updated successfully',
+      data: updatedJob,
     };
   }
 }

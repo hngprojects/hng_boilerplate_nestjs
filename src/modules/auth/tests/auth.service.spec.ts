@@ -73,6 +73,7 @@ describe('AuthenticationService', () => {
           useValue: {
             sendForgotPasswordMail: jest.fn(),
             sendUserEmailConfirmationOtp: jest.fn(),
+            sendUserConfirmationMail: jest.fn(),
             sendEmail: jest.fn(),
           },
         },

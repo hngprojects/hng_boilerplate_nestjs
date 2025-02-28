@@ -5,7 +5,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Language } from '../entities/language.entity';
 import { CreateLanguageDto } from '../dto/create-language.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { User } from '@modules/user/entities/user.entity';
 
 const mockLanguageRepository = {
   findOne: jest.fn(),
@@ -16,6 +17,7 @@ const mockLanguageRepository = {
 
 const mockLanguagesService = {
   createLanguage: jest.fn(),
+  getLanguagesById: jest.fn(),
   getSupportedLanguages: jest.fn(),
 };
 
@@ -173,6 +175,100 @@ describe('LanguagesController', () => {
           HttpStatus.INTERNAL_SERVER_ERROR
         )
       );
+    });
+  });
+
+  describe('getLanguagesByUserId', () => {
+    it('should return languages associated with a user', async () => {
+      const userId = '550e8400-e29b-41d4-a716-446655440000';
+      const user = { id: 'user-id' } as User;
+
+      const languages = [
+        { id: '1', language: 'English', code: 'en', description: 'English' },
+        { id: '2', language: 'Spanish', code: 'es', description: 'Español' },
+      ];
+      mockLanguagesService.getLanguagesById.mockResolvedValue({
+        status: 'OK',
+        status_code: HttpStatus.OK,
+        message: 'Languages fetched successfully',
+        data: languages,
+      });
+
+      const req = { user };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+      await controller.getLanguagesByUserId(userId, req, res as any);
+
+      expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+      expect(res.json).toHaveBeenCalledWith({
+        status: 'OK',
+        status_code: HttpStatus.OK,
+        message: 'Languages fetched successfully',
+        data: languages,
+      });
+    });
+
+    it('should handle invalid user ID', async () => {
+      const userId = 'invalid-id';
+      const user = { id: 'user-id' } as User;
+
+      mockLanguagesService.getLanguagesById.mockRejectedValue(new BadRequestException('Invalid user Id'));
+
+      const req = { user };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+      await expect(controller.getLanguagesByUserId(userId, req, res as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should handle unauthorized access', async () => {
+      const userId = '550e8400-e29b-41d4-a716-446655440000';
+      const user = { id: 'different-user-id' } as User;
+
+      mockLanguagesService.getLanguagesById.mockRejectedValue(
+        new ForbiddenException({
+          status_code: HttpStatus.FORBIDDEN,
+          message: 'You are not authorized to access this resource',
+        })
+      );
+
+      const req = { user };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+      await expect(controller.getLanguagesByUserId(userId, req, res as any)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should handle no languages found for the user', async () => {
+      const userId = '550e8400-e29b-41d4-a716-446655440000';
+      const user = { id: userId } as User;
+
+      mockLanguagesService.getLanguagesById.mockRejectedValue(
+        new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: 'Languages associated with this user not found',
+        })
+      );
+
+      const req = { user };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+      await expect(controller.getLanguagesByUserId(userId, req, res as any)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should handle no languages found for the user', async () => {
+      const userId = '550e8400-e29b-41d4-a716-446655440000';
+      const user = { id: userId } as User;
+
+      mockLanguagesService.getLanguagesById.mockRejectedValue(
+        new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: 'Languages associated with this user not found',
+        })
+      );
+
+      const req = { user };
+      const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+      await expect(controller.getLanguagesByUserId(userId, req, res as any)).rejects.toThrow(NotFoundException);
     });
   });
 });
