@@ -407,5 +407,6 @@ data/
 docker-compose.yml
 package-lock.json
 .dev.env
+data
 
-
+/data/db/base
