@@ -1,6 +1,7 @@
 import { skipAuth } from '@shared/helpers/skipAuth';
 import { Controller, Get } from '@nestjs/common';
 import * as os from 'os';
+import { PusherService } from '@modules/pusher/pusher.service';
 
 @Controller()
 export default class HealthController {

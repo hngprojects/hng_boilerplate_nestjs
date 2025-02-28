@@ -49,33 +49,18 @@ describe('PusherService', () => {
     expect(pusherInstance.trigger).toHaveBeenCalledTimes(1);
   });
 
-  it('should log success message when event is triggered successfully', async () => {
-    const channel = 'test-channel';
-    const event = 'test-event';
-    const data = { message: 'test message' };
-
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-    await pusherService.triggerEvent(channel, event, data);
-
-    expect(consoleSpy).toHaveBeenCalledWith('Notifications sent to pusher successfully');
-
-    consoleSpy.mockRestore();
+  it('should trigger event successfully', async () => {
+    const result = await pusherService.triggerEvent('test-channel', 'test-event', { message: 'new notification' });
+    expect(result).toBeUndefined();
+    expect(pusherInstance.trigger).toHaveBeenCalledWith('test-channel', 'test-event', { message: 'new notification' });
   });
 
-  it('should log error when pusher trigger fails', async () => {
-    (pusherInstance.trigger as jest.Mock).mockRejectedValueOnce(new Error('Pusher Error'));
+  it('should throw an error if Pusher fails', async () => {
+    (pusherInstance.trigger as jest.Mock).mockRejectedValue(new Error('Pusher Error'));
+    await expect(async () => {
+      await pusherService.triggerEvent('test-channel', 'test-event', { message: 'new notification' });
+    }).rejects.toThrow('Pusher Error');
 
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-    const channel = 'test-channel';
-    const event = 'test-event';
-    const data = { message: 'test message' };
-
-    await pusherService.triggerEvent(channel, event, data);
-
-    expect(consoleSpy).toHaveBeenCalledWith(new Error('Pusher Error'));
-
-    consoleSpy.mockRestore();
+    expect(pusherInstance.trigger).toHaveBeenCalledWith('test-channel', 'test-event', { message: 'new notification' });
   });
 });
