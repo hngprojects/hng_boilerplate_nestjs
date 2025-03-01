@@ -10,6 +10,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { BillingPlanService } from './billing-plan.service';
@@ -40,8 +41,14 @@ export class BillingPlanController {
   @skipAuth()
   @getAllBillingPlansDocs()
   @Get('/')
-  async getAllBillingPlans() {
-    return this.billingPlanService.getAllBillingPlans();
+  async getAllBillingPlans(
+    @Query('page') page: string,
+    @Query('limit') limit: string, 
+  ) {
+    const pageNumber = page ? parseInt(page, 10) : 1;
+    const limitNumber = limit ? parseInt(limit, 10) : 10; 
+
+    return this.billingPlanService.getAllBillingPlans(pageNumber, limitNumber);
   }
 
   @skipAuth()
