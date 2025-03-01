@@ -4,7 +4,7 @@ import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Cart } from '../../dashboard/entities/cart.entity';
 import { OrderItem } from '../../dashboard/entities/order-items.entity';
-import { ProductVariant } from '../../products/entities/product-variant.entity'
+import { ProductVariant } from '../../products/entities/product-variant.entity';
 import { ProductCategory } from '../../../modules/product-category/entities/product-category.entity';
 
 export enum StockStatusType {
@@ -71,6 +71,6 @@ export class Product extends AbstractBaseEntity {
   @OneToMany(() => ProductVariant, variant => variant.product, { cascade: true })
   variants?: ProductVariant[];
 
-  @ManyToOne(() => ProductCategory, (category) => category.products, { nullable: false })
-  category: ProductCategory;
+  @ManyToOne(() => ProductCategory, category => category.products, { nullable: false })
+  category: ProductCategory; //category linked to the product
 }
