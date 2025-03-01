@@ -70,6 +70,7 @@ export class ProductsController {
     return await this.productsService.getTotalProducts();
   }
 
+
   @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Post('organisations/:orgId/products')

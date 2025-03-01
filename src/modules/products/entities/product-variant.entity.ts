@@ -5,4 +5,7 @@ import { Product } from './product.entity';
 export class ProductVariant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => Product, product => product.variants, { onDelete: 'CASCADE' })
+  product: Product;
 }

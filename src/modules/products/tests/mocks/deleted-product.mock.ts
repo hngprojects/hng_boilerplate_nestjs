@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { orgMock } from '../../../organisations/tests/mocks/organisation.mock';
 import { Product, StockStatusType } from '../../entities/product.entity';
+import { productCategoryMock } from './product-category.mock';
 
 enum ProductSizeType {
   SMALL = 'Small',
@@ -15,7 +16,7 @@ export const deletedProductMock: Product = {
   stock_status: StockStatusType.LOW_STOCK,
   image: '',
   price: 12,
-  category: 'Fashion',
+  category: productCategoryMock,
   quantity: 7,
   cost_price: 10,
   orderItems: [],
