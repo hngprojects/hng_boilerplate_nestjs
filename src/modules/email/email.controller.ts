@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Res, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Res, Patch, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { EmailService } from './email.service';
 import { UpdateTemplateDto, createTemplateDto, getTemplateDto } from './dto/email.dto';
@@ -21,10 +21,11 @@ export class EmailController {
   @ApiOperation({ summary: 'Store a new email template' })
   @ApiResponse({ status: 201, description: 'Template created successfully', type: CreateTemplateResponseDto })
   @ApiResponse({ status: 400, description: 'Invalid HTML format', type: ErrorResponseDto })
+  @HttpCode(HttpStatus.CREATED)
   @Post('store-template')
-  async storeTemplate(@Body() body: createTemplateDto, @Res() res: Response): Promise<any> {
+  async storeTemplate(@Body() body: createTemplateDto): Promise<any> {
     const response = await this.emailService.createTemplate(body);
-    res.status(response.status_code).send(response);
+    return response;
   }
 
   @ApiOperation({ summary: 'Update an existing email template' })
@@ -32,24 +33,22 @@ export class EmailController {
   @ApiResponse({ status: 400, description: 'Invalid HTML format', type: ErrorResponseDto })
   @ApiResponse({ status: 404, description: 'Template not found', type: ErrorResponseDto })
   @ApiParam({ name: 'templateName', required: true, description: 'The name of the template to update' })
+  @HttpCode(HttpStatus.OK)
   @Patch('update-template/:templateName')
-  async updateTemplate(
-    @Param('templateName') name: string,
-    @Body() body: UpdateTemplateDto,
-    @Res() res: Response
-  ): Promise<any> {
+  async updateTemplate(@Param('templateName') name: string, @Body() body: UpdateTemplateDto): Promise<any> {
     const response = await this.emailService.updateTemplate(name, body);
-    res.status(response.status_code).send(response);
+    return response;
   }
 
   @ApiOperation({ summary: 'Retrieve an email template' })
   @ApiResponse({ status: 200, description: 'Template retrieved successfully', type: GetTemplateResponseDto })
   @ApiResponse({ status: 404, description: 'Template not found', type: ErrorResponseDto })
   @UseGuards(SuperAdminGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('get-template')
-  async getTemplate(@Body() body: getTemplateDto, @Res() res: Response): Promise<any> {
+  async getTemplate(@Body() body: getTemplateDto): Promise<any> {
     const response = await this.emailService.getTemplate(body);
-    res.status(response.status_code).send(response);
+    return response;
   }
 
   @ApiOperation({ summary: 'Delete an email template' })

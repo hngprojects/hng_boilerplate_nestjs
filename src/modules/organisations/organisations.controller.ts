@@ -94,6 +94,19 @@ export class OrganisationsController {
   }
 
   @UseGuards(OwnershipGuard)
+  @ApiOperation({ summary: 'Remove member from an organization' })
+  @ApiResponse({ status: 201, description: 'Member added successfully' })
+  @ApiResponse({ status: 409, description: 'User already added to organization.' })
+  @ApiResponse({ status: 404, description: 'Organisation not found' })
+  @Delete(':org_id/users')
+  async removeMember(
+    @Param('org_id', ParseUUIDPipe) org_id: string,
+    @Query('member_id', ParseUUIDPipe) member_id: string
+  ) {
+    return this.organisationsService.removeOrganisationMember(org_id, member_id);
+  }
+
+  @UseGuards(OwnershipGuard)
   @ApiOperation({ summary: 'Assign roles to members of an organisation' })
   @ApiResponse({
     status: 200,

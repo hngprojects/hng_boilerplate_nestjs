@@ -72,4 +72,14 @@ describe('BlogCategoryService', () => {
     expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'blog-id' } });
     expect(repository.remove).toHaveBeenCalledWith(blogCategory);
   });
+
+  it('should throw an error when the ID is missing', async () => {
+    expect(service.deleteOrganisationCategory('')).rejects.toThrow('Category ID not present');
+  });
+
+  it('should throw an error if no blog category is found for the given ID', async () => {
+    jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+    expect(service.deleteOrganisationCategory('non-existing-id')).rejects.toThrow('Organization category not found');
+  });
 });
