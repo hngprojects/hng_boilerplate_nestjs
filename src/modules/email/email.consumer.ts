@@ -96,7 +96,7 @@ export default class EmailQueueConsumer {
     }
   }
 
-  @Process('in-app-notification')
+  @Process('login-otp')
   async sendLoginOtpEmailJob(job: Job<MailInterface>) {
     try {
       const {
@@ -113,7 +113,7 @@ export default class EmailQueueConsumer {
     }
   }
 
-  @Process('login-otp')
+  @Process('in-app-notification')
   async sendNotificationMail(job: Job<MailInterface>) {
     try {
       const {

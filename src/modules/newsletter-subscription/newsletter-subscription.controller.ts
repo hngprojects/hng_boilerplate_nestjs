@@ -5,6 +5,8 @@ import { skipAuth } from '@shared/helpers/skipAuth';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 import { SuperAdminGuard } from '@guards/super-admin.guard';
+import { UnsubscribeNewsletterDto } from './dto/unsubscribe-newsletter.dto';
+import { ResubscribeNewsletterDto } from './dto/resubscribe-newsletter.dto';
 
 @ApiTags('Newsletter Subscription')
 @Controller('newsletter-subscription')
@@ -18,6 +20,17 @@ export class NewsletterSubscriptionController {
   @ApiResponse({ status: 201, description: 'Subscriber subscription successful.' })
   create(@Body() createNewsletterDto: CreateNewsletterSubscriptionDto) {
     return this.newsletterSubscriptionService.newsletterSubscription(createNewsletterDto);
+  }
+
+  @skipAuth()
+  @Post('resubscribe')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resubscribe to the newsletter' })
+  @ApiResponse({ status: 200, description: 'User successfully resubscribed.' })
+  @ApiResponse({ status: 400, description: 'User is already subscribed.' })
+  @ApiResponse({ status: 404, description: 'User not found or not unsubscribed.' })
+  resubscribe(@Body() resubscribeDto: ResubscribeNewsletterDto) {
+    return this.newsletterSubscriptionService.resubscribe(resubscribeDto);
   }
 
   @ApiBearerAuth()
@@ -114,5 +127,15 @@ export class NewsletterSubscriptionController {
   @ApiResponse({ status: 404, description: 'Subscriber with ID ${id} not found or already restored' })
   restore(@Param('id') id: string) {
     return this.newsletterSubscriptionService.restore(id);
+  }
+
+  @Post('unsubscribe')
+  @skipAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Unsubscribe from the newsletter' })
+  @ApiResponse({ status: 200, description: 'User has been unsubscribed successfully.' })
+  @ApiResponse({ status: 404, description: 'Email not found' })
+  unsubscribe(@Body() unsubscribeDto: UnsubscribeNewsletterDto) {
+    return this.newsletterSubscriptionService.unsubscribe(unsubscribeDto.email);
   }
 }

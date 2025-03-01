@@ -1,5 +1,3 @@
-import 'module-alias/register';
-import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BillingPlanService } from '../billing-plan.service';
 import { Repository } from 'typeorm';
@@ -9,6 +7,8 @@ import { NotFoundException, BadRequestException, HttpStatus } from '@nestjs/comm
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { BillingPlanMapper } from '../mapper/billing-plan.mapper';
+import { SubscriptionScheduler } from '../subscription-scheduler';
+import { MailerService } from '@nestjs-modules/mailer';
 
 describe('BillingPlanService', () => {
   let service: BillingPlanService;
@@ -21,6 +21,12 @@ describe('BillingPlanService', () => {
         {
           provide: getRepositoryToken(BillingPlan),
           useClass: Repository,
+        },
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();
@@ -48,6 +54,8 @@ describe('BillingPlanService', () => {
         is_active: true,
         created_at: new Date(),
         updated_at: new Date(),
+        expirationDate: new Date(),
+        email: 'test@example.com',
       };
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(billingPlan as BillingPlan);
@@ -70,6 +78,8 @@ describe('BillingPlanService', () => {
           is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
+          expirationDate: new Date(),
+          email: 'test1@example.com',
         },
         {
           id: '2',
@@ -80,9 +90,11 @@ describe('BillingPlanService', () => {
           is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
+          expirationDate: new Date(),
+          email: 'test2@example.com',
         },
         {
-          id: '1',
+          id: '3',
           name: 'Premium',
           description: 'premium plan',
           amount: 120,
@@ -90,6 +102,8 @@ describe('BillingPlanService', () => {
           is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
+          expirationDate: new Date(),
+          email: 'test3@example.com',
         },
       ];
 
@@ -121,6 +135,8 @@ describe('BillingPlanService', () => {
         is_active: true,
         created_at: new Date(),
         updated_at: new Date(),
+        expirationDate: new Date(),
+        email: 'test@example.com',
       };
 
       jest.spyOn(repository, 'findOneBy').mockResolvedValue(billingPlan as BillingPlan);
@@ -142,5 +158,40 @@ describe('BillingPlanService', () => {
 
       await expect(service.getSingleBillingPlan('1')).rejects.toThrow(NotFoundException);
     });
+  });
+});
+
+describe('SubscriptionScheduler', () => {
+  let scheduler: SubscriptionScheduler;
+  let billingPlanService: BillingPlanService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        SubscriptionScheduler,
+        {
+          provide: BillingPlanService,
+          useValue: {
+            getAllSubscriptions: jest.fn().mockResolvedValue([
+              { id: 1, expirationDate: new Date(), email: 'test1@example.com' },
+              { id: 2, expirationDate: new Date(), email: 'test2@example.com' },
+            ]),
+            sendRenewalReminder: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+      ],
+    }).compile();
+
+    scheduler = module.get<SubscriptionScheduler>(SubscriptionScheduler);
+    billingPlanService = module.get<BillingPlanService>(BillingPlanService);
+  });
+
+  it('should send renewal reminders to all subscriptions', async () => {
+    await scheduler.handleCron();
+
+    expect(billingPlanService.getAllSubscriptions).toHaveBeenCalled();
+    expect(billingPlanService.sendRenewalReminder).toHaveBeenCalledTimes(2);
+    expect(billingPlanService.sendRenewalReminder).toHaveBeenCalledWith(1);
+    expect(billingPlanService.sendRenewalReminder).toHaveBeenCalledWith(2);
   });
 });

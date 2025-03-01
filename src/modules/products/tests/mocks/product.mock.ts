@@ -24,4 +24,5 @@ export const productMock: Product = {
   cost_price: 10,
   cart: [],
   orderItems: [],
+  reviews: [],
 };
