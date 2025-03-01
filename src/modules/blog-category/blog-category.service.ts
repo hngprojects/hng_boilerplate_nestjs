@@ -31,6 +31,10 @@ export class BlogCategoryService {
   }
 
   async deleteOrganisationCategory(id: string) {
+    if (!id) {
+      throw new CustomHttpException('Category ID not present', 400);
+    }
+
     const category = await this.blogCategoryRepository.findOne({ where: { id } });
 
     if (!category) {

@@ -247,6 +247,38 @@ export class OrganisationsService {
     return { status: 'success', message: SYS_MSG.MEMBER_ALREADY_SUCCESSFULLY, member: responsePayload };
   }
 
+  async removeOrganisationMember(org_id: string, member_id: string) {
+    const organisation = await this.organisationRepository.findOne({
+      where: { id: org_id },
+    });
+
+    if (!organisation) {
+      throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    const orgUserRole = await this.organisationUserRole.findOne({
+      where: {
+        userId: member_id,
+        organisationId: org_id,
+      },
+      relations: ['user', 'role', 'organisation'],
+    });
+
+    if (!orgUserRole) {
+      throw new CustomHttpException(SYS_MSG.ORG_MEMBER_DOES_NOT_BELONG, HttpStatus.FORBIDDEN);
+    }
+
+    await this.organisationUserRole.remove(orgUserRole);
+
+    return {
+      message: `${orgUserRole.user.first_name} ${orgUserRole.user.last_name} has successfully been removed from the organisation`,
+      data: {
+        user: orgUserRole.user,
+        organisation: orgUserRole.organisation,
+      },
+    };
+  }
+
   async updateMemberRole(org_id: string, member_id: string, updateMemberRoleDto: UpdateMemberRoleDto) {
     const organisation = await this.organisationRepository.findOne({
       where: { id: org_id },
