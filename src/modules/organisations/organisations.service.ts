@@ -166,9 +166,6 @@ export class OrganisationsService {
       message: 'Organisations retrieved successfully',
       data: {
         organisations,
-        total_count,
-        current_page: page,
-        page_size,
       },
     };
   }
