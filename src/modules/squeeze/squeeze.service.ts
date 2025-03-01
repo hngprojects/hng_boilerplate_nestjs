@@ -21,14 +21,14 @@ import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 export class SqueezeService {
   constructor(
     @InjectRepository(Squeeze)
-    private readonly SqueezeRepository: Repository<Squeeze>
+    private readonly squeezeRepository: Repository<Squeeze>
   ) {}
 
   async create(createSqueezeDto: SqueezeRequestDto) {
     try {
       const mapNewSqueeze = CreateSqueezeMapper.mapToEntity(createSqueezeDto);
 
-      const existingSqueeze = await this.SqueezeRepository.findOne({
+      const existingSqueeze = await this.squeezeRepository.findOne({
         where: {
           email: mapNewSqueeze.email,
         },
@@ -41,10 +41,10 @@ export class SqueezeService {
         });
       }
 
-      const newSqueeze = this.SqueezeRepository.create({
+      const newSqueeze = this.squeezeRepository.create({
         ...mapNewSqueeze,
       });
-      await this.SqueezeRepository.save(newSqueeze);
+      await this.squeezeRepository.save(newSqueeze);
       const mappedResponse = SqueezeMapper.mapToResponseFormat(newSqueeze);
       return {
         status: 'success',
@@ -63,7 +63,7 @@ export class SqueezeService {
 
   async updateSqueeze(updateDto: UpdateSqueezeDto) {
     try {
-      const squeeze = await this.SqueezeRepository.findOneBy({ email: updateDto.email });
+      const squeeze = await this.squeezeRepository.findOneBy({ email: updateDto.email });
 
       if (!squeeze) {
         throw new NotFoundException({
@@ -80,7 +80,7 @@ export class SqueezeService {
       }
 
       Object.assign(squeeze, updateDto);
-      const updatedSqueeze = await this.SqueezeRepository.save(squeeze);
+      const updatedSqueeze = await this.squeezeRepository.save(squeeze);
       return updatedSqueeze;
     } catch (err) {
       if (this.isInstanceOfAny(err, [ForbiddenException, NotFoundException])) {
@@ -99,7 +99,7 @@ export class SqueezeService {
   }
 
   async deleteSqueeze(squeezeId: string, authenticatedSqueezeId: string): Promise<any> {
-    const squeeze = await this.SqueezeRepository.findOne({
+    const squeeze = await this.squeezeRepository.findOne({
       where: { id: squeezeId },
     });
 
@@ -111,7 +111,7 @@ export class SqueezeService {
       throw new CustomHttpException('You are not authorized to delete this squeeze', HttpStatus.UNAUTHORIZED);
     }
 
-    await this.SqueezeRepository.delete(squeezeId);
+    await this.squeezeRepository.softDelete(squeezeId);
 
     return {
       status: 'success',

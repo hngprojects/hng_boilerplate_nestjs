@@ -17,7 +17,7 @@ describe('SqueezeService', () => {
     findOne: jest.fn(),
     findAndCount: jest.fn(),
     count: jest.fn(),
-    delete: jest.fn(),
+    softDelete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -116,14 +116,14 @@ describe('SqueezeService', () => {
       const squeezeToDelete = { id: squeezeId, email: 'user@example.com' };
 
       mockSqueezeRepository.findOne.mockResolvedValueOnce(squeezeToDelete);
-      mockSqueezeRepository.delete.mockResolvedValueOnce({ affected: 1 });
+      mockSqueezeRepository.softDelete.mockResolvedValueOnce({ affected: 1 });
 
       const result = await service.deleteSqueeze(squeezeId, authenticatedSqueezeId);
 
       expect(result.status).toBe('success');
       expect(result.message).toBe('Deletion in progress');
       expect(mockSqueezeRepository.findOne).toHaveBeenCalledWith({ where: { id: squeezeId } });
-      expect(mockSqueezeRepository.delete).toHaveBeenCalledWith(squeezeId);
+      expect(mockSqueezeRepository.softDelete).toHaveBeenCalledWith(squeezeId);
     });
 
     it('should throw an error if squeeze is not found', async () => {
