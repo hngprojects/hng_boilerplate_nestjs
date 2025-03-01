@@ -197,7 +197,7 @@ export default class AuthenticationService {
     if (!isMatch) {
       throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
-    const userOrganisations = await this.organisationService.getAllUserOrganisations(user.id);
+    const userOrganisations = await this.organisationService.getAllUserOrganisations(user.id, 1, 10);
     const isSuperAdmin = userOrganisations.some(org => org.user_role === 'super-admin');
 
     let refresh_token = this.jwtService.sign({ sub: user.id }, { expiresIn: '7d' });
