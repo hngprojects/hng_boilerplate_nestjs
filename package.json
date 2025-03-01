@@ -33,8 +33,6 @@
     "postinstall": "npm install --platform=linux --arch=x64 sharp"
   },
   "dependencies": {
-    "@css-inline/css-inline": "^0.14.1",
-    "@faker-js/faker": "^8.4.1",
     "@google/generative-ai": "^0.22.0",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/bull": "^11.0.2",
@@ -49,7 +47,6 @@
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/typeorm": "^11.0.0",
     "@types/nodemailer": "^6.4.17",
-    "@nestjs-modules/mailer": "^2.0.2",
     "@types/speakeasy": "^2.0.10",
     "@vitalets/google-translate-api": "^9.2.1",
     "aws-sdk": "^2.1692.0",
@@ -88,13 +85,12 @@
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
+    "@nestjs-modules/mailer": "^1.6.1",
     "@nestjs/cli": "^11.0.5",
     "@nestjs/common": "^11.0.10",
     "@nestjs/schematics": "^11.0.1",
     "@nestjs/testing": "^11.0.10",
     "@types/bcrypt": "^5.0.2",
-    "@types/conventional-commits-parser": "^5.0.1",
-    "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/multer": "^1.4.12",
@@ -121,9 +117,6 @@
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3"
-  },
-  "optionalDependencies": {
-    "@css-inline/css-inline-linux-x64-gnu": "^0.14.1"
   },
   "jest": {
     "moduleFileExtensions": [
