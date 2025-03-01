@@ -40,19 +40,26 @@ export class JobsService {
 
     const { resume, applicant_name, ...others } = jobApplicationDto;
 
-    // TODO: Upload resume to the cloud and grab URL
+    const existingApplication = await this.jobApplicationRepository.findOne({
+      where: { job: { id: jobId }, applicant_name: jobApplicationDto.applicant_name },
+      relations: ['job'],
+    });
 
+    if (existingApplication) {
+      throw new CustomHttpException('Duplicate application', HttpStatus.BAD_REQUEST);
+    }
+
+    // TODO: Upload resume to the cloud and grab URL
     const resumeUrl = `https://example.com/${applicant_name.split(' ').join('_')}.pdf`;
 
     const createJobApplication = this.jobApplicationRepository.create({
       ...others,
       applicant_name,
       resume: resumeUrl,
-      ...job,
+      job: job.data,
     });
 
     await this.jobApplicationRepository.save(createJobApplication);
-
     return {
       status: 'success',
       message: 'Application submitted successfully',

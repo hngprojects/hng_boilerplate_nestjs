@@ -190,9 +190,18 @@ describe('JobsService', () => {
         ...mockJobApplicationDto,
         applicant_name: 'John Doe',
         resume: `https://example.com/John_Doe.pdf`,
-        ...mockJob,
+        job: mockJob.data,
       });
       expect(saveMock).toHaveBeenCalled();
+    });
+
+    it('should throw error if duplicate application is found', async () => {
+      jest.spyOn(service, 'getJob').mockResolvedValue(mockJob as any);
+      jest.spyOn(service['jobApplicationRepository'], 'findOne').mockResolvedValue(mockJobApplicationDto as any);
+
+      await expect(service.applyForJob('jobId', mockJobApplicationDto)).rejects.toThrow(
+        new CustomHttpException('Duplicate application', HttpStatus.CONFLICT)
+      );
     });
   });
 
