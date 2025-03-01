@@ -6,10 +6,13 @@ import { User } from '../../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { HttpStatus } from '@nestjs/common';
+import { UserType } from '../../user/entities/user.entity';
 
 const mockCommentRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
+  findOne: jest.fn(),
+  delete: jest.fn(),
 });
 
 const mockUserRepository = () => ({
@@ -72,6 +75,42 @@ describe('CommentsService', () => {
         message: 'Comment added successfully!',
         savedComment: mockComment,
         commentedBy: 'John Doe',
+      });
+    });
+  });
+
+  describe('delAComment', () => {
+    it('should throw CustomHttpException if comment is not found', async () => {
+      commentRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.delAComment('comment-id', 'user-id', UserType.USER)).rejects.toThrow(CustomHttpException);
+      await expect(service.delAComment('comment-id', 'user-id', UserType.USER)).rejects.toMatchObject({
+        message: 'Comment not found',
+        status: HttpStatus.NOT_FOUND,
+      });
+    });
+
+    it('should throw CustomHttpException if user is not an admin', async () => {
+      const mockComment = { id: 'comment-id', user: { id: 'user-id' } };
+      commentRepository.findOne.mockResolvedValue(mockComment);
+
+      await expect(service.delAComment('comment-id', 'user-id', UserType.USER)).rejects.toThrow(CustomHttpException);
+      await expect(service.delAComment('comment-id', 'user-id', UserType.USER)).rejects.toMatchObject({
+        message: 'Unauthorized action',
+        status: HttpStatus.FORBIDDEN,
+      });
+    });
+
+    it('should delete a comment successfully if user is an admin', async () => {
+      const mockComment = { id: 'comment-id', user: { id: 'user-id' } };
+
+      commentRepository.findOne.mockResolvedValue(mockComment);
+      commentRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await service.delAComment('comment-id', 'admin-id', UserType.ADMIN);
+
+      expect(result).toEqual({
+        message: 'Comment deleted successfully (soft delete)',
       });
     });
   });

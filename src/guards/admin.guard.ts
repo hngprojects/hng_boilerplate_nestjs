@@ -7,9 +7,10 @@ import { CustomHttpException } from '../helpers/custom-http-filter';
 import { Organisation } from '../modules/organisations/entities/organisations.entity';
 import { OrganisationUserRole } from '../modules/role/entities/organisation-user-role.entity';
 import { Role } from '../modules/role/entities/role.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class SuperAdminGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -27,7 +28,7 @@ export class SuperAdminGuard implements CanActivate {
 
     // Retrieve admin roles with the permissions alloted to that role
     const adminRole = await this.userRoleManager.findOne({
-      where: { name: 'super-admin' },
+      where: { name: UserType.ADMIN },
       relations: ['permissions'],
     });
 

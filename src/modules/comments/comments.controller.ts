@@ -5,6 +5,7 @@ import { CommentResponseDto } from './dtos/comment-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 // import { AuthGuard } from 'src/guards/auth.guard';
 import { AuthGuard } from '../../guards/auth.guard';
+import { AdminGuard } from '../../guards/admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Comments')
@@ -34,7 +35,7 @@ export class CommentsController {
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @Delete(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, AdminGuard)
   async delAComment(@Param('id') id: string, @Request() req): Promise<any> {
     const { userId, role } = req.user;
     return await this.commentsService.delAComment(id, userId, role);

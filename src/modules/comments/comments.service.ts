@@ -66,10 +66,6 @@ export class CommentsService {
       throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
     }
 
-    if (role !== UserType.ADMIN) {
-      throw new CustomHttpException('Unauthorized action', HttpStatus.FORBIDDEN);
-    }
-
     await this.commentRepository.delete(commentId);
 
     return {
