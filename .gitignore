@@ -392,8 +392,8 @@ Temporary Items
 .apdisk
 
 # Local
-dist
-/.env
+dist/
+.env
 /.env.*
 *._local.ts
 
