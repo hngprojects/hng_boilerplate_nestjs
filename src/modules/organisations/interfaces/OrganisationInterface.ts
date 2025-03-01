@@ -14,4 +14,6 @@ export interface OrganisationInterface {
   address: string;
 
   state: string;
+
+  userId: string;
 }

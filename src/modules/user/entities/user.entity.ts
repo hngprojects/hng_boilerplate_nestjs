@@ -22,6 +22,7 @@ import { Cart } from '../../dashboard/entities/cart.entity';
 import { Order } from '../../dashboard/entities/order.entity';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { Profile } from '../../profile/entities/profile.entity';
+import { Language } from '@modules/languages/entities/language.entity';
 
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
@@ -110,4 +111,8 @@ export class User extends AbstractBaseEntity {
 
   @OneToMany(() => Cart, cart => cart.user)
   cart: Cart[];
+
+  @ManyToMany(() => Language, language => language.users)
+  @JoinTable()
+  languages?: Language[];
 }
