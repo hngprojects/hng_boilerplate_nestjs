@@ -18,9 +18,7 @@ import { Organisation } from '../organisations/entities/organisations.entity';
 import { User } from '../user/entities/user.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
-import { ProductVariant } from './entities/product-variant.entity';
 import { Product, ProductSizeType, StockStatusType } from './entities/product.entity';
-import { ProductCategory } from '../product-category/entities/product-category.entity';
 
 interface SearchCriteria {
   name?: string;
@@ -61,15 +59,14 @@ export class ProductsService {
     const category = await this.categoryRepository.findOne({
       where: { id: payload.category },
     });
-    
+
     if (!category) {
       throw new BadRequestException(`Invalid category ID: ${payload.category}`);
     }
 
-    
     const newProduct: Product = this.productRepository.create({
       ...payload,
-      category, 
+      category,
     });
 
     newProduct.org = org;
@@ -87,20 +84,20 @@ export class ProductsService {
       });
     }
 
-        return {
-          status: 'success',
-          message: 'Product created successfully',
-          data: {
-            id: product.id,
-            name: product.name,
-            description: product.description,
-            price: product.price,
-            status: product.stock_status,
-            quantity: product.quantity,
-            created_at: product.created_at,
-            updated_at: product.updated_at,
-          },
-        };
+    return {
+      status: 'success',
+      message: 'Product created successfully',
+      data: {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        status: product.stock_status,
+        quantity: product.quantity,
+        created_at: product.created_at,
+        updated_at: product.updated_at,
+      },
+    };
   }
 
   async getAllProducts({ page = 1, pageSize = 2 }: { page: number; pageSize: number }) {
@@ -217,7 +214,7 @@ export class ProductsService {
     try {
       await this.productRepository.update(productId, {
         ...updateProductDto,
-        category: updateProductDto.category ? {id: updateProductDto.category} : undefined,
+        category: updateProductDto.category ? { id: updateProductDto.category } : undefined,
         cost_price: 0.2 * updateProductDto.price - updateProductDto.price,
         stock_status: await this.calculateProductStatus(updateProductDto.quantity),
       });
