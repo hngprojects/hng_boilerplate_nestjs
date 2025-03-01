@@ -42,12 +42,11 @@ export class BillingPlanController {
   @getAllBillingPlansDocs()
   @Get('/')
   async getAllBillingPlans(
-    @Query('page') page: string,
-    @Query('limit') limit: string, 
-  ) {
-    const pageNumber = page ? parseInt(page, 10) : 1;
-    const limitNumber = limit ? parseInt(limit, 10) : 10; 
-
+    @Query('page') page: string,    
+    @Query('limit') limit: string, )
+    {
+    const pageNumber = page ? parseInt(page, 10) : 1; 
+    const limitNumber = limit ? parseInt(limit, 10) : 10;  
     return this.billingPlanService.getAllBillingPlans(pageNumber, limitNumber);
   }
 
