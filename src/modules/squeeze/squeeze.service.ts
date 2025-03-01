@@ -15,6 +15,7 @@ import { CreateSqueezeMapper } from './mapper/create-squeeze.mapper';
 import { SqueezeMapper } from './mapper/squeeze.mapper';
 import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
 import CustomExceptionHandler from '@shared/helpers/exceptionHandler';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @Injectable()
 export class SqueezeService {
@@ -95,5 +96,26 @@ export class SqueezeService {
 
   isInstanceOfAny(err: any, classes: Array<{ new (...args: any[]): any }>): boolean {
     return classes.some(errClass => err instanceof errClass);
+  }
+
+  async deleteSqueeze(squeezeId: string, authenticatedSqueezeId: string): Promise<any> {
+    const squeeze = await this.SqueezeRepository.findOne({
+      where: { id: squeezeId },
+    });
+
+    if (!squeeze) {
+      throw new CustomHttpException('Squeeze not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (squeeze.id !== authenticatedSqueezeId) {
+      throw new CustomHttpException('You are not authorized to delete this squeeze', HttpStatus.UNAUTHORIZED);
+    }
+
+    await this.SqueezeRepository.delete(squeezeId);
+
+    return {
+      status: 'success',
+      message: 'Deletion in progress',
+    };
   }
 }

@@ -4,6 +4,15 @@ import { SqueezeService } from './squeeze.service';
 import { SqueezeRequestDto } from './dto/squeeze.dto';
 import { skipAuth } from '@shared/helpers/skipAuth';
 import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
+import { UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiForbiddenResponse } from '@nestjs/swagger';
+import { ApiInternalServerErrorResponse } from '@nestjs/swagger';
+import { Delete } from '@nestjs/common';
+import { Param } from '@nestjs/common';
+import { ParseUUIDPipe } from '@nestjs/common';
 
 @ApiTags('Squeeze')
 @Controller('squeeze')
@@ -47,5 +56,37 @@ export class SqueezeController {
         ...updatedSqueeze,
       },
     };
+  }
+
+  @Delete(':squeezeId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete Squeeze Record' })
+  @ApiOkResponse({
+    description: 'Squeeze Records Deleted Successfully',
+    type: 'object',
+    example: {
+      message: 'Success',
+      status: 200,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User is Unauthorized',
+    type: 'object',
+    example: {
+      message: 'User is currently unauthorized, kindly authenticate to continue',
+      status: 401,
+    },
+  })
+  @ApiForbiddenResponse({
+    description: 'User is forbidden',
+    example: {
+      message: "You don't have the permission to perform this action",
+      status: 403,
+    },
+  })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  async deleteSqueeze(@Param('squeezeId', ParseUUIDPipe) squeezeId: string, @Request() req) {
+    const authenticatedSqueezeId = req['squeeze'].id;
+    return this.SqueezeService.deleteSqueeze(squeezeId, authenticatedSqueezeId);
   }
 }
