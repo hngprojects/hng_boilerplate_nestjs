@@ -108,7 +108,8 @@ export class OrganisationsService {
       }
       org.isDeleted = true;
       await this.organisationRepository.save(org);
-      return HttpStatus.NO_CONTENT;
+
+      return { message: 'Organisation deleted successfully' }; // ✅ Match the test expectation
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;

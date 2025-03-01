@@ -256,7 +256,7 @@ describe('OrganisationsService', () => {
     });
   });
 
-  describe('deleteOrganisation', () => {
+  describe('deleteorganisation', () => {
     it('should mark an organisation as deleted', async () => {
       const orgId = 'org-id';
       const mockOrganisation = { id: orgId, isDeleted: false } as Organisation;
@@ -264,10 +264,16 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'findOne').mockResolvedValue(mockOrganisation);
       jest.spyOn(organisationRepository, 'update').mockResolvedValue({ affected: 1 } as any);
 
-      const result = await service.deleteOrganisation(orgId);
+      const result = await service.deleteorganisation(orgId);
 
-      expect(result.message).toBe('Organisation deleted successfully');
+      expect(result).toEqual({
+        message: 'Organisation deleted successfully',
+      });
       expect(organisationRepository.update).toHaveBeenCalledWith({ id: orgId }, { isDeleted: true });
+
+      // Check if the entity was marked as deleted
+      const updatedOrg = await organisationRepository.findOne({ where: { id: orgId } });
+      expect(updatedOrg?.isDeleted).toBe(true);
     });
 
     it('should exclude deleted organisations from queries', async () => {
@@ -278,7 +284,7 @@ describe('OrganisationsService', () => {
 
       jest.spyOn(organisationRepository, 'find').mockResolvedValue(mockOrganisations);
 
-      const result = await service.getOrganisations();
+      const result = await service.getUserOrganisations('test-user-id');
 
       expect(result).toEqual(expect.arrayContaining([{ id: 'org1', name: 'Active Org' }]));
       expect(result).not.toEqual(expect.arrayContaining([{ id: 'org2', name: 'Deleted Org' }]));
