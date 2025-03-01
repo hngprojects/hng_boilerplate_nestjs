@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 import { CreateFlutterwavePaymentDto } from './dto/create-flutterwave-payment.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ConfigService } from '@nestjs/config';
@@ -12,36 +13,40 @@ import { PAYMENT_NOTFOUND } from '@shared/constants/SystemMessages';
 
 @Injectable()
 export class FlutterwaveService {
-  private readonly secretkey: string;
+  private readonly secretKey: string;
   private readonly baseUrl: string;
+
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     @InjectRepository(Payment)
     private readonly paymentRepo: Repository<Payment>
   ) {
-    this.secretkey = this.configService.get<string>('FLUTTERWAVE_SECRET_KEY');
+    this.secretKey = this.configService.get<string>('FLUTTERWAVE_SECRET_KEY');
     this.baseUrl = this.configService.get<string>('FLUTTERWAVE_BASE_URL');
   }
 
   async initiatePayment(createFlutterwavePaymentDto: CreateFlutterwavePaymentDto, userId: string) {
     const headers = {
-      Authorization: `Bearer ${this.secretkey}`,
+      Authorization: `Bearer ${this.secretKey}`,
       'Content-Type': 'application/json',
     };
-    const payment_plan = await this.httpService.axiosRef.get(
+
+    const paymentPlanObs = this.httpService.get(
       `${this.baseUrl}/payment-plans/${createFlutterwavePaymentDto.plan_id}`,
       { headers }
     );
-    if (!payment_plan) {
+    const paymentPlan = await firstValueFrom(paymentPlanObs).catch(() => null);
+    if (!paymentPlan || !paymentPlan.data?.data) {
       throw new CustomHttpException(PAYMENT_NOTFOUND, 404);
     }
-    const { amount, currency } = payment_plan.data.data;
+
+    const { amount, currency } = paymentPlan.data.data;
     const { email, first_name, last_name } = createFlutterwavePaymentDto;
     const paymentData = {
       tx_ref: uuid4(),
-      amount: amount,
-      currency: currency,
+      amount,
+      currency,
       redirect_url: createFlutterwavePaymentDto.redirect_url,
       customer: {
         email: email,
@@ -57,7 +62,10 @@ export class FlutterwaveService {
         billing_option: createFlutterwavePaymentDto.billing_option,
       },
     };
-    const response = await this.httpService.axiosRef.post(`${this.baseUrl}/payments`, paymentData, { headers });
+
+    const paymentInitObs = this.httpService.post(`${this.baseUrl}/payments`, paymentData, { headers });
+    const response = await firstValueFrom(paymentInitObs);
+
     const createPaymentDto: CreatePaymentDto = {
       user_id: userId,
       transaction_id: uuid4(),
@@ -67,31 +75,39 @@ export class FlutterwaveService {
     };
     const newPayment = this.paymentRepo.create(createPaymentDto);
     await this.paymentRepo.save(newPayment);
+
     return {
       status: 200,
       message: 'Payment initiated successfully',
       data: {
-        payment_url: response.data.data.link,
+        payment_url: response.data?.data?.link,
       },
     };
   }
 
   async verifyPayment(transactionId: string): Promise<any> {
     const headers = {
-      Authorization: `Bearer ${this.secretkey}`,
+      Authorization: `Bearer ${this.secretKey}`,
       'Content-Type': 'application/json',
     };
-    const response = await this.httpService.axiosRef.get(`${this.baseUrl}/transactions/${transactionId}/verify`, {
-      headers,
+
+    const verifyObs = this.httpService.get(`${this.baseUrl}/transactions/${transactionId}/verify`, { headers });
+    const response = await firstValueFrom(verifyObs);
+
+    const payment = await this.paymentRepo.findOne({
+      where: { transaction_id: transactionId },
     });
-    const payment = await this.paymentRepo.findOne({ where: { transaction_id: transactionId } });
+    if (!payment) {
+      throw new CustomHttpException(PAYMENT_NOTFOUND, 404);
+    }
     payment.status = PaymentStatus.APPROVED;
     await this.paymentRepo.save(payment);
+
     return {
       status: 200,
       message: 'Payment verified successfully',
       data: {
-        paymentStatus: response.data.data,
+        paymentStatus: response.data?.data,
       },
     };
   }
