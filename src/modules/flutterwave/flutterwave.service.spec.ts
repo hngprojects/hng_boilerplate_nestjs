@@ -8,6 +8,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { of } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { CreateFlutterwavePaymentDto } from './dto/create-flutterwave-payment.dto';
+import axios from 'axios';
 
 describe('FlutterwaveService', () => {
   let service: FlutterwaveService;
@@ -21,6 +22,7 @@ describe('FlutterwaveService', () => {
         {
           provide: HttpService,
           useValue: {
+            axiosRef: axios,
             get: jest.fn(),
             post: jest.fn(),
           },
