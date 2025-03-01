@@ -61,20 +61,24 @@ export class NotificationsService {
     };
   }
 
-  async getNotificationsForUser(userId: string) {
+  async getNotificationsForUser(userId: string, page: number, limit: number) {
     try {
       const user = await this.userRepository.findOne({ where: { id: userId } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      const notifications = await this.notificationRepository.find({
+      const [notifications, totalNotificationCount] = await this.notificationRepository.findAndCount({
         where: { user: { id: userId } },
         order: { created_at: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
       });
 
-      const totalNotificationCount = notifications.length;
-      const totalUnreadNotificationCount = notifications.filter(notification => !notification.is_read).length;
+      const totalUnreadNotificationCount = await this.notificationRepository.count({
+        where: { user: { id: userId }, is_read: false },
+      });
+
       return {
         totalNotificationCount,
         totalUnreadNotificationCount,

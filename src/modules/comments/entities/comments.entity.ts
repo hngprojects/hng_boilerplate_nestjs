@@ -14,9 +14,9 @@ export class Comment extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.comments, { cascade: true })
   user: User;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   model_id: string;
 
-  @Column()
+  @Column({ nullable: true })
   model_type: string;
 }
