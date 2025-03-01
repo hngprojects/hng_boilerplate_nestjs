@@ -13,7 +13,7 @@ import { Role } from '../role/entities/role.entity';
 import { Product } from './entities/product.entity';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
-import { ProductCategory } from '../product-category/entities/product-category.entity';
+
 
 @Module({
   imports: [
@@ -28,7 +28,6 @@ import { ProductCategory } from '../product-category/entities/product-category.e
       Order,
       OrderItem,
       Cart,
-      ProductCategory,
     ]),
     UserModule,
   ],
