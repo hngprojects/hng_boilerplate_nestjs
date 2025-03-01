@@ -402,3 +402,8 @@ dist
 
 # database files
 data/db
+
+# 
+docker-compose.yml
+
+package-lock.json
