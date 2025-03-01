@@ -38,7 +38,11 @@ export class OrganisationsController {
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
-    return this.organisationsService.createOrganisation(createOrganisationDto, user.sub);
+    const payload = {
+      ...createOrganisationDto,
+      userId: user.sub,
+    };
+    return this.organisationsService.createOrganisation(payload);
   }
 
   @UseGuards(OwnershipGuard)

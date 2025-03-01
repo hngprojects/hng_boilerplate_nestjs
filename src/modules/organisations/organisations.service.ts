@@ -8,11 +8,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { Organisation } from './entities/organisations.entity';
 import { OrganisationMapper } from './mapper/organisation.mapper';
-import CreateOrganisationType from './dto/create-organisation-options';
+import CreateOrganisationType, { CreateOrganisationRecordOptions } from './dto/create-organisation-options';
 import { OrganisationMemberMapper } from './mapper/org-members.mapper';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
 import { AddMemberDto } from './dto/add-member.dto';
@@ -65,35 +65,51 @@ export class OrganisationsService {
     return { status_code: HttpStatus.OK, message: 'members retrieved successfully', data };
   }
 
-  async createOrganisation(createOrganisationDto: CreateOrganisationType, userId: string) {
-    const query = await this.create(createOrganisationDto, userId);
+  async createOrganisation(createOrganisationDto: CreateOrganisationType) {
+    const createPayload: CreateOrganisationRecordOptions = {
+      createPayload: createOrganisationDto,
+      dbTransaction: {
+        useTransaction: false,
+      },
+    };
+    const query = await this.create(createPayload);
     return { status_code: HttpStatus.CREATED, messge: 'Organisation created', data: query };
   }
 
-  async create(createOrganisationDto: CreateOrganisationType, userId: string) {
-    if (createOrganisationDto.email) {
-      const emailFound = await this.emailExists(createOrganisationDto.email);
+  async create(createOrganisationDto: CreateOrganisationRecordOptions) {
+    const { createPayload, dbTransaction } = createOrganisationDto;
+
+    const repo = dbTransaction.useTransaction
+      ? dbTransaction.transactionManager.getRepository(Organisation)
+      : this.organisationRepository;
+    const orgUserRoleRepo = dbTransaction.useTransaction
+      ? dbTransaction.transactionManager.getRepository(OrganisationUserRole)
+      : this.organisationUserRole;
+    if (createPayload.email) {
+      const emailFound = await this.emailExists(createPayload.email);
       if (emailFound) throw new ConflictException('Organisation with this email already exists');
     }
 
     const owner = await this.userRepository.findOne({
-      where: { id: userId },
+      where: { id: createPayload.userId },
     });
 
-    const vendorRole = await this.roleRepository.findOne({ where: { name: 'admin' } });
+    const vendorRole = await this.roleRepository.findOne({
+      where: { name: 'admin' },
+    });
 
     const organisationInstance = new Organisation();
-    Object.assign(organisationInstance, createOrganisationDto);
+    Object.assign(organisationInstance, createPayload);
     organisationInstance.owner = owner;
     organisationInstance.members = [owner];
-    const newOrganisation = await this.organisationRepository.save(organisationInstance);
+    const newOrganisation = await repo.save(organisationInstance);
 
     const adminRole = new OrganisationUserRole();
     adminRole.userId = owner.id;
     adminRole.organisationId = newOrganisation.id;
     adminRole.roleId = vendorRole.id;
 
-    await this.organisationUserRole.save(adminRole);
+    await orgUserRoleRepo.save(adminRole);
 
     const mappedResponse = OrganisationMapper.mapToResponseFormat(newOrganisation);
 
@@ -159,7 +175,7 @@ export class OrganisationsService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
-      throw new CustomHttpException('Invalid Request', HttpStatus.BAD_REQUEST);
+      return [];
     }
 
     const skip = (page - 1) * page_size;

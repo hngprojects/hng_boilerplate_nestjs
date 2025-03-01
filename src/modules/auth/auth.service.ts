@@ -20,7 +20,12 @@ import { TokenPayload } from 'google-auth-library';
 import { UpdateProfileDto } from '@modules/profile/dto/update-profile.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { OtpDto } from '@modules/otp/dto/otp.dto';
+
 import { Response, Request } from 'express';
+
+
+import { DataSource, EntityManager } from 'typeorm';
+import { CreateOrganisationRecordOptions } from '@modules/organisations/dto/create-organisation-options';
 
 @Injectable()
 export default class AuthenticationService {
@@ -30,74 +35,89 @@ export default class AuthenticationService {
     private otpService: OtpService,
     private emailService: EmailService,
     private organisationService: OrganisationsService,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private dataSource: DataSource
   ) {}
 
   async createNewUser(createUserDto: CreateUserDTO) {
-    const userExists = await this.userService.getUserRecord({
-      identifier: createUserDto.email,
-      identifierType: 'email',
-    });
+    const result = await this.dataSource.transaction(async (manager: EntityManager) => {
+      const userExists = await this.userService.getUserRecord({
+        identifier: createUserDto.email,
+        identifierType: 'email',
+      });
 
-    if (userExists) {
-      throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
-    }
+      console.log('userExists', userExists);
+      if (userExists) {
+        throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
+      }
 
-    await this.userService.createUser(createUserDto);
+      console.log('createUserDto', createUserDto);
+      const user = await this.userService.createUser(createUserDto, manager);
 
-    const user = await this.userService.getUserRecord({ identifier: createUserDto.email, identifierType: 'email' });
-
-    if (!user) {
-      throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
-    }
-    const newOrganisationPayload = {
-      name: `${user.first_name}'s Organisation`,
-      description: '',
-      email: user.email,
-      industry: '',
-      type: '',
-      country: '',
-      address: '',
-      state: '',
-    };
-
-    const newOrganisation = await this.organisationService.create(newOrganisationPayload, user.id);
-
-    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id, 1, 10);
-    const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
-    const token = (await this.otpService.createOtp(user.id)).token;
-
-    const access_token = this.jwtService.sign({
-      id: user.id,
-      sub: user.id,
-      email: user.email,
-    });
-
-    const responsePayload = {
-      user: {
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
+      if (!user) {
+        throw new CustomHttpException(SYS_MSG.FAILED_TO_CREATE_USER, HttpStatus.BAD_REQUEST);
+      }
+      const newOrganisationPayload = {
+        name: `${user.first_name}'s Organisation`,
+        description: '',
         email: user.email,
-        avatar_url: user.profile.profile_pic_url,
-        is_superadmin: isSuperAdmin,
-      },
-      oranisations: userOranisations,
-    };
+        industry: '',
+        type: '',
+        country: '',
+        address: '',
+        state: '',
+      };
 
-    // send welcome mail
-    await this.emailService.sendUserConfirmationMail(
-      user.email,
-      user.first_name,
-      `${process.env.FRONTEND_URL}/confirm-email`,
-      token
-    );
+      const createOrganisationPayload: CreateOrganisationRecordOptions = {
+        createPayload: newOrganisationPayload,
+        dbTransaction: {
+          useTransaction: true,
+          transactionManager: manager,
+        },
+      };
 
-    return {
-      message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
-      access_token,
-      data: responsePayload,
-    };
+      const newOrganisation = await this.organisationService.create(createOrganisationPayload);
+
+      const userOrganisations = await this.organisationService.getAllUserOrganisations(user.id, 1, 10);
+      const isSuperAdmin = userOrganisations.map(instance => instance.user_role).includes('super-admin');
+
+      const token = (await this.otpService.createOtp(user.id, manager)).token;
+
+      const access_token = this.jwtService.sign({
+        id: user.id,
+        sub: user.id,
+        email: user.email,
+      });
+      const responsePayload = {
+        user: {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          avatar_url: user.profile.profile_pic_url,
+          is_superadmin: isSuperAdmin,
+        },
+        organisations: userOrganisations,
+      };
+      return {
+        message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
+        access_token,
+        data: responsePayload,
+      };
+    });
+    try {
+      // send welcome mail
+      await this.emailService.sendUserConfirmationMail(
+        result.data.user.email,
+        result.data.user.first_name,
+        `${process.env.FRONTEND_URL}/confirm-email`,
+        result.access_token
+      );
+    } catch (emailError) {
+      console.error('Error sending confirmation email:', emailError);
+    }
+
+    return result;
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string } | null> {
@@ -418,7 +438,13 @@ export default class AuthenticationService {
       state: '',
     };
 
-    await this.organisationService.create(newOrganisationPaload, newUser.id);
+    const createOrganisationPayload: CreateOrganisationRecordOptions = {
+      createPayload: newOrganisationPaload,
+      dbTransaction: {
+        useTransaction: false,
+      },
+    };
+    await this.organisationService.create(createOrganisationPayload);
 
     const userOranisations = await this.organisationService.getAllUserOrganisations(newUser.id, 1, 10);
     const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
