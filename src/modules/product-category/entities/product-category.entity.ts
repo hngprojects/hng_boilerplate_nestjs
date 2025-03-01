@@ -12,4 +12,7 @@ export class ProductCategory extends AbstractBaseEntity {
   @ApiProperty()
   @Column({ type: 'text', nullable: true })
   description: string;
+
+  @OneToMany(() => Product, product => product.category)
+  products: Product[];
 }

@@ -226,38 +226,71 @@ export class SeedingService {
         await categoryRepository.save([c1, c2, c3]);
 
         // Create products with associated categories
+        const category1 = await categoryRepository.findOne({
+          where: { name: 'electricity' }, 
+        });
+        
+        if (!category1) {
+          throw new BadRequestException(`Invalid category: electricity`);
+        }
+        
         const p1 = productRepository.create({
           name: 'Product 1',
           description: 'Description for Product 1',
           size: ProductSizeType.STANDARD,
-          category: 'electricity',
-          quantity: 1,
-          price: 500,
+          category: category1,
+          quantity: 2,
+          price: 50,
           org: or1,
         });
+        const category2 = await categoryRepository.findOne({
+          where: { name: 'electronics' },
+        });
+        
+        if (!category2) {
+          throw new BadRequestException(`Invalid category: electronics`);
+        }
+        
         const p2 = productRepository.create({
           name: 'Product 2',
           description: 'Description for Product 2',
-          size: ProductSizeType.LARGE,
-          category: 'electricity',
-          quantity: 2,
-          price: 50,
+          size: ProductSizeType.STANDARD,
+          category: category2,
+          quantity: 5,
+          price: 100,
           org: or2,
         });
+        
+        const category3 = await categoryRepository.findOne({
+          where: { name: 'electricity' },
+        });
+        
+        if (!category3) {
+          throw new BadRequestException(`Invalid category: electricity`);
+        }
+        
         const p3 = productRepository.create({
-          name: 'Product 2',
-          description: 'Description for Product 2',
+          name: 'Product 3',
+          description: 'Description for Product 3',
           size: ProductSizeType.STANDARD,
-          category: 'electricity',
+          category: category3,
           quantity: 2,
           price: 50,
           org: or1,
         });
+        const category4 = await categoryRepository.findOne({
+          where: { name: 'electricity' },
+        });
+        
+        if (!category4) {
+          throw new BadRequestException(`Invalid category: electricity`);
+        }
+        
         const p4 = productRepository.create({
-          name: 'Product 2',
-          description: 'Description for Product 2',
+          name: 'Product 4',
+          description: 'Description for Product 4',
           size: ProductSizeType.SMALL,
-          category: 'clothing',
+          category: category4,
           quantity: 2,
           price: 50,
           org: or2,
