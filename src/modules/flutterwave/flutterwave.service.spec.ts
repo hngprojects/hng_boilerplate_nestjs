@@ -30,7 +30,7 @@ describe('FlutterwaveService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockReturnValue('mock-base-url'),
+            get: jest.fn().mockReturnValue('http://mock-base-url'),
           },
         },
         {
