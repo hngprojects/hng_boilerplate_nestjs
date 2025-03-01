@@ -33,6 +33,10 @@
     "source.fixAll": "explicit"
   },
   "[typescript]": {
+<<<<<<< Updated upstream
     "editor.defaultFormatter": "vscode.typescript-language-features"
+=======
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+>>>>>>> Stashed changes
   }
 }

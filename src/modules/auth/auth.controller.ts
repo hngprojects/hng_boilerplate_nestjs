@@ -8,7 +8,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import * as SYS_MSG from '@shared/constants/SystemMessages';
-import { Body, Controller, HttpCode, Post, Req, Request, Patch } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req, Res, Request, Patch } from '@nestjs/common';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '@shared/helpers/skipAuth';
 import AuthenticationService from './auth.service';
@@ -33,6 +33,7 @@ import { UpdatePasswordDto } from './dto/updatePasswordDto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { UpdateUserPasswordResponseDTO } from './dto/update-user-password.dto';
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { Response, Request as RequestExpress } from 'express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -76,8 +77,21 @@ export default class RegistrationController {
   @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials', type: LoginErrorResponseDto })
   @HttpCode(200)
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
-    return this.authService.loginUser(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Req() req: RequestExpress, // Express Request
+    @Res({ passthrough: true }) res: Response // Express Response
+  ): Promise<LoginResponseDto | { status_code: number; message: string }> {
+    return this.authService.loginUser(loginDto, req, res);
+  }
+
+  @Post('refresh-token')
+  @ApiOperation({ summary: 'Refresh Access Token' })
+  @ApiResponse({ status: 200, description: 'New access token issued' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @HttpCode(200)
+  async refreshToken(@Req() req: RequestExpress, @Res({ passthrough: true }) res: Response) {
+    return this.authService.refreshToken(req, res);
   }
 
   @skipAuth()
@@ -172,5 +186,13 @@ export default class RegistrationController {
   @HttpCode(200)
   public async resetPassword(@Body() updatePasswordDto: UpdatePasswordDto) {
     return this.authService.updateForgotPassword(updatePasswordDto);
+  }
+
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({ status: 200, description: 'User successfully logged out' })
+  @HttpCode(200)
+  async logout(@Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(res);
   }
 }
