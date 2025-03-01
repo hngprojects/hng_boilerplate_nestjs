@@ -11,4 +11,6 @@ export const mockComment: Comment = {
   product: productMock,
   created_at: new Date(),
   updated_at: new Date(),
+  parent: null, // Top-level comment has no parent
+  replies: [], // No replies by default
 };
