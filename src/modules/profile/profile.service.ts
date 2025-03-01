@@ -14,10 +14,10 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as sharp from 'sharp';
 import * as fs from 'fs';
 import * as path from 'path';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { UploadProfilePicDto } from './dto/upload-profile-pic.dto';
-import { PROFILE_PHOTO_UPLOADS } from '../../helpers/app-constants';
+import { PROFILE_PHOTO_UPLOADS } from '@shared/constants/app-constants';
 import { pipeline, Readable } from 'stream';
 
 @Injectable()
@@ -51,11 +51,11 @@ export class ProfileService {
         throw new NotFoundException('Profile not found');
       }
 
-      const  profileData = {...profile, avatar_url:profile.profile_pic_url}
+      const profileData = { ...profile, avatar_url: profile.profile_pic_url };
 
       const responseData = {
         message: 'Successfully fetched profile',
-        data:profileData,
+        data: profileData,
       };
 
       return responseData;
@@ -174,14 +174,13 @@ export class ProfileService {
           await this.profileRepository.update(profile.id, profile);
           const updatedProfile = await this.profileRepository.findOne({ where: { id: profile.id } });
           resolve({
-            status: "success",
+            status: 'success',
             message: SYS_MSG.PICTURE_UPDATED,
             data: { avatar_url: updatedProfile.profile_pic_url },
           });
         }
       });
     });
-
   }
 
   private async createUploadsDirectory() {

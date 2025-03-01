@@ -5,8 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreateWaitlistDto } from './dto/create-waitlist.dto';
 import { WaitlistResponseDto } from './dto/create-waitlist-response.dto';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @Injectable()
 export default class WaitlistService {

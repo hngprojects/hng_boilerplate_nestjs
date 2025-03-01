@@ -13,15 +13,16 @@ import {
   HttpStatus,
   Query,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BlogService } from './blogs.service';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { CreateBlogDto } from './dtos/create-blog.dto';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
+import { AuthGuard } from '@guards/auth.guard';
 import { BlogResponseDto } from './dtos/blog-response.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { BlogDto } from './dtos/blog.dto';
-import { UpdateBlogDto } from './dtos/update-blog.dto';
+import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogResponseDto } from './dtos/update-blog-response.dto';
-import { BLOG_DELETED } from '../../helpers/SystemMessages';
+import { UpdateBlogDto } from './dtos/update-blog.dto';
+import { BlogDto } from './dtos/blog.dto';
+import { BLOG_DELETED } from '@shared/constants/SystemMessages';
 
 @ApiTags('blogs')
 @Controller('/blogs')
@@ -30,7 +31,7 @@ export class BlogController {
 
   @ApiBearerAuth()
   @Post()
-  @UseGuards(SuperAdminGuard)
+  @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Create a new blog' })
   @ApiResponse({ status: 201, description: 'The blog has been successfully created.', type: BlogResponseDto })
   @ApiResponse({ status: 403, description: 'Forbidden.' })

@@ -1,12 +1,11 @@
 import { Injectable, CanActivate, ExecutionContext, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserType } from '../modules/user/entities/user.entity';
+import { User } from '@modules/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import * as SYS_MSG from '../helpers/SystemMessages';
-import { CustomHttpException } from '../helpers/custom-http-filter';
-import { Organisation } from '../modules/organisations/entities/organisations.entity';
-import { OrganisationUserRole } from '../modules/role/entities/organisation-user-role.entity';
-import { Role } from '../modules/role/entities/role.entity';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Role } from '@modules/role/entities/role.entity';
 
 @Injectable()
 export class SuperAdminGuard implements CanActivate {

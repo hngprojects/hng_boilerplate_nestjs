@@ -3,12 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { HelpCenterService } from './help-center.service';
 import { HelpCenterController } from './help-center.controller';
 import { HelpCenterEntity } from './entities/help-center.entity';
-import { User } from '../user/entities/user.entity';
-import { Role } from '../role/entities/role.entity';
-import { Profile } from '../profile/entities/profile.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { TextService } from '../translation/translation.service';
+import { User } from '@modules/user/entities/user.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { TextService } from '@modules/translation/translation.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([HelpCenterEntity, User, Organisation, OrganisationUserRole, Profile, Role])],

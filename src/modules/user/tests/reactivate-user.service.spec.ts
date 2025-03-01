@@ -1,12 +1,11 @@
 import { ReactivateAccountDto } from '../dto/reactivate-account.dto';
-import { BadRequestException, ForbiddenException, HttpException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import UserService from '../user.service';
 import { Profile } from '../../profile/entities/profile.entity';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 describe('UserService', () => {
   let service: UserService;

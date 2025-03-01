@@ -7,6 +7,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
 import * as SYS_MSG from '../../helpers/SystemMessages';
 import {
   Body,
@@ -23,8 +24,11 @@ import {
   Query,
 } from '@nestjs/common';
 
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { Body, Controller, HttpCode, Post, Req, Request, Patch } from '@nestjs/common';
+
 import { CreateUserDTO } from './dto/create-user.dto';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import AuthenticationService from './auth.service';
 import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -46,8 +50,12 @@ import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { UpdateUserPasswordResponseDTO } from './dto/update-user-password.dto';
+
 import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { Throttle } from '@nestjs/throttler';
+
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+
 
 @ApiTags('Authentication')
 @Controller('auth')

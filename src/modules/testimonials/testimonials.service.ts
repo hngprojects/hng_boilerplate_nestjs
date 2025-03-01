@@ -9,14 +9,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { Testimonial } from './entities/testimonials.entity';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import UserService from '../user/user.service';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { TestimonialMapper } from './mappers/testimonial.mapper';
 import { TestimonialResponseMapper } from './mappers/testimonial-response.mapper';
 import { TestimonialResponse } from './interfaces/testimonial-response.interface';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
-import { TextService } from '../translation/translation.service';
+import { TextService } from '@modules/translation/translation.service';
+import UserService from '@modules/user/user.service';
 
 @Injectable()
 export class TestimonialsService {
@@ -115,6 +115,7 @@ export class TestimonialsService {
     const testimonial = await this.testimonialRepository.findOne({
       where: { id: testimonialId },
       relations: ['user'],
+      withDeleted: false,
     });
 
     if (!testimonial) {
@@ -155,7 +156,7 @@ export class TestimonialsService {
     if (!testimonial) {
       throw new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND);
     }
-    await this.testimonialRepository.remove(testimonial);
+    await this.testimonialRepository.softDelete(id);
     return {
       message: 'Testimonial deleted successfully',
       status_code: HttpStatus.OK,

@@ -2,17 +2,17 @@ import { InternalServerErrorException, NotFoundException, HttpStatus } from '@ne
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Profile } from '../../profile/entities/profile.entity';
-import { User } from '../../user/entities/user.entity';
-import UserService from '../../user/user.service';
-import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
-import { Testimonial } from '../entities/testimonials.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { TestimonialsService } from '../testimonials.service';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import { mockUser } from '../../organisations/tests/mocks/user.mock';
+import { Testimonial } from '../entities/testimonials.entity';
+import UserService from '@modules/user/user.service';
+import { TextService } from '@modules/translation/translation.service';
+import { User } from '@modules/user/entities/user.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { mockUser } from '@modules/invite/mocks/mockUser';
 import { testimonialsMock } from './mocks/testimonials.mock';
-import { TextService } from '../../translation/translation.service';
 
 class MockTextService {
   translateText(text: string, targetLang: string) {
@@ -158,12 +158,12 @@ describe('TestimonialsService', () => {
       mockTestimonial.id = testimonialId;
 
       jest.spyOn(testimonialRepository, 'findOne').mockResolvedValue(mockTestimonial);
-      jest.spyOn(testimonialRepository, 'remove').mockResolvedValue(undefined);
+      jest.spyOn(testimonialRepository, 'softDelete').mockResolvedValue({ affected: 1 } as any);
 
       const result = await service.deleteTestimonial(testimonialId);
 
       expect(testimonialRepository.findOne).toHaveBeenCalledWith({ where: { id: testimonialId } });
-      expect(testimonialRepository.remove).toHaveBeenCalledWith(mockTestimonial);
+      expect(testimonialRepository.softDelete).toHaveBeenCalledWith(mockTestimonial.id);
       expect(result).toEqual({
         message: 'Testimonial deleted successfully',
         status_code: HttpStatus.OK,
@@ -174,14 +174,14 @@ describe('TestimonialsService', () => {
       const id = 'non_existent_id';
 
       jest.spyOn(testimonialRepository, 'findOne').mockResolvedValue(null);
-      jest.spyOn(testimonialRepository, 'remove').mockImplementation(jest.fn());
+      jest.spyOn(testimonialRepository, 'softDelete').mockImplementation(jest.fn());
 
       await expect(service.deleteTestimonial(id)).rejects.toThrow(
         new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND)
       );
 
       expect(testimonialRepository.findOne).toHaveBeenCalledWith({ where: { id } });
-      expect(testimonialRepository.remove).not.toHaveBeenCalled();
+      expect(testimonialRepository.softDelete).not.toHaveBeenCalled();
     });
   });
 });

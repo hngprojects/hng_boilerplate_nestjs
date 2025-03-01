@@ -23,16 +23,14 @@ export function SubmitJobApplicationDocs() {
       description: 'Job application request body',
     }),
     ApiCreatedResponse({
-      status: 201,
       description: 'Job application submitted successfully',
       type: JobApplicationResponseDto,
     }),
     ApiUnprocessableEntityResponse({
       description: 'Job application deadline passed',
-      status: 422,
     }),
-    ApiBadRequestResponse({ status: 400, description: 'Invalid request body', type: JobApplicationErrorDto }),
-    ApiInternalServerErrorResponse({ status: 500, description: 'Internal server error', type: JobApplicationErrorDto })
+    ApiBadRequestResponse({ description: 'Invalid request body', type: JobApplicationErrorDto }),
+    ApiInternalServerErrorResponse({ description: 'Internal server error', type: JobApplicationErrorDto })
   );
 }
 export function CreateNewJobDocs() {

@@ -55,6 +55,11 @@ fabric.properties
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
+# DB
+data/db/
+
+
 # User-specific files
 *.suo
 *.user
@@ -99,6 +104,7 @@ BenchmarkDotNet.Artifacts/
 
 # .NET Core
 project.lock.json
+package-lock.json
 project.fragment.lock.json
 artifacts/
 **/Properties/launchSettings.json
@@ -385,10 +391,9 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-=======
 # Local
-dist
-/.env
+dist/
+.env
 /.env.*
 *._local.ts
 
@@ -400,10 +405,48 @@ dist
 *.dev
 *.prod
 
+
 # database files
 data/db
 
 # 
-docker-compose.yml
+
 
 package-lock.json
+
+
+# User specific ignores 
+todo.txt
+/.vscode/
+.vscode/
+
+# Docker compose
+
+data/
+data/
+docker-compose.yml
+package-lock.json
+.dev.env
+
+
+package-lock.json
+docker-compose.yml
+data/
+.dev.env
+
+/compose/compose.yaml
+compose/compose.yaml
+
+data/
+docker-compose.yml
+package-lock.json/
+package-lock.json
+.dev.env
+
+
+package-lock.json
+
+data/
+.dev.env
+
+

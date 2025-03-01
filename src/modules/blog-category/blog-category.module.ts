@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { BlogCategoryService } from './blog-category.service';
-import { BlogCategoryController } from './blog-category.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
-import { User } from '../user/entities/user.entity';
 import { BlogCategory } from './entities/blog-category.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import { Role } from '../role/entities/role.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { BlogCategoryController } from './blog-category.controller';
+import { BlogCategoryService } from './blog-category.service';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([BlogCategory, User, Organisation, OrganisationUserRole, Role])],

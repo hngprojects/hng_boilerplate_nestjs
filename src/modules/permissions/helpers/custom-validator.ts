@@ -5,7 +5,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { PermissionCategory } from './PermissionCategory';
-import { WRONG_PARAMETERS } from '../../../helpers/SystemMessages';
+import { WRONG_PARAMETERS } from '@shared/constants/SystemMessages';
 
 @ValidatorConstraint({ async: false })
 class IsPermissionListValidConstraint implements ValidatorConstraintInterface {

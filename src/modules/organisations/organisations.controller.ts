@@ -4,8 +4,6 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
-  InternalServerErrorException,
-  NotFoundException,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
@@ -14,25 +12,18 @@ import {
   Put,
   Query,
   Req,
-  Res,
   UseGuards,
   Logger,
-  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { OwnershipGuard } from '../../guards/authorization.guard';
+import { OwnershipGuard } from '@guards/authorization.guard';
 import { OrganisationMembersResponseDto } from './dto/org-members-response.dto';
 import { OrganisationRequestDto } from './dto/organisation.dto';
 import { OrganisationsService } from './organisations.service';
 import { UpdateOrganisationDto } from './dto/update-organisation.dto';
 import { UpdateMemberRoleDto } from './dto/update-organisation-role.dto';
-import { RemoveOrganisationMemberDto } from './dto/org-member.dto';
 import { UserOrganizationErrorResponseDto, UserOrganizationResponseDto } from './dto/user-orgs-response.dto';
 import { AddMemberDto } from './dto/add-member.dto';
-import { Response } from 'express';
-import { createReadStream } from 'fs';
-import { pipeline } from 'stream/promises';
-import { unlink } from 'fs/promises';
 
 @ApiBearerAuth()
 @ApiTags('organisation')
@@ -47,7 +38,11 @@ export class OrganisationsController {
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
-    return this.organisationsService.createOrganisation(createOrganisationDto, user.sub);
+    const payload = {
+      ...createOrganisationDto,
+      userId: user.sub,
+    };
+    return this.organisationsService.createOrganisation(payload);
   }
 
   @UseGuards(OwnershipGuard)
@@ -87,9 +82,13 @@ export class OrganisationsController {
   @ApiResponse({ status: 200, description: 'Organisations retrieved successfully', type: UserOrganizationResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request', type: UserOrganizationErrorResponseDto })
   @Get('/')
-  async getUserOrganisations(@Req() req) {
+  async getUserOrganisations(
+    @Req() req,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('page_size', new DefaultValuePipe(10), ParseIntPipe) page_size: number
+  ) {
     const { sub } = req.user;
-    return this.organisationsService.getUserOrganisations(sub);
+    return this.organisationsService.getUserOrganisations(sub, page, page_size);
   }
 
   @UseGuards(OwnershipGuard)

@@ -11,6 +11,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -20,9 +21,9 @@ import { ErrorDto } from './dtos/unread-response-error.dto';
 import { notificationPropDto } from './dtos/notification-prop.dto';
 import { MarkAllNotificationAsReadResponse } from './dtos/mark-all-notifications-as-read.dto';
 import { MarkAllNotificationAsReadError } from './dtos/mark-all-notifications-as-read-error.dto';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { CreateNotificationForAllUsersDto } from './dtos/create-notifiction-all-users.dto';
 import { CreateNotificationForAllUsersResDto } from './dtos/create-notification-all-users-res.dto';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
@@ -38,7 +39,6 @@ export class NotificationsController {
     type: CreateNotificationForAllUsersResDto,
   })
   @ApiInternalServerErrorResponse({
-    status: 500,
     description: 'Failed to create the notification.',
   })
   async createNotificationsForAllUsers(@Body() dto: CreateNotificationForAllUsersDto) {
@@ -46,18 +46,23 @@ export class NotificationsController {
   }
 
   @Get('/all')
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number for pagination' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of notifications per page' })
   @ApiResponse({
     status: 200,
     description: 'Notifications retrieved successfully',
     type: notificationPropDto,
   })
   @ApiInternalServerErrorResponse({
-    status: 500,
     description: 'Failed to retrieve notifications.',
   })
-  async getNotifications(@Req() req: { user: UserPayload }) {
+  async getNotifications(
+    @Req() req: { user: UserPayload },
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
     const userId = req.user.id;
-    const notifications = await this.notificationsService.getNotificationsForUser(userId);
+    const notifications = await this.notificationsService.getNotificationsForUser(userId, page, limit);
 
     return {
       status: 'success',
@@ -72,6 +77,8 @@ export class NotificationsController {
           message,
           created_at,
         })),
+        current_page: page,
+        total_pages: Math.ceil(notifications.totalNotificationCount / limit),
       },
     };
   }
