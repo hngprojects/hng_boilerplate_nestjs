@@ -410,15 +410,6 @@ todo.txt
 /.vscode/
 .vscode/
 
-# Docker compose
-docker-compose.yml
-data/
-data/
-docker-compose.yml
-package-lock.json
-.dev.env
-
-
 package-lock.json
 docker-compose.yml
 data/
@@ -426,15 +417,3 @@ data/
 
 /compose/compose.yaml
 compose/compose.yaml
-
-data/
-docker-compose.yml
-package-lock.json/
-package-lock.json
-.dev.env
-
-
-package-lock.json
-docker-compose.yml
-data/
-.dev.env
