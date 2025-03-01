@@ -16,15 +16,9 @@ import { OrganisationsService } from '@modules/organisations/organisations.servi
 import { User } from '@modules/user/entities/user.entity';
 import { Profile } from '@modules/profile/entities/profile.entity';
 import { LoginDto } from '../dto/login.dto';
-
-import { Profile } from '../../profile/entities/profile.entity';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-import { OrganisationsService } from '../../../modules/organisations/organisations.service';
-import { ProfileService } from '../../profile/profile.service';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../../app.module';
 import * as request from 'supertest';
-
 
 import UserResponseDTO from '@modules/user/dto/user-response.dto';
 import { Otp } from '@modules/otp/entities/otp.entity';
