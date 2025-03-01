@@ -422,4 +422,3 @@ package-lock.json
 docker-compose.yml
 data/
 .dev.env
-.env.*
