@@ -400,3 +400,5 @@ dist
 *.dev
 *.prod
 
+# database files
+data/db

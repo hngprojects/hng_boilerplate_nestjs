@@ -17,6 +17,9 @@ import { Profile } from '../../profile/entities/profile.entity';
 import { CustomHttpException } from '../../../helpers/custom-http-filter';
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
 import { ProfileService } from '../../profile/profile.service';
+import { INestApplication } from '@nestjs/common';
+import { AppModule } from '../../../app.module';
+import * as request from 'supertest';
 
 jest.mock('speakeasy');
 
@@ -196,6 +199,93 @@ describe('AuthenticationService', () => {
       userServiceMock.getUserRecord.mockResolvedValueOnce(null);
 
       await expect(service.createNewUser(createUserDto)).rejects.toThrow(HttpException);
+    });
+  });
+
+  describe('AuthenticationService - Throttling (e2e)', () => {
+    let app: INestApplication;
+    let httpServer: any;
+
+    // Create a dummy AuthenticationService that always returns a success response.
+    const authServiceMock = {
+      createNewUser: jest.fn().mockResolvedValue({
+        message: 'User created successfully',
+        access_token: 'dummy_token',
+        data: {
+          user: {
+            id: 1,
+            first_name: 'Test',
+            last_name: 'User',
+            email: 'test@example.com',
+            avatar_url: '',
+            is_superadmin: false,
+          },
+          organisations: [],
+        },
+      }),
+    };
+
+    beforeEach(async () => {
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      })
+        .overrideProvider(AuthenticationService)
+        .useValue(authServiceMock)
+        .compile();
+
+      app = moduleFixture.createNestApplication();
+      await app.init();
+      httpServer = app.getHttpServer();
+    });
+
+    afterEach(async () => {
+      await app.close();
+    });
+
+    it('should allow requests within the limit', async () => {
+      const testUser = {
+        first_name: 'John',
+        last_name: 'Doe',
+        email: `user${Math.random()}@test.com`, // unique email to avoid duplication errors
+        password: 'password123',
+      };
+
+      // This request should pass since it is within the throttling limit.
+      const response = await request(httpServer).post('/auth/register').send(testUser).expect(HttpStatus.CREATED);
+
+      expect(response.body).toBeDefined();
+    });
+
+    it('should return 429 Too Many Requests after exceeding limit', async () => {
+      const url = '/auth/register';
+
+      // The @Throttle decorator is configured for 3 requests per 10 seconds.
+      // Make 3 successful requests.
+      for (let i = 0; i < 3; i++) {
+        await request(httpServer)
+          .post(url)
+          .send({
+            first_name: 'Jane',
+            last_name: 'Doe',
+            email: `user${i}@test.com`,
+            password: 'password123',
+          })
+          .expect(HttpStatus.CREATED);
+      }
+
+      // The 4th request should be throttled.
+      const response = await request(httpServer)
+        .post(url)
+        .send({
+          first_name: 'Jane',
+          last_name: 'Doe',
+          email: `user4@test.com`,
+          password: 'passwor123',
+        })
+        .expect(429);
+
+      // The error message might include a prefix (e.g. "ThrottlerException:"), so check using a partial match.
+      expect(response.body.message).toContain('Too Many Requests');
     });
   });
 

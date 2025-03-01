@@ -1,3 +1,5 @@
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { BullModule } from '@nestjs/bull';
@@ -71,8 +73,21 @@ import { ApiStatusModule } from './modules/api-status/api-status.module';
       provide: 'APP_GUARD',
       useClass: AuthGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard, // Apply rate limiting globally
+    },
   ],
   imports: [
+    // Add ThrottlerModule here
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000, //Time window in seconds (1 minute)
+          limit: 50, // Maximum number of requests within ttl
+        },
+      ],
+    }),
     ConfigModule.forRoot({
       /*
        * By default, the package looks for a env file in the root directory of the application.
