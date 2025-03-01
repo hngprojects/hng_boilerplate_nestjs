@@ -17,6 +17,7 @@ import {
   TIMEZONE_CREATED_SUCCESSFULLY,
   SUCCESS,
   FETCH_TIMEZONE_FAILURE,
+  TIMEZONE_DELETED_SUCCESSFULLY,
 } from '@shared/constants/SystemMessages';
 
 @Injectable()
@@ -61,6 +62,7 @@ export class TimezonesService {
     try {
       const timezones = await this.timezoneRepository.find();
       const formattedTimezones = timezones.map(tz => ({
+        id: tz.id,
         timezone: tz.timezone,
         gmtOffset: tz.gmtOffset,
         description: tz.description,
@@ -100,6 +102,35 @@ export class TimezonesService {
       };
     } catch (error) {
       this.logger.error('TimezonesServiceError ~ updateTimezone ~', error);
+      throw new InternalServerErrorException({
+        message: ERROR_OCCURED,
+        status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  async deleteTimezone(id: string): Promise<any> {
+    try {
+      const timezone = await this.timezoneRepository.findOne({ where: { id } });
+      if (!timezone) {
+        throw new NotFoundException({
+          status_code: HttpStatus.NOT_FOUND,
+          message: 'Timezone not found',
+        });
+      }
+
+      await this.timezoneRepository.delete(id);
+
+      return {
+        status_code: HttpStatus.OK,
+        message: TIMEZONE_DELETED_SUCCESSFULLY,
+      };
+    } catch (error) {
+      Logger.error('TimezonesServiceError ~ deleteTimezone ~', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       throw new InternalServerErrorException({
         message: ERROR_OCCURED,
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,

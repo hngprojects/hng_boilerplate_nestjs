@@ -23,6 +23,7 @@ export const WORK_IN_PROGRESS = 'Work in progress';
 export const FETCH_LANGUAGE_FAILURE = 'Failed to fetch language';
 export const UNAUTHORISED_TOKEN = 'Invalid token or email';
 export const TIMEZONE_CREATED_SUCCESSFULLY = 'Timezone created Successfully';
+export const TIMEZONE_DELETED_SUCCESSFULLY = 'Timezone deleted successfully';
 export const FETCH_TIMEZONE_FAILURE = 'Error Occured while creating Timezone, kindly try again';
 export const SUCCESS = 'Timezone fetched successfully';
 export const TIMEZONE_ALREADY_EXISTS = 'Timezone already exists';
