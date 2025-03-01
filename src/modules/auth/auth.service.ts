@@ -46,12 +46,10 @@ export default class AuthenticationService {
         identifierType: 'email',
       });
 
-      console.log('userExists', userExists);
       if (userExists) {
         throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
       }
 
-      console.log('createUserDto', createUserDto);
       const user = await this.userService.createUser(createUserDto, manager);
 
       if (!user) {

@@ -1,18 +1,27 @@
-import { Injectable, HttpStatus, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpStatus,
+  HttpException,
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { BillingPlan } from './entities/billing-plan.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BillingPlanDto } from './dto/billing-plan.dto';
-import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { BillingPlanMapper } from './mapper/billing-plan.mapper';
 import { UpdateBillingPlanDto } from './dto/update-billing-plan.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class BillingPlanService {
   constructor(
     @InjectRepository(BillingPlan)
-    private readonly billingPlanRepository: Repository<BillingPlan>
+    private readonly billingPlanRepository: Repository<BillingPlan>,
+    private readonly mailerService: MailerService
   ) {}
 
   async createBillingPlan(createBillingPlanDto: BillingPlanDto) {
@@ -80,5 +89,38 @@ export class BillingPlanService {
       throw new CustomHttpException(SYS_MSG.BILLING_PLAN_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
     await this.billingPlanRepository.delete(id);
+  }
+
+  // New methods for subscription renewal reminders
+  async getAllSubscriptions(): Promise<BillingPlan[]> {
+    return this.billingPlanRepository.find();
+  }
+
+  async sendRenewalReminder(subscriptionId: string): Promise<void> {
+    const subscription = await this.billingPlanRepository.findOne({ where: { id: subscriptionId } });
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+
+    const expirationDate = new Date(subscription.expirationDate);
+    const currentDate = new Date();
+    const daysUntilExpiration = (expirationDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24);
+
+    if (daysUntilExpiration <= 7) {
+      try {
+        await this.mailerService.sendMail({
+          to: subscription.email,
+          subject: 'Subscription Renewal Reminder',
+          template: './renewal-reminder',
+          context: {
+            name: subscription.name,
+            expirationDate: subscription.expirationDate,
+          },
+        });
+        console.log(`Renewal reminder sent to ${subscription.email}`);
+      } catch (error) {
+        console.error(`Failed to send renewal reminder to ${subscription.email}: ${error.message}`);
+      }
+    }
   }
 }

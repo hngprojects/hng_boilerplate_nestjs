@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-
+import { IsEmail, IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { Express } from 'express';
 export class JobApplicationDto {
   @IsNotEmpty()
   @IsString()
@@ -16,8 +16,9 @@ export class JobApplicationDto {
   })
   email: string;
 
-  @IsNotEmpty()
-  resume: string;
+  @IsOptional()
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  resume: Express.Multer.File;
 
   @IsNotEmpty()
   @IsString()

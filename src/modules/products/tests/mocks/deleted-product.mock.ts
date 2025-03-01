@@ -24,4 +24,5 @@ export const deletedProductMock: Product = {
   org: orgMock,
   created_at: new Date(),
   updated_at: new Date(),
+  reviews: [],
 };
