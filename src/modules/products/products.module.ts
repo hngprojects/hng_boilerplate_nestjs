@@ -18,7 +18,7 @@ import { ProductCategory } from '../product-category/entities/product-category.e
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Product, Organisation,
+      Product,
       Organisation,
       ProductVariant,
       User,
@@ -28,7 +28,7 @@ import { ProductCategory } from '../product-category/entities/product-category.e
       Order,
       OrderItem,
       Cart,
-      ProductCategory
+      ProductCategory,
     ]),
     UserModule,
   ],
