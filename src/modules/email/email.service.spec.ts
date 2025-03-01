@@ -175,7 +175,7 @@ describe('EmailService', () => {
 
       expect(htmlValidator).toHaveBeenCalledWith({ data: compiledTemplate });
       expect(fsWriteFileMock).toHaveBeenCalledWith(
-        `./src/modules/email/templates/${templateName}.hbs`,
+        `./src/modules/email/hng-templates/${templateName}.hbs`,
         compiledTemplate,
         'utf-8'
       );
@@ -255,7 +255,7 @@ describe('EmailService', () => {
       const result = await service.deleteTemplate(templateInfo);
 
       expect(result).toEqual({
-        status_code: HttpStatus.OK,
+        status_code: HttpStatus.NO_CONTENT,
         message: 'Template deleted successfully',
       });
     });

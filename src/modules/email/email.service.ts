@@ -172,7 +172,7 @@ export class EmailService {
       );
     }
 
-    const templatePath = `./src/modules/email/templates/${templateName}.hbs`;
+    const templatePath = `./src/modules/email/hng-templates/${templateName}.hbs`;
 
     if (!fs.existsSync(templatePath)) {
       throw new CustomHttpException(SYS_MSG.EMAIL_TEMPLATES.TEMPLATE_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -211,7 +211,7 @@ export class EmailService {
     try {
       await deleteFile(`./src/modules/email/hng-templates/${templateInfo.templateName}.hbs`);
       return {
-        status_code: HttpStatus.OK,
+        status_code: HttpStatus.NO_CONTENT,
         message: 'Template deleted successfully',
       };
     } catch (error) {
