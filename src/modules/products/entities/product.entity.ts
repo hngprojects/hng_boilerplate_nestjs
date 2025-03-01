@@ -4,6 +4,7 @@ import { Comment } from '../../../modules/comments/entities/comments.entity';
 import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
 import { Cart } from '../../dashboard/entities/cart.entity';
 import { OrderItem } from '../../dashboard/entities/order-items.entity';
+import { Review } from './review.entity';
 
 export enum StockStatusType {
   IN_STOCK = 'in stock',
@@ -39,6 +40,9 @@ export class Product extends AbstractBaseEntity {
 
   @Column({ type: 'int', nullable: false, default: 0 })
   quantity: number;
+
+  @OneToMany(() => Review, review => review.product)
+  reviews: Review[];
 
   @Column({
     type: 'enum',
