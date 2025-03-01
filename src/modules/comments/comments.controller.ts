@@ -8,7 +8,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 @ApiTags('Comments')
 @Controller('comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(private readonly commentsService: CommentsService) { }
+
   @Post('add')
   @ApiOperation({ summary: 'Create a new comment' })
   @ApiResponse({ status: 201, description: 'The comment has been successfully created.', type: CommentResponseDto })
@@ -19,10 +20,18 @@ export class CommentsController {
     return await this.commentsService.addComment(createCommentDto, userId);
   }
 
+  @Get(':id')
   @ApiOperation({ summary: 'Get a comment' })
   @ApiResponse({ status: 200, description: 'The comment has been retrieved successfully.' })
-  @Get(':id')
   async getAComment(@Param('id') id: string): Promise<any> {
     return await this.commentsService.getAComment(id);
+  }
+
+  @Get(':id/thread')
+  @ApiOperation({ summary: 'Get a comment thread' })
+  @ApiResponse({ status: 200, description: 'The comment thread has been retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Comment not found.' })
+  async getCommentThread(@Param('id') id: string): Promise<any> {
+    return await this.commentsService.getCommentThread(id);
   }
 }
