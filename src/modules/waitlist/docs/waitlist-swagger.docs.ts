@@ -6,6 +6,7 @@ import { WaitlistResponseDto } from '../dto/create-waitlist-response.dto';
 
 export function createWaitlistDocs() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({ summary: 'Create a new waitlist entry' }),
     ApiResponse({
       status: HttpStatus.CREATED,
@@ -15,6 +16,21 @@ export function createWaitlistDocs() {
     ApiResponse({
       status: HttpStatus.BAD_REQUEST,
       description: 'Invalid input data.',
+      type: ErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.UNAUTHORIZED,
+      description: 'Unauthorized access.',
+      type: ErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.FORBIDDEN,
+      description: 'Forbidden access.',
+      type: ErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      description: 'Internal server error.',
       type: ErrorResponseDto,
     })
   );
@@ -28,6 +44,16 @@ export function getAllWaitlistDocs() {
       status: HttpStatus.OK,
       description: 'Successfully retrieved all waitlist entries.',
       type: GetWaitlistResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.UNAUTHORIZED,
+      description: 'Unauthorized access.',
+      type: ErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.FORBIDDEN,
+      description: 'Forbidden access.',
+      type: ErrorResponseDto,
     }),
     ApiResponse({
       status: HttpStatus.INTERNAL_SERVER_ERROR,

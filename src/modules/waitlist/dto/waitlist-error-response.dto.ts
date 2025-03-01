@@ -20,4 +20,34 @@ export class ErrorResponseDto {
     example: 'Bad Request',
   })
   error: string;
+
+  @ApiProperty({
+    description: 'Example of an unauthorized error response.',
+    example: {
+      status_code: HttpStatus.UNAUTHORIZED,
+      message: 'Unauthorized access',
+      error: 'Unauthorized',
+    },
+  })
+  unauthorized_example: object;
+
+  @ApiProperty({
+    description: 'Example of a forbidden error response.',
+    example: {
+      status_code: HttpStatus.FORBIDDEN,
+      message: 'Forbidden access',
+      error: 'Forbidden',
+    },
+  })
+  forbidden_example: object;
+
+  @ApiProperty({
+    description: 'Example of an internal server error response.',
+    example: {
+      status_code: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    },
+  })
+  internal_server_error_example: object;
 }
