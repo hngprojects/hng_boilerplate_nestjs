@@ -14,8 +14,8 @@ export class TextService {
     const prompt = `Please provide a direct translation of the following text to ${targetLanguage}, without any additional context or explanations:\n\n"${text}"`;
 
     const result = await this.model.generateContent(prompt);
-    const response = await result.response;
-    let translatedText = await response.text();
+    const response = result.response;
+    let translatedText = response.text();
     translatedText = translatedText.replace(/^"|"$/g, '').trim();
 
     return translatedText;

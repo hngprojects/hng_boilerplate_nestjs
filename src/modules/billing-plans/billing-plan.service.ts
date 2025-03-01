@@ -1,10 +1,8 @@
 import {
   Injectable,
   HttpStatus,
-  HttpException,
   BadRequestException,
   NotFoundException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { BillingPlan } from './entities/billing-plan.entity';

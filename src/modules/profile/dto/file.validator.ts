@@ -29,7 +29,7 @@ export class FileValidator implements PipeTransform {
   }
 
   private async validateFileType(buffer: Buffer) {
-    const response = await fileType.parse(buffer);
+    const response = fileType.parse(buffer);
     if (!response || !this.options.mimeTypes.includes(response.mime)) {
       throw new CustomHttpException(INVALID_FILE_TYPE(this.options.mimeTypes.join(', ')), HttpStatus.BAD_REQUEST);
     }

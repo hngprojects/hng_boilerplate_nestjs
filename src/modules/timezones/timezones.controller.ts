@@ -1,9 +1,8 @@
-import { Controller, Post, Body, Get, Res, HttpStatus, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateTimezoneDto } from './dto/create-timezone.dto';
 import { UpdateTimezoneDto } from './dto/update-timezone.dto';
 import { TimezonesService } from './timezones.service';
-import { Response } from 'express';
 
 @ApiTags('Timezones')
 @Controller('timezones')

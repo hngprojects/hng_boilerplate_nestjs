@@ -17,6 +17,8 @@ import { TestimonialResponse } from './interfaces/testimonial-response.interface
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 import { TextService } from '@modules/translation/translation.service';
 import UserService from '@modules/user/user.service';
+import { User } from '@modules/user/entities/user.entity';
+import UserInterface from '@modules/user/interfaces/UserInterface';
 
 @Injectable()
 export class TestimonialsService {
@@ -31,7 +33,11 @@ export class TestimonialsService {
     return this.textService.translateText(content, lang);
   }
 
-  async createTestimonial(createTestimonialDto: CreateTestimonialDto, user, language?: string) {
+  async createTestimonial(
+    createTestimonialDto: CreateTestimonialDto,
+    user: User | Partial<UserInterface>,
+    language?: string
+  ) {
     try {
       const { content, name } = createTestimonialDto;
 

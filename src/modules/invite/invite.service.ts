@@ -86,7 +86,7 @@ export class InviteService {
 
     const token = uuidv4();
 
-    const invite = await this.inviteRepository.create({
+    const invite = this.inviteRepository.create({
       token,
       organisation: organisation,
       isGeneric: true,

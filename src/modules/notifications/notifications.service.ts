@@ -134,7 +134,7 @@ export class NotificationsService {
     }
   }
 
-  async markNotificationAsRead(options: MarkNotificationAsReadDto, notificationId: string, userId: string) {
+  async markNotificationAsRead(options: MarkNotificationAsReadDto, notificationId: string, _userId: string) {
     try {
       if (!notificationId || !options) {
         throw new BadRequestException({

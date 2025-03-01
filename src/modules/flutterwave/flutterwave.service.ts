@@ -20,8 +20,8 @@ export class FlutterwaveService {
     @InjectRepository(Payment)
     private readonly paymentRepo: Repository<Payment>
   ) {
-    this.secretkey = configService.get<string>('FLUTTERWAVE_SECRET_KEY');
-    this.baseUrl = configService.get<string>('FLUTTERWAVE_BASE_URL');
+    this.secretkey = this.configService.get<string>('FLUTTERWAVE_SECRET_KEY');
+    this.baseUrl = this.configService.get<string>('FLUTTERWAVE_BASE_URL');
   }
 
   async initiatePayment(createFlutterwavePaymentDto: CreateFlutterwavePaymentDto, userId: string) {
@@ -29,9 +29,10 @@ export class FlutterwaveService {
       Authorization: `Bearer ${this.secretkey}`,
       'Content-Type': 'application/json',
     };
-    const payment_plan = await this.httpService
-      .get(`${this.baseUrl}/payment-plans/${createFlutterwavePaymentDto.plan_id}`, { headers })
-      .toPromise();
+    const payment_plan = await this.httpService.axiosRef.get(
+      `${this.baseUrl}/payment-plans/${createFlutterwavePaymentDto.plan_id}`,
+      { headers }
+    );
     if (!payment_plan) {
       throw new CustomHttpException(PAYMENT_NOTFOUND, 404);
     }
@@ -56,7 +57,7 @@ export class FlutterwaveService {
         billing_option: createFlutterwavePaymentDto.billing_option,
       },
     };
-    const response = await this.httpService.post(`${this.baseUrl}/payments`, paymentData, { headers }).toPromise();
+    const response = await this.httpService.axiosRef.post(`${this.baseUrl}/payments`, paymentData, { headers });
     const createPaymentDto: CreatePaymentDto = {
       user_id: userId,
       transaction_id: uuid4(),
@@ -64,7 +65,7 @@ export class FlutterwaveService {
       amount: paymentData.amount,
       status: PaymentStatus.PENDING,
     };
-    const newPayment = await this.paymentRepo.create(createPaymentDto);
+    const newPayment = this.paymentRepo.create(createPaymentDto);
     await this.paymentRepo.save(newPayment);
     return {
       status: 200,
@@ -80,9 +81,9 @@ export class FlutterwaveService {
       Authorization: `Bearer ${this.secretkey}`,
       'Content-Type': 'application/json',
     };
-    const response = await this.httpService
-      .get(`${this.baseUrl}/transactions/${transactionId}/verify`, { headers })
-      .toPromise();
+    const response = await this.httpService.axiosRef.get(`${this.baseUrl}/transactions/${transactionId}/verify`, {
+      headers,
+    });
     const payment = await this.paymentRepo.findOne({ where: { transaction_id: transactionId } });
     payment.status = PaymentStatus.APPROVED;
     await this.paymentRepo.save(payment);
