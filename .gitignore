@@ -397,8 +397,8 @@ Temporary Items
 .apdisk
 
 # Local
-dist
-/.env
+dist/
+.env
 /.env.*
 *._local.ts
 
@@ -410,6 +410,7 @@ dist
 *.dev
 *.prod
 
+
 # User specific ignores 
 todo.txt
 /.vscode/
@@ -418,19 +419,10 @@ todo.txt
 # Docker compose
 docker-compose.yml
 data/
-data/
-docker-compose.yml
-package-lock.json
-.dev.env
 
-
-package-lock.json
+# Docker compose
 docker-compose.yml
 data/
-.dev.env
-
-/compose/compose.yaml
-compose/compose.yaml
 
 data/
 docker-compose.yml
@@ -443,3 +435,4 @@ package-lock.json
 docker-compose.yml
 data/
 .dev.env
+

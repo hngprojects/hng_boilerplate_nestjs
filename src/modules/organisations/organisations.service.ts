@@ -197,7 +197,7 @@ export class OrganisationsService {
     return userOrganisations;
   }
 
-  async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto) {
+  async addOrganisationMember(org_id: string, addMemberDto: AddMemberDto, manager?: EntityManager) {
     const organisation = await this.organisationRepository.findOneBy({ id: org_id });
     if (!organisation) {
       throw new CustomHttpException(SYS_MSG.ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -227,10 +227,15 @@ export class OrganisationsService {
     defaultRole.organisationId = organisation.id;
     defaultRole.roleId = userRole.id;
 
-    await this.organisationUserRole.save(defaultRole);
+    const organisationUserRoleRepository = manager
+      ? manager.getRepository(OrganisationUserRole)
+      : this.organisationUserRole;
+    await organisationUserRoleRepository.save(defaultRole);
 
     user.organisations = [...user.organisations, organisation];
-    await this.userRepository.save(user);
+
+    const userRepository = manager ? manager.getRepository(User) : this.userRepository;
+    await userRepository.save(user);
 
     const responsePayload = {
       id: user.id,

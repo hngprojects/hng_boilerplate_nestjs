@@ -3,14 +3,14 @@ import { Entity, Column } from 'typeorm';
 
 @Entity()
 export class ContactUs extends AbstractBaseEntity {
+  @Column('varchar', { length: 20, nullable: true })
+  phone: string;
+
   @Column('varchar', { nullable: false })
   name: string;
 
   @Column('varchar', { nullable: false })
   email: string;
-
-  @Column('int', { nullable: true })
-  phone: number;
 
   @Column('text', { nullable: false })
   message: string;
