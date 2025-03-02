@@ -48,7 +48,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { LanguageGuard } from '@guards/language.guard';
 import { ApiStatusModule } from '@modules/api-status/api-status.module';
-
+import s3Config from '@config/s3.config';
 @Module({
   providers: [
     {
@@ -82,7 +82,7 @@ import { ApiStatusModule } from '@modules/api-status/api-status.module';
        */
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
       isGlobal: true,
-      load: [serverConfig, authConfig],
+      load: [serverConfig, authConfig, s3Config],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').required(),
         PROFILE: Joi.string().valid('local', 'development', 'production', 'ci', 'testing', 'staging').required(),

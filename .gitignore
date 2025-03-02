@@ -55,6 +55,11 @@ fabric.properties
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
+# DB
+data/db/
+
+docker-compose.yml
 # User-specific files
 *.suo
 *.user
@@ -387,8 +392,8 @@ Temporary Items
 .apdisk
 
 # Local
-dist
-/.env
+dist/
+.env
 /.env.*
 *._local.ts
 
@@ -399,6 +404,7 @@ dist
 *.staging
 *.dev
 *.prod
+
 
 # User specific ignores 
 todo.txt
@@ -433,3 +439,4 @@ package-lock.json
 docker-compose.yml
 data/
 .dev.env
+

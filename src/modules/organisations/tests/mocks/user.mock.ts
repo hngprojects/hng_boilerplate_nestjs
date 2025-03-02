@@ -33,4 +33,5 @@ export const mockUser = {
   comments: null,
   cart: [],
   organisations: null,
+  is_superadmin: false,
 };

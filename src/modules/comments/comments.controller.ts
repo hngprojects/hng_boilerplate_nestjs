@@ -28,7 +28,7 @@ export class CommentsController {
   async getAComment(@Param('id') id: string): Promise<any> {
     return await this.commentsService.getAComment(id);
   }
-
+  
   @Get(':id/thread')
   @ApiOperation({ summary: 'Get a comment thread' })
   @ApiResponse({ status: 200, description: 'The comment thread has been retrieved successfully.' })
@@ -50,6 +50,24 @@ export class CommentsController {
   @Delete(':id/delete')
   @ApiOperation({ summary: 'Delete a comment' })
   @ApiResponse({ status: 200, description: 'The comment has been deleted successfully.' })
+  async deleteAComment(@Param('id') id: string, @Request() req): Promise<any> {
+    return await this.commentsService.deleteAComment(id, req.user.id);
+  }
+}
+
+  @ApiOperation({ summary: 'Dislike a comment' })
+  @ApiResponse({ status: 200, description: 'Dislike updated successfully' })
+  @ApiResponse({ status: 404, description: 'Comment not found' })
+  @Post(':id/dislike')
+  async dislikeComment(@Param('id') id: string, @Request() req) {
+    const userId = req.user.id;
+    // console.log('User ID:', userId); debug
+    return await this.commentsService.dislikeComment(id, userId);
+  }
+
+  @ApiOperation({ summary: 'Delete a comment' })
+  @ApiResponse({ status: 200, description: 'The comment has been deleted successfully.' })
+  @Delete(':id/delete')
   async deleteAComment(@Param('id') id: string, @Request() req): Promise<any> {
     return await this.commentsService.deleteAComment(id, req.user.id);
   }

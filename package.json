@@ -48,6 +48,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/speakeasy": "^2.0.10",
     "@vitalets/google-translate-api": "^9.2.1",
+    "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "bull": "^4.16.5",
