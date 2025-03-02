@@ -22,6 +22,7 @@ import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { OtpDto } from '@modules/otp/dto/otp.dto';
 import { DataSource, EntityManager } from 'typeorm';
 import { CreateOrganisationRecordOptions } from '@modules/organisations/dto/create-organisation-options';
+
 @Injectable()
 export default class AuthenticationService {
   constructor(
@@ -41,12 +42,10 @@ export default class AuthenticationService {
         identifierType: 'email',
       });
 
-      console.log('userExists', userExists);
       if (userExists) {
         throw new CustomHttpException(SYS_MSG.USER_ACCOUNT_EXIST, HttpStatus.BAD_REQUEST);
       }
 
-      console.log('createUserDto', createUserDto);
       const user = await this.userService.createUser(createUserDto, manager);
 
       if (!user) {

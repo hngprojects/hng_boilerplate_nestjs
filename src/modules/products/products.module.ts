@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
+import { Review } from './entities/review.entity';
 import { UserModule } from '@modules/user/user.module';
 import { Cart } from '@modules/dashboard/entities/cart.entity';
 import { OrderItem } from '@modules/dashboard/entities/order-items.entity';
@@ -13,7 +14,6 @@ import { ProductVariant } from './entities/product-variant.entity';
 import { Organisation } from '@modules/organisations/entities/organisations.entity';
 import { Order } from '@modules/dashboard/entities/order.entity';
 import { Comment } from '@modules/comments/entities/comments.entity';
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -27,6 +27,7 @@ import { Comment } from '@modules/comments/entities/comments.entity';
       Order,
       OrderItem,
       Cart,
+      Review,
     ]),
     UserModule,
   ],

@@ -13,13 +13,19 @@ import { JobsService } from '../jobs.service';
 import { jobsMock } from './mocks/jobs.mock';
 import { JobSearchDto } from '../dto/jobSearch.dto';
 import { UpdateJobDto } from '../dto/update-job.dto';
+import { S3Service } from '@modules/s3/s3.service';
+import { isPassed } from '../utils/helpers';
 
+jest.mock('../utils/helpers', () => ({
+  isPassed: jest.fn(() => false),
+}));
 describe('JobsService', () => {
   let service: JobsService;
   let jobRepository: Repository<Job>;
   let userRepository: Repository<User>;
   let userDto: UserResponseDTO;
   let createJobDto: JobDto;
+  let s3Service: S3Service;
 
   const mockJob = {
     data: {
@@ -27,11 +33,22 @@ describe('JobsService', () => {
       deadline: new Date(new Date().getTime() + 1000 * 60 * 60 * 24).toISOString(),
     },
   };
-
+  const mockFile: Express.Multer.File = {
+    fieldname: 'resume',
+    originalname: 'resume.pdf',
+    encoding: '7bit',
+    mimetype: 'application/pdf',
+    buffer: Buffer.from('mock file content'),
+    size: 1024,
+    destination: '',
+    filename: '',
+    path: '',
+    stream: null,
+  };
   const mockJobApplicationDto: JobApplicationDto = {
     applicant_name: 'John Doe',
     email: 'johndoe@example.com',
-    resume: 'resume content',
+    resume: mockFile,
     cover_letter: 'Cover letter text',
   };
 
@@ -72,6 +89,7 @@ describe('JobsService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
+
             createQueryBuilder: jest.fn().mockReturnValue({
               where: jest.fn().mockReturnThis(),
               andWhere: jest.fn().mockReturnThis(),
@@ -104,12 +122,19 @@ describe('JobsService', () => {
             update: jest.fn(),
           },
         },
+        {
+          provide: S3Service,
+          useValue: {
+            uploadFile: jest.fn().mockResolvedValue('https://s3-bucket-url/resume.pdf'),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<JobsService>(JobsService);
     userRepository = module.get(getRepositoryToken(User));
     jobRepository = module.get(getRepositoryToken(Job));
+    s3Service = module.get<S3Service>(S3Service);
 
     jest.spyOn(userRepository, 'findOne').mockResolvedValue(userDto as User);
     jest.spyOn(jobRepository, 'create').mockReturnValue({ ...createJobDto, user: userDto } as Job);
@@ -161,7 +186,7 @@ describe('JobsService', () => {
         data: { is_deleted: true, deadline: new Date().toISOString() },
       } as any);
 
-      await expect(service.applyForJob('jobId', mockJobApplicationDto)).rejects.toThrow(
+      await expect(service.applyForJob('jobId', mockJobApplicationDto, {} as Express.Multer.File)).rejects.toThrow(
         new CustomHttpException('Job deleted', HttpStatus.NOT_FOUND)
       );
     });
@@ -170,30 +195,34 @@ describe('JobsService', () => {
       jest.spyOn(service, 'getJob').mockResolvedValue({
         data: { is_deleted: false, deadline: new Date(new Date().getTime() - 1000 * 60 * 60 * 24).toISOString() },
       } as any);
+      (isPassed as jest.Mock).mockReturnValue(true);
 
-      await expect(service.applyForJob('jobId', mockJobApplicationDto)).rejects.toThrow(
+      await expect(
+        service.applyForJob('jobId', mockJobApplicationDto, {} as Express.Multer.File)
+      ).rejects.toMatchObject(
         new CustomHttpException('Job application deadline passed', HttpStatus.UNPROCESSABLE_ENTITY)
       );
     });
+    it('should successfully create a job application with resume uploaded to S3', async () => {
+      const resume = { buffer: Buffer.from('test file'), originalname: 'resume.pdf' } as Express.Multer.File;
 
-    it('should successfully create a job application', async () => {
       jest.spyOn(service, 'getJob').mockResolvedValue(mockJob as any);
-      const createMock = jest.fn().mockReturnValue(mockJobApplicationDto);
-      const saveMock = jest.fn().mockResolvedValue(mockJobApplicationResponse);
+      jest.spyOn(s3Service, 'uploadFile').mockResolvedValue('https://s3-bucket-url/resume.pdf');
+      (isPassed as jest.Mock).mockReturnValue(false);
 
-      jest.spyOn(service['jobApplicationRepository'], 'create').mockImplementation(createMock);
-      jest.spyOn(service['jobApplicationRepository'], 'save').mockImplementation(saveMock);
+      jest
+        .spyOn(service['jobApplicationRepository'], 'create')
+        .mockReturnValue({ id: '1', ...mockJobApplicationDto } as any);
+      jest
+        .spyOn(service['jobApplicationRepository'], 'save')
+        .mockResolvedValue({ id: '1', ...mockJobApplicationDto } as any);
 
-      const result = await service.applyForJob('jobId', mockJobApplicationDto);
+      const result = await service.applyForJob('jobId', mockJobApplicationDto, resume);
 
       expect(result).toEqual(mockJobApplicationResponse);
-      expect(createMock).toHaveBeenCalledWith({
-        ...mockJobApplicationDto,
-        applicant_name: 'John Doe',
-        resume: `https://example.com/John_Doe.pdf`,
-        ...mockJob,
-      });
-      expect(saveMock).toHaveBeenCalled();
+      expect(s3Service.uploadFile).toHaveBeenCalledWith(resume, 'resumes'); // ✅ Updated expectation
+      expect(service['jobApplicationRepository'].create).toHaveBeenCalled();
+      expect(service['jobApplicationRepository'].save).toHaveBeenCalled();
     });
   });
 

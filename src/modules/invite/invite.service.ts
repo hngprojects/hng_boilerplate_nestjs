@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException
 import { InviteDto } from './dto/invite.dto';
 import { Invite } from './entities/invite.entity';
 import { Organisation } from '@modules/organisations/entities/organisations.entity';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
@@ -24,7 +24,8 @@ export class InviteService {
     private readonly mailerService: MailerService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-    private readonly OrganisationService: OrganisationsService
+    private readonly OrganisationService: OrganisationsService,
+    private readonly entityManager: EntityManager
   ) {}
 
   async getPendingInvites(): Promise<{ message: string; data: InviteDto[] }> {
@@ -127,17 +128,23 @@ export class InviteService {
       throw new CustomHttpException(SYS_MSG.USER_NOT_REGISTERED, HttpStatus.NOT_FOUND);
     }
 
-    const response = await this.OrganisationService.addOrganisationMember(invite.organisation.id, {
-      user_id: user.id,
-    });
+    return await this.entityManager.transaction(async transactionalEntityManager => {
+      const response = await this.OrganisationService.addOrganisationMember(
+        invite.organisation.id,
+        {
+          user_id: user.id,
+        },
+        transactionalEntityManager
+      );
 
-    if (response.status === 'success') {
-      invite.isAccepted = true;
-      await this.inviteRepository.save(invite);
-      return response;
-    } else {
-      throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+      if (response.status === 'success') {
+        invite.isAccepted = true;
+        await transactionalEntityManager.save(invite);
+        return response;
+      } else {
+        throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    });
   }
 
   async sendInvitations(createInvitationDto: CreateInvitationDto): Promise<any> {

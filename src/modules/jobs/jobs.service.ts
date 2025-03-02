@@ -14,7 +14,7 @@ import { User } from '@modules/user/entities/user.entity';
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { pick } from '@shared/helpers/pick';
 import { UpdateJobDto } from './dto/update-job.dto';
-
+import { S3Service } from '@modules/s3/s3.service';
 @Injectable()
 export class JobsService {
   constructor(
@@ -23,10 +23,15 @@ export class JobsService {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     @InjectRepository(JobApplication)
-    private readonly jobApplicationRepository: Repository<JobApplication>
+    private readonly jobApplicationRepository: Repository<JobApplication>,
+    private readonly s3Service: S3Service
   ) {}
 
-  async applyForJob(jobId: string, jobApplicationDto: JobApplicationDto): Promise<JobApplicationResponseDto> {
+  async applyForJob(
+    jobId: string,
+    jobApplicationDto: JobApplicationDto,
+    resume: Express.Multer.File
+  ): Promise<JobApplicationResponseDto> {
     const job: FindJobResponseDto = await this.getJob(jobId);
 
     const { is_deleted, deadline } = job.data;
@@ -39,11 +44,9 @@ export class JobsService {
       throw new CustomHttpException(SYS_MSG.DEADLINE_PASSED, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    const { resume, applicant_name, ...others } = jobApplicationDto;
+    const { applicant_name, ...others } = jobApplicationDto;
 
-    // TODO: Upload resume to the cloud and grab URL
-
-    const resumeUrl = `https://example.com/${applicant_name.split(' ').join('_')}.pdf`;
+    const resumeUrl = await this.s3Service.uploadFile(resume, 'resumes');
 
     const createJobApplication = this.jobApplicationRepository.create({
       ...others,
