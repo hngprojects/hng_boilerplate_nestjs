@@ -41,6 +41,7 @@ export class ResponseInterceptor implements NestInterceptor {
     response.setHeader('Content-Type', 'application/json');
     if (typeof res === 'object') {
       const { message, ...data } = res;
+      console.log('response', res);
 
       return {
         status_code,

@@ -343,16 +343,43 @@ export class SeedingService {
   async createSuperAdmin({ secret, ...adminDetails }: CreateAdminDto): Promise<CreateAdminResponseDto> {
     try {
       const userRepository = this.dataSource.getRepository(User);
+      const roleRepository = this.dataSource.getRepository(Role);
+      const orgUserRoleRepository = this.dataSource.getRepository(OrganisationUserRole);
+
+      // Check if user exists
       const exists = await userRepository.findOne({ where: { email: adminDetails.email } });
       if (exists) throw new ConflictException('A user already exist with the same email');
 
-      const user = userRepository.create(adminDetails);
+      // Verify admin secret
       const { ADMIN_SECRET } = process.env;
       if (secret !== ADMIN_SECRET) throw new UnauthorizedException(INVALID_ADMIN_SECRET);
 
-      // user.user_type = UserType.SUPER_ADMIN;
-      const admin = await userRepository.save(user);
-      return { status: 201, message: ADMIN_CREATED, data: admin };
+      // Find or create super-admin role
+      let adminRole = await roleRepository.findOne({ where: { name: 'super-admin' } });
+      if (!adminRole) {
+        adminRole = roleRepository.create({
+          name: 'super-admin',
+          description: 'Super Administrator',
+        });
+        adminRole = await roleRepository.save(adminRole);
+      }
+
+      // Create and save user
+      const user = userRepository.create(adminDetails);
+      const savedUser = await userRepository.save(user);
+
+      // Assign super-admin role to user
+      const userRole = orgUserRoleRepository.create({
+        userId: savedUser.id,
+        roleId: adminRole.id,
+      });
+      await orgUserRoleRepository.save(userRole);
+
+      return {
+        status: 201,
+        message: ADMIN_CREATED,
+        data: savedUser,
+      };
     } catch (error) {
       console.log('Error creating superAdmin:', error);
       if (error instanceof UnauthorizedException || error instanceof ConflictException) throw error;

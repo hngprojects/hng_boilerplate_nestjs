@@ -7,6 +7,7 @@ import { CreateWaitlistDto } from './dto/create-waitlist.dto';
 import { WaitlistResponseDto } from './dto/create-waitlist-response.dto';
 import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { STATUS_CODES } from 'http';
 
 @Injectable()
 export default class WaitlistService {
@@ -34,8 +35,25 @@ export default class WaitlistService {
     return { message: 'You are all signed up!' };
   }
 
-  async getAllWaitlist() {
-    const waitlist = await this.waitlistRepository.find();
-    return { message: 'Waitlist found successfully', data: { waitlist } };
+  async getAllWaitlist(page: number = 1, limit: number = 10) {
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 10;
+
+    const [waitlist, total] = await this.waitlistRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      status: 'Success',
+      status_code: 200,
+      message: 'Waitlist found successfully',
+      data: {
+        waitlist,
+        total_waitlist_count: total,
+        current_page: page,
+        total_pages: Math.ceil(total / limit),
+      },
+    };
   }
 }
