@@ -14,14 +14,13 @@ export class CommentsService {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async addComment(createCommentDto: CreateCommentDto, userId: string): Promise<CommentResponseDto> {
     const { model_id, model_type, comment, parentId } = createCommentDto;
 
     if (!comment || comment.trim().length === 0) {
       throw new CustomHttpException('Comment cannot be empty', HttpStatus.BAD_REQUEST);
- carriages carriages
     }
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -115,10 +114,12 @@ export class CommentsService {
       comment.dislikedBy = [];
     }
 
+    // Check if the user has already disliked the comment
     if (comment.dislikedBy.includes(userId)) {
       throw new CustomHttpException('You have already disliked this comment', HttpStatus.BAD_REQUEST);
     }
 
+    // Add the user to the dislikedBy array and increment dislikes
     comment.dislikedBy.push(userId);
     comment.dislikes = comment.dislikedBy.length;
 
