@@ -189,4 +189,38 @@ describe('NewsletterService', () => {
       expect(repository.findOne).toHaveBeenCalledWith({ where: { email } });
     });
   });
+
+  describe('resubscribe', () => {
+    it('should successfully resubscribe a user who was unsubscribed', async () => {
+      const dto = { email: 'test@example.com' };
+      const mockSubscription = {
+        id: '1',
+        email: 'test@example.com',
+        status: 'unsubscribed',
+      } as NewsletterSubscription;
+
+      jest.spyOn(repository, 'findOne').mockResolvedValue(mockSubscription);
+      jest.spyOn(repository, 'save').mockResolvedValue({ ...mockSubscription, status: 'active' });
+
+      const result = await service.resubscribe(dto);
+
+      expect(result).toEqual({ message: 'Successfully resubscribed to the newsletter.' });
+      expect(repository.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.arrayContaining([expect.objectContaining({ email: dto.email })]),
+        })
+      );
+      expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({ status: 'active' }));
+    });
+
+    it('should throw NotFoundException if user is not found or was never subscribed', async () => {
+      const dto = { email: 'notfound@example.com' };
+
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.resubscribe(dto)).rejects.toThrow(
+        new NotFoundException('User not found or not unsubscribed.')
+      );
+    });
+  });
 });

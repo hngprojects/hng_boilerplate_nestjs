@@ -1,7 +1,7 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { AbstractBaseEntity } from '@entities/base.entity';
 import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from 'typeorm';
-import { Comment } from '../../../modules/comments/entities/comments.entity';
-import { Organisation } from '../../../modules/organisations/entities/organisations.entity';
+import { Comment } from '@modules/comments/entities/comments.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
 import { Cart } from '../../dashboard/entities/cart.entity';
 import { OrderItem } from '../../dashboard/entities/order-items.entity';
 import { Review } from './review.entity';
@@ -64,7 +64,7 @@ export class Product extends AbstractBaseEntity {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @OneToMany(() => Comment, comment => comment.product)
+  @OneToMany(() => Comment, comment => comment.product, { onUpdate: 'CASCADE' })
   comments?: Comment[];
 
   @OneToMany(() => OrderItem, orderItem => orderItem.product)

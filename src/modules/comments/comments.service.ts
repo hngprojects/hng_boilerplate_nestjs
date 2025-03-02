@@ -65,6 +65,7 @@ export class CommentsService {
     };
   }
 
+
   async getCommentThread(commentId: string): Promise<{ message: string; data: Comment }> {
     const comment = await this.commentRepository.findOne({
       where: { id: commentId },
@@ -130,4 +131,3 @@ export class CommentsService {
       dislikeCount: comment.dislikes,
     };
   }
-}

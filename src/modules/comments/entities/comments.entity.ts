@@ -20,6 +20,7 @@ export class Comment extends AbstractBaseEntity {
   @Column({ nullable: true })
   model_type: string;
 
+
   // Threading fields for PostgreSQL
   @ManyToOne(() => Comment, comment => comment.replies, { nullable: true })
   parent: Comment;
@@ -32,4 +33,3 @@ export class Comment extends AbstractBaseEntity {
 
   @Column('simple-array', { nullable: true }) // Store user IDs as an array
   dislikedBy: string[];
-}

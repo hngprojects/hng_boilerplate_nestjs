@@ -68,6 +68,9 @@ export class User extends AbstractBaseEntity {
   @Column({ default: false })
   is_2fa_enabled: boolean;
 
+  @Column({ default: false })
+  is_superadmin: boolean;
+
   @DeleteDateColumn({ nullable: true })
   deletedAt?: Date;
 

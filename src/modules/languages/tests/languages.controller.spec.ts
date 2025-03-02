@@ -7,6 +7,7 @@ import { Language } from '../entities/language.entity';
 import { CreateLanguageDto } from '../dto/create-language.dto';
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { User } from '@modules/user/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 const mockLanguageRepository = {
   findOne: jest.fn(),
@@ -19,6 +20,11 @@ const mockLanguagesService = {
   createLanguage: jest.fn(),
   getLanguagesById: jest.fn(),
   getSupportedLanguages: jest.fn(),
+};
+
+const mockJwtService = {
+  sign: jest.fn(),
+  verify: jest.fn(),
 };
 
 describe('LanguagesController', () => {
@@ -36,6 +42,10 @@ describe('LanguagesController', () => {
         {
           provide: getRepositoryToken(Language),
           useValue: mockLanguageRepository,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
         },
       ],
     }).compile();

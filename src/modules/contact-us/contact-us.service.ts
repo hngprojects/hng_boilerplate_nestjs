@@ -39,4 +39,23 @@ export class ContactUsService {
       },
     });
   }
+
+  async getAllContactMessages(page: number, limit: number) {
+    const [messages, total] = await this.contactRepository.findAndCount({
+      order: { created_at: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    const totalPages = Math.ceil(total / limit);
+    return {
+      status: 'success',
+      message: 'Retrieved messages successfully',
+      data: {
+        currentPage: page,
+        totalPages,
+        totalResults: total,
+        messages,
+      },
+    };
+  }
 }
