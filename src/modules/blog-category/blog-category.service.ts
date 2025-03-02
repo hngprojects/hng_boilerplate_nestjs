@@ -43,4 +43,37 @@ export class BlogCategoryService {
       message: 'Organisation category deleted successfully',
     };
   }
+
+  async searchCategories(searchTerm: string): Promise<{
+    status: string;
+    status_code: number;
+    message: string;
+    data: { categories: BlogCategory[]; total: number };
+  }> {
+    // Handle empty search term
+    if (!searchTerm || searchTerm.trim() === '') {
+      return {
+        status: 'success',
+        status_code: 200,
+        message: 'No search term provided',
+        data: { categories: [], total: 0 },
+      };
+    }
+
+    // Perform a case-insensitive search
+    const categories = await this.blogCategoryRepository
+      .createQueryBuilder('category')
+      .where('LOWER(category.name) LIKE LOWER(:searchTerm)', {
+        searchTerm: `%${searchTerm}%`,
+      })
+      .getMany();
+
+    // Return the results in the desired format
+    return {
+      status: 'success',
+      status_code: 200,
+      message: categories.length > 0 ? 'Categories found successfully' : 'No categories found',
+      data: { categories, total: categories.length },
+    };
+  }
 }

@@ -72,4 +72,66 @@ describe('BlogCategoryService', () => {
     expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'blog-id' } });
     expect(repository.remove).toHaveBeenCalledWith(blogCategory);
   });
+
+  it('should return empty array and total 0 for empty search term', async () => {
+    const result = await service.searchCategories('');
+    expect(result).toEqual({
+      status: 'success',
+      status_code: 200,
+      message: 'No search term provided',
+      data: { categories: [], total: 0 },
+    });
+  });
+
+  it('should return matching categories for partial search term', async () => {
+    const mockCategories = [
+      { id: '1', name: 'Technology' },
+      { id: '2', name: 'Tech News' },
+    ];
+
+    jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue(mockCategories),
+    } as any);
+
+    const result = await service.searchCategories('tech');
+    expect(result).toEqual({
+      status: 'success',
+      status_code: 200,
+      message: 'Categories found successfully',
+      data: { categories: mockCategories, total: 2 },
+    });
+  });
+
+  it('should return empty array and total 0 for no matches', async () => {
+    jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
+    } as any);
+
+    const result = await service.searchCategories('nonexistent');
+    expect(result).toEqual({
+      status: 'success',
+      status_code: 200,
+      message: 'No categories found',
+      data: { categories: [], total: 0 },
+    });
+  });
+
+  it('should handle search term with special characters', async () => {
+    const mockCategories = [{ id: '1', name: 'C# Programming' }];
+
+    jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+      where: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue(mockCategories),
+    } as any);
+
+    const result = await service.searchCategories('C#');
+    expect(result).toEqual({
+      status: 'success',
+      status_code: 200,
+      message: 'Categories found successfully',
+      data: { categories: mockCategories, total: 1 },
+    });
+  });
 });
