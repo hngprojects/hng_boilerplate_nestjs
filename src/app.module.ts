@@ -49,9 +49,7 @@ import { join } from 'path';
 import { LanguageGuard } from '@guards/language.guard';
 import { ApiStatusModule } from '@modules/api-status/api-status.module';
 import s3Config from '@config/s3.config';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
 @Module({
   providers: [
     {
