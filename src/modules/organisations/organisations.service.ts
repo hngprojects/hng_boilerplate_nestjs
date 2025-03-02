@@ -156,16 +156,22 @@ export class OrganisationsService {
     };
   }
 
-  async getUserOrganisations(userId: string) {
+  async getUserOrganisations(userId: string, page: number = 1, page_size: number = 10) {
     // const organisations = await this.getAllUserOrganisations(userId);
-    const organisations = await this.organisationRepository.find({
+    const [organisations, total_count] = await this.organisationRepository.findAndCount({
       where: { isDeleted: false },
+      skip: (page - 1) * page_size,
+      take: page_size,
     });
+
     return {
       status_code: HttpStatus.OK,
       message: 'Organisations retrieved successfully',
       data: {
         organisations,
+        total_count,
+        current_page: page,
+        page_size,
       },
     };
   }
