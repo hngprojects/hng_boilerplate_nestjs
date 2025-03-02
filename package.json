@@ -29,12 +29,12 @@
     "premigration:run": "npm run build",
     "migration:run": "npx typeorm migration:run -d dist/src/database/data-source",
     "migration:revert": "npx typeorm migration:revert -d dist/src/database/data-source",
-    "seed": "ts-node src/seed.ts",
+    "seed": "ts-node src/database/seeding/seeding.service.ts",
     "postinstall": "npm install --platform=linux --arch=x64 sharp"
   },
   "dependencies": {
     "@css-inline/css-inline": "^0.14.1",
-    "@css-inline/css-inline-linux-x64-gnu": "^0.14.1",
+    "@css-inline/css-inline-win32-x64-msvc": "^0.14.1",
     "@faker-js/faker": "^8.4.1",
     "@google/generative-ai": "^0.17.0",
     "@nestjs-modules/mailer": "^2.0.2",

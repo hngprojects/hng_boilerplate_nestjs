@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BlogCategory } from './entities/blog-category.entity';
 import { Like, Repository } from 'typeorm';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { CATEGORY_NOT_FOUND, ORG_NOT_FOUND } from '../../helpers/SystemMessages';
+import { CATEGORY_NOT_FOUND } from 'src/helpers/SystemMessages';
+import { CustomHttpException } from 'src/helpers/custom-http-filter';
 
 @Injectable()
 export class BlogCategoryService {
