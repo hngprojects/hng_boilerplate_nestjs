@@ -239,6 +239,41 @@ export class ProductsService {
     };
   }
 
+  async editProductComment(productId: string, commentId: string, commentDto: AddCommentDto, userId: string) {
+    const c = commentDto;
+
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+
+    if (!product) {
+      throw new CustomHttpException(SYS_MSG.PRODUCT_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    const comment = await this.commentRepository.findOne({ where: { id: commentId } });
+
+    if (!comment) {
+      throw new CustomHttpException(SYS_MSG.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    if (comment.user.id !== userId) {
+      throw new CustomHttpException(SYS_MSG.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    await this.commentRepository.update(commentId, { comment: c.comment });
+
+    const responsePayload = {
+      id: comment.id,
+      product_id: product.id,
+      comment: c.comment,
+      user_id: userId,
+      created_at: new Date(),
+    };
+
+    return {
+      message: SYS_MSG.COMMENT_EDITED,
+      data: responsePayload,
+    };
+  }
+
   async getProductStock(productId: string) {
     const product = await this.productRepository.findOne({ where: { id: productId } });
     if (!product) {
