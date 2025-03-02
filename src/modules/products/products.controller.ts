@@ -172,6 +172,28 @@ export class ProductsController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(SuperAdminGuard)
+  @Post('organisations/:productId/comments/:commentId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Edits a comment for a product' })
+  @ApiParam({ name: 'id', description: 'organisation ID', example: '870ccb14-d6b0-4a50-b459-9895af803i89' })
+  @ApiParam({ name: 'productId', description: 'product ID', example: '126ccb14-d6b0-4a50-b459-9895af803h6y' })
+  @ApiBody({ type: AddCommentDto, description: 'Comment to be edited' })
+  @ApiResponse({ status: 201, description: 'Comment updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async editProductComment(
+    @Param('productId') productId: string,
+    @Param('commentId') commentId: string,
+    @Body() commentDto: AddCommentDto,
+    @Req() req: any
+  ) {
+    const user = req.user;
+    return this.productsService.editProductComment(productId, commentId, commentDto, user.sub);
+  }
+
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
   @Get('organisations/:orgId/products/:productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
