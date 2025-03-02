@@ -48,7 +48,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { LanguageGuard } from './guards/language.guard';
 import { ApiStatusModule } from './modules/api-status/api-status.module';
-
+import {PaystackModule} from './modules/paystack/paystack.module';
 @Module({
   providers: [
     {
@@ -166,6 +166,8 @@ import { ApiStatusModule } from './modules/api-status/api-status.module';
     SubscriptionsModule,
     RevenueModule,
     BlogCategoryModule,
+    PaystackModule,
+    
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'uploads'),
       serveRoot: '/uploads',
