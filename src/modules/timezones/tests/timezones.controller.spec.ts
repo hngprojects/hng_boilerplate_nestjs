@@ -5,7 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Timezone } from '../entities/timezone.entity';
 import { CreateTimezoneDto } from '../dto/create-timezone.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 
 const mockTimezoneRepository = {
   findOne: jest.fn(),
@@ -173,5 +173,46 @@ describe('TimezonesController', () => {
         )
       );
     });
+  });
+});
+
+describe('TimezonesController - deleteTimezone', () => {
+  let controller: TimezonesController;
+  let service: TimezonesService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [TimezonesController],
+      providers: [
+        {
+          provide: TimezonesService,
+          useValue: {
+            deleteTimezone: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    controller = module.get<TimezonesController>(TimezonesController);
+    service = module.get<TimezonesService>(TimezonesService);
+  });
+
+  it('should successfully delete a timezone', async () => {
+    jest.spyOn(service, 'deleteTimezone').mockResolvedValue({
+      status_code: 200,
+      message: 'Timezone deleted successfully',
+    });
+
+    const response = await controller.deleteTimezone('123');
+    expect(response).toEqual({
+      status_code: 200,
+      message: 'Timezone deleted successfully',
+    });
+  });
+
+  it('should return NotFoundException if timezone does not exist', async () => {
+    jest.spyOn(service, 'deleteTimezone').mockRejectedValue(new NotFoundException());
+
+    await expect(controller.deleteTimezone('invalid-id')).rejects.toThrow(NotFoundException);
   });
 });

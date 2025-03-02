@@ -78,13 +78,13 @@ export class NewsletterSubscriptionService {
     const subscription = await this.newsletterSubscriptionRepository.findOne({ where: { email } });
 
     if (!subscription) {
-      throw new NotFoundException(`Email ${email} not found in the subscription list`);
+      throw new NotFoundException('Email not found in the subscription list');
     }
 
     subscription.isUnsubscribed = true;
     await this.newsletterSubscriptionRepository.save(subscription);
 
-    return { message: `Email ${email} has been unsubscribed successfully` };
+    return { message: 'Email has been unsubscribed successfully' };
   }
   async resubscribe(dto: ResubscribeNewsletterDto): Promise<{ message: string }> {
     const { id, email } = dto;
