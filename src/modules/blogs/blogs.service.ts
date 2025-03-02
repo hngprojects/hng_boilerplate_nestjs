@@ -12,10 +12,8 @@ import { User } from '@modules/user/entities/user.entity';
 @Injectable()
 export class BlogService {
   constructor(
-    @InjectRepository(Blog)
-    private blogRepository: Repository<Blog>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>
+    @InjectRepository(Blog) private blogRepository: Repository<Blog>,
+    @InjectRepository(User) private userRepository: Repository<User>
   ) {}
 
   private async fetchUserById(userId: string): Promise<User> {
@@ -27,130 +25,64 @@ export class BlogService {
     if (!user) {
       throw new CustomHttpException('User not found.', HttpStatus.NOT_FOUND);
     }
-
     return user;
+  }
+
+  private async findBlogById(id: string, relations: string[] = []): Promise<Blog> {
+    const blog = await this.blogRepository.findOne({ where: { id }, relations });
+    if (!blog) {
+      throw new CustomHttpException(SYS_MSG.BLOG_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return blog;
   }
 
   async createBlog(createBlogDto: CreateBlogDto, user: User): Promise<BlogResponseDto> {
     const fullUser = await this.fetchUserById(user.id);
 
-    const blog = this.blogRepository.create({
-      ...createBlogDto,
-      author: fullUser,
-    });
-
+    const blog = this.blogRepository.create({ ...createBlogDto, author: fullUser });
     const savedBlog = await this.blogRepository.save(blog);
 
-    return {
-      blog_id: savedBlog.id,
-      title: savedBlog.title,
-      content: savedBlog.content,
-      tags: savedBlog.tags,
-      image_urls: savedBlog.image_urls,
-      author: `${fullUser.first_name} ${fullUser.last_name}`,
-      created_at: savedBlog.created_at,
-    };
+    return this.formatBlogResponse(savedBlog);
   }
 
-  async getSingleBlog(blogId: string, user: User): Promise<any> {
-    const singleBlog = await this.blogRepository.findOneBy({ id: blogId });
-    const fullName = await this.fetchUserById(user.id);
-
-    if (!singleBlog) {
-      throw new CustomHttpException(SYS_MSG.BLOG_NOT_FOUND, HttpStatus.NOT_FOUND);
-    }
-
-    const { id, created_at, updated_at, ...rest } = singleBlog;
-    const author = `${fullName.first_name} ${fullName.last_name}`;
-
-    return {
-      status_code: 200,
-      message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
-      data: { blog_id: id, ...rest, author, published_date: created_at },
-    };
-  }
-
-  async updateBlog(id: string, updateBlogDto: UpdateBlogDto, user: User): Promise<BlogResponseDto> {
-    const blog = await this.blogRepository.findOne({
-      where: { id },
-      relations: ['author'],
-    });
-
-    if (!blog) {
-      throw new CustomHttpException('Blog post not found.', HttpStatus.NOT_FOUND);
-    }
-
-    const fullUser = await this.fetchUserById(user.id);
-
-    Object.assign(blog, updateBlogDto, { author: fullUser });
-
-    const updatedBlog = await this.blogRepository.save(blog);
-
-    return {
-      blog_id: updatedBlog.id,
-      title: updatedBlog.title,
-      content: updatedBlog.content,
-      tags: updatedBlog.tags,
-      image_urls: updatedBlog.image_urls,
-      author: `${updatedBlog.author.first_name} ${updatedBlog.author.last_name}`,
-      created_at: updatedBlog.created_at,
-    };
-  }
-  async deleteBlogPost(id: string): Promise<void> {
-    const blog = await this.blogRepository.findOne({ where: { id } });
-    if (!blog) {
-      throw new CustomHttpException('Blog post with this id does not exist.', HttpStatus.NOT_FOUND);
-    } else await this.blogRepository.remove(blog);
-  }
-
-  async getAllBlogs(
-    page: number,
-    pageSize: number
-  ): Promise<{
-    status_code: number;
-    message: string;
-    data: { currentPage: number; totalPages: number; totalResults: number; blogs: BlogResponseDto[]; meta: any };
-  }> {
-    const skip = (page - 1) * pageSize;
-
-    const [result, total] = await this.blogRepository.findAndCount({
-      skip,
-      take: pageSize,
-      relations: ['author'],
-    });
-
-    const data = this.mapBlogResults(result);
-    const totalPages = Math.ceil(total / pageSize);
+  async getSingleBlog(blogId: string): Promise<any> {
+    const blog = await this.findBlogById(blogId, ['author']);
 
     return {
       status_code: HttpStatus.OK,
       message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
-      data: {
-        currentPage: page,
-        totalPages,
-        totalResults: total,
-        blogs: data,
-        meta: {
-          hasNext: page < totalPages,
-          total,
-          nextPage: page < totalPages ? page + 1 : null,
-          prevPage: page > 1 ? page - 1 : null,
-        },
-      },
+      data: this.formatBlogResponse(blog),
     };
   }
 
-  async searchBlogs(query: any): Promise<{
-    status_code: number;
-    message: string;
-    data: { current_page: number; total_pages: number; total_results: number; blogs: BlogResponseDto[]; meta: any };
-  }> {
+  async updateBlog(id: string, updateBlogDto: UpdateBlogDto, user: User): Promise<BlogResponseDto> {
+    const blog = await this.findBlogById(id, ['author']);
+    const fullUser = await this.fetchUserById(user.id);
+
+    Object.assign(blog, updateBlogDto, { author: fullUser });
+    const updatedBlog = await this.blogRepository.save(blog);
+
+    return this.formatBlogResponse(updatedBlog);
+  }
+
+  async deleteBlogPost(id: string): Promise<void> {
+    const blog = await this.findBlogById(id);
+    await this.blogRepository.remove(blog);
+  }
+
+  async getAllBlogs(page: number, pageSize: number) {
+    const skip = (page - 1) * pageSize;
+    const [result, total] = await this.blogRepository.findAndCount({ skip, take: pageSize, relations: ['author'] });
+
+    return this.formatPaginatedResponse(result, total, page, pageSize, SYS_MSG.BLOG_FETCHED_SUCCESSFUL);
+  }
+
+  async searchBlogs(query: any) {
     const { page = 1, page_size = 10 } = query;
     const skip = (page - 1) * page_size;
 
     this.validateEmptyValues(query);
-
-    const where: FindOptionsWhere<Blog> = this.buildWhereClause(query);
+    const where = this.buildWhereClause(query);
 
     const [result, total] = await this.blogRepository.findAndCount({
       where: Object.keys(where).length ? where : undefined,
@@ -159,36 +91,56 @@ export class BlogService {
       relations: ['author'],
     });
 
-    if (!result || result.length === 0) {
-      return {
-        status_code: HttpStatus.NOT_FOUND,
-        message: 'no_results_found_for_the_provided_search_criteria',
-        data: {
-          current_page: page,
-          total_pages: 0,
-          total_results: 0,
-          blogs: [],
-          meta: {
-            has_next: false,
-            total: 0,
-            next_page: null,
-            prev_page: null,
-          },
-        },
-      };
-    }
+    return this.formatPaginatedResponse(
+      result,
+      total,
+      page,
+      page_size,
+      result.length ? SYS_MSG.BLOG_FETCHED_SUCCESSFUL : 'No results found.'
+    );
+  }
 
-    const data = this.mapBlogResults(result);
-    const totalPages = Math.ceil(total / page_size);
+  private buildWhereClause(query: any): FindOptionsWhere<Blog> {
+    const where: FindOptionsWhere<Blog> = {};
+    if (query.author) where.author = { first_name: Like(`%${query.author}%`), last_name: Like(`%${query.author}%`) };
+    if (query.title) where.title = Like(`%${query.title}%`);
+    if (query.content) where.content = Like(`%${query.content}%`);
+    if (query.tags) where.tags = Like(`%${query.tags}%`);
+    if (query.created_date) where.created_at = MoreThanOrEqual(new Date(query.created_date));
+    return where;
+  }
+
+  private validateEmptyValues(query: any): void {
+    for (const key in query) {
+      if (query[key] !== undefined && typeof query[key] === 'string' && !query[key].trim()) {
+        throw new CustomHttpException(`${key.replace(/_/g, ' ')} value is empty`, HttpStatus.BAD_REQUEST);
+      }
+    }
+  }
+
+  private formatBlogResponse(blog: Blog): BlogResponseDto {
+    return {
+      blog_id: blog.id,
+      title: blog.title,
+      content: blog.content,
+      tags: blog.tags,
+      image_urls: blog.image_urls,
+      author: blog.author ? `${blog.author.first_name} ${blog.author.last_name}` : 'Unknown',
+      created_at: blog.created_at,
+    };
+  }
+
+  private formatPaginatedResponse(result: Blog[], total: number, page: number, pageSize: number, message: string) {
+    const totalPages = Math.ceil(total / pageSize);
 
     return {
-      status_code: HttpStatus.OK,
-      message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
+      status_code: total > 0 ? HttpStatus.OK : HttpStatus.NOT_FOUND,
+      message,
       data: {
         current_page: page,
         total_pages: totalPages,
         total_results: total,
-        blogs: data,
+        blogs: result.map(blog => this.formatBlogResponse(blog)),
         meta: {
           has_next: page < totalPages,
           total,
@@ -197,59 +149,5 @@ export class BlogService {
         },
       },
     };
-  }
-
-  private buildWhereClause(query: any): FindOptionsWhere<Blog> {
-    const where: FindOptionsWhere<Blog> = {};
-
-    if (query.author !== undefined) {
-      where.author = {
-        first_name: Like(`%${query.author}%`),
-        last_name: Like(`%${query.author}%`),
-      };
-    }
-    if (query.title !== undefined) {
-      where.title = Like(`%${query.title}%`);
-    }
-    if (query.content !== undefined) {
-      where.content = Like(`%${query.content}%`);
-    }
-    if (query.tags !== undefined) {
-      where.tags = Like(`%${query.tags}%`);
-    }
-    if (query.created_date !== undefined) {
-      where.created_at = MoreThanOrEqual(new Date(query.created_date));
-    }
-
-    return where;
-  }
-
-  private validateEmptyValues(query: any): void {
-    for (const key in query) {
-      if (Object.prototype.hasOwnProperty.call(query, key) && query[key] !== undefined) {
-        const value = query[key];
-        if (typeof value === 'string' && !value.trim()) {
-          throw new CustomHttpException(`${key.replace(/_/g, ' ')} value is empty`, HttpStatus.BAD_REQUEST);
-        }
-      }
-    }
-  }
-
-  private mapBlogResults(result: Blog[]): BlogResponseDto[] {
-    return result.map(blog => {
-      if (!blog.author) {
-        throw new CustomHttpException('author_not_found', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-      const author_name = blog.author ? `${blog.author.first_name} ${blog.author.last_name}` : 'Unknown';
-      return {
-        blog_id: blog.id,
-        title: blog.title,
-        content: blog.content,
-        tags: blog.tags,
-        image_urls: blog.image_urls,
-        author: author_name,
-        created_at: blog.created_at,
-      };
-    });
   }
 }
