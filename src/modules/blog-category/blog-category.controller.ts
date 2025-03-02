@@ -1,4 +1,15 @@
-import { Body, Controller, Post, UseGuards, Request, Patch, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Patch,
+  Param,
+  Get,
+  Query,
+  NotFoundException,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BlogCategoryService } from './blog-category.service';
@@ -35,5 +46,15 @@ export class BlogCategoryController {
   @ApiResponse({ status: 500, description: 'Internal Server Error. Please try again later.' })
   async updateBlogCategory(@Param('id') id: string, @Body() updateBlogCategoryDto: UpdateBlogCategoryDto) {
     return await this.blogCategoryService.updateOrganisationCategory(id, updateBlogCategoryDto);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search blog categories by name' })
+  @ApiResponse({ status: 200, description: 'Categories found' })
+  @ApiResponse({ status: 404, description: 'No categories found' })
+  async searchCategories(@Query('term') searchTerm: string) {
+    console.log('Search Term: ', searchTerm);
+    const result = await this.blogCategoryService.searchCategories(searchTerm);
+    return result;
   }
 }
