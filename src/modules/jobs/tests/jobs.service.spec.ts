@@ -237,7 +237,6 @@ describe('JobsService', () => {
         new CustomHttpException('Duplicate application', HttpStatus.CONFLICT)
       );
     });
-
   });
 
   describe('searchJobs', () => {
@@ -386,7 +385,12 @@ describe('JobsService', () => {
         user: { ...mockUser, id: 'different_user_id' } as User,
       } as Job;
 
+      // Mock both repository calls
       jest.spyOn(jobRepository, 'findOne').mockResolvedValue(mockJob);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue({
+        ...mockUser,
+        is_superadmin: false,
+      } as User);
 
       await expect(service.update('job-id', updateDto, 'user_id')).rejects.toThrow(
         new CustomHttpException('Unauthorized to update this job', HttpStatus.FORBIDDEN)
@@ -435,7 +439,12 @@ describe('JobsService', () => {
         user: { ...mockUser, id: 'different_user_id' } as User,
       } as Job;
 
+      // Mock both repository calls
       jest.spyOn(jobRepository, 'findOne').mockResolvedValue(mockJob);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue({
+        ...mockUser,
+        is_superadmin: false,
+      } as User);
 
       await expect(service.update('job-id', updateDto, 'user_id')).rejects.toThrow(
         new CustomHttpException('Unauthorized to update this job', HttpStatus.FORBIDDEN)
@@ -496,6 +505,53 @@ describe('JobsService', () => {
           job_application: originalJob.job_application,
           title: updateDtoWithPartialData.title,
         })
+      );
+    });
+
+    it('should allow super admin to update any job', async () => {
+      const superAdminUser = {
+        ...mockUser,
+        is_superadmin: true,
+        id: 'super_admin_id',
+      };
+
+      const jobOwnedByOtherUser = {
+        ...jobsMock[0],
+        user: { ...mockUser, id: 'other_user_id' } as User,
+      } as Job;
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(jobOwnedByOtherUser);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(superAdminUser as User);
+      jest.spyOn(jobRepository, 'save').mockResolvedValue({
+        ...jobOwnedByOtherUser,
+        ...updateDto,
+      } as Job);
+
+      const result = await service.update('job-id', updateDto, 'super_admin_id');
+
+      expect(result.status).toBe('success');
+      expect(result.status_code).toBe(200);
+      expect((result.data as Job).title).toBe(updateDto.title);
+    });
+
+    it('should not allow non-owner non-admin user to update job', async () => {
+      const regularUser = {
+        ...mockUser,
+        is_superadmin: false,
+        id: 'regular_user_id',
+      };
+
+      const jobOwnedByOtherUser = {
+        ...jobsMock[0],
+        user: { ...mockUser, id: 'other_user_id' } as User,
+      } as Job;
+
+      // Mock both repository calls
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValue(jobOwnedByOtherUser);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(regularUser as User);
+
+      await expect(service.update('job-id', updateDto, 'regular_user_id')).rejects.toThrow(
+        new CustomHttpException('Unauthorized to update this job', HttpStatus.FORBIDDEN)
       );
     });
   });

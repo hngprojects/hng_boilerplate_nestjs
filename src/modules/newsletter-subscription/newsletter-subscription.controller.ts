@@ -2,11 +2,20 @@ import { Controller, Get, Post, Body, Param, Delete, HttpCode, HttpStatus, UseGu
 import { NewsletterSubscriptionService } from './newsletter-subscription.service';
 import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { skipAuth } from '@shared/helpers/skipAuth';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { UnsubscribeNewsletterDto } from './dto/unsubscribe-newsletter.dto';
 import { ResubscribeNewsletterDto } from './dto/resubscribe-newsletter.dto';
+import {
+  createNewsletterDocs,
+  getAllSubscribersDocs,
+  resubscribeDocs,
+  removeSubscriberDocs,
+  findSoftDeletedDocs,
+  restoreDocs,
+  unsubscribeDocs,
+} from './docs/newsletter-subscription-swagger.docs';
 
 @ApiTags('Newsletter Subscription')
 @Controller('newsletter-subscription')
@@ -16,8 +25,7 @@ export class NewsletterSubscriptionController {
   @skipAuth()
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Subscribe to newsletter' })
-  @ApiResponse({ status: 201, description: 'Subscriber subscription successful.' })
+  @createNewsletterDocs()
   create(@Body() createNewsletterDto: CreateNewsletterSubscriptionDto) {
     return this.newsletterSubscriptionService.newsletterSubscription(createNewsletterDto);
   }
@@ -25,10 +33,7 @@ export class NewsletterSubscriptionController {
   @skipAuth()
   @Post('resubscribe')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Resubscribe to the newsletter' })
-  @ApiResponse({ status: 200, description: 'User successfully resubscribed.' })
-  @ApiResponse({ status: 400, description: 'User is already subscribed.' })
-  @ApiResponse({ status: 404, description: 'User not found or not unsubscribed.' })
+  @resubscribeDocs()
   resubscribe(@Body() resubscribeDto: ResubscribeNewsletterDto) {
     return this.newsletterSubscriptionService.resubscribe(resubscribeDto);
   }
@@ -37,30 +42,7 @@ export class NewsletterSubscriptionController {
   @UseGuards(SuperAdminGuard)
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Fetch all subscribers to newsletter' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return all team members',
-    schema: {
-      properties: {
-        status: { type: 'string' },
-        message: { type: 'string' },
-        data: {
-          type: 'array',
-          items: { $ref: '#/components/schemas/NewsletterSubscriptionResponseDto' },
-        },
-        meta: {
-          type: 'object',
-          properties: {
-            total: { type: 'number' },
-            page: { type: 'number' },
-            limit: { type: 'number' },
-            totalPages: { type: 'number' },
-          },
-        },
-      },
-    },
-  })
+  @getAllSubscribersDocs()
   async getAllSubscribers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10
@@ -82,10 +64,7 @@ export class NewsletterSubscriptionController {
   @UseGuards(SuperAdminGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiParam({ name: 'id', required: true, description: 'ID of the subscriber to be deleted' })
-  @ApiOperation({ summary: 'Remove subscriber from newsletter' })
-  @ApiResponse({ status: 200, description: 'Subscriber with ID {id} has been soft deleted' })
-  @ApiResponse({ status: 404, description: 'Subscriber with ID ${id} not found' })
+  @removeSubscriberDocs()
   removeSubscriber(@Param('id') id: string) {
     return this.newsletterSubscriptionService.removeSubscriber(id);
   }
@@ -94,24 +73,9 @@ export class NewsletterSubscriptionController {
   @UseGuards(SuperAdminGuard)
   @Get('deleted')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Fetch all deleted subscribers' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return all team members',
-    schema: {
-      properties: {
-        status: { type: 'string' },
-        message: { type: 'string' },
-        data: {
-          type: 'array',
-          items: { $ref: '#/components/schemas/NewsletterSubscriptionResponseDto' },
-        },
-      },
-    },
-  })
+  @findSoftDeletedDocs()
   async findSoftDeleted(): Promise<{ message: string; data: NewsletterSubscriptionResponseDto[] }> {
     const deletedSubscribers = await this.newsletterSubscriptionService.findSoftDeleted();
-
     return {
       message: 'Deleted subscribers list fetched successfully',
       data: deletedSubscribers,
@@ -122,9 +86,7 @@ export class NewsletterSubscriptionController {
   @UseGuards(SuperAdminGuard)
   @Post('restore/:id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Fetch all deleted subscribers' })
-  @ApiResponse({ status: 200, description: 'Subscriber with ID {id} has been restored' })
-  @ApiResponse({ status: 404, description: 'Subscriber with ID ${id} not found or already restored' })
+  @restoreDocs()
   restore(@Param('id') id: string) {
     return this.newsletterSubscriptionService.restore(id);
   }
@@ -132,9 +94,7 @@ export class NewsletterSubscriptionController {
   @Post('unsubscribe')
   @skipAuth()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Unsubscribe from the newsletter' })
-  @ApiResponse({ status: 200, description: 'User has been unsubscribed successfully.' })
-  @ApiResponse({ status: 404, description: 'Email not found' })
+  @unsubscribeDocs()
   unsubscribe(@Body() unsubscribeDto: UnsubscribeNewsletterDto) {
     return this.newsletterSubscriptionService.unsubscribe(unsubscribeDto.email);
   }

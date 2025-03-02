@@ -10,6 +10,7 @@ export const mockUserWithProfile: User = {
   first_name: 'John',
   last_name: 'Doe',
   is_active: true,
+  is_superadmin: false,
   phone: '+1234567891',
   id: 'some-uuid-value-here',
   attempts_left: 2,
