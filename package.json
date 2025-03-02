@@ -33,7 +33,6 @@
     "postinstall": "npm install --platform=linux --arch=x64 sharp"
   },
   "dependencies": {
-
     "@google/generative-ai": "^0.22.0",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/bull": "^11.0.2",
@@ -47,7 +46,6 @@
     "@nestjs/swagger": "^11.0.5",
     "@nestjs/typeorm": "^11.0.0",
     "@types/nodemailer": "^6.4.17",
-
     "@types/speakeasy": "^2.0.10",
     "@vitalets/google-translate-api": "^9.2.1",
     "aws-sdk": "^2.1692.0",

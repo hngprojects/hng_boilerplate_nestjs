@@ -41,6 +41,7 @@ import { JobSearchDto } from './dto/jobSearch.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { JobOwnerGuard } from '../../guards/job-owner.guard';
 import { AuthGuard } from '../../guards/auth.guard';
+import { JobAccessGuard } from '@guards/job-access.guard';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -124,8 +125,7 @@ export class JobsController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard)
-  @UseGuards(SuperAdminGuard, JobOwnerGuard)
+  @UseGuards(AuthGuard, JobAccessGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a job posting' })
   @ApiResponse({ status: 200, description: 'Job updated successfully' })
