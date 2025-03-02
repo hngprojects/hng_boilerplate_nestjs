@@ -73,7 +73,6 @@ describe('BlogCategoryService', () => {
     expect(repository.remove).toHaveBeenCalledWith(blogCategory);
   });
 
-
   it('should return empty array and total 0 for empty search term', async () => {
     const result = await service.searchCategories('');
     expect(result).toEqual({

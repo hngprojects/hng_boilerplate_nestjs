@@ -9,7 +9,7 @@ import { skipAuth } from '@shared/helpers/skipAuth';
 @ApiTags('Blog Categories')
 @Controller('blogs/categories')
 export class BlogCategoryController {
-  constructor(private readonly blogCategoryService: BlogCategoryService) { }
+  constructor(private readonly blogCategoryService: BlogCategoryService) {}
 
   @Post()
   @UseGuards(SuperAdminGuard)
@@ -62,5 +62,4 @@ export class BlogCategoryController {
     const result = await this.blogCategoryService.searchCategories(searchTerm);
     return result;
   }
-
 }

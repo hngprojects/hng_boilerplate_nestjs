@@ -11,7 +11,7 @@ export class BlogCategoryService {
   constructor(
     @InjectRepository(BlogCategory)
     private blogCategoryRepository: Repository<BlogCategory>
-  ) { }
+  ) {}
 
   async createOrganisationCategory(createBlogCategoryDto: CreateBlogCategoryDto) {
     const blogCategory = this.blogCategoryRepository.create(createBlogCategoryDto);
