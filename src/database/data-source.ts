@@ -7,15 +7,15 @@ dotenv.config();
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 const dataSource = new DataSource({
-  type: process.env.DB_TYPE as 'postgres',
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: +process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  entities: [process.env.DB_ENTITIES],
-  migrations: [process.env.DB_MIGRATIONS],
-  synchronize: isDevelopment,
+  type: (process.env.DB_TYPE as 'postgres') || 'postgres', // Default to 'postgres'
+  username: process.env.DB_USERNAME || 'andre',
+  password: process.env.DB_PASSWORD || 'Damilare12345',
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT) || 5432,
+  database: process.env.DB_NAME || 'mydatabase',
+  entities: [process.env.DB_ENTITIES || 'dist/**/*.entity{.ts,.js}'], // Ensure default value
+  migrations: [process.env.DB_MIGRATIONS || 'dist/migrations/*{.ts,.js}'],
+  synchronize: false,
   migrationsTableName: 'migrations',
   ssl: process.env.DB_SSL === 'true',
 });

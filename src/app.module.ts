@@ -56,7 +56,7 @@ import { ApiStatusModule } from '@modules/api-status/api-status.module';
       useClass: LanguageGuard,
     },
     {
-      provide: 'CONFIG',
+     provide: 'CONFIG',
       useClass: ConfigService,
     },
     {
@@ -67,10 +67,10 @@ import { ApiStatusModule } from '@modules/api-status/api-status.module';
           forbidNonWhitelisted: true,
         }),
     },
-    {
+   {
       provide: 'APP_GUARD',
       useClass: AuthGuard,
-    },
+   },
   ],
   imports: [
     ConfigModule.forRoot({

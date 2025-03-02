@@ -1,25 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumberString, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsIn, IsNumber, IsBoolean } from 'class-validator';
 
 export class BillingPlanDto {
   @ApiProperty({ example: 'Free' })
   @IsString()
   name: string;
 
-  @ApiProperty({ example: 'Free' })
+  @ApiProperty({ example: 'Basic plan with limited features' })
   @IsString()
   @IsOptional()
   description: string;
 
-  @ApiProperty({ example: 'monthly' })
+  @ApiProperty({ example: 'monthly', enum: ['monthly', 'yearly'] })
   @IsString()
+  @IsIn(['monthly', 'yearly'])
   frequency: string;
 
   @ApiProperty({ example: 0 })
-  @IsNumberString()
+  @IsNumber()
   amount: number;
 
-  @ApiProperty({ example: 'true' })
+  @ApiProperty({ example: true })
   @IsBoolean()
   is_active: boolean;
 }
