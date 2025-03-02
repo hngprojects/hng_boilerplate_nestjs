@@ -20,6 +20,10 @@ import { TokenPayload } from 'google-auth-library';
 import { UpdateProfileDto } from '@modules/profile/dto/update-profile.dto';
 import { RequestSigninTokenDto } from './dto/request-signin-token.dto';
 import { OtpDto } from '@modules/otp/dto/otp.dto';
+
+import { Response, Request } from 'express';
+
+
 import { DataSource, EntityManager } from 'typeorm';
 import { CreateOrganisationRecordOptions } from '@modules/organisations/dto/create-organisation-options';
 
@@ -172,7 +176,11 @@ export default class AuthenticationService {
     };
   }
 
-  async loginUser(loginDto: LoginDto): Promise<LoginResponseDto | { status_code: number; message: string }> {
+  async loginUser(
+    loginDto: LoginDto,
+    req: Request,
+    res: Response
+  ): Promise<LoginResponseDto | { status_code: number; message: string }> {
     const { email, password } = loginDto;
 
     const user = await this.userService.getUserRecord({
@@ -189,11 +197,28 @@ export default class AuthenticationService {
     if (!isMatch) {
       throw new CustomHttpException(SYS_MSG.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
-    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id, 1, 10);
-    const access_token = this.jwtService.sign({ id: user.id, sub: user.id });
-    const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
+    const userOrganisations = await this.organisationService.getAllUserOrganisations(user.id, 1, 10);
+    const isSuperAdmin = userOrganisations.some(org => org.user_role === 'super-admin');
+
+    let refresh_token = this.jwtService.sign({ sub: user.id }, { expiresIn: '7d' });
+
+    let newTokenGenerated = false;
+
+    const access_token = this.jwtService.sign({ sub: user.id }, { expiresIn: '15m' });
+    if (newTokenGenerated) {
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/auth/refresh-token',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+    }
+
     const responsePayload = {
+      message: SYS_MSG.LOGIN_SUCCESSFUL,
       access_token,
+      refresh_token,
       data: {
         user: {
           id: user.id,
@@ -203,13 +228,35 @@ export default class AuthenticationService {
           avatar_url: user.profile && user.profile.profile_pic_url ? user.profile.profile_pic_url : null,
           is_superadmin: isSuperAdmin,
         },
-        organisations: userOranisations,
+        organisations: userOrganisations,
       },
     };
 
     return { message: SYS_MSG.LOGIN_SUCCESSFUL, ...responsePayload };
   }
 
+  async logout(res: Response): Promise<{ message: string }> {
+    res.clearCookie('refresh_token', { path: '/auth/refresh-token' });
+    return { message: 'Logged out successfully' };
+  }
+
+  async refreshToken(req: Request, res: Response): Promise<{ access_token: string } | { message: string }> {
+    const refresh_token = req.cookies['refresh_token'];
+
+    if (!refresh_token) {
+      throw new CustomHttpException(SYS_MSG.UNAUTHORISED_TOKEN, HttpStatus.UNAUTHORIZED);
+    }
+
+    try {
+      const decoded = this.jwtService.verify(refresh_token);
+
+      const access_token = this.jwtService.sign({ id: decoded.id, sub: decoded.id }, { expiresIn: '15m' });
+
+      return { access_token };
+    } catch (error) {
+      throw new CustomHttpException(SYS_MSG.UNAUTHORISED_TOKEN, HttpStatus.UNAUTHORIZED);
+    }
+  }
   private async validateUserAndPassword(user_id: string, password: string) {
     const user = await this.userService.getUserRecord({
       identifier: user_id,

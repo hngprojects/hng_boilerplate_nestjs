@@ -19,8 +19,21 @@ import { LoginDto } from '../dto/login.dto';
 import UserResponseDTO from '@modules/user/dto/user-response.dto';
 import { Otp } from '@modules/otp/entities/otp.entity';
 import { Verify2FADto } from '../dto/verify-2fa.dto';
+
+import { Response, Request } from 'express';
+
 import { DataSource, EntityManager } from 'typeorm';
+
 jest.mock('speakeasy');
+
+const mockRequest = {
+  cookies: { refreshToken: 'mock-refresh-token' },
+} as unknown as Request;
+
+const mockResponse = {
+  status: jest.fn().mockReturnThis(),
+  json: jest.fn(),
+} as unknown as Response;
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -241,11 +254,12 @@ describe('AuthenticationService', () => {
       ]);
       jwtServiceMock.sign.mockReturnValue('jwt_token');
 
-      const result = await service.loginUser(loginDto);
+      const result = await service.loginUser(loginDto, mockRequest, mockResponse);
 
       expect(result).toEqual({
         message: 'Login successful',
         access_token: 'jwt_token',
+        refresh_token: 'jwt_token',
         data: {
           user: {
             id: '1',
@@ -272,7 +286,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(null);
 
-      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto, mockRequest, mockResponse)).rejects.toThrow(CustomHttpException);
     });
 
     it('should throw an unauthorized error for invalid password', async () => {
@@ -291,7 +305,7 @@ describe('AuthenticationService', () => {
 
       userServiceMock.getUserRecord.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
-      await expect(service.loginUser(loginDto)).rejects.toThrow(CustomHttpException);
+      await expect(service.loginUser(loginDto, mockRequest, mockResponse)).rejects.toThrow(CustomHttpException);
     });
   });
 
