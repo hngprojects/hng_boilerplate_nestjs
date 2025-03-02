@@ -3,7 +3,7 @@ import { PaystackService } from './paystack.service';
 import { CreatePaystackPaymentPlanDto } from './dto/create-paystack-payment-plan.dto';
 import { UserPayload } from '../user/interfaces/user-payload.interface';
 import * as crypto from 'crypto';
-import { skipAuth } from 'src/helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 
 @Controller('payments/paystack')
 export class PaystackController {
@@ -12,19 +12,15 @@ export class PaystackController {
   @Post('initialize')
   @skipAuth()
   initiate(@Body() createPaystackPaymentDto: CreatePaystackPaymentPlanDto, @Req() req: { user: UserPayload }) {
-    
     return this.paystackService.initiatePaymentForPlan(createPaystackPaymentDto, req.user.id);
   }
 
   @Get('verify/:reference')
-  @skipAuth()
   verify(@Param('reference') reference: string, @Req() req: { user: UserPayload }) {
-  
     return this.paystackService.verifyPayment(reference);
   }
 
   @Post('webhook')
-  @skipAuth()
   handleWebhook(@Body() body: any, @Req() req: { headers: Record<string, string> }) {
     const paystackSecret = process.env.PAYSTACK_WEBHOOK_SECRET;
     if (!paystackSecret) {

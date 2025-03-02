@@ -5,7 +5,7 @@ import { CreatePaystackPaymentPlanDto } from './dto/create-paystack-payment-plan
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentStatus } from './entities/payment.entity';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -48,7 +48,7 @@ export class PaystackService {
     // Construct payment payload
     const paymentData = {
       email: createPaystackPaymentPlanDto.email,
-      amount, 
+      amount,
       reference: uuidv4(),
       callback_url: createPaystackPaymentPlanDto.callback_url,
       plan: createPaystackPaymentPlanDto.plan_id,
@@ -68,7 +68,7 @@ export class PaystackService {
       user_id: userId,
       transaction_id: paymentData.reference,
       gateway_id: '',
-      amount: amount / 100, 
+      amount: amount / 100,
       status: PaymentStatus.PENDING,
     });
 
