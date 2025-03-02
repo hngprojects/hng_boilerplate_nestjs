@@ -414,19 +414,10 @@ todo.txt
 # Docker compose
 docker-compose.yml
 data/
-data/
-docker-compose.yml
-package-lock.json
-.dev.env
 
-
-package-lock.json
+# Docker compose
 docker-compose.yml
 data/
-.dev.env
-
-/compose/compose.yaml
-compose/compose.yaml
 
 data/
 docker-compose.yml
