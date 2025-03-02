@@ -20,5 +20,5 @@ export class BlogDto {
   author: string;
 
   @ApiProperty({ description: 'The creation date of the blog' })
-  published_date: Date;
+  published_date?: Date;
 }
