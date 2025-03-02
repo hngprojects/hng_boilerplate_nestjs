@@ -42,6 +42,7 @@ export const mockUser: User = {
   status: 'Hello from the children of planet Earth',
   hashPassword: async () => {},
   is_active: true,
+  is_superadmin: false,
   attempts_left: 3,
   time_left: 3600,
   owned_organisations: [],

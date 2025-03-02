@@ -1,0 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsUUID } from 'class-validator';
+
+export class DislikeCommentDto {
+  @ApiProperty({ description: 'Comment ID to dislike' })
+  @IsNotEmpty()
+  @IsUUID()
+  commentId: string;
+}

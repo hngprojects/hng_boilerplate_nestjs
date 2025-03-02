@@ -66,12 +66,43 @@ export class CommentsService {
       throw new CustomHttpException('You are not authorized to delete this comment', HttpStatus.FORBIDDEN);
     }
 
-    await this.commentRepository.delete(comment);
+    await this.commentRepository.delete(comment.id);
 
     return {
       message: 'Comment deleted successfully!',
       status: HttpStatus.OK,
       data: { comment },
+    };
+  }
+
+  async dislikeComment(commentId: string, userId: string): Promise<{ message: string; dislikeCount: number }> {
+    const comment = await this.commentRepository
+      .createQueryBuilder('comment')
+      .where('comment.id = :id', { id: commentId })
+      .getOne();
+
+    if (!comment) {
+      throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (!comment.dislikedBy) {
+      comment.dislikedBy = [];
+    }
+
+    // Check if the user has already disliked the comment
+    if (comment.dislikedBy.includes(userId)) {
+      throw new CustomHttpException('You have already disliked this comment', HttpStatus.BAD_REQUEST);
+    }
+
+    // Add the user to the dislikedBy array and increment dislikes
+    comment.dislikedBy.push(userId);
+    comment.dislikes = comment.dislikedBy.length;
+
+    await this.commentRepository.save(comment);
+
+    return {
+      message: 'Dislike updated successfully',
+      dislikeCount: comment.dislikes,
     };
   }
 }

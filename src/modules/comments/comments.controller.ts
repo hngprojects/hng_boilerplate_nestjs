@@ -1,3 +1,5 @@
+import { UserPayload } from './../user/interfaces/user-payload.interface';
+import { User } from './../user/entities/user.entity';
 import { Controller, Body, Post, Request, Get, Param, Delete } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dtos/create-comment.dto';
@@ -15,7 +17,7 @@ export class CommentsController {
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   async addComment(@Body() createCommentDto: CreateCommentDto, @Request() req): Promise<CommentResponseDto> {
-    const { userId } = req.user;
+    const userId = req.user.id;
     return await this.commentsService.addComment(createCommentDto, userId);
   }
 
@@ -26,10 +28,20 @@ export class CommentsController {
     return await this.commentsService.getAComment(id);
   }
 
+  @ApiOperation({ summary: 'Dislike a comment' })
+  @ApiResponse({ status: 200, description: 'Dislike updated successfully' })
+  @ApiResponse({ status: 404, description: 'Comment not found' })
+  @Post(':id/dislike')
+  async dislikeComment(@Param('id') id: string, @Request() req) {
+    const userId = req.user.id;
+    // console.log('User ID:', userId); debug
+    return await this.commentsService.dislikeComment(id, userId);
+  }
+
   @ApiOperation({ summary: 'Delete a comment' })
   @ApiResponse({ status: 200, description: 'The comment has been deleted successfully.' })
   @Delete(':id/delete')
   async deleteAComment(@Param('id') id: string, @Request() req): Promise<any> {
-    return await this.commentsService.deleteAComment(id, req.user.userId);
+    return await this.commentsService.deleteAComment(id, req.user.id);
   }
 }

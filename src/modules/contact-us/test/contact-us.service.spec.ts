@@ -18,6 +18,7 @@ describe('ContactUsService', () => {
     mockRepository = {
       create: jest.fn(),
       save: jest.fn(),
+      findAndCount: jest.fn(),
     };
 
     mockMailerService = {
@@ -60,6 +61,39 @@ describe('ContactUsService', () => {
       expect(mockRepository.save).toHaveBeenCalledWith(createContactDto);
       expect(mockMailerService.sendMail).toHaveBeenCalled();
       expect(result).toEqual({ message: SYS_MSG.INQUIRY_SENT, status_code: HttpStatus.CREATED });
+    });
+  });
+
+  describe('getAllContactMessages', () => {
+    it('should return all contact messages paginated', async () => {
+      const page = 1;
+      const limit = 10;
+      const messages = [
+        { id: 1, name: 'John Doe', email: 'john@example.com', phone: 123456789, message: 'Test message' },
+      ];
+
+      const total = messages.length;
+      const totalPages = Math.ceil(total / limit);
+
+      mockRepository.findAndCount.mockResolvedValue([messages, total]);
+
+      const result = await service.getAllContactMessages(page, limit);
+
+      expect(mockRepository.findAndCount).toHaveBeenCalledWith({
+        order: { created_at: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Retrieved messages successfully',
+        data: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalResults: total,
+          messages,
+        },
+      });
     });
   });
 });
