@@ -27,7 +27,7 @@ export class PaystackService {
    * Initializes a payment for a subscription plan.
    */
   async initiatePaymentForPlan(createPaystackPaymentPlanDto: CreatePaystackPaymentPlanDto, userId: string) {
-    console.log("this.secret_key",`${this.secretKey}`)
+    // Validate email format
     const headers = {
       Authorization: `Bearer ${this.secretKey}`,
       'Content-Type': 'application/json',
