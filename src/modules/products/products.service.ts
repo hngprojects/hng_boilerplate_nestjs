@@ -17,7 +17,11 @@ import { User } from '../user/entities/user.entity';
 import { CreateProductRequestDto } from './dto/create-product.dto';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { Product, ProductSizeType, StockStatusType } from './entities/product.entity';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { Review } from './entities/review.entity';
+import { ProductResponseDto } from './dto/product-response.dto';
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+
 
 interface SearchCriteria {
   name?: string;
@@ -33,7 +37,8 @@ export class ProductsService {
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(Organisation) private organisationRepository: Repository<Organisation>,
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
-    @InjectRepository(User) private userRepository: Repository<User>
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Review) private reviewRepository: Repository<Review> // Add this line
   ) {}
 
   async createProduct(id: string, dto: CreateProductRequestDto) {
@@ -338,6 +343,74 @@ export class ProductsService {
         total_products: totalProductsThisMonth,
         percentage_change: percentageChange,
       },
+    };
+  }
+
+  async submitReview(userId: string, productId: string, dto: CreateReviewDto) {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+      relations: ['reviews'],
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    let review = product.reviews.find(r => r.createdBy === userId);
+    if (review) {
+      // Update existing review
+      review.rating = dto.rating;
+      review.review = dto.review;
+      review.updatedAt = new Date();
+    } else {
+      // Create new review
+      review = this.reviewRepository.create({ ...dto, createdBy: userId, product });
+    }
+
+    await this.reviewRepository.save(review);
+    return { message: 'Review saved successfully' };
+  }
+
+  async deleteReview(userId: string, productId: string) {
+    const review = await this.reviewRepository.findOne({ where: { product: { id: productId }, createdBy: userId } });
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
+
+    await this.reviewRepository.remove(review);
+    return { message: 'Review deleted successfully' };
+  }
+
+  async getProductDetails(productId: string): Promise<ProductResponseDto> {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+      relations: ['reviews'],
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    const averageRating =
+      product.reviews.length > 0 ? product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length : 0;
+
+    const recentReviews = product.reviews
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 5)
+      .map(r => ({
+        rating: r.rating,
+        review: r.review,
+        createdBy: r.createdBy,
+        createdAt: r.createdAt,
+      }));
+
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      averageRating,
+      totalReviews: product.reviews.length,
+      recentReviews,
     };
   }
 }

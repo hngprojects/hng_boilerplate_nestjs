@@ -17,6 +17,7 @@ import { mockComment } from './mocks/comment.mock';
 import { deletedProductMock } from './mocks/deleted-product.mock';
 import { createProductRequestDtoMock } from './mocks/product-request-dto.mock';
 import { productMock } from './mocks/product.mock';
+import { Review } from '../entities/review.entity';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -24,6 +25,7 @@ describe('ProductsService', () => {
   let organisationRepository: Repository<Organisation>;
   let userRepository: Repository<User>;
   let commentRepository: Repository<Comment>;
+  let reviewRepository: Repository<Review>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -56,6 +58,15 @@ describe('ProductsService', () => {
             createQueryBuilder: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Review), // ✅ Added the missing ReviewRepository correctly
+          useValue: {
+            createQueryBuilder: jest.fn(), // Optional — mock these if Review is used in queries
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn(),
           },
         },
         {

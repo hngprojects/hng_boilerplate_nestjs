@@ -402,12 +402,12 @@ dist
 
 # User specific ignores 
 todo.txt
+/.vscode/
 .vscode/
 
 # Docker compose
 docker-compose.yml
 data/
-<<<<<<< HEAD
 data/
 docker-compose.yml
 package-lock.json
@@ -419,16 +419,12 @@ docker-compose.yml
 data/
 .dev.env
 
-
-=======
-
-# Docker compose
-docker-compose.yml
-data/
->>>>>>> d080450 (chore: created a docker-compose.yml file and updated the gitignore)
+/compose/compose.yaml
+compose/compose.yaml
 
 data/
 docker-compose.yml
+package-lock.json/
 package-lock.json
 .dev.env
 
