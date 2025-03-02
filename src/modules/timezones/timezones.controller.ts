@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Res, HttpStatus, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, HttpStatus, Patch, Param, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateTimezoneDto } from './dto/create-timezone.dto';
 import { UpdateTimezoneDto } from './dto/update-timezone.dto';
@@ -25,9 +25,8 @@ export class TimezonesController {
   @ApiOperation({ summary: 'Get all supported timezones' })
   @ApiResponse({ status: 200, description: 'List of supported timezones.' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getTimezones(@Res() response: Response): Promise<any> {
-    const result = await this.timezonesService.getSupportedTimezones();
-    return response.status(result.status_code).json(result);
+  async getTimezones() {
+    return this.timezonesService.getSupportedTimezones();
   }
 
   @Patch(':id')
@@ -38,5 +37,13 @@ export class TimezonesController {
   @ApiResponse({ status: 404, description: 'Timezone not found.' })
   async updateTimezone(@Param('id') id: string, @Body() updateTimezoneDto: UpdateTimezoneDto) {
     return this.timezonesService.updateTimezone(id, updateTimezoneDto);
+  }
+  @Delete(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a timezone' })
+  @ApiResponse({ status: 200, description: 'Timezone successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Timezone not found.' })
+  async deleteTimezone(@Param('id') id: string) {
+    return this.timezonesService.deleteTimezone(id);
   }
 }

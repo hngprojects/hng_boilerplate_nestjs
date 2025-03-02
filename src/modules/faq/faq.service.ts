@@ -36,23 +36,64 @@ export class FaqService {
     return this.faqRepository.save(faq);
   }
 
-  async findAllFaq(language?: string) {
-    const faqs = await this.faqRepository.find();
+  async findAllFaq(language?: string, page: number = 1, pageSize: number = 10) {
+    try {
+      if (page <= 0 || pageSize <= 0) {
+        return {
+          status: 'error',
+          status_code: 400,
+          message: 'Invalid page or pageSize value.',
+          data: {},
+        };
+      }
 
-    const translatedFaqs = await Promise.all(
-      faqs.map(async faq => {
-        faq.question = await this.translateContent(faq.question, language);
-        faq.answer = await this.translateContent(faq.answer, language);
-        faq.category = await this.translateContent(faq.category, language);
-        return faq;
-      })
-    );
+      // Calculate offset and limit
+      const offset = (page - 1) * pageSize;
+      const limit = pageSize;
 
-    return {
-      message: 'Faq fetched successfully',
-      status_code: 200,
-      data: translatedFaqs,
-    };
+      // Fetch all FAQs from the repository
+      const faqs = await this.faqRepository.find({
+        skip: offset,
+        take: limit,
+      });
+
+      // Total count of FAQs for pagination metadata
+      const total = await this.faqRepository.count();
+
+      const translatedFaqs = await Promise.all(
+        faqs.map(async faq => {
+          faq.question = await this.translateContent(faq.question, language);
+          faq.answer = await this.translateContent(faq.answer, language);
+          faq.category = await this.translateContent(faq.category, language);
+          return faq;
+        })
+      );
+
+      // Calculate total pages
+      const totalPages = Math.ceil(total / pageSize);
+
+      // Return paginated response
+      return {
+        status: 'success', // Added status field
+        status_code: 200,
+        message: 'Faq fetched successfully',
+        data: {
+          // Ensure data is always included
+          faqs: translatedFaqs,
+          total,
+          page,
+          pageSize,
+          totalPages,
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        status_code: 500,
+        message: 'An error occurred while fetching the FAQs.',
+        data: {},
+      };
+    }
   }
 
   async updateFaq(id: string, updateFaqDto: UpdateFaqDto, language?: string) {

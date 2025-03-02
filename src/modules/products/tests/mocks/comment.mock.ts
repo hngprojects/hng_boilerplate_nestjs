@@ -9,6 +9,8 @@ export const mockComment: Comment = {
   model_type: 'Product',
   user: mockUser,
   product: productMock,
+  dislikes: 0,
+  dislikedBy: [],
   created_at: new Date(),
   updated_at: new Date(),
 };

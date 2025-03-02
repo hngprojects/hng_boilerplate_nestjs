@@ -158,12 +158,12 @@ describe('TestimonialsService', () => {
       mockTestimonial.id = testimonialId;
 
       jest.spyOn(testimonialRepository, 'findOne').mockResolvedValue(mockTestimonial);
-      jest.spyOn(testimonialRepository, 'remove').mockResolvedValue(undefined);
+      jest.spyOn(testimonialRepository, 'softDelete').mockResolvedValue({ affected: 1 } as any);
 
       const result = await service.deleteTestimonial(testimonialId);
 
       expect(testimonialRepository.findOne).toHaveBeenCalledWith({ where: { id: testimonialId } });
-      expect(testimonialRepository.remove).toHaveBeenCalledWith(mockTestimonial);
+      expect(testimonialRepository.softDelete).toHaveBeenCalledWith(mockTestimonial.id);
       expect(result).toEqual({
         message: 'Testimonial deleted successfully',
         status_code: HttpStatus.OK,
@@ -174,14 +174,14 @@ describe('TestimonialsService', () => {
       const id = 'non_existent_id';
 
       jest.spyOn(testimonialRepository, 'findOne').mockResolvedValue(null);
-      jest.spyOn(testimonialRepository, 'remove').mockImplementation(jest.fn());
+      jest.spyOn(testimonialRepository, 'softDelete').mockImplementation(jest.fn());
 
       await expect(service.deleteTestimonial(id)).rejects.toThrow(
         new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND)
       );
 
       expect(testimonialRepository.findOne).toHaveBeenCalledWith({ where: { id } });
-      expect(testimonialRepository.remove).not.toHaveBeenCalled();
+      expect(testimonialRepository.softDelete).not.toHaveBeenCalled();
     });
   });
 });

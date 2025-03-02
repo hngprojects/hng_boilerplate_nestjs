@@ -14,9 +14,15 @@ export class Comment extends AbstractBaseEntity {
   @ManyToOne(() => User, user => user.comments, { cascade: true })
   user: User;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   model_id: string;
 
-  @Column()
+  @Column({ nullable: true })
   model_type: string;
+
+  @Column({ type: 'int', default: 0 }) // Add dislikes column
+  dislikes: number;
+
+  @Column('simple-array', { nullable: true }) // Store user IDs as an array
+  dislikedBy: string[];
 }

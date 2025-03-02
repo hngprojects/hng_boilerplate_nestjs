@@ -29,4 +29,18 @@ export class BlogCategoryService {
     await this.blogCategoryRepository.save(category);
     return { data: category, message: 'Organisation category updated successfully.' };
   }
+
+  async deleteOrganisationCategory(id: string) {
+    const category = await this.blogCategoryRepository.findOne({ where: { id } });
+
+    if (!category) {
+      throw new CustomHttpException(CATEGORY_NOT_FOUND, 404);
+    }
+
+    await this.blogCategoryRepository.remove(category);
+
+    return {
+      message: 'Organisation category deleted successfully',
+    };
+  }
 }

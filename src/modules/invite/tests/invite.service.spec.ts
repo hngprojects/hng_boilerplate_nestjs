@@ -1,7 +1,7 @@
 import { HttpStatus, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { User } from '../../user/entities/user.entity';
 import { Invite } from '../entities/invite.entity';
@@ -34,8 +34,14 @@ describe('InviteService', () => {
   let organisationService: OrganisationsService;
   let configService: ConfigService;
   let frontendUrl: string;
+  let entityManager: jest.Mocked<EntityManager>;
 
   beforeEach(async () => {
+    entityManager = {
+      transaction: jest.fn().mockImplementation(async cb => cb(entityManager)),
+      save: jest.fn(),
+    } as unknown as jest.Mocked<EntityManager>;
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
       providers: [
@@ -52,6 +58,7 @@ describe('InviteService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
+            findAndCount: jest.fn(),
           },
         },
         {
@@ -137,6 +144,10 @@ describe('InviteService', () => {
             sendMail: jest.fn(),
           },
         },
+        {
+          provide: EntityManager,
+          useValue: entityManager,
+        },
       ],
     }).compile();
 
@@ -153,15 +164,26 @@ describe('InviteService', () => {
   });
 
   it('should fetch all invites', async () => {
-    jest.spyOn(repository, 'find').mockResolvedValue(mockInvites);
+    const expectedInvites = mockInvites.map(invite => {
+      const { created_at, updated_at, ...rest } = invite;
+      return rest;
+    });
+
+    jest.spyOn(repository, 'findAndCount').mockResolvedValue([mockInvites, mockInvites.length]);
 
     const result = await service.findAllInvitations();
 
     expect(result).toEqual({
-      status_code: 200,
-      message: 'Successfully fetched invites',
-      data: mockInvitesResponse,
+      status: 'success',
+      status_code: HttpStatus.OK,
+      message: 'Invitations retrieved successfully',
+      data: {
+        invitations: expectedInvites,
+        total: mockInvites.length,
+      },
     });
+
+    expect(repository.findAndCount).toHaveBeenCalled();
   });
 
   it('should throw an internal server error if an exception occurs', async () => {
@@ -185,6 +207,8 @@ describe('InviteService', () => {
         isGeneric: invite.isGeneric,
         organisation: invite.organisation,
         email: invite.email,
+        created_at: new Date(),
+        updated_at: new Date(),
       })),
     });
   });

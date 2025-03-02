@@ -80,7 +80,14 @@ export class BlogController {
   @ApiResponse({ status: 200, description: 'Blog fetched successfully.', type: BlogDto })
   @ApiResponse({ status: 404, description: 'Blog not found.' })
   @ApiResponse({ status: 500, description: 'Internal server error.' })
-  async getSingleBlog(@Param('id', new ParseUUIDPipe()) id: string, @Request() req): Promise<BlogDto> {
+  async getSingleBlog(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Request() req
+  ): Promise<{
+    status_code: number;
+    message: string;
+    data: BlogDto;
+  }> {
     return await this.blogService.getSingleBlog(id, req.user);
   }
 

@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
 import { CreateNewsletterSubscriptionDto } from './dto/create-newsletter-subscription.dto';
 import { NewsletterSubscriptionResponseDto } from './dto/newsletter-subscription.response.dto';
 import { NewsletterSubscription } from './entities/newsletter-subscription.entity';
+import { ResubscribeNewsletterDto } from './dto/resubscribe-newsletter.dto';
 
 @Injectable()
 export class NewsletterSubscriptionService {
@@ -77,12 +78,35 @@ export class NewsletterSubscriptionService {
     const subscription = await this.newsletterSubscriptionRepository.findOne({ where: { email } });
 
     if (!subscription) {
-      throw new NotFoundException(`Email ${email} not found in the subscription list`);
+      throw new NotFoundException('Email not found in the subscription list');
     }
 
     subscription.isUnsubscribed = true;
     await this.newsletterSubscriptionRepository.save(subscription);
 
-    return { message: `Email ${email} has been unsubscribed successfully` };
+    return { message: 'Email has been unsubscribed successfully' };
+  }
+  async resubscribe(dto: ResubscribeNewsletterDto): Promise<{ message: string }> {
+    const { id, email } = dto;
+
+    // Find the subscription record
+    const userSubscription = await this.newsletterSubscriptionRepository.findOne({
+      where: [{ id }, { email }],
+    });
+
+    if (!userSubscription) {
+      throw new NotFoundException('User not found or not unsubscribed.');
+    }
+
+    // Check if the user is already subscribed
+    if (userSubscription.status === 'active') {
+      throw new BadRequestException('User is already subscribed.');
+    }
+
+    // Update the subscription status
+    userSubscription.status = 'active';
+    await this.newsletterSubscriptionRepository.save(userSubscription);
+
+    return { message: 'Successfully resubscribed to the newsletter.' };
   }
 }

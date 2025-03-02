@@ -11,8 +11,12 @@ import {
   ValidationPipe,
   ParseUUIDPipe,
   Patch,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import {
+  ApiConsumes,
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
@@ -25,6 +29,7 @@ import {
   ApiUnprocessableEntityResponse,
   ApiParam,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { skipAuth } from '@shared/helpers/skipAuth';
 import { JobApplicationErrorDto } from './dto/job-application-error.dto';
 import { JobApplicationResponseDto } from './dto/job-application-response.dto';
@@ -36,6 +41,7 @@ import { JobSearchDto } from './dto/jobSearch.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { JobOwnerGuard } from '../../guards/job-owner.guard';
 import { AuthGuard } from '../../guards/auth.guard';
+import { JobAccessGuard } from '@guards/job-access.guard';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -55,11 +61,20 @@ export class JobsController {
   @ApiUnprocessableEntityResponse({
     description: 'Job application deadline passed',
   })
+  @UseInterceptors(FileInterceptor('resume')) // Handles file uploads
+  @ApiConsumes('multipart/form-data')
   @ApiBadRequestResponse({ description: 'Invalid request body', type: JobApplicationErrorDto })
   @ApiInternalServerErrorResponse({ description: 'Internal server error', type: JobApplicationErrorDto })
   @Post('/:id/applications')
-  async applyForJob(@Param('id') id: string, @Body() jobApplicationDto: JobApplicationDto) {
-    return this.jobService.applyForJob(id, jobApplicationDto);
+  async applyForJob(
+    @Param('id') id: string,
+    @Body() jobApplicationDto: JobApplicationDto,
+    @UploadedFile() resume: Express.Multer.File
+  ) {
+    if (!resume) {
+      throw new BadRequestException('Resume file is required');
+    }
+    return this.jobService.applyForJob(id, jobApplicationDto, resume);
   }
 
   @UseGuards(AuthGuard)
@@ -110,8 +125,7 @@ export class JobsController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard)
-  @UseGuards(SuperAdminGuard, JobOwnerGuard)
+  @UseGuards(AuthGuard, JobAccessGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a job posting' })
   @ApiResponse({ status: 200, description: 'Job updated successfully' })

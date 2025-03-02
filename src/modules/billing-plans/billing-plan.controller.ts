@@ -11,8 +11,11 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BillingPlanService } from './billing-plan.service';
+import { skipAuth } from '@shared/helpers/skipAuth';
+import { BillingPlanDto } from './dto/billing-plan.dto';
 import {
   createBillingPlanDocs,
   deleteBillingPlanDocs,
@@ -20,9 +23,6 @@ import {
   getSingleBillingPlanDocs,
   updateBillingPlanDocs,
 } from './docs/billing-plan-docs';
-import { SuperAdminGuard } from '@guards/super-admin.guard';
-import { BillingPlanDto } from './dto/billing-plan.dto';
-import { skipAuth } from '@shared/helpers/skipAuth';
 import { UpdateBillingPlanDto } from './dto/update-billing-plan.dto';
 
 @ApiTags('Billing Plans')
@@ -67,5 +67,18 @@ export class BillingPlanController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBillingPlan(@Param('id', ParseUUIDPipe) id: string) {
     return this.billingPlanService.deleteBillingPlan(id);
+  }
+
+  //  For sending renewal reminders
+
+  @Post('send-renewal-reminder/:id')
+  @ApiOperation({ summary: 'Send renewal reminder for a billing plan' })
+  @ApiResponse({
+    status: 200,
+    description: 'Renewal reminder sent successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Billing plan not found' })
+  async sendRenewalReminder(@Param('id') id: string) {
+    return this.billingPlanService.sendRenewalReminder(id);
   }
 }

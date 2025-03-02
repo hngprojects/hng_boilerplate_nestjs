@@ -19,7 +19,9 @@ import { isUUID } from 'class-validator';
 export class LanguagesService {
   constructor(
     @InjectRepository(Language)
-    private readonly languageRepository: Repository<Language>
+    private readonly languageRepository: Repository<Language>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>
   ) {}
 
   async createLanguage(createLanguageDto: CreateLanguageDto): Promise<any> {
@@ -156,6 +158,31 @@ export class LanguagesService {
         message: 'An error occurred',
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
+    }
+  }
+
+  async getUserLanguages(userId: string): Promise<Language[]> {
+    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['languages'] });
+    if (!user) throw new NotFoundException('User not found.');
+    return user.languages || [];
+  }
+
+  async deleteUserLanguage(languageId: string, userId: string): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['languages'] });
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const language = user.languages.find(lang => lang.id === languageId);
+    if (!language) {
+      throw new NotFoundException('Language not found for this user.');
+    }
+
+    try {
+      await this.languageRepository.remove(language);
+      return { message: 'Language successfully deleted for the user.' };
+    } catch (error) {
+      throw new BadRequestException('Cannot delete language due to dependencies.');
     }
   }
 }
