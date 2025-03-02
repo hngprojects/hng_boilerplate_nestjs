@@ -412,8 +412,10 @@ todo.txt
 .vscode/
 
 # Docker compose
-docker-compose.yml
 data/
+docker-compose.yml
+package-lock.json
+.dev.env
 
 # Docker compose
 docker-compose.yml

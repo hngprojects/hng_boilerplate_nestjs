@@ -12,6 +12,7 @@ import { SeedingService } from '@database/seeding/seeding.service';
 import { ResponseInterceptor } from '@shared/inteceptors/response.interceptor';
 import { Request, Response } from 'express';
 import { HttpExceptionFilter } from '@shared/helpers/http-exception-filter';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 

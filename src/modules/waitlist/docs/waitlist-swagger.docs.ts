@@ -1,11 +1,18 @@
 import { applyDecorators, HttpStatus, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GetWaitlistResponseDto } from '../dto/get-waitlist.dto';
-import { ErrorResponseDto } from '../dto/waitlist-error-response.dto';
+import {
+  BadRequestErrorResponseDto,
+  UnauthorizedErrorResponseDto,
+  ForbiddenErrorResponseDto,
+  InternalServerErrorResponseDto,
+  NotFoundErrorResponseDto,
+} from '../dto/waitlist-error-response.dto';
 import { WaitlistResponseDto } from '../dto/create-waitlist-response.dto';
 
 export function createWaitlistDocs() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({ summary: 'Create a new waitlist entry' }),
     ApiResponse({
       status: HttpStatus.CREATED,
@@ -15,7 +22,22 @@ export function createWaitlistDocs() {
     ApiResponse({
       status: HttpStatus.BAD_REQUEST,
       description: 'Invalid input data.',
-      type: ErrorResponseDto,
+      type: BadRequestErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.UNAUTHORIZED,
+      description: 'Unauthorized access.',
+      type: UnauthorizedErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.FORBIDDEN,
+      description: 'Forbidden access.',
+      type: ForbiddenErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      description: 'Internal server error.',
+      type: InternalServerErrorResponseDto,
     })
   );
 }
@@ -30,9 +52,19 @@ export function getAllWaitlistDocs() {
       type: GetWaitlistResponseDto,
     }),
     ApiResponse({
+      status: HttpStatus.UNAUTHORIZED,
+      description: 'Unauthorized access.',
+      type: UnauthorizedErrorResponseDto,
+    }),
+    ApiResponse({
+      status: HttpStatus.FORBIDDEN,
+      description: 'Forbidden access.',
+      type: ForbiddenErrorResponseDto,
+    }),
+    ApiResponse({
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       description: 'Internal server error.',
-      type: ErrorResponseDto,
+      type: InternalServerErrorResponseDto,
     })
   );
 }
