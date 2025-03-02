@@ -405,6 +405,7 @@ dist/
 *.dev
 *.prod
 
+
 # User specific ignores 
 todo.txt
 /.vscode/
@@ -438,3 +439,4 @@ package-lock.json
 docker-compose.yml
 data/
 .dev.env
+

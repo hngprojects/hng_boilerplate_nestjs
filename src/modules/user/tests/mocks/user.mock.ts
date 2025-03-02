@@ -25,4 +25,5 @@ export const mockUser: User = {
   hashPassword: () => null,
   cart: [],
   organisations: null,
+  is_superadmin: false,
 };

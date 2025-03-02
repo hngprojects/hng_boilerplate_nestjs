@@ -6,6 +6,7 @@ export const mockUser: User = {
   first_name: 'John',
   last_name: 'Doe',
   is_active: true,
+  is_superadmin: false,
   phone: '+1234567890',
   status: 'Hello from the children of planet Earth',
   id: 'some-uuid-value-here',

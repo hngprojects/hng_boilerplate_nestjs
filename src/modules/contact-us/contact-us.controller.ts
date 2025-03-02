@@ -7,7 +7,7 @@ import { skipAuth } from '@shared/helpers/skipAuth';
 
 @ApiTags('Contact Us')
 @skipAuth()
-@Controller('contact')
+@Controller({ path: 'contact', version: '1' })
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 
