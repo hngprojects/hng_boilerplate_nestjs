@@ -1,5 +1,5 @@
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { Controller, Get } from '@nestjs/common';
-import { skipAuth } from './helpers/skipAuth';
 import * as os from 'os';
 
 @Controller()
@@ -43,4 +43,3 @@ export default class HealthController {
     return { status_code: 200, message: 'This is a healthy endpoint', ip: localIpAddress };
   }
 }
-

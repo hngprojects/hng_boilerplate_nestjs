@@ -46,6 +46,7 @@ export const createMockOrganisation = (): Organisation => {
     phone: '+1234567890',
     hashPassword: async () => {},
     is_active: true,
+    is_superadmin: false,
     attempts_left: 3,
     time_left: 3600,
     owned_organisations: [],

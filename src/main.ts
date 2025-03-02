@@ -1,3 +1,5 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -5,10 +7,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { DataSource } from 'typeorm';
 import { AppModule } from './app.module';
-import { initializeDataSource } from './database/data-source';
-import { SeedingService } from './database/seeding/seeding.service';
-import { ResponseInterceptor } from './shared/inteceptors/response.interceptor';
-
+import { initializeDataSource } from '@database/data-source';
+import { SeedingService } from '@database/seeding/seeding.service';
+import { ResponseInterceptor } from '@shared/inteceptors/response.interceptor';
+import { Request, Response } from 'express';
+import { HttpExceptionFilter } from '@shared/helpers/http-exception-filter';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 
@@ -32,6 +35,7 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api/v1', { exclude: ['/', 'health', 'api', 'api/v1', 'api/docs', 'probe'] });
   app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const options = new DocumentBuilder()
     .setTitle('HNG Boilerplate')
@@ -42,6 +46,10 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api/docs', app, document);
+
+  app.use('api/docs-json', (req: Request, res: Response) => {
+    res.json(document);
+  });
 
   const port = app.get<ConfigService>(ConfigService).get<number>('server.port');
   await app.listen(port);

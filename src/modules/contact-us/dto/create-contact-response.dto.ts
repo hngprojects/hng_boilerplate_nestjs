@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 
 export class CreateContactResponseDto {
   @ApiProperty({

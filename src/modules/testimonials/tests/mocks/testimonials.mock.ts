@@ -9,6 +9,7 @@ export const testimonialsMock: Testimonial[] = [
     content: 'Excellent Work!',
     created_at: new Date(),
     updated_at: new Date(),
+    deletedAt: null,
   },
   {
     id: '2',
@@ -17,6 +18,7 @@ export const testimonialsMock: Testimonial[] = [
     content: 'Excellent Work! Highly Recommend',
     created_at: new Date(),
     updated_at: new Date(),
+    deletedAt: null,
   },
   {
     id: '3',
@@ -25,6 +27,7 @@ export const testimonialsMock: Testimonial[] = [
     content: 'Organized and quality work!',
     created_at: new Date(),
     updated_at: new Date(),
+    deletedAt: null,
   },
   {
     id: '4',
@@ -33,6 +36,7 @@ export const testimonialsMock: Testimonial[] = [
     content: 'Excellent Work!',
     created_at: new Date(),
     updated_at: new Date(),
+    deletedAt: null,
   },
   {
     id: '5',
@@ -41,5 +45,6 @@ export const testimonialsMock: Testimonial[] = [
     content: 'Highly Recommend!',
     created_at: new Date(),
     updated_at: new Date(),
+    deletedAt: null,
   },
 ];

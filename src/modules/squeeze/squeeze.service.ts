@@ -14,7 +14,7 @@ import { SqueezeRequestDto } from './dto/squeeze.dto';
 import { CreateSqueezeMapper } from './mapper/create-squeeze.mapper';
 import { SqueezeMapper } from './mapper/squeeze.mapper';
 import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
-import CustomExceptionHandler from '../../helpers/exceptionHandler';
+import CustomExceptionHandler from '@shared/helpers/exceptionHandler';
 
 @Injectable()
 export class SqueezeService {

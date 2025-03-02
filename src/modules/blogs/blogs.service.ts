@@ -1,13 +1,13 @@
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, MoreThanOrEqual, FindOptionsWhere } from 'typeorm';
 import { Blog } from './entities/blog.entity';
-import { User } from '../user/entities/user.entity';
 import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { BlogResponseDto } from './dtos/blog-response.dto';
+import { User } from '@modules/user/entities/user.entity';
 
 @Injectable()
 export class BlogService {

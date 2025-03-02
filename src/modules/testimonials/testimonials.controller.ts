@@ -14,8 +14,6 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserPayload } from '../user/interfaces/user-payload.interface';
-import UserService from '../user/user.service';
 import { CreateTestimonialResponseDto } from './dto/create-testimonial-response.dto';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
 import { TestimonialsService } from './testimonials.service';
@@ -26,6 +24,8 @@ import {
 } from './dto/get-testimonials.dto';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 import { UpdateTestimonialResponseDto } from './dto/update-testimonial.response.dto';
+import { UserPayload } from '@modules/user/interfaces/user-payload.interface';
+import UserService from '@modules/user/user.service';
 
 @ApiBearerAuth()
 @ApiTags('Testimonials')

@@ -7,13 +7,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailController } from './email.controller';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import { Profile } from '../profile/entities/profile.entity';
-import { Role } from '../role/entities/role.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { Role } from '@modules/role/entities/role.entity';
 
 @Module({
   providers: [EmailService, QueueService, EmailQueueConsumer],

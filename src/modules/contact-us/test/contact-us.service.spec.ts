@@ -1,10 +1,12 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ContactUs } from '../entities/contact-us.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CreateContactDto } from '../dto/create-contact-us.dto';
 import { ContactUsService } from '../contact-us.service';
-import * as SYS_MSG from '../../../helpers/SystemMessages';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { HttpStatus } from '@nestjs/common';
 
 describe('ContactUsService', () => {
@@ -16,6 +18,7 @@ describe('ContactUsService', () => {
     mockRepository = {
       create: jest.fn(),
       save: jest.fn(),
+      findAndCount: jest.fn(),
     };
 
     mockMailerService = {
@@ -44,7 +47,7 @@ describe('ContactUsService', () => {
       const createContactDto: CreateContactDto = {
         name: 'John Doe',
         email: 'john@example.com',
-        phone: 123456789,
+        phone: '123456789',
         message: 'Test message',
       };
 
@@ -58,6 +61,39 @@ describe('ContactUsService', () => {
       expect(mockRepository.save).toHaveBeenCalledWith(createContactDto);
       expect(mockMailerService.sendMail).toHaveBeenCalled();
       expect(result).toEqual({ message: SYS_MSG.INQUIRY_SENT, status_code: HttpStatus.CREATED });
+    });
+  });
+
+  describe('getAllContactMessages', () => {
+    it('should return all contact messages paginated', async () => {
+      const page = 1;
+      const limit = 10;
+      const messages = [
+        { id: 1, name: 'John Doe', email: 'john@example.com', phone: 123456789, message: 'Test message' },
+      ];
+
+      const total = messages.length;
+      const totalPages = Math.ceil(total / limit);
+
+      mockRepository.findAndCount.mockResolvedValue([messages, total]);
+
+      const result = await service.getAllContactMessages(page, limit);
+
+      expect(mockRepository.findAndCount).toHaveBeenCalledWith({
+        order: { created_at: 'DESC' },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Retrieved messages successfully',
+        data: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalResults: total,
+          messages,
+        },
+      });
     });
   });
 });

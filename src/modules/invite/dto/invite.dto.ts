@@ -20,6 +20,7 @@ export class InviteDto {
   @ApiProperty({
     description: 'organisation',
     type: 'object',
+    additionalProperties: true,
   })
   @IsObject()
   organisation: Organisation;

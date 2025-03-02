@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { CreateContactDto } from '../contact-us/dto/create-contact-us.dto';
 import { ContactUs } from './entities/contact-us.entity';
 import { MailerService } from '@nestjs-modules/mailer';
-import * as CONTACTHELPER from '../../helpers/contactHelper';
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import * as CONTACTHELPER from '@shared/constants/contactHelper';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 
 @Injectable()
 export class ContactUsService {
@@ -38,5 +38,24 @@ export class ContactUsService {
         date: new Date().toLocaleString(),
       },
     });
+  }
+
+  async getAllContactMessages(page: number, limit: number) {
+    const [messages, total] = await this.contactRepository.findAndCount({
+      order: { created_at: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    const totalPages = Math.ceil(total / limit);
+    return {
+      status: 'success',
+      message: 'Retrieved messages successfully',
+      data: {
+        currentPage: page,
+        totalPages,
+        totalResults: total,
+        messages,
+      },
+    };
   }
 }

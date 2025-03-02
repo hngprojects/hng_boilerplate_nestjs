@@ -2,12 +2,12 @@ import { Injectable, CanActivate, ExecutionContext, HttpStatus } from '@nestjs/c
 import { Reflector } from '@nestjs/core';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../modules/user/entities/user.entity';
-import * as SYS_MSG from '../helpers/SystemMessages';
-import { Organisation } from './../modules/organisations/entities/organisations.entity';
-import { CustomHttpException } from '../helpers/custom-http-filter';
-import { OrganisationUserRole } from '../modules/role/entities/organisation-user-role.entity';
-import { Role } from '../modules/role/entities/role.entity';
+import { User } from '@modules/user/entities/user.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Role } from '@modules/role/entities/role.entity';
 
 @Injectable()
 export class OwnershipGuard implements CanActivate {
@@ -27,7 +27,7 @@ export class OwnershipGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const userId = request.user.sub;
     const organisationId = request.params.orgId || request.params.org_id || request.params.id;
-    
+
     const adminUserRole = await this.organisationMembersRole.find({ where: { userId }, relations: ['role'] });
     if (adminUserRole.length) {
       const roles = adminUserRole.map(instance => instance.role.name);

@@ -1,11 +1,10 @@
-import { HttpStatus, Injectable, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId, Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Otp } from './entities/otp.entity';
-import { User } from '../user/entities/user.entity';
-import { generateSixDigitToken } from '../../utils/generate-token';
-import { isInstance } from 'class-validator';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { User } from '@modules/user/entities/user.entity';
+import { generateSixDigitToken } from '@utils/generate-token';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @Injectable()
 export class OtpService {
@@ -16,9 +15,11 @@ export class OtpService {
     private userRepository: Repository<User>
   ) {}
 
-  async createOtp(userId: string): Promise<Otp | null> {
+  async createOtp(userId: string, manager?: EntityManager): Promise<Otp | null> {
     try {
-      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const repo = manager ? manager.getRepository(User) : this.userRepository;
+      const otpRepo = manager ? manager.getRepository(Otp) : this.otpRepository;
+      const user = await repo.findOne({ where: { id: userId } });
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -27,8 +28,8 @@ export class OtpService {
       const token = generateSixDigitToken();
       const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
-      const otp = this.otpRepository.create({ token, expiry, user, user_id: userId });
-      await this.otpRepository.save(otp);
+      const otp = otpRepo.create({ token, expiry, user, user_id: userId });
+      await otpRepo.save(otp);
 
       return otp;
     } catch (error) {

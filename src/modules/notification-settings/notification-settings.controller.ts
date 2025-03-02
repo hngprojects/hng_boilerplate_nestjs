@@ -8,7 +8,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Controller, Post, Body, Get, Request, Req, Patch } from '@nestjs/common';
+import { Controller, Body, Get, Request, Req, Patch } from '@nestjs/common';
 import { NotificationSettingsService } from './notification-settings.service';
 import { NotificationSettingsDto } from './dto/notification-settings.dto';
 import { NotificationSettingsErrorDto } from './dto/notification-settings-error.dto';

@@ -4,24 +4,13 @@ import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Organisation } from '../entities/organisations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { validate } from 'class-validator';
-import { orgMock } from '../tests/mocks/organisation.mock';
-import { createMockOrganisationRequestDto } from '../tests/mocks/organisation-dto.mock';
 import UserService from '../../user/user.service';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
-  ForbiddenException,
-  ConflictException,
-  HttpStatus,
-} from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationUserRole } from '../../../modules/role/entities/organisation-user-role.entity';
 import { Role } from '../../../modules/role/entities/role.entity';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
-
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { CreateOrganisationRecordOptions } from '../dto/create-organisation-options';
 describe('OrganisationsService', () => {
   let service: OrganisationsService;
   let userRepository: Repository<User>;
@@ -98,8 +87,14 @@ describe('OrganisationsService', () => {
   });
   describe('create', () => {
     it('should create a new organisation', async () => {
-      const createOrganisationDto = { name: 'Test Org', email: 'test@example.com' };
       const userId = 'user-id';
+      const createOrganisationDto = { name: 'Test Org', email: 'test@example.com' };
+      const createOrganisationPayload: CreateOrganisationRecordOptions = {
+        createPayload: { ...createOrganisationDto, userId },
+        dbTransaction: {
+          useTransaction: false,
+        },
+      };
       const user = { id: userId };
       const superAdminRole = { id: 'role-id', name: 'super_admin', description: '', permissions: [] };
       const newOrganisation = { ...createOrganisationDto, id: 'org-id', owner: user };
@@ -116,7 +111,7 @@ describe('OrganisationsService', () => {
       jest.spyOn(organisationRepository, 'save').mockResolvedValue(newOrganisation as Organisation);
       jest.spyOn(organisationUserRole, 'save').mockResolvedValue(adminReponse);
 
-      const result = await service.create(createOrganisationDto, userId);
+      const result = await service.create(createOrganisationPayload);
 
       expect(result).toEqual(
         expect.objectContaining({

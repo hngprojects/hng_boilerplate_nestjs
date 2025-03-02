@@ -2,13 +2,11 @@ import { Injectable, CanActivate, ExecutionContext, HttpStatus } from '@nestjs/c
 import { Reflector } from '@nestjs/core';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as SYS_MSG from '../helpers/SystemMessages';
-import { Organisation } from './../modules/organisations/entities/organisations.entity';
-import { CustomHttpException } from '../helpers/custom-http-filter';
-import { PermissionCategory } from '../modules/permissions/helpers/PermissionCategory';
-import { PERMISSIONS_KEY } from './permission.decorator';
-import { OrganisationUserRole } from '../modules/role/entities/organisation-user-role.entity';
-import { Role } from '../modules/role/entities/role.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Role } from '@modules/role/entities/role.entity';
 
 @Injectable()
 export class MembershipGuard implements CanActivate {

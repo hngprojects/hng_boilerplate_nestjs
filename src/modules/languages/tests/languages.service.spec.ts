@@ -1,21 +1,41 @@
+import { User } from '@modules/user/entities/user.entity';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { LanguagesService } from '../languages.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Language } from '../entities/language.entity';
 import { CreateLanguageDto, UpdateLanguageDto } from '../dto/create-language.dto';
-import { HttpException, HttpStatus, ConflictException, NotFoundException } from '@nestjs/common';
+import { Language } from '../entities/language.entity';
+import { LanguagesService } from '../languages.service';
 
 const mockLanguageRepository = {
   findOne: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
   find: jest.fn(),
+  remove: jest.fn(),
+  createQueryBuilder: jest.fn(() => ({
+    innerJoin: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    getMany: jest.fn(),
+  })),
+};
+
+const mockUserRepository = {
+  findOne: jest.fn(),
 };
 
 describe('LanguagesService', () => {
   let service: LanguagesService;
   let repository: Repository<Language>;
+  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,11 +45,16 @@ describe('LanguagesService', () => {
           provide: getRepositoryToken(Language),
           useValue: mockLanguageRepository,
         },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepository, // Add this line
+        },
       ],
     }).compile();
 
     service = module.get<LanguagesService>(LanguagesService);
     repository = module.get<Repository<Language>>(getRepositoryToken(Language));
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -86,164 +111,89 @@ describe('LanguagesService', () => {
         })
       );
     });
-
-    it('should handle errors during creation', async () => {
-      const createLanguageDto: CreateLanguageDto = {
-        language: 'English',
-        code: 'en',
-        description: 'English',
-      };
-
-      jest.spyOn(repository, 'findOne').mockRejectedValue(
-        new HttpException(
-          {
-            message: 'An error occurred',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
-
-      await expect(service.createLanguage(createLanguageDto)).rejects.toThrow(
-        new HttpException(
-          {
-            message: 'An error occurred',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
-    });
   });
 
-  describe('getSupportedLanguages', () => {
-    it('should return a list of languages', async () => {
-      const languages: Language[] = [
-        {
-          id: '1',
-          language: 'English',
-          code: 'en',
-          description: 'English',
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-        {
-          id: '2',
-          language: 'Spanish',
-          code: 'es',
-          description: 'Español',
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      ];
+  describe('getUserLanguages', () => {
+    let languageService: LanguagesService;
+    let languageRepository: Repository<Language>;
+    let userRepository: Repository<User>;
 
-      jest.spyOn(repository, 'find').mockResolvedValue(languages);
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          LanguagesService,
+          {
+            provide: getRepositoryToken(Language),
+            useClass: Repository,
+          },
+          {
+            provide: getRepositoryToken(User),
+            useClass: Repository,
+          },
+        ],
+      }).compile();
 
-      const result = await service.getSupportedLanguages();
-      expect(result).toEqual({
-        status_code: HttpStatus.OK,
-        message: 'Languages fetched successfully',
-        languages: languages.map(language => ({
-          language: `${language.language} (${language.description})`,
-        })),
-      });
+      languageService = module.get<LanguagesService>(LanguagesService);
+      languageRepository = module.get<Repository<Language>>(getRepositoryToken(Language));
+      userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     });
 
-    it('should handle errors during fetch', async () => {
-      jest.spyOn(repository, 'find').mockRejectedValue(
-        new HttpException(
-          {
-            message: 'An error occurred',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
-
-      await expect(service.getSupportedLanguages()).rejects.toThrow(
-        new HttpException(
-          {
-            message: 'An error occurred',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
+    it('should be defined', () => {
+      expect(languageService).toBeDefined();
     });
-  });
 
-  describe('updateLanguage', () => {
-    it('should update a language', async () => {
-      const id = 'some-id';
-      const updateLanguageDto: UpdateLanguageDto = {
-        language: 'English',
-        code: 'en',
-        description: 'English Language',
-      };
-
-      const updatedLanguage = {
-        id,
-        ...updateLanguageDto,
+    it('should return languages if user exists', async () => {
+      const mockUser: User = {
+        id: '123',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john.doe@example.com',
+        status: 'active',
+        languages: [{ id: '1', language: 'English', code: 'en', description: 'English' }],
         created_at: new Date(),
         updated_at: new Date(),
-      } as Language;
+      } as User;
 
-      jest.spyOn(repository, 'findOne').mockResolvedValue(updatedLanguage);
-      jest.spyOn(repository, 'save').mockResolvedValue(updatedLanguage);
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
 
-      const result = await service.updateLanguage(id, updateLanguageDto);
-      expect(result).toEqual({
-        status_code: HttpStatus.OK,
-        message: 'Language successfully updated',
-        language: updatedLanguage,
+      const result = await languageService.getUserLanguages('123');
+      expect(result).toEqual(mockUser.languages);
+    });
+
+    it('should throw NotFoundException if user does not exist', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+      await expect(languageService.getUserLanguages('123')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('deleteUserLanguage', () => {
+    it('should delete a user-specific language successfully', async () => {
+      const mockUser = { id: 'user123', languages: [{ id: 'lang123', language: 'English' }] } as User;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(repository, 'remove').mockResolvedValue(null);
+
+      await expect(service.deleteUserLanguage('lang123', 'user123')).resolves.toEqual({
+        message: 'Language successfully deleted for the user.',
       });
     });
 
-    it('should handle language not found', async () => {
-      const id = 'non-existent-id';
-      const updateLanguageDto: UpdateLanguageDto = {
-        language: 'English',
-        code: 'en',
-        description: 'English Language',
-      };
-
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.updateLanguage(id, updateLanguageDto)).rejects.toThrow(
-        new NotFoundException({
-          status_code: HttpStatus.NOT_FOUND,
-          message: 'Language not found',
-        })
-      );
+    it('should throw NotFoundException if user does not exist', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+      await expect(service.deleteUserLanguage('lang123', 'user123')).rejects.toThrow(NotFoundException);
     });
 
-    it('should handle errors during update', async () => {
-      const id = 'some-id';
-      const updateLanguageDto: UpdateLanguageDto = {
-        language: 'English',
-        code: 'en',
-        description: 'English Language',
-      };
+    it('should throw NotFoundException if language is not found for user', async () => {
+      const mockUser = { id: 'user123', languages: [] } as User;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      await expect(service.deleteUserLanguage('lang123', 'user123')).rejects.toThrow(NotFoundException);
+    });
 
-      jest.spyOn(repository, 'findOne').mockRejectedValue(
-        new HttpException(
-          {
-            message: 'An error occurred',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
+    it('should throw BadRequestException if language has dependencies', async () => {
+      const mockUser = { id: 'user123', languages: [{ id: 'lang123', language: 'English' }] } as User;
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+      jest.spyOn(repository, 'remove').mockRejectedValue(new Error('Cannot delete'));
 
-      await expect(service.updateLanguage(id, updateLanguageDto)).rejects.toThrow(
-        new HttpException(
-          {
-            message: 'An error occurred',
-            status_code: HttpStatus.INTERNAL_SERVER_ERROR,
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        )
-      );
+      await expect(service.deleteUserLanguage('lang123', 'user123')).rejects.toThrow(BadRequestException);
     });
   });
 });

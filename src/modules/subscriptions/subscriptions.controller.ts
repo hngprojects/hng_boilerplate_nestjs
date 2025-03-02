@@ -1,8 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { NotificationSettingsErrorDto } from '../notification-settings/dto/notification-settings-error.dto';
 import { GetAllSubscriptionsResponseDto } from './dto/get-all-subscription-response.dto';
 import { SubscriptionsService } from './subscriptions.service';
+import { NotificationSettingsErrorDto } from '@modules/notification-settings/dto/notification-settings-error.dto';
 
 @ApiBearerAuth()
 @Controller('subscriptions')

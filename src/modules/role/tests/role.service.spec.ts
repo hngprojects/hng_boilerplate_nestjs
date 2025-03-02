@@ -1,4 +1,4 @@
-import { ConflictException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,8 +9,8 @@ import { Role } from '../entities/role.entity';
 import { RoleService } from '../role.service';
 import { UpdateOrganisationRoleDto } from '../dto/update-organisation-role.dto';
 import { OrganisationUserRole } from '../entities/organisation-user-role.entity';
-import { EXISTING_ROLE, ROLE_CREATED_SUCCESSFULLY, ROLE_FETCHED_SUCCESSFULLY } from '../../../helpers/SystemMessages';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { EXISTING_ROLE, ROLE_CREATED_SUCCESSFULLY, ROLE_FETCHED_SUCCESSFULLY } from '@shared/constants/SystemMessages';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { CreateRoleWithPermissionDto } from '../dto/create-role-with-permission.dto';
 import { CreateOrganisationRoleDto } from '../dto/create-organisation-role.dto';
 

@@ -2,7 +2,7 @@ import { Body, Controller, Post, Request, Put, HttpCode } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { SqueezeService } from './squeeze.service';
 import { SqueezeRequestDto } from './dto/squeeze.dto';
-import { skipAuth } from '../../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { UpdateSqueezeDto } from './dto/update-squeeze.dto';
 
 @ApiTags('Squeeze')

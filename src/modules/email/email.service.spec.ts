@@ -2,20 +2,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService } from './email.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import QueueService, { MailSender } from './queue.service';
-import { BullModule, getQueueToken } from '@nestjs/bull';
-import { SendEmailDto, createTemplateDto, getTemplateDto, UpdateTemplateDto } from './dto/email.dto';
+import { getQueueToken } from '@nestjs/bull';
+import { createTemplateDto, getTemplateDto, UpdateTemplateDto } from './dto/email.dto';
 import * as Handlebars from 'handlebars';
 import * as htmlValidator from 'html-validator';
 import * as fs from 'fs';
 import { HttpStatus } from '@nestjs/common';
-import { createFile, deleteFile, getFile } from '../../helpers/fileHelpers';
-import { MailInterface } from './interfaces/MailInterface';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { promisify } from 'util';
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import { createFile, deleteFile, getFile } from '@shared/helpers/fileHelpers';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import * as util from 'util';
 
-jest.mock('../../helpers/fileHelpers', () => ({
+jest.mock('../../shared/helpers/fileHelpers', () => ({
   createFile: jest.fn(),
   deleteFile: jest.fn(),
   getFile: jest.fn(),
