@@ -10,7 +10,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 @ApiTags('Comments')
 @Controller('comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(private readonly commentsService: CommentsService) { }
 
   @Post('add')
   @ApiOperation({ summary: 'Create a new comment' })
@@ -37,19 +37,19 @@ export class CommentsController {
     return await this.commentsService.getCommentThread(id);
   }
 
-  @Post(':id/dislike')
   @ApiOperation({ summary: 'Dislike a comment' })
   @ApiResponse({ status: 200, description: 'Dislike updated successfully' })
   @ApiResponse({ status: 404, description: 'Comment not found' })
+  @Post(':id/dislike')
   async dislikeComment(@Param('id') id: string, @Request() req) {
     const userId = req.user.id;
-    // console.log('User ID:', userId); // debug (optional, can remove if not needed)
+    // console.log('User ID:', userId); // debug (optional)
     return await this.commentsService.dislikeComment(id, userId);
   }
 
-  @Delete(':id/delete')
   @ApiOperation({ summary: 'Delete a comment' })
   @ApiResponse({ status: 200, description: 'The comment has been deleted successfully.' })
+  @Delete(':id/delete')
   async deleteAComment(@Param('id') id: string, @Request() req): Promise<any> {
     return await this.commentsService.deleteAComment(id, req.user.id);
   }

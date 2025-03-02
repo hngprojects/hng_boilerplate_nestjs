@@ -14,7 +14,7 @@ export class CommentsService {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async addComment(createCommentDto: CreateCommentDto, userId: string): Promise<CommentResponseDto> {
     const { model_id, model_type, comment, parentId } = createCommentDto;
