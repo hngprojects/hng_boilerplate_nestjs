@@ -79,8 +79,8 @@ export default class RegistrationController {
   @HttpCode(200)
   async login(
     @Body() loginDto: LoginDto,
-    @Req() req: RequestExpress, // Express Request
-    @Res({ passthrough: true }) res: Response // Express Response
+    @Req() req: RequestExpress,
+    @Res({ passthrough: true }) res: Response
   ): Promise<LoginResponseDto | { status_code: number; message: string }> {
     return this.authService.loginUser(loginDto, req, res);
   }
