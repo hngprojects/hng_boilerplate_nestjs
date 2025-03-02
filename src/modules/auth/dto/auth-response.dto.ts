@@ -16,6 +16,7 @@ export class AuthResponseDto {
   @ApiProperty({
     description: 'Additional data containing user object',
     type: 'object',
+    additionalProperties: true,
   })
   data: object;
 }

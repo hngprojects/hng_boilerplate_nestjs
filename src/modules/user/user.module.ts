@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import UserService from './user.service';
 import { UserController } from './user.controller';
-import { Profile } from '../profile/entities/profile.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import { Role } from '../role/entities/role.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { User } from './entities/user.entity';
 
 @Module({
   controllers: [UserController],

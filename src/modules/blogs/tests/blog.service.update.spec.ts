@@ -1,3 +1,5 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -5,7 +7,7 @@ import { BlogService } from '../blogs.service';
 import { Blog } from '../entities/blog.entity';
 import { User } from '../../user/entities/user.entity';
 import { HttpStatus } from '@nestjs/common';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 describe('BlogService', () => {
   let service: BlogService;

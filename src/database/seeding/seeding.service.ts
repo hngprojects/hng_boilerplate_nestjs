@@ -8,25 +8,25 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '../../helpers/SystemMessages';
-import { Cart } from '../../modules/dashboard/entities/cart.entity';
-import { OrderItem } from '../../modules/dashboard/entities/order-items.entity';
-import { Order } from '../../modules/dashboard/entities/order.entity';
-import { Transaction } from '../../modules/dashboard/entities/transaction.entity';
-import { Invite } from '../../modules/invite/entities/invite.entity';
-import { Notification } from '../../modules/notifications/entities/notifications.entity';
-import { Organisation } from '../../modules/organisations/entities/organisations.entity';
-import { DefaultPermissions } from '../../modules/permissions/entities/default-permissions.entity';
-import { PermissionCategory } from '../../modules/permissions/helpers/PermissionCategory';
-import { ProductCategory } from '../../modules/product-category/entities/product-category.entity';
-import { Product, ProductSizeType } from '../../modules/products/entities/product.entity';
+import { ADMIN_CREATED, INVALID_ADMIN_SECRET, SERVER_ERROR } from '@shared/constants/SystemMessages';
+import { OrderItem } from '@modules/dashboard/entities/order-items.entity';
+import { Order } from '@modules/dashboard/entities/order.entity';
+import { Transaction } from '@modules/dashboard/entities/transaction.entity';
+import { Invite } from '@modules/invite/entities/invite.entity';
+import { Notification } from '@modules/notifications/entities/notifications.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { DefaultPermissions } from '@modules/permissions/entities/default-permissions.entity';
+import { PermissionCategory } from '@modules/permissions/helpers/PermissionCategory';
+import { ProductCategory } from '@modules/product-category/entities/product-category.entity';
+import { Product, ProductSizeType } from '@modules/products/entities/product.entity';
 
-import { Profile } from '../../modules/profile/entities/profile.entity';
-import { Role } from '../../modules/role/entities/role.entity';
-import { User } from '../../modules/user/entities/user.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { User } from '@modules/user/entities/user.entity';
 import { CreateAdminDto } from './dto/admin.dto';
 import { CreateAdminResponseDto } from './dto/create-admin-response.dto';
-import { OrganisationUserRole } from '../../modules/role/entities/organisation-user-role.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Cart } from '@modules/dashboard/entities/cart.entity';
 
 @Injectable()
 export class SeedingService {
@@ -343,16 +343,43 @@ export class SeedingService {
   async createSuperAdmin({ secret, ...adminDetails }: CreateAdminDto): Promise<CreateAdminResponseDto> {
     try {
       const userRepository = this.dataSource.getRepository(User);
+      const roleRepository = this.dataSource.getRepository(Role);
+      const orgUserRoleRepository = this.dataSource.getRepository(OrganisationUserRole);
+
+      // Check if user exists
       const exists = await userRepository.findOne({ where: { email: adminDetails.email } });
       if (exists) throw new ConflictException('A user already exist with the same email');
 
-      const user = userRepository.create(adminDetails);
+      // Verify admin secret
       const { ADMIN_SECRET } = process.env;
       if (secret !== ADMIN_SECRET) throw new UnauthorizedException(INVALID_ADMIN_SECRET);
 
-      // user.user_type = UserType.SUPER_ADMIN;
-      const admin = await userRepository.save(user);
-      return { status: 201, message: ADMIN_CREATED, data: admin };
+      // Find or create super-admin role
+      let adminRole = await roleRepository.findOne({ where: { name: 'super-admin' } });
+      if (!adminRole) {
+        adminRole = roleRepository.create({
+          name: 'super-admin',
+          description: 'Super Administrator',
+        });
+        adminRole = await roleRepository.save(adminRole);
+      }
+
+      // Create and save user
+      const user = userRepository.create(adminDetails);
+      const savedUser = await userRepository.save(user);
+
+      // Assign super-admin role to user
+      const userRole = orgUserRoleRepository.create({
+        userId: savedUser.id,
+        roleId: adminRole.id,
+      });
+      await orgUserRoleRepository.save(userRole);
+
+      return {
+        status: 201,
+        message: ADMIN_CREATED,
+        data: savedUser,
+      };
     } catch (error) {
       console.log('Error creating superAdmin:', error);
       if (error instanceof UnauthorizedException || error instanceof ConflictException) throw error;

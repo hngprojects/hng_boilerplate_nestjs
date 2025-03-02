@@ -23,8 +23,8 @@ import { ErrorResponseDto } from './dto/invite-error-response.dto';
 import { SendInvitationsResponseDto } from './dto/send-invitations-response.dto';
 
 import { AcceptInviteDto } from './dto/accept-invite.dto';
-import { OwnershipGuard } from '../../guards/authorization.guard';
-import * as SYS_MSG from '../../helpers/SystemMessages';
+import { OwnershipGuard } from '@guards/authorization.guard';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 @ApiBearerAuth()
 @ApiTags('Organisation Invites')
 @Controller('organizations')

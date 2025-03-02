@@ -2,12 +2,12 @@ import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
 import { CreateContactDto } from '../contact-us/dto/create-contact-us.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { skipAuth } from '../..//helpers/skipAuth';
 import { createContactDocs } from './docs/contact-us-swagger.docs';
+import { skipAuth } from '@shared/helpers/skipAuth';
 
 @ApiTags('Contact Us')
 @skipAuth()
-@Controller('contact')
+@Controller({ path: 'contact', version: '1' })
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 

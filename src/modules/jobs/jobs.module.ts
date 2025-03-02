@@ -1,22 +1,25 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { UserModule } from '../user/user.module';
 import { JobApplication } from './entities/job-application.entity';
 import { Job } from './entities/job.entity';
 import { JobsController } from './jobs.controller';
 import { JobsService } from './jobs.service';
-import { Role } from '../role/entities/role.entity';
-import { Profile } from '../profile/entities/profile.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
-
+import { User } from '@modules/user/entities/user.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { UserModule } from '@modules/user/user.module';
+import { JobOwnerGuard } from '@guards/job-owner.guard';
+import { AuthGuard } from '@guards/auth.guard';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
+import { S3Service } from '@modules/s3/s3.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Job, User, JobApplication, Organisation, OrganisationUserRole, Profile, Role]),
     UserModule,
   ],
-  providers: [JobsService],
+  providers: [JobsService, JobOwnerGuard, AuthGuard, SuperAdminGuard, S3Service],
   controllers: [JobsController],
 })
 export class JobsModule {}

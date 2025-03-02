@@ -1,3 +1,5 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApiStatusService } from '../api-status.service';
 import { getRepositoryToken } from '@nestjs/typeorm';

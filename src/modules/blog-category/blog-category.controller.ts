@@ -1,29 +1,20 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  Request,
-  Patch,
-  Param,
-  Get,
-  Query,
-  NotFoundException,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Patch, Param, Delete, Get, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
 import { BlogCategoryService } from './blog-category.service';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { CreateBlogCategoryDto } from './dto/create-blog-category.dto';
 import { UpdateBlogCategoryDto } from './dto/update-blog-category.dto';
+import { skipAuth } from '@shared/helpers/skipAuth';
 
 @ApiTags('Blog Categories')
 @Controller('blogs/categories')
 export class BlogCategoryController {
-  constructor(private readonly blogCategoryService: BlogCategoryService) {}
+  constructor(private readonly blogCategoryService: BlogCategoryService) { }
 
   @Post()
   @UseGuards(SuperAdminGuard)
   @ApiBearerAuth()
+  @skipAuth()
   @ApiOperation({ summary: 'Create a new blog category' })
   @ApiResponse({ status: 201, description: 'Blog category created successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid request data. Please provide a valid category name.' })
@@ -48,6 +39,20 @@ export class BlogCategoryController {
     return await this.blogCategoryService.updateOrganisationCategory(id, updateBlogCategoryDto);
   }
 
+  @Delete(':id')
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an organisation category' })
+  @ApiResponse({ status: 200, description: 'Organisation category updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid request data. Please provide valid data.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized. Token is missing or invalid.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. You do not have permission to update this category.' })
+  @ApiResponse({ status: 404, description: 'Not Found. Category with the given ID does not exist.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error. Please try again later.' })
+  async deleteBlogCategory(@Param('id') id: string) {
+    return await this.blogCategoryService.deleteOrganisationCategory(id);
+  }
+
   @Get('search')
   @ApiOperation({ summary: 'Search blog categories by name' })
   @ApiResponse({ status: 200, description: 'Categories found' })
@@ -57,4 +62,5 @@ export class BlogCategoryController {
     const result = await this.blogCategoryService.searchCategories(searchTerm);
     return result;
   }
+
 }

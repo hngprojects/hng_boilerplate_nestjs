@@ -1,22 +1,20 @@
-import {
-  ConflictException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { DefaultPermissions } from '../permissions/entities/default-permissions.entity';
-import { Permissions } from '../permissions/entities/permissions.entity';
-import { Organisation } from '../organisations/entities/organisations.entity';
 import { CreateOrganisationRoleDto } from './dto/create-organisation-role.dto';
 import { OrganisationUserRole } from './entities/organisation-user-role.entity';
 import { AttachPermissionsDto, UpdateOrganisationRoleDto } from './dto/update-organisation-role.dto';
 import { Role } from './entities/role.entity';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
 import { CreateRoleWithPermissionDto } from './dto/create-role-with-permission.dto';
-import { RESOURCE_NOT_FOUND, ROLE_CREATED_SUCCESSFULLY, ROLE_FETCHED_SUCCESSFULLY } from '../../helpers/SystemMessages';
+import {
+  RESOURCE_NOT_FOUND,
+  ROLE_CREATED_SUCCESSFULLY,
+  ROLE_FETCHED_SUCCESSFULLY,
+} from '@shared/constants/SystemMessages';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { DefaultPermissions } from '@modules/permissions/entities/default-permissions.entity';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { Permissions } from '@modules/permissions/entities/permissions.entity';
 
 @Injectable()
 export class RoleService {

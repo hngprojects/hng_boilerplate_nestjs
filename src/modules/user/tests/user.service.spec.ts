@@ -11,8 +11,6 @@ import { UserPayload } from '../interfaces/user-payload.interface';
 import CreateNewUserOptions from '../options/CreateNewUserOptions';
 import UserIdentifierOptionsType from '../options/UserIdentifierOptions';
 import UserService from '../user.service';
-import { mockUser } from './mocks/user.mock';
-import exp from 'constants';
 import { PassThrough } from 'stream';
 import { Response } from 'express';
 import { FileFormat } from '../dto/user-data-export.dto';

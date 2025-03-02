@@ -248,6 +248,36 @@ Here are some useful npm scripts that you can use during development and product
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 - [Express Documentation](https://expressjs.com/)
 
+## API Documentation and Postman Integration
+
+### Swagger Documentation
+
+The API documentation is available through Swagger UI at:
+
+```http
+http://localhost:3000/api/docs
+```
+
+### Postman Integration
+
+To import the API documentation into Postman:
+
+1. Access the Swagger JSON endpoint:
+
+```http
+http://localhost:3000/api/docs-json
+```
+
+2. In Postman:
+   - Click on "Import" in the top left corner
+   - Select "Link" tab
+   - Paste the Swagger JSON URL (http://localhost:3000/api/docs-json)
+   - Click "Continue" and then "Import"
+
+This will create a new collection in Postman with all available API endpoints, making it easier to test and interact with the API.
+
+Note: Replace `localhost:3000` with your actual API host if different.
+
 By following these steps, you should have your Node.js and TypeScript application up and running. If you encounter any issues, please refer to the documentation of the respective tools or seek help from the community.
 
 ## API Endpoints

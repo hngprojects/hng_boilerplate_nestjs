@@ -25,9 +25,8 @@ export class TimezonesController {
   @ApiOperation({ summary: 'Get all supported timezones' })
   @ApiResponse({ status: 200, description: 'List of supported timezones.' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getTimezones(@Res() response: Response): Promise<any> {
-    const result = await this.timezonesService.getSupportedTimezones();
-    return response.status(result.status_code).json(result);
+  async getTimezones() {
+    return this.timezonesService.getSupportedTimezones();
   }
 
   @Patch(':id')

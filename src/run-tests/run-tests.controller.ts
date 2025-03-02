@@ -1,6 +1,6 @@
 import { Controller, Get, Header, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { skipAuth } from '../helpers/skipAuth';
+import { skipAuth } from '@shared/helpers/skipAuth';
 import { RunTestsService } from './run-tests.service';
 import { ApiOperation } from '@nestjs/swagger';
 

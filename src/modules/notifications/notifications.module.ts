@@ -1,20 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EmailService } from '../email/email.service';
-import { NotificationSettings } from '../notification-settings/entities/notification-setting.entity';
-import { NotificationSettingsService } from '../notification-settings/notification-settings.service';
-import { Profile } from '../profile/entities/profile.entity';
-import { User } from '../user/entities/user.entity';
-import UserService from '../user/user.service';
 import { Notification } from './entities/notifications.entity';
 import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
-import QueueService from '../email/queue.service';
-import { EmailModule } from '../email/email.module';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import { Role } from '../role/entities/role.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { NotificationSettings } from '@modules/notification-settings/entities/notification-setting.entity';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { EmailService } from '@modules/email/email.service';
+import { NotificationSettingsService } from '@modules/notification-settings/notification-settings.service';
+import UserService from '@modules/user/user.service';
+import { EmailModule } from '@modules/email/email.module';
 
 @Module({
   imports: [

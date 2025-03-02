@@ -1,11 +1,10 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Permissions } from './entities/permissions.entity';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
-import { RESOURCE_NOT_FOUND } from '../../helpers/SystemMessages';
 import UpdatePermissionOption from './dto/update-permission.dto';
-import { title } from 'process';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
+import { RESOURCE_NOT_FOUND } from '@shared/constants/SystemMessages';
 
 @Injectable()
 export class OrganisationPermissionsService {

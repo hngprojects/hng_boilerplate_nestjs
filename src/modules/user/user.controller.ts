@@ -10,9 +10,6 @@ import {
   Request,
   UseGuards,
   Res,
-  StreamableFile,
-  Header,
-  ParseEnumPipe,
   Delete,
 } from '@nestjs/common';
 import {
@@ -30,14 +27,12 @@ import { DeactivateAccountDto } from './dto/deactivate-account.dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { UserPayload } from './interfaces/user-payload.interface';
 import UserService from './user.service';
-import { SuperAdminGuard } from '../../guards/super-admin.guard';
+import { SuperAdminGuard } from '@guards/super-admin.guard';
 import { ReactivateAccountDto } from './dto/reactivate-account.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserStatusResponseDto } from './dto/update-user-status-response.dto';
 import { GetUserStatsResponseDto } from './dto/get-user-stats-response.dto';
-import { skipAuth } from '../../helpers/skipAuth';
 import { Response } from 'express';
-import * as path from 'path';
 import { UserDataExportDto } from './dto/user-data-export.dto';
 
 @ApiBearerAuth()

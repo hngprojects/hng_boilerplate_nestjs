@@ -1,18 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-  NotFoundException,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { OwnershipGuard } from '../../guards/authorization.guard';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { OrganisationPermissionsService } from './permissions.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';

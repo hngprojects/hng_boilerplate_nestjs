@@ -1,3 +1,5 @@
+import 'module-alias/register';
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -57,6 +59,20 @@ describe('BlogCategoryService', () => {
 
     await expect(service.createOrganisationCategory(createBlogCategoryDto)).rejects.toThrow('Save failed');
   });
+
+  it('should successfully delete a blog category', async () => {
+    const blogCategory = new BlogCategory();
+    blogCategory.id = 'blog-id';
+
+    jest.spyOn(repository, 'findOne').mockResolvedValue(blogCategory);
+    jest.spyOn(repository, 'remove').mockResolvedValue(undefined);
+
+    await service.deleteOrganisationCategory('blog-id');
+
+    expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'blog-id' } });
+    expect(repository.remove).toHaveBeenCalledWith(blogCategory);
+  });
+
 
   it('should return empty array and total 0 for empty search term', async () => {
     const result = await service.searchCategories('');

@@ -3,18 +3,18 @@ import { InviteService } from './invite.service';
 import { InviteController } from './invite.controller';
 import { Invite } from './entities/invite.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Organisation } from '../organisations/entities/organisations.entity';
-import { OrganisationsService } from '../organisations/organisations.service';
-import { User } from '../user/entities/user.entity';
-import { EmailService } from '../email/email.service';
-import QueueService from '../email/queue.service';
-import { BullModule } from '@nestjs/bull';
-import { Profile } from '../profile/entities/profile.entity';
-import { Role } from '../role/entities/role.entity';
-import { OrganisationUserRole } from '../role/entities/organisation-user-role.entity';
-import UserService from '../user/user.service';
-import { Permissions } from '../../modules/permissions/entities/permissions.entity';
 import { ConfigModule } from '@nestjs/config';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { Profile } from '@modules/profile/entities/profile.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { OrganisationUserRole } from '@modules/role/entities/organisation-user-role.entity';
+import { Permissions } from '@modules/permissions/entities/permissions.entity';
+import UserService from '@modules/user/user.service';
+import { OrganisationsService } from '@modules/organisations/organisations.service';
+import QueueService from '@modules/email/queue.service';
+import { EmailService } from '@modules/email/email.service';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [

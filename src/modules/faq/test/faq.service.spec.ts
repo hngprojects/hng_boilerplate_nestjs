@@ -21,6 +21,7 @@ describe('FaqService', () => {
     findOne: jest.fn(),
     save: jest.fn(),
     delete: jest.fn(),
+    count: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -47,21 +48,35 @@ describe('FaqService', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of FAQs', async () => {
+    it('should return a paginated list of FAQs', async () => {
       const mockFaqs = [
         { id: '1', question: 'Q1', answer: 'A1', category: 'C1' },
         { id: '2', question: 'Q2', answer: 'A2', category: 'C2' },
       ];
+
+      const page = 1;
+      const pageSize = 10;
+      const totalFaqs = 20; // Total FAQs in the database
+
       mockRepository.find.mockResolvedValue(mockFaqs);
+      mockRepository.count.mockResolvedValue(totalFaqs);
 
-      const result = await service.findAllFaq();
+      const result = await service.findAllFaq('en', page, pageSize);
 
-      expect(result).toEqual({
-        data: mockFaqs,
-        message: 'Faq fetched successfully',
-        status_code: 200,
+      expect(result.status).toBe('success');
+      expect(result.status_code).toBe(200);
+      expect(result.message).toBe('Faq fetched successfully');
+      expect(result.data.faqs).toEqual(mockFaqs);
+      expect(result.data.total).toBe(totalFaqs);
+      expect(result.data.page).toBe(page);
+      expect(result.data.pageSize).toBe(pageSize);
+      expect(result.data.totalPages).toBe(Math.ceil(totalFaqs / pageSize));
+
+      expect(mockRepository.find).toHaveBeenCalledWith({
+        skip: (page - 1) * pageSize,
+        take: pageSize,
       });
-      expect(mockRepository.find).toHaveBeenCalled();
+      expect(mockRepository.count).toHaveBeenCalled();
     });
   });
 

@@ -1,25 +1,19 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InviteDto } from './dto/invite.dto';
 import { Invite } from './entities/invite.entity';
-import { Organisation } from '../../modules/organisations/entities/organisations.entity';
-import { Repository } from 'typeorm';
+import { Organisation } from '@modules/organisations/entities/organisations.entity';
+import { Repository, EntityManager } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
-import * as SYS_MSG from '../../helpers/SystemMessages';
-import { User } from '../user/entities/user.entity';
+import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { MailerService } from '@nestjs-modules/mailer';
-import { OrganisationsService } from '../organisations/organisations.service';
 import { CreateInvitationDto } from './dto/create-invite.dto';
-import { EmailService } from '../email/email.service';
-import { CustomHttpException } from '../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { ConfigService } from '@nestjs/config';
+import { User } from '@modules/user/entities/user.entity';
+import { EmailService } from '@modules/email/email.service';
+import { OrganisationsService } from '@modules/organisations/organisations.service';
 
 @Injectable()
 export class InviteService {
@@ -30,7 +24,8 @@ export class InviteService {
     private readonly mailerService: MailerService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-    private readonly OrganisationService: OrganisationsService
+    private readonly OrganisationService: OrganisationsService,
+    private readonly entityManager: EntityManager
   ) {}
 
   async getPendingInvites(): Promise<{ message: string; data: InviteDto[] }> {
@@ -133,17 +128,23 @@ export class InviteService {
       throw new CustomHttpException(SYS_MSG.USER_NOT_REGISTERED, HttpStatus.NOT_FOUND);
     }
 
-    const response = await this.OrganisationService.addOrganisationMember(invite.organisation.id, {
-      user_id: user.id,
-    });
+    return await this.entityManager.transaction(async transactionalEntityManager => {
+      const response = await this.OrganisationService.addOrganisationMember(
+        invite.organisation.id,
+        {
+          user_id: user.id,
+        },
+        transactionalEntityManager
+      );
 
-    if (response.status === 'success') {
-      invite.isAccepted = true;
-      await this.inviteRepository.save(invite);
-      return response;
-    } else {
-      throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+      if (response.status === 'success') {
+        invite.isAccepted = true;
+        await transactionalEntityManager.save(invite);
+        return response;
+      } else {
+        throw new CustomHttpException(SYS_MSG.MEMBER_NOT_ADDED, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    });
   }
 
   async sendInvitations(createInvitationDto: CreateInvitationDto): Promise<any> {

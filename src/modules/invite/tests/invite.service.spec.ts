@@ -1,7 +1,7 @@
 import { HttpStatus, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Organisation } from '../../organisations/entities/organisations.entity';
 import { User } from '../../user/entities/user.entity';
 import { Invite } from '../entities/invite.entity';
@@ -13,7 +13,7 @@ import { mockOrg } from '../mocks/mockOrg';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from '../../../modules/email/email.service';
 import { CreateInvitationDto } from '../dto/create-invite.dto';
-import { CustomHttpException } from '../../../helpers/custom-http-filter';
+import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 import { OrganisationsService } from '../../../modules/organisations/organisations.service';
 import { mockUser } from '../mocks/mockUser';
@@ -34,8 +34,14 @@ describe('InviteService', () => {
   let organisationService: OrganisationsService;
   let configService: ConfigService;
   let frontendUrl: string;
+  let entityManager: jest.Mocked<EntityManager>;
 
   beforeEach(async () => {
+    entityManager = {
+      transaction: jest.fn().mockImplementation(async cb => cb(entityManager)),
+      save: jest.fn(),
+    } as unknown as jest.Mocked<EntityManager>;
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule.forRoot()],
       providers: [
@@ -136,6 +142,10 @@ describe('InviteService', () => {
           useValue: {
             sendMail: jest.fn(),
           },
+        },
+        {
+          provide: EntityManager,
+          useValue: entityManager,
         },
       ],
     }).compile();
