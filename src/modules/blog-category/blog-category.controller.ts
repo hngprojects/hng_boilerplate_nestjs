@@ -12,9 +12,9 @@ export class BlogCategoryController {
   constructor(private readonly blogCategoryService: BlogCategoryService) {}
 
   @Post()
-  @UseGuards(SuperAdminGuard)
-  @ApiBearerAuth()
   @skipAuth()
+  // @UseGuards(SuperAdminGuard)
+  // @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new blog category' })
   @ApiResponse({ status: 201, description: 'Blog category created successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid request data. Please provide a valid category name.' })
@@ -26,8 +26,8 @@ export class BlogCategoryController {
   }
 
   @Patch(':id')
-  @UseGuards(SuperAdminGuard)
-  @ApiBearerAuth()
+  // @UseGuards(SuperAdminGuard)
+  // @ApiBearerAuth()
   @ApiOperation({ summary: 'Update an organisation category' })
   @ApiResponse({ status: 200, description: 'Organisation category updated successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid request data. Please provide valid data.' })
@@ -40,9 +40,9 @@ export class BlogCategoryController {
   }
 
   @Delete(':id')
-  @UseGuards(SuperAdminGuard)
-  @ApiBearerAuth()
   @skipAuth()
+  // @UseGuards(SuperAdminGuard)
+  // @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an organisation category' })
   @ApiResponse({ status: 200, description: 'Organisation category updated successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid request data. Please provide valid data.' })

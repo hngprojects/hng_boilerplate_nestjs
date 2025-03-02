@@ -62,8 +62,8 @@ export default class AuthenticationService {
 
     const newOrganisation = await this.organisationService.create(newOrganisationPayload, user.id);
 
-    const userOranisations = await this.organisationService.getAllUserOrganisations(user.id);
-    const isSuperAdmin = userOranisations.map(instance => instance.user_role).includes('super-admin');
+    const userOrganisations = await this.organisationService.getAllUserOrganisations(user.id);
+    const isSuperAdmin = userOrganisations.map(instance => instance.user_role).includes('super-admin');
     const token = (await this.otpService.createOtp(user.id)).token;
 
     const access_token = this.jwtService.sign({
@@ -81,7 +81,7 @@ export default class AuthenticationService {
         avatar_url: user.profile.profile_pic_url,
         is_superadmin: isSuperAdmin,
       },
-      oranisations: userOranisations,
+      oranisations: userOrganisations,
     };
 
     return {
