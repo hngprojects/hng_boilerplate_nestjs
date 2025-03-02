@@ -46,13 +46,22 @@ export class JobsService {
 
     const { applicant_name, ...others } = jobApplicationDto;
 
+    const existingApplication = await this.jobApplicationRepository.findOne({
+      where: { job: { id: jobId }, applicant_name: jobApplicationDto.applicant_name },
+      relations: ['job'],
+    });
+
+    if (existingApplication) {
+      throw new CustomHttpException('Duplicate application', HttpStatus.BAD_REQUEST);
+    }
+
     const resumeUrl = await this.s3Service.uploadFile(resume, 'resumes');
 
     const createJobApplication = this.jobApplicationRepository.create({
       ...others,
       applicant_name,
       resume: resumeUrl,
-      ...job,
+      job: job.data
     });
 
     await this.jobApplicationRepository.save(createJobApplication);

@@ -224,6 +224,20 @@ describe('JobsService', () => {
       expect(service['jobApplicationRepository'].create).toHaveBeenCalled();
       expect(service['jobApplicationRepository'].save).toHaveBeenCalled();
     });
+
+    it('should throw error if duplicate application is found', async () => {
+      const resume = { buffer: Buffer.from('test file'), originalname: 'resume.pdf' } as Express.Multer.File;
+
+      jest.spyOn(service, 'getJob').mockResolvedValue(mockJob as any);
+      jest
+        .spyOn(service['jobApplicationRepository'], 'findOne')
+        .mockResolvedValue({ ...mockJobApplicationDto, resumeUrl: 'https://s3-bucket-url/resume.pdf' } as any);
+
+      await expect(service.applyForJob('jobId', mockJobApplicationDto, resume)).rejects.toThrow(
+        new CustomHttpException('Duplicate application', HttpStatus.CONFLICT)
+      );
+    });
+
   });
 
   describe('searchJobs', () => {
