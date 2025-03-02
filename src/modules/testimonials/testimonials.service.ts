@@ -115,6 +115,7 @@ export class TestimonialsService {
     const testimonial = await this.testimonialRepository.findOne({
       where: { id: testimonialId },
       relations: ['user'],
+      withDeleted: false,
     });
 
     if (!testimonial) {
@@ -155,7 +156,7 @@ export class TestimonialsService {
     if (!testimonial) {
       throw new CustomHttpException('Testimonial not found', HttpStatus.NOT_FOUND);
     }
-    await this.testimonialRepository.remove(testimonial);
+    await this.testimonialRepository.softDelete(id);
     return {
       message: 'Testimonial deleted successfully',
       status_code: HttpStatus.OK,

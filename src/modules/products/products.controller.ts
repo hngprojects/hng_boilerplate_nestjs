@@ -18,9 +18,13 @@ import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dto/update-product.dto';
 import { isUUID } from 'class-validator';
 import { GetTotalProductsResponseDto } from './dto/get-total-products.dto';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { User } from '../user/entities/user.entity';
+import { AuthGuard } from '../../guards/auth.guard';
+import { CurrentUser } from './current-user.decorator';
 import { skipAuth } from '@shared/helpers/skipAuth';
 import { OwnershipGuard } from '@guards/authorization.guard';
-import { AddCommentDto } from '@modules/comments/dto/add-comment.dto';
+import { AddCommentDto } from '@modules/comments/dtos/add-comment.dto';
 import { INVALID_ORG_ID, INVALID_PRODUCT_ID } from '@shared/constants/SystemMessages';
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 import { SuperAdminGuard } from '@guards/super-admin.guard';
@@ -153,10 +157,9 @@ export class ProductsController {
 
   @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
-  @Post('organisations/:productId/comments')
-  @ApiBearerAuth()
+  @Post('organisations/:orgId/products/:productId/comments')
   @ApiOperation({ summary: 'Creates a comment for a product' })
-  @ApiParam({ name: 'id', description: 'organisation ID', example: '870ccb14-d6b0-4a50-b459-9895af803i89' })
+  @ApiParam({ name: 'orgId', description: 'organisation ID', example: '870ccb14-d6b0-4a50-b459-9895af803i89' })
   @ApiParam({ name: 'productId', description: 'product ID', example: '126ccb14-d6b0-4a50-b459-9895af803h6y' })
   @ApiBody({ type: AddCommentDto, description: 'Comment to be added' })
   @ApiResponse({ status: 201, description: 'Comment added successfully' })
@@ -169,15 +172,63 @@ export class ProductsController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(SuperAdminGuard)
+  @Post('organisations/:productId/comments/:commentId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Edits a comment for a product' })
+  @ApiParam({ name: 'id', description: 'organisation ID', example: '870ccb14-d6b0-4a50-b459-9895af803i89' })
+  @ApiParam({ name: 'productId', description: 'product ID', example: '126ccb14-d6b0-4a50-b459-9895af803h6y' })
+  @ApiBody({ type: AddCommentDto, description: 'Comment to be edited' })
+  @ApiResponse({ status: 201, description: 'Comment updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async editProductComment(
+    @Param('productId') productId: string,
+    @Param('commentId') commentId: string,
+    @Body() commentDto: AddCommentDto,
+    @Req() req: any
+  ) {
+    const user = req.user;
+    return this.productsService.editProductComment(productId, commentId, commentDto, user.sub);
+  }
+
+  @ApiBearerAuth()
   @UseGuards(OwnershipGuard)
-  @Get('organisations/:productId/stock')
+  @Get('organisations/:orgId/products/:productId/stock')
   @ApiOperation({ summary: 'Gets a product stock details by id' })
-  @ApiParam({ name: 'id', description: 'Organization ID', example: '12345' })
+  @ApiParam({ name: 'orgId', description: 'Organization ID', example: '12345' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
   @ApiResponse({ status: 200, description: 'Product stock retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async getProductStock(@Param('productId') productId: string) {
     return this.productsService.getProductStock(productId);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Post(':productId/review')
+  @ApiOperation({ summary: 'Submit or Update Product Review' })
+  async submitReview(
+    @Param('productId') productId: string,
+    @CurrentUser() user: User, // Use the correct custom decorator
+    @Body() dto: CreateReviewDto // Consistent DTO name
+  ) {
+    return this.productsService.submitReview(user.id, productId, dto);
+  }
+
+  @Delete(':productId/reviews')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete Product Review' })
+  async deleteReview(@Param('productId') productId: string, @CurrentUser() user: User) {
+    return this.productsService.deleteReview(user.id, productId);
+  }
+
+  @Get('view/reviews/:productId')
+  @ApiOperation({ summary: 'Get Product Details (with Reviews)' })
+  async getProductDetails(@Param('productId') productId: string) {
+    return this.productsService.getProductDetails(productId);
   }
 }

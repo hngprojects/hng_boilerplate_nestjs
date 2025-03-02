@@ -17,4 +17,10 @@ export class BillingPlan extends AbstractBaseEntity {
 
   @Column({ type: 'int', nullable: true })
   amount: number;
+
+  @Column({ type: 'date', nullable: true })
+  expirationDate: Date;
+
+  @Column({ type: 'text', nullable: true })
+  email: string;
 }

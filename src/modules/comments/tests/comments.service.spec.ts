@@ -11,6 +11,8 @@ import { HttpStatus } from '@nestjs/common';
 const mockCommentRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
+  findOne: jest.fn(),
+  delete: jest.fn(),
 });
 
 const mockUserRepository = () => ({
@@ -73,6 +75,59 @@ describe('CommentsService', () => {
         message: 'Comment added successfully!',
         savedComment: mockComment,
         commentedBy: 'John Doe',
+      });
+    });
+
+    describe('deleteComment', () => {
+      it('should throw CustomHttpException if comment is not found', async () => {
+        commentRepository.findOne.mockResolvedValue(null);
+
+        await expect(service.deleteAComment('comment-id', 'user-id')).rejects.toThrow(CustomHttpException);
+        await expect(service.deleteAComment('comment-id', 'user-id')).rejects.toMatchObject({
+          message: 'Comment not found',
+          status: HttpStatus.NOT_FOUND,
+        });
+      });
+
+      it('should throw CustomHttpException if user is not the owner of the comment', async () => {
+        const mockOwner = { id: 'owner-id' };
+        const mockComment = { id: 'comment-id', user: mockOwner };
+
+        commentRepository.findOne.mockResolvedValue(mockComment);
+
+        await expect(service.deleteAComment('comment-id', 'another-user-id')).rejects.toThrow(CustomHttpException);
+        await expect(service.deleteAComment('comment-id', 'another-user-id')).rejects.toMatchObject({
+          message: 'You are not authorized to delete this comment',
+          status: HttpStatus.FORBIDDEN,
+        });
+      });
+
+      it('should delete a comment successfully', async () => {
+        const commentId = 'comment-id';
+        const userId = 'user-id';
+        const mockUser = { id: 'user-id' };
+        const mockComment = {
+          id: 'comment-id',
+          model_id: '1',
+          model_type: 'post',
+          comment: 'A valid comment',
+          user: mockUser,
+        };
+
+        commentRepository.findOne.mockResolvedValue(mockComment);
+        commentRepository.delete.mockResolvedValue(mockComment);
+
+        console.log(await commentRepository.findOne({ where: { id: commentId }, relations: ['user'] })); // Debugging
+
+        const result = await service.deleteAComment(commentId, userId);
+
+        expect(commentRepository.findOne).toHaveBeenCalledWith({ where: { id: commentId }, relations: ['user'] });
+        expect(commentRepository.delete).toHaveBeenCalledWith(mockComment);
+        expect(result).toEqual({
+          message: 'Comment deleted successfully!',
+          status: HttpStatus.OK,
+          data: { comment: mockComment },
+        });
       });
     });
   });

@@ -38,7 +38,11 @@ export class OrganisationsController {
   @Post('/')
   async create(@Body() createOrganisationDto: OrganisationRequestDto, @Req() req) {
     const user = req['user'];
-    return this.organisationsService.createOrganisation(createOrganisationDto, user.sub);
+    const payload = {
+      ...createOrganisationDto,
+      userId: user.sub,
+    };
+    return this.organisationsService.createOrganisation(payload);
   }
 
   @UseGuards(OwnershipGuard)
@@ -78,9 +82,13 @@ export class OrganisationsController {
   @ApiResponse({ status: 200, description: 'Organisations retrieved successfully', type: UserOrganizationResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request', type: UserOrganizationErrorResponseDto })
   @Get('/')
-  async getUserOrganisations(@Req() req) {
+  async getUserOrganisations(
+    @Req() req,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('page_size', new DefaultValuePipe(10), ParseIntPipe) page_size: number
+  ) {
     const { sub } = req.user;
-    return this.organisationsService.getUserOrganisations(sub);
+    return this.organisationsService.getUserOrganisations(sub, page, page_size);
   }
 
   @UseGuards(OwnershipGuard)
