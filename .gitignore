@@ -411,13 +411,8 @@ todo.txt
 /.vscode/
 .vscode/
 
-package-lock.json
 docker-compose.yml
 data/
-.dev.env
-
-/compose/compose.yaml
-compose/compose.yaml
 
 data/
 docker-compose.yml

@@ -46,13 +46,22 @@ export class JobsService {
 
     const { applicant_name, ...others } = jobApplicationDto;
 
+    const existingApplication = await this.jobApplicationRepository.findOne({
+      where: { job: { id: jobId }, applicant_name: jobApplicationDto.applicant_name },
+      relations: ['job'],
+    });
+
+    if (existingApplication) {
+      throw new CustomHttpException('Duplicate application', HttpStatus.BAD_REQUEST);
+    }
+
     const resumeUrl = await this.s3Service.uploadFile(resume, 'resumes');
 
     const createJobApplication = this.jobApplicationRepository.create({
       ...others,
       applicant_name,
       resume: resumeUrl,
-      ...job,
+      job: job.data,
     });
 
     await this.jobApplicationRepository.save(createJobApplication);
@@ -172,16 +181,21 @@ export class JobsService {
     this.validateUserId(userId);
     this.validateUpdateData(updateJobDto);
 
-    const job = await this.jobRepository.findOne({
-      where: { id },
-      relations: ['user'],
-    });
+    const [job, user] = await Promise.all([
+      this.jobRepository.findOne({
+        where: { id },
+        relations: ['user'],
+      }),
+      this.userRepository.findOne({
+        where: { id: userId },
+      }),
+    ]);
 
     if (!job) {
       throw new CustomHttpException('Job not found', HttpStatus.NOT_FOUND);
     }
 
-    if (job.user.id !== userId) {
+    if (job.user.id !== userId && !user?.is_superadmin) {
       throw new CustomHttpException('Unauthorized to update this job', HttpStatus.FORBIDDEN);
     }
 
