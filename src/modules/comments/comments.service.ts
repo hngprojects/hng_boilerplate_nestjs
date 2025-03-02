@@ -21,6 +21,7 @@ export class CommentsService {
 
     if (!comment || comment.trim().length === 0) {
       throw new CustomHttpException('Comment cannot be empty', HttpStatus.BAD_REQUEST);
+ carriages carriages
     }
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -76,6 +77,56 @@ export class CommentsService {
     return {
       message: 'Comment thread retrieved successfully',
       data: comment,
+    };
+  }
+
+  async deleteAComment(commentId: string, userId: string) {
+    const comment = await this.commentRepository.findOne({ where: { id: commentId }, relations: ['user'] });
+    if (!comment) {
+      throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+
+    const isOwner = comment.user.id === userId;
+
+    if (!isOwner) {
+      throw new CustomHttpException('You are not authorized to delete this comment', HttpStatus.FORBIDDEN);
+    }
+
+    await this.commentRepository.delete(comment.id);
+
+    return {
+      message: 'Comment deleted successfully!',
+      status: HttpStatus.OK,
+      data: { comment },
+    };
+  }
+
+  async dislikeComment(commentId: string, userId: string): Promise<{ message: string; dislikeCount: number }> {
+    const comment = await this.commentRepository
+      .createQueryBuilder('comment')
+      .where('comment.id = :id', { id: commentId })
+      .getOne();
+
+    if (!comment) {
+      throw new CustomHttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (!comment.dislikedBy) {
+      comment.dislikedBy = [];
+    }
+
+    if (comment.dislikedBy.includes(userId)) {
+      throw new CustomHttpException('You have already disliked this comment', HttpStatus.BAD_REQUEST);
+    }
+
+    comment.dislikedBy.push(userId);
+    comment.dislikes = comment.dislikedBy.length;
+
+    await this.commentRepository.save(comment);
+
+    return {
+      message: 'Dislike updated successfully',
+      dislikeCount: comment.dislikes,
     };
   }
 }
