@@ -1,5 +1,5 @@
-import { UserPayload } from './../user/interfaces/user-payload.interface';
-import { User } from './../user/entities/user.entity';
+import { UserPayload } from '../user/interfaces/user-payload.interface';
+import { User } from '../user/entities/user.entity';
 import { Controller, Body, Post, Request, Get, Param, Delete } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dtos/create-comment.dto';
@@ -28,7 +28,7 @@ export class CommentsController {
   async getAComment(@Param('id') id: string): Promise<any> {
     return await this.commentsService.getAComment(id);
   }
-  
+
   @Get(':id/thread')
   @ApiOperation({ summary: 'Get a comment thread' })
   @ApiResponse({ status: 200, description: 'The comment thread has been retrieved successfully.' })
@@ -43,25 +43,7 @@ export class CommentsController {
   @Post(':id/dislike')
   async dislikeComment(@Param('id') id: string, @Request() req) {
     const userId = req.user.id;
-    // console.log('User ID:', userId); // debug (optional)
-    return await this.commentsService.dislikeComment(id, userId);
-  }
-
-  @ApiOperation({ summary: 'Delete a comment' })
-  @ApiResponse({ status: 200, description: 'The comment has been deleted successfully.' })
-  @Delete(':id/delete')
-  async deleteAComment(@Param('id') id: string, @Request() req): Promise<any> {
-    return await this.commentsService.deleteAComment(id, req.user.id);
-  }
-}
-
-  @ApiOperation({ summary: 'Dislike a comment' })
-  @ApiResponse({ status: 200, description: 'Dislike updated successfully' })
-  @ApiResponse({ status: 404, description: 'Comment not found' })
-  @Post(':id/dislike')
-  async dislikeComment(@Param('id') id: string, @Request() req) {
-    const userId = req.user.id;
-    // console.log('User ID:', userId); debug
+    // console.log('User ID:', userId); // debug (optional, kept for consistency)
     return await this.commentsService.dislikeComment(id, userId);
   }
 

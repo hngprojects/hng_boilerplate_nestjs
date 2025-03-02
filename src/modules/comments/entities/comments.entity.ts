@@ -33,3 +33,4 @@ export class Comment extends AbstractBaseEntity {
 
   @Column('simple-array', { nullable: true }) // Store user IDs as an array
   dislikedBy: string[];
+}

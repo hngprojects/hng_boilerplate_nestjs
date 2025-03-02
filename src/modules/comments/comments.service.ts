@@ -131,3 +131,4 @@ export class CommentsService {
       dislikeCount: comment.dislikes,
     };
   }
+}
