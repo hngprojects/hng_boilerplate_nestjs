@@ -267,8 +267,36 @@ describe('OrganisationsService', () => {
       const orgId = 'org-id';
 
       // Mock repository functions
-      organisationRepository.update = jest.fn().mockResolvedValue({ affected: 1 });
-      organisationRepository.findOneBy = jest.fn().mockResolvedValue({ id: orgId, isDeleted: true });
+      jest.spyOn(organisationRepository, 'update').mockResolvedValue({
+        affected: 1,
+        raw: [],
+        generatedMaps: [],
+      });
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValue({
+        id: orgId,
+        name: 'Test Organisation',
+        description: 'Mock description',
+        email: 'test@example.com',
+        industry: 'Tech',
+        phone: '+1234567890',
+        address: '123 Test Street',
+        country: 'Nigeria',
+        isDeleted: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        type: 'Private',
+        owner: { id: 'owner-id', name: 'Owner Name' },
+        members: [],
+        state: 'Active',
+        city: 'Lagos',
+        zipCode: '100001',
+        products: [], // Add empty array for products
+        preferences: {}, // Add empty object for preferences
+        invites: [], // Add empty array for invites
+        created_at: new Date(),
+        updated_at: new Date(),
+      } as unknown as Partial<Organisation> as Organisation);
 
       const result = await service.deleteorganisation(orgId);
 
@@ -281,18 +309,17 @@ describe('OrganisationsService', () => {
     });
 
     it('should exclude deleted organisations from queries', async () => {
-      const mockOrganisations = [
-        { id: 'org1', name: 'Active Org', isDeleted: false },
-        { id: 'org2', name: 'Deleted Org', isDeleted: true },
-      ] as Organisation[];
+      jest.spyOn(organisationRepository, 'findAndCount').mockResolvedValue([[], 0]);
 
-      // Mock `findBy` to only return non-deleted organisations
-      organisationRepository.findBy = jest.fn().mockResolvedValue(mockOrganisations.filter(org => !org.isDeleted));
+      const result = await service.getUserOrganisations('user-id');
 
-      const result = await service.getUserOrganisations('test-user-id');
+      expect(result).toEqual({ organisations: [], total_count: 0 });
 
-      expect(result).toEqual(expect.arrayContaining([{ id: 'org1', name: 'Active Org' }]));
-      expect(result).not.toEqual(expect.arrayContaining([{ id: 'org2', name: 'Deleted Org' }]));
+      expect(organisationRepository.findAndCount).toHaveBeenCalledWith({
+        where: { isDeleted: false },
+        skip: expect.any(Number),
+        take: expect.any(Number),
+      });
     });
   });
 });
