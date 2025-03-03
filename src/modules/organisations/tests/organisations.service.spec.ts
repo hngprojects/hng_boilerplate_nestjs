@@ -263,6 +263,10 @@ describe('OrganisationsService', () => {
   });
 
   describe('deleteorganisation', () => {
+    beforeAll(() => {
+      console.log(Object.keys(organisationRepository));
+    });
+
     it('should mark an organisation as deleted', async () => {
       const orgId = 'org-id';
 
@@ -311,7 +315,7 @@ describe('OrganisationsService', () => {
     });
 
     it('should exclude deleted organisations from queries', async () => {
-      jest.spyOn(organisationRepository, 'findAndCount').mockResolvedValue([[], 0]);
+      organisationRepository.findAndCount = jest.fn().mockResolvedValue([[], 0]);
 
       const result = await service.getUserOrganisations('user-id');
 
