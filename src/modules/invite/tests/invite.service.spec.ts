@@ -58,6 +58,7 @@ describe('InviteService', () => {
             save: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
+            findAndCount: jest.fn(),
           },
         },
         {
@@ -163,15 +164,26 @@ describe('InviteService', () => {
   });
 
   it('should fetch all invites', async () => {
-    jest.spyOn(repository, 'find').mockResolvedValue(mockInvites);
+    const expectedInvites = mockInvites.map(invite => {
+      const { created_at, updated_at, ...rest } = invite;
+      return rest;
+    });
+
+    jest.spyOn(repository, 'findAndCount').mockResolvedValue([mockInvites, mockInvites.length]);
 
     const result = await service.findAllInvitations();
 
     expect(result).toEqual({
-      status_code: 200,
-      message: 'Successfully fetched invites',
-      data: mockInvitesResponse,
+      status: 'success',
+      status_code: HttpStatus.OK,
+      message: 'Invitations retrieved successfully',
+      data: {
+        invitations: expectedInvites,
+        total: mockInvites.length,
+      },
     });
+
+    expect(repository.findAndCount).toHaveBeenCalled();
   });
 
   it('should throw an internal server error if an exception occurs', async () => {
@@ -195,6 +207,8 @@ describe('InviteService', () => {
         isGeneric: invite.isGeneric,
         organisation: invite.organisation,
         email: invite.email,
+        created_at: new Date(),
+        updated_at: new Date(),
       })),
     });
   });

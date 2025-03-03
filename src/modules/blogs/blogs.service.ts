@@ -1,7 +1,7 @@
 import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, MoreThanOrEqual, FindOptionsWhere } from 'typeorm';
+import { Repository, Like, MoreThanOrEqual, FindOptionsWhere, Not, IsNull } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 import { CreateBlogDto } from './dtos/create-blog.dto';
 import { UpdateBlogDto } from './dtos/update-blog.dto';
@@ -45,13 +45,37 @@ export class BlogService {
     return this.formatBlogResponse(savedBlog);
   }
 
+
   async getSingleBlog(blogId: string): Promise<any> {
     const blog = await this.findBlogById(blogId, ['author']);
+
+  async getSingleBlog(
+    blogId: string,
+    user: User
+  ): Promise<{
+    status_code: number;
+    message: string;
+    data: BlogResponseDto;
+  }> {
+    const singleBlog = await this.blogRepository.findOneBy({ id: blogId, deletedAt: null });
+    const fullName = await this.fetchUserById(user.id);
+
+    if (!singleBlog) {
+      throw new CustomHttpException(SYS_MSG.BLOG_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    const { id, created_at, updated_at, ...rest } = singleBlog;
+    const author = `${fullName.first_name} ${fullName.last_name}`;
+
 
     return {
       status_code: HttpStatus.OK,
       message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
+
       data: this.formatBlogResponse(blog),
+
+      data: { blog_id: id, ...rest, author, published_date: created_at, created_at },
+
     };
   }
 
@@ -66,6 +90,7 @@ export class BlogService {
   }
 
   async deleteBlogPost(id: string): Promise<void> {
+
     const blog = await this.findBlogById(id);
     await this.blogRepository.remove(blog);
   }
@@ -75,6 +100,58 @@ export class BlogService {
     const [result, total] = await this.blogRepository.findAndCount({ skip, take: pageSize, relations: ['author'] });
 
     return this.formatPaginatedResponse(result, total, page, pageSize, SYS_MSG.BLOG_FETCHED_SUCCESSFUL);
+
+    const blog = await this.blogRepository.findOne({ where: { id } });
+    if (!blog) {
+      throw new CustomHttpException('Blog post with this id does not exist.', HttpStatus.NOT_FOUND);
+    } else await this.blogRepository.softRemove(blog);
+  }
+
+  async getAllBlogs(
+    page: number,
+    pageSize: number,
+    includeDeleted: boolean = false
+  ): Promise<{
+    status_code: number;
+    message: string;
+    data: { currentPage: number; totalPages: number; totalResults: number; blogs: BlogResponseDto[]; meta: any };
+  }> {
+    const result = await this.getBlogs(page, pageSize, includeDeleted ? {} : { deletedAt: null });
+    return {
+      status_code: result.status_code,
+      message: result.message,
+      data: {
+        ...result.data,
+        blogs: includeDeleted
+          ? result.data.blogs
+          : result.data.blogs
+              .filter(blog => !blog.deletedAt)
+              .map(blog => {
+                const { deletedAt, ...rest } = blog;
+                return rest;
+              }),
+      },
+    };
+  }
+
+  async getDeletedBlogs(
+    page: number,
+    pageSize: number
+  ): Promise<{
+    status_code: number;
+    message: string;
+    data: { currentPage: number; totalPages: number; totalResults: number; blogs: BlogResponseDto[]; meta: any };
+  }> {
+    const result = await this.getBlogs(page, pageSize, { deletedAt: Not(IsNull()) });
+    return {
+      status_code: result.status_code,
+      message: result.message,
+      data: {
+        ...result.data,
+        blogs: result.data.blogs,
+      },
+    };
+
   }
 
   async searchBlogs(query: any) {
@@ -140,7 +217,16 @@ export class BlogService {
         current_page: page,
         total_pages: totalPages,
         total_results: total,
+
         blogs: result.map(blog => this.formatBlogResponse(blog)),
+
+        blogs: data
+          .filter(blog => !blog.deletedAt)
+          .map(blog => {
+            const { deletedAt, ...rest } = blog;
+            return rest;
+          }),
+
         meta: {
           has_next: page < totalPages,
           total,
@@ -149,5 +235,99 @@ export class BlogService {
         },
       },
     };
+  }
+
+  private async getBlogs(
+    page: number,
+    pageSize: number,
+    whereCondition: FindOptionsWhere<Blog>
+  ): Promise<{
+    status_code: number;
+    message: string;
+    data: { currentPage: number; totalPages: number; totalResults: number; blogs: BlogResponseDto[]; meta: any };
+  }> {
+    const skip = (page - 1) * pageSize;
+
+    const [result, total] = await this.blogRepository.findAndCount({
+      where: whereCondition,
+      skip,
+      take: pageSize,
+      relations: ['author'],
+    });
+
+    const data = this.mapBlogResults(result);
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      status_code: HttpStatus.OK,
+      message: SYS_MSG.BLOG_FETCHED_SUCCESSFUL,
+      data: {
+        currentPage: page,
+        totalPages,
+        totalResults: total,
+        blogs: data,
+        meta: {
+          hasNext: page < totalPages,
+          total,
+          nextPage: page < totalPages ? page + 1 : null,
+          prevPage: page > 1 ? page - 1 : null,
+        },
+      },
+    };
+  }
+
+  private buildWhereClause(query: any): FindOptionsWhere<Blog> {
+    const where: FindOptionsWhere<Blog> = {};
+
+    if (query.author !== undefined) {
+      where.author = {
+        first_name: Like(`%${query.author}%`),
+        last_name: Like(`%${query.author}%`),
+      };
+    }
+    if (query.title !== undefined) {
+      where.title = Like(`%${query.title}%`);
+    }
+    if (query.content !== undefined) {
+      where.content = Like(`%${query.content}%`);
+    }
+    if (query.tags !== undefined) {
+      where.tags = Like(`%${query.tags}%`);
+    }
+    if (query.created_date !== undefined) {
+      where.created_at = MoreThanOrEqual(new Date(query.created_date));
+    }
+
+    return where;
+  }
+
+  private validateEmptyValues(query: any): void {
+    for (const key in query) {
+      if (Object.prototype.hasOwnProperty.call(query, key) && query[key] !== undefined) {
+        const value = query[key];
+        if (typeof value === 'string' && !value.trim()) {
+          throw new CustomHttpException(`${key.replace(/_/g, ' ')} value is empty`, HttpStatus.BAD_REQUEST);
+        }
+      }
+    }
+  }
+
+  private mapBlogResults(result: Blog[]): BlogResponseDto[] {
+    return result.map(blog => {
+      if (!blog.author) {
+        throw new CustomHttpException('author_not_found', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+      const author_name = blog.author ? `${blog.author.first_name} ${blog.author.last_name}` : 'Unknown';
+      return {
+        blog_id: blog.id,
+        title: blog.title,
+        content: blog.content,
+        tags: blog.tags,
+        image_urls: blog.image_urls,
+        author: author_name,
+        created_at: blog.created_at,
+        deletedAt: blog.deletedAt,
+      };
+    });
   }
 }
