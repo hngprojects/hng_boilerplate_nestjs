@@ -265,11 +265,10 @@ describe('OrganisationsService', () => {
   describe('deleteorganisation', () => {
     it('should mark an organisation as deleted', async () => {
       const orgId = 'org-id';
-      const mockOrganisation = { id: orgId, isDeleted: false } as Organisation;
 
-      // Ensure `findOneBy` is mocked correctly
-      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValue(mockOrganisation);
-      jest.spyOn(organisationRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+      // Mock repository functions
+      organisationRepository.update = jest.fn().mockResolvedValue({ affected: 1 });
+      organisationRepository.findOneBy = jest.fn().mockResolvedValue({ id: orgId, isDeleted: true });
 
       const result = await service.deleteorganisation(orgId);
 
@@ -287,8 +286,8 @@ describe('OrganisationsService', () => {
         { id: 'org2', name: 'Deleted Org', isDeleted: true },
       ] as Organisation[];
 
-      // Ensure `findBy` is mocked instead of `find`
-      jest.spyOn(organisationRepository, 'findBy').mockResolvedValue(mockOrganisations.filter(org => !org.isDeleted));
+      // Mock `findBy` to only return non-deleted organisations
+      organisationRepository.findBy = jest.fn().mockResolvedValue(mockOrganisations.filter(org => !org.isDeleted));
 
       const result = await service.getUserOrganisations('test-user-id');
 
