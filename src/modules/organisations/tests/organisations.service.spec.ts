@@ -263,10 +263,6 @@ describe('OrganisationsService', () => {
   });
 
   describe('deleteorganisation', () => {
-    beforeAll(() => {
-      console.log(Object.keys(organisationRepository));
-    });
-
     it('should mark an organisation as deleted', async () => {
       const orgId = 'org-id';
 
@@ -315,7 +311,7 @@ describe('OrganisationsService', () => {
     });
 
     it('should exclude deleted organisations from queries', async () => {
-      organisationRepository.findAndCount = jest.fn().mockResolvedValue([[], 0]);
+      organisationRepository.findBy = jest.fn().mockResolvedValue([]);
 
       const result = await service.getUserOrganisations('user-id');
 
@@ -331,7 +327,7 @@ describe('OrganisationsService', () => {
       });
 
       // ✅ Fix expectation
-      expect(organisationRepository.findAndCountBy).toHaveBeenCalledWith({
+      expect(organisationRepository.findBy).toHaveBeenCalledWith({
         isDeleted: false,
       });
     });

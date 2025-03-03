@@ -157,11 +157,8 @@ export class OrganisationsService {
 
   async getUserOrganisations(userId: string, page: number = 1, page_size: number = 10) {
     // const organisations = await this.getAllUserOrganisations(userId);
-    const [organisations, total_count] = await this.organisationRepository.findAndCount({
-      where: { isDeleted: false },
-      skip: (page - 1) * page_size,
-      take: page_size,
-    });
+    const organisations = await this.organisationRepository.findBy({ isDeleted: false });
+    const total_count = organisations.length;
 
     return {
       status_code: HttpStatus.OK,
