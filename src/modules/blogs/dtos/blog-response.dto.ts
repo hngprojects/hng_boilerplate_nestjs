@@ -21,4 +21,10 @@ export class BlogResponseDto {
 
   @ApiProperty({ description: 'The creation date of the blog' })
   created_at: Date;
+
+  @ApiProperty({ description: 'The published date of the blog' })
+  published_date?: Date;
+
+  @ApiProperty({ description: 'The deletion date of the blog', required: false })
+  deletedAt?: Date;
 }
