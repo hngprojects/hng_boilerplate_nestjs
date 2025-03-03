@@ -7,8 +7,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
 import * as SYS_MSG from '@shared/constants/SystemMessages';
 import { Body, Controller, HttpCode, Post, Req, Request, Patch } from '@nestjs/common';
+
 import { CreateUserDTO } from './dto/create-user.dto';
 import { skipAuth } from '@shared/helpers/skipAuth';
 import AuthenticationService from './auth.service';
@@ -32,6 +34,8 @@ import { GenericAuthResponseDto } from './dto/generic-reponse.dto';
 import { UpdatePasswordDto } from './dto/updatePasswordDto';
 import { LoginErrorResponseDto } from './dto/login-error-dto';
 import { UpdateUserPasswordResponseDTO } from './dto/update-user-password.dto';
+import { Throttle } from '@nestjs/throttler';
+
 import { CustomHttpException } from '@shared/helpers/custom-http-filter';
 
 @ApiTags('Authentication')
@@ -43,6 +47,7 @@ export default class RegistrationController {
   @ApiOperation({ summary: 'User Registration' })
   @ApiResponse({ status: 201, description: 'Register a new user', type: SuccessCreateUserResponse })
   @ApiResponse({ status: 400, description: 'User already exists', type: ErrorCreateUserResponse })
+  @Throttle({ default: { limit: 25, ttl: 30000 } }) // 25 requests per 30 seconds
   @Post('register')
   @HttpCode(201)
   public async register(@Body() body: CreateUserDTO): Promise<any> {

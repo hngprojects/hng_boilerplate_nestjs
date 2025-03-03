@@ -2,22 +2,48 @@
 
 ## Overview
 
+## Rate Limiting
+
+This project uses `@nestjs/throttler` for rate limiting to prevent abuse.
+
+### Configuration
+
+- **Global Rate Limit**: 10 requests per minute.
+- **Custom Limits**: Some routes may have different limits.
+
+### Error Handling
+
+If a user exceeds the allowed request rate, they receive:
+
+```json
+{
+  "statusCode": 429,
+  "message": "Too Many Requests"
+}
+
+<img align="right" width="300" src="./screenshot/Screenshot1.png" alt="successful register user request api endpoint" />
+
+<img align="right" width="300" src="./screenshot/ScreenshotE2.png" alt="throttle limiting " />
+
+
 [Description]
 
 ## Folder Structure
 
 ```
+
 |--- src
-|    |--- database
-|    |--- modules
-|    |--- shared
-|    |--- app.module.ts
-|    |--- main.ts
+| |--- database
+| |--- modules
+| |--- shared
+| |--- app.module.ts
+| |--- main.ts
 |--- .env.local
 |--- .gitignore
 |--- package.json
 |--- tsconfig.json
-```
+
+````
 
 ## Dependencies (Dev)
 
@@ -63,7 +89,7 @@ Open a terminal and run the following git command:
 
 ```bash
 git clone "url you just copied"
-```
+````
 
 where "url you just copied" (without the quotation marks) is the url to this repository (your fork of this project). See the previous steps to obtain the url.
 

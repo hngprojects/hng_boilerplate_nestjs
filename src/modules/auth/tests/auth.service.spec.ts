@@ -16,10 +16,15 @@ import { OrganisationsService } from '@modules/organisations/organisations.servi
 import { User } from '@modules/user/entities/user.entity';
 import { Profile } from '@modules/profile/entities/profile.entity';
 import { LoginDto } from '../dto/login.dto';
+import { INestApplication } from '@nestjs/common';
+import { AppModule } from '../../../app.module';
+import * as request from 'supertest';
+
 import UserResponseDTO from '@modules/user/dto/user-response.dto';
 import { Otp } from '@modules/otp/entities/otp.entity';
 import { Verify2FADto } from '../dto/verify-2fa.dto';
 import { DataSource, EntityManager } from 'typeorm';
+
 jest.mock('speakeasy');
 
 describe('AuthenticationService', () => {
