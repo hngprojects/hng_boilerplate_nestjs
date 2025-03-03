@@ -46,8 +46,9 @@ import { RunTestsModule } from './run-tests/run-tests.module';
 import { BlogCategoryModule } from '@modules/blog-category/blog-category.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { LanguageGuard } from '@guards/language.guard';
-import { ApiStatusModule } from '@modules/api-status/api-status.module';
+import { LanguageGuard } from './guards/language.guard';
+import { ApiStatusModule } from './modules/api-status/api-status.module';
+import { PaystackModule } from './modules/paystack/paystack.module';
 import s3Config from '@config/s3.config';
 @Module({
   providers: [
@@ -166,6 +167,8 @@ import s3Config from '@config/s3.config';
     SubscriptionsModule,
     RevenueModule,
     BlogCategoryModule,
+    PaystackModule,
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'uploads'),
       serveRoot: '/uploads',
