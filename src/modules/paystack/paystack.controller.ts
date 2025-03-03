@@ -21,6 +21,7 @@ export class PaystackController {
   }
 
   @Post('webhook')
+  @skipAuth()
   handleWebhook(@Body() body: any, @Req() req: { headers: Record<string, string> }) {
     const paystackSecret = process.env.PAYSTACK_WEBHOOK_SECRET;
     if (!paystackSecret) {
