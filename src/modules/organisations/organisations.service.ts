@@ -122,10 +122,9 @@ export class OrganisationsService {
       if (!org) {
         throw new NotFoundException(`Organisation with id: ${id} not found`);
       }
-      org.isDeleted = true;
-      await this.organisationRepository.save(org);
+      await this.organisationRepository.update(id, { isDeleted: true }); // ✅ Use update
 
-      return { message: 'Organisation deleted successfully' }; // ✅ Match the test expectation
+      return { message: 'Organisation deleted successfully' };
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
