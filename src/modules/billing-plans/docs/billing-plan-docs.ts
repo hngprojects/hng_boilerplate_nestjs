@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { BillingPlanDto } from '../dto/billing-plan.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiQuery} from '@nestjs/swagger';
 import { BillingPlan } from '../entities/billing-plan.entity';
 
 export function createBillingPlanDocs() {
@@ -15,8 +15,29 @@ export function createBillingPlanDocs() {
 
 export function getAllBillingPlansDocs() {
   return applyDecorators(
-    ApiOperation({ summary: 'Get all billing plans' }),
-    ApiResponse({ status: 200, description: 'Billing plans retrieved successfully.', type: [BillingPlanDto] }),
+    ApiOperation({ summary: 'Get all billing plans (paginated)' }),
+    ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)' }),
+    ApiQuery({ name: 'limit', required: false, description: 'Number of items per page (default: 10)' }),
+    ApiResponse({
+      status: 200,
+      description: 'Billing plans retrieved successfully.',
+      schema: {
+        type: 'object',
+        properties: {
+          message: { type: 'string', example: 'Billing plans retrieved successfully' },
+          data: {
+            type: 'object',
+            properties: {
+              plans: {
+                type: 'array',
+                items: { type: 'object', $ref: '#/components/schemas/BillingPlanDto' }, // Use a $ref to your BillingPlanDto schema
+              },
+              total: { type: 'number', example: 123 },
+            },
+          },
+        },
+      },
+    }),
     ApiResponse({ status: 404, description: 'No billing plans found.' })
   );
 }

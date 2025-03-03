@@ -67,7 +67,7 @@ describe('BillingPlanService', () => {
   });
 
   describe('getAllBillingPlans', () => {
-    it('should return all billing plans', async () => {
+    it('should return paginated billing plans', async () => {
       const billingPlans = [
         {
           id: '1',
@@ -105,25 +105,40 @@ describe('BillingPlanService', () => {
           expirationDate: new Date(),
           email: 'test3@example.com',
         },
+
       ];
-
-      jest.spyOn(repository, 'find').mockResolvedValue(billingPlans as BillingPlan[]);
-
-      const result = await service.getAllBillingPlans();
-
+  
+      const total = 2; // Total number of billing plans in the database
+  
+      // Mock findAndCount to return paginated results
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([billingPlans as BillingPlan[], total]);
+  
+      const result = await service.getAllBillingPlans(1, 10);
+  
+      // Verify the response structure
       expect(result).toEqual({
         message: 'Billing plans retrieved successfully',
-        data: billingPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan)),
+        data: {
+          plans: billingPlans.map(plan => BillingPlanMapper.mapToResponseFormat(plan)),
+          total,
+        },
+      });
+  
+      // Verify that findAndCount was called with the correct pagination parameters
+      expect(repository.findAndCount).toHaveBeenCalledWith({
+        skip: 0, // (page - 1) * limit = (1 - 1) * 10 = 0
+        take: 10, // limit = 10
       });
     });
-
+  
     it('should throw a NotFoundException if no billing plans are found', async () => {
-      jest.spyOn(repository, 'find').mockResolvedValue([]);
-
-      await expect(service.getAllBillingPlans()).rejects.toThrow(NotFoundException);
+      // Mock findAndCount to return an empty array
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([[], 0]);
+  
+      await expect(service.getAllBillingPlans(1, 10)).rejects.toThrow(NotFoundException);
     });
   });
-
+  
   describe('getSingleBillingPlan', () => {
     it('should return a single billing plan', async () => {
       const billingPlan = {

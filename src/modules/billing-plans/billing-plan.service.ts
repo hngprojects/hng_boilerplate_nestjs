@@ -45,8 +45,15 @@ export class BillingPlanService {
     };
   }
 
-  async getAllBillingPlans() {
-    const allPlans = await this.billingPlanRepository.find();
+  async getAllBillingPlans(page: number = 1, limit: number = 10) {
+     const skip = (page - 1) * limit;
+    const take = limit;
+    
+    const [allPlans, total] = await this.billingPlanRepository.findAndCount({
+      skip,
+      take,
+    });
+
     if (allPlans.length === 0) {
       throw new NotFoundException('No billing plans found');
     }
@@ -54,7 +61,10 @@ export class BillingPlanService {
 
     return {
       message: 'Billing plans retrieved successfully',
-      data: plans,
+      data: {
+        plans,
+        total,
+      },
     };
   }
 
