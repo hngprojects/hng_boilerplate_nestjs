@@ -10,7 +10,6 @@ export class PaystackController {
   constructor(private readonly paystackService: PaystackService) {}
 
   @Post('initialize')
-  @skipAuth()
   initiate(@Body() createPaystackPaymentDto: CreatePaystackPaymentPlanDto, @Req() req: { user: UserPayload }) {
     return this.paystackService.initiatePaymentForPlan(createPaystackPaymentDto, req.user.id);
   }
