@@ -40,7 +40,7 @@ export class OrganisationsService {
   async getOrganisationMembers(orgId: string, page: number, page_size: number, sub: string) {
     const skip = (page - 1) * page_size;
     const organisation = await this.organisationRepository.findOne({
-      where: { id: orgId },
+      where: { id: orgId, isDeleted: false },
     });
 
     if (!organisation) throw new NotFoundException('No organisation found');
@@ -122,9 +122,9 @@ export class OrganisationsService {
       if (!org) {
         throw new NotFoundException(`Organisation with id: ${id} not found`);
       }
-      org.isDeleted = true;
-      await this.organisationRepository.save(org);
-      return HttpStatus.NO_CONTENT;
+      await this.organisationRepository.update(id, { isDeleted: true }); // ✅ Use update
+
+      return { message: 'Organisation deleted successfully' };
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
@@ -155,9 +155,10 @@ export class OrganisationsService {
     };
   }
 
-  async getUserOrganisations(userId: string, page: number, page_size: number) {
-    const organisations = await this.getAllUserOrganisations(userId, page, page_size);
-    const total_count = await this.organisationUserRole.count({ where: { userId } });
+  async getUserOrganisations(userId: string, page: number = 1, page_size: number = 10) {
+    // const organisations = await this.getAllUserOrganisations(userId);
+    const organisations = await this.organisationRepository.findBy({ isDeleted: false });
+    const total_count = organisations.length;
 
     return {
       status_code: HttpStatus.OK,
@@ -187,12 +188,14 @@ export class OrganisationsService {
         skip,
         take: page_size,
       })
-    ).map(instance => ({
-      organisation_id: instance?.organisation?.id || '',
-      name: instance?.organisation?.name,
-      user_role: instance.role.name,
-      is_owner: instance.organisation ? instance.organisation.owner.id === user.id : '',
-    }));
+    )
+      .filter(instance => !instance.organisation.isDeleted)
+      .map(instance => ({
+        organisation_id: instance?.organisation?.id || '',
+        name: instance?.organisation?.name,
+        user_role: instance.role.name,
+        is_owner: instance.organisation ? instance.organisation.owner.id === user.id : '',
+      }));
 
     return userOrganisations;
   }

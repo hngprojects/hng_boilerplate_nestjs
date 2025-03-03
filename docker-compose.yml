@@ -1,0 +1,36 @@
+services:
+  postgres:
+    container_name: postgres-boiler
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    restart: always
+
+  adminer:
+    image: adminer
+    container_name: adminer-boiler
+    ports:
+      - '8080:8080'
+    restart: always
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:latest
+    container_name: redis-boiler
+    ports:
+      - '6379:6379'
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  data:
+  redis_data:

@@ -261,4 +261,75 @@ describe('OrganisationsService', () => {
       await expect(service.updateMemberRole(orgId, memberId, updateMemberRoleDto)).rejects.toThrow(CustomHttpException);
     });
   });
+
+  describe('deleteorganisation', () => {
+    it('should mark an organisation as deleted', async () => {
+      const orgId = 'org-id';
+
+      // Mock repository functions
+      jest.spyOn(organisationRepository, 'update').mockResolvedValue({
+        affected: 1,
+        raw: [],
+        generatedMaps: [],
+      });
+
+      jest.spyOn(organisationRepository, 'findOneBy').mockResolvedValue({
+        id: orgId,
+        name: 'Test Organisation',
+        description: 'Mock description',
+        email: 'test@example.com',
+        industry: 'Tech',
+        phone: '+1234567890',
+        address: '123 Test Street',
+        country: 'Nigeria',
+        isDeleted: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        type: 'Private',
+        owner: { id: 'owner-id', name: 'Owner Name' },
+        members: [],
+        state: 'Active',
+        city: 'Lagos',
+        zipCode: '100001',
+        products: [],
+        preferences: {},
+        invites: [],
+        created_at: new Date(),
+        updated_at: new Date(),
+      } as unknown as Partial<Organisation> as Organisation);
+
+      const result = await service.deleteorganisation(orgId);
+
+      expect(result).toEqual({ message: 'Organisation deleted successfully' });
+
+      // ✅ Fix expectation
+      expect(organisationRepository.update).toHaveBeenCalledWith(orgId, { isDeleted: true });
+
+      // ✅ Check if organisation was marked as deleted
+      const updatedOrg = await organisationRepository.findOneBy({ id: orgId });
+      expect(updatedOrg?.isDeleted).toBe(true);
+    });
+
+    it('should exclude deleted organisations from queries', async () => {
+      organisationRepository.findBy = jest.fn().mockResolvedValue([]);
+
+      const result = await service.getUserOrganisations('user-id');
+
+      expect(result).toEqual({
+        data: {
+          organisations: [],
+          total_count: 0,
+          current_page: 1,
+          page_size: 10,
+        },
+        message: 'Organisations retrieved successfully',
+        status_code: 200,
+      });
+
+      // ✅ Fix expectation
+      expect(organisationRepository.findBy).toHaveBeenCalledWith({
+        isDeleted: false,
+      });
+    });
+  });
 });
