@@ -319,7 +319,16 @@ describe('OrganisationsService', () => {
 
       const result = await service.getUserOrganisations('user-id');
 
-      expect(result).toEqual({ organisations: [], total_count: 0 });
+      expect(result).toEqual({
+        data: {
+          organisations: [],
+          total_count: 0,
+          current_page: 1,
+          page_size: 10,
+        },
+        message: 'Organisations retrieved successfully',
+        status_code: 200,
+      });
 
       // ✅ Fix expectation
       expect(organisationRepository.findAndCountBy).toHaveBeenCalledWith({
