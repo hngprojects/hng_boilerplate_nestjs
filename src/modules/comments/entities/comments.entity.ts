@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractBaseEntity } from '../../../entities/base.entity';
 import { Product } from '../../products/entities/product.entity';
 import { User } from '../../user/entities/user.entity';
@@ -19,6 +19,14 @@ export class Comment extends AbstractBaseEntity {
 
   @Column({ nullable: true })
   model_type: string;
+
+
+  // Threading fields for PostgreSQL
+  @ManyToOne(() => Comment, comment => comment.replies, { nullable: true })
+  parent: Comment;
+
+  @OneToMany(() => Comment, comment => comment.parent)
+  replies: Comment[];
 
   @Column({ type: 'int', default: 0 }) // Add dislikes column
   dislikes: number;
