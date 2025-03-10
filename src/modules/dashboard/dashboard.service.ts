@@ -7,6 +7,8 @@ import { GetStatisticsDto } from './dto/get-statistics.dto';
 import { GetSubscriptionCountDto } from './dto/get-subscription-count.dto';
 import { Transaction } from './entities/transaction.entity';
 import { NewsletterSubscription } from '@modules/newsletter-subscription/entities/newsletter-subscription.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { Order } from './entities/order.entity';
 
 @Injectable()
 export class DashboardService {
@@ -15,6 +17,10 @@ export class DashboardService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
 
     @InjectRepository(NewsletterSubscription)
     private readonly newsletterSubscriptionRepository: Repository<NewsletterSubscription>
@@ -99,11 +105,69 @@ export class DashboardService {
     };
   }
 
+  async getOrders(): Promise<any> {
+    const startOfMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+    const startOfNextMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+    const startOfPreviousMonth = new Date(this.previousMonth.getFullYear(), this.previousMonth.getMonth(), 1);
+
+    // Get current month orders count
+    const [, currentMonthOrdersCount] = await this.orderRepository.findAndCount({
+      where: {
+        created_at: Between(startOfMonth, startOfNextMonth),
+      },
+    });
+
+    // Get previous month orders count
+    const [, previousMonthOrdersCount] = await this.orderRepository.findAndCount({
+      where: {
+        created_at: Between(startOfPreviousMonth, startOfMonth),
+      },
+    });
+
+    const percentageDifference = this.getPercentageDifference(currentMonthOrdersCount, previousMonthOrdersCount);
+
+    return {
+      currentMonthOrdersCount,
+      previousMonthOrdersCount,
+      percentageDifference,
+    };
+  }
+
+  async getActiveUsers(): Promise<any> {
+    // Get current active users (users active in the last hour)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+    const currentActiveUsersCount = await this.userRepository.count({
+      where: {
+        is_active: true,
+        updated_at: Between(oneHourAgo, new Date()),
+      },
+    });
+
+    // Get active users from two hours ago to one hour ago for comparison
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+    const previousHourActiveUsersCount = await this.userRepository.count({
+      where: {
+        is_active: true,
+        updated_at: Between(twoHoursAgo, oneHourAgo),
+      },
+    });
+
+    const difference = currentActiveUsersCount - previousHourActiveUsersCount;
+
+    return {
+      current: currentActiveUsersCount,
+      difference_an_hour_ago: difference,
+    };
+  }
+
   async getStatistics(): Promise<GetStatisticsDto> {
     const revenueStats = await this.getRevenue();
     const subscriptionsCount = await this.getSubscriptions();
+    const ordersStats = await this.getOrders();
+    const activeUsersStats = await this.getActiveUsers();
 
-    // TODO: Implement the logic to return the dashboard metric for Orders and Active users
     return {
       message: SYS_MSG.DASHBOARD_FETCHED_SUCCESSFULLY,
       data: {
@@ -118,13 +182,13 @@ export class DashboardService {
           percentage_difference: subscriptionsCount.percentageDifference || '0%',
         },
         orders: {
-          current_month: 0,
-          previous_month: 0,
-          percentage_difference: '0%',
+          current_month: ordersStats.currentMonthOrdersCount || 0,
+          previous_month: ordersStats.previousMonthOrdersCount || 0,
+          percentage_difference: ordersStats.percentageDifference || '0%',
         },
         active_users: {
-          current: 1,
-          difference_an_hour_ago: 0,
+          current: activeUsersStats.current || 0,
+          difference_an_hour_ago: activeUsersStats.difference_an_hour_ago || 0,
         },
       },
     };

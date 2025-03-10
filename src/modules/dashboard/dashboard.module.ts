@@ -7,9 +7,10 @@ import { OrderItem } from './entities/order-items.entity';
 import { Order } from './entities/order.entity';
 import { Transaction } from './entities/transaction.entity';
 import { NewsletterSubscription } from '@modules/newsletter-subscription/entities/newsletter-subscription.entity';
+import { User } from '@modules/user/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Transaction, Order, OrderItem, Cart, NewsletterSubscription])],
+  imports: [TypeOrmModule.forFeature([Transaction, Order, OrderItem, Cart, NewsletterSubscription, User])],
   controllers: [DashboardController],
   providers: [DashboardService],
 })
